@@ -1,0 +1,61 @@
+
+
+// initialize a simulation
+initialize()
+
+{
+	// Turn on tree sequences. Here, simplification ratio and interval can be customized
+	initializeTreeSeq();
+
+	// set overall mutation rate
+	initializeMutationRate(2.5e-8);
+	
+	// set m1 mutation type: dominance coeff = 0.5, fitness effects drawn from gamma 				  	distribution
+	// the two numbers after "g" indicate the mean and shape parameters (respectively) of the            	gamma distribution
+	initializeMutationType("m1", 0.5, "g", -0.03, 0.2);
+	
+	// g1 genomic element type: all mutations are m1 mutations
+	initializeGenomicElementType("g1", m1, 1.0);
+	
+	// create one uniform chromosome of length 100 kb
+	initializeGenomicElement(g1, 0, 99999);
+	
+	// uniform recomb rate along the chromosome
+	initializeRecombinationRate(4e-8);
+	
+	// enable separate sexes (can model X or Y chrom later)
+	initializeSex("A");
+	
+}
+
+// create a population of 10k individuals
+1 early()
+
+{
+	sim.addSubpop("p1", 10000);
+}
+
+// run to tick 100000 (can set this later)
+200000 late()
+
+{
+
+	// split 500 subpops off of p1, with 1 male and 1 female (for crosses).
+	// problematic bc addSubpopSplit copies individuals from main population
+	//for (i in 1:500)	
+		//sim.addSubpopSplit("p2" + i, 2, p1, sexRatio = 0.5);
+		
+	
+			
+	// save full output of euro sim, save euro treeseq output
+	
+	sim.outputFull();
+	sim.outputFull("C:/Academics/Post-doc/SLim/Trial stuff/Trial1 (s vs 2pq)/SLiMeuro_out.txt");
+	
+	sim.treeSeqOutput("C:/Academics/Post-doc/SLim/Trial stuff/Trial1 (s vs 2pq)/SLiMeuro_trees.trees", 			includeModel = F);
+}
+
+	
+	
+
+
