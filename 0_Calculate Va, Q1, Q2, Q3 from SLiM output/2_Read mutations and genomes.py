@@ -42,7 +42,7 @@ f_mutation.close()
 # Create an empty file to write the genomes in
 f_genomes = open("Interim_files/all_genomes.txt", "w")
 
-# Create an empty list to store genomes. Later this list will be edited to remove unnecessary text and only have the list of mutations for each genome.
+# Create an empty list to store genomes beloging to subpopulation p2 (i.e. sampled genomes). Later this list will be edited to remove unnecessary text and only have the list of mutations for each genome.
 a = []
 
 dict_1g = {}
