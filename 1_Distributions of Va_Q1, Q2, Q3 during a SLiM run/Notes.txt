@@ -1,0 +1,19 @@
+###### 6 June 2023
+
+##### !!!! See laboratory
+
+# Ran the SLim simulation for 200000 generations, generating output every 1000 generations from 101000.
+
+# Calculated Va, Q1, Q2, Q3 fopr each of the sampled generations
+
+# Generation 176000 was a major outlier with q1 ~ 6, q2 ~ 505 and q3 ~ -3
+# All three quantities were several orders of magnitudes smaller in the other generations
+# In generation 176000, the alphas were of the order of 10, while in other generations they were between e-02 and e-04
+
+# Closer inspection revealed that two individuals (rows 10 and 52 in c_ind_ret) in gen 176000 had exceptionally low fitness.
+# Both these individuals were the only ones carrying a mutation (ID in mutations_ret =  455) that had s < -0.25
+
+# Removing these two individuals led to gen 176000 behaving similar to the other generations
+
+
+

@@ -1,0 +1,51 @@
+
+
+// initialize a simulation
+initialize()
+
+{
+	
+	// set overall mutation rate
+	initializeMutationRate(2.5e-8);
+	
+	// set m1 mutation type: dominance coeff = 0.5, fitness effects drawn from gamma distribution
+	// the two numbers after "g" indicate the mean and shape parameters (respectively) of the gamma distribution
+	initializeMutationType("m1", 0.1, "g", -0.03, 0.2);
+	// Mutation type m2 is neutral
+	initializeMutationType("m2", 0.5, "f", 0);
+	
+	// g1 genomic element type: mutations are m1 and m2 mutations, arising at frequencies proportional to 1.0 and 5.0 respectively
+	initializeGenomicElementType("g1", c(m1, m2), c(1.0, 5.0));
+	
+	// create one uniform chromosome of length 100 kb
+	initializeGenomicElement(g1, 0, 99999);
+	
+	// uniform recomb rate along the chromosome
+	initializeRecombinationRate(4e-8);
+	
+	// enable separate sexes (can model X or Y chrom later)
+	initializeSex("A");
+	
+}
+
+// create a population of 10000 individuals
+1 early()
+
+{
+	sim.addSubpop("p1", 10000);
+}
+// Save the full output at regular intervals
+
+101000:200000 late(){
+	if (sim.cycle % 1000 == 0)
+		
+		sim.outputFull("b_Interim_files/SLiM_Outputs/Output_" + sim.cycle + ".txt");
+		
+}
+
+
+
+	
+	
+
+
