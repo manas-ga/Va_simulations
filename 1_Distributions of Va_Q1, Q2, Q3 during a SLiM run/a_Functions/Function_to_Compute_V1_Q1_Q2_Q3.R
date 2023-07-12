@@ -217,7 +217,7 @@ va = t(list_alpha)%*%L_ret%*%list_alpha
 
 Frequency = colMeans(c_ind_ret)/2
 
-q1 = cov(2*0.5*Frequency*(1-Frequency), list_alpha*list_alpha)
+q1 = cov(2*Frequency*(1-Frequency), list_alpha*list_alpha)
 
 #q1_reordered = cov(2*0.5*Frequency[vect_reordered]*(1-Frequency[vect_reordered]), list_alpha_reordered*list_alpha_reordered)
 #q1_reordered1 = cov(2*0.5*Frequency[vect_reordered1]*(1-Frequency[vect_reordered1]), list_alpha_reordered1*list_alpha_reordered1)
