@@ -1,0 +1,58 @@
+initialize()
+{    // must define L ie the size of the genome in base pairs
+    L = 10000000;
+    initializeSLiMModelType("WF");
+    initializeTreeSeq();
+    initializeMutationRate(0);
+    initializeMutationType("m1", 0.5, "g", 0.05, 0.2);
+    initializeMutationType("m2", 0.5, "f", 0.0);
+    //initializeMutationType("m3", 0.5, "g", -0.05, 0.2);
+    initializeGenomicElementType("g1", m1, 1.0);
+    initializeGenomicElement(g1, 0, L-1);
+    initializeRecombinationRate(1e-09);
+    //input_file = "C:/Academics/Post-doc/Va_simulations/3_With_neutral_burnin_msprime/b_Interim_files/Msprime_outputs/neutral_burnin.trees";
+    //output_path = "C:/Academics/Post-doc/Va_simulations/3_With_neutral_burnin_msprime/b_Interim_files/SLiM_outputs/";
+}
+
+
+1 mutationEffect(m2) { return 1.0; }
+1 late() { 
+    sim.readFromPopulationFile("C:/Academics/Post-doc/Va_simulations/4_Va_theory/b_Interim_files/Msprime_outputs/neutral_burnin.trees");
+    sim.treeSeqRememberIndividuals(p0.individuals);
+}
+
+//2 late() {
+	// Assign selection coefficients to mutations of type m2
+	// Relative frequencies of neutral , beneficial and deleterious mutations
+	
+	//freq_neutral = 10;
+	//freq_beneficial = 1;
+	//freq_deleterious = 1;
+	
+	// Create a vector storing 0s, 1s and -1s, that will be used to multiply selection coefficients
+	// drawn from a gamma dtstribution to generate neutral, beneficial and deleterious mutations respectively
+	
+	//dfe = c(sample(0:0, freq_neutral, replace = T), sample(-1:-1, freq_deleterious, replace = T), sample(1:1, freq_beneficial, replace = T));
+	
+	// Record the frequencies of all m2 mutations
+	
+	//m2muts = sim.mutationsOfType(m2);
+	//m2_freqs = sim.mutationFrequencies(NULL, m2muts);
+	
+	//for (index in seqAlong(m2muts))
+		//m2muts[index].setSelectionCoeff(rgamma(1, -0.03, 0.2)*dfe[sample(0:(length(dfe)-1), 1)]); // gamma DFE
+		//m2muts[index].setSelectionCoeff(2*alpha*dfe[sample(0:(length(dfe)-1), 1)]); // constant DFE
+
+//}
+
+
+1:5 late() {
+	 sim.outputFull("C:/Academics/Post-doc/Va_simulations/4_Va_theory/b_Interim_files/SLiM_outputs/" + "Output_" + sim.cycle + ".txt");
+	 //catn(sim.cycle);
+	 }
+
+5 late() {
+    catn("Done.");
+    sim.treeSeqOutput("C:/Academics/Post-doc/Va_simulations/4_Va_theory/b_Interim_files/SLiM_outputs/Output.trees");
+    sim.simulationFinished();
+}
