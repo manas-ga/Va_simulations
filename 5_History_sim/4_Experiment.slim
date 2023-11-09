@@ -1,0 +1,44 @@
+initialize()
+{   
+    initializeSLiMModelType("WF");
+    initializeTreeSeq();
+    initializeMutationRate(mu);
+    initializeMutationType("m2", 0.5, "g", -shape*scale, shape);
+    initializeMutationType("m3", 0.5, "g", shape*scale, shape);
+    initializeGenomicElementType("g1", c(m2, m3), c(1.0, mut_ratio));
+    initializeGenomicElement(g1, 0, sequence_length-1);
+    initializeRecombinationRate(r);
+    
+}
+
+
+mutationEffect(m2) { return 1.0; }  
+mutationEffect(m3) { return 1.0; }
+
+100000 late() { 
+    sim.readFromPopulationFile(slim_output_path + "/Output_history.trees");
+    sim.treeSeqRememberIndividuals(p0.individuals);
+}
+
+
+
+100001 late() {
+
+	 sim.outputFull(slim_output_path + "/Output_experiment_" + sim.cycle + ".txt");
+	 catn(sim.cycle);
+ 
+}
+
+100002:100004 late() {
+	 inds = sim.subpopulations.individuals; // Vector of all individuals
+	 phenotypes = inds.sumOfMutationsOfType(m2) + inds.sumOfMutationsOfType(m3) + rnorm(length(inds), 0, 1); // Sum of all the selection coefficients (both m2 and m3) in each individuals genomes
+	 inds.fitnessScaling = exp(phenotypes); // Calculate absolute fitness
+
+	 sim.outputFull(slim_output_path + "/Output_experiment_" + sim.cycle + ".txt");
+	 catn(sim.cycle);
+	 }
+100004 late() {
+    catn("Done.");
+    sim.treeSeqOutput(slim_output_path + "/Output_experiment.trees");
+    sim.simulationFinished();
+}
