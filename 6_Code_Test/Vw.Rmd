@@ -404,7 +404,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
      covp<-(L*N)%*%covp%*%(L*N)
   }
   if(Vs=="L"){
-     covp<-(L*ngen)%*%covp%*%(L*ngen)
+     covp<-(L*(ngen2 - ngen1))%*%covp%*%(L*(ngen2 - ngen1))
   }  
 
 
