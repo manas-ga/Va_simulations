@@ -26,8 +26,17 @@ library(MASS)
 library(lme4)
 library(MCMCglmm)
 library(asreml)
+
+if(Sys.info()["nodename"]=="sce-bio-c04553"){  
+  base_path<-"~/Work/Va_simulations"
+}else{
+  print("Manas - you need to change this!")
+  base_path<-""
+}
+
+
 source("~/Work/Vw/R/Recombination_from_msprime.R")
-#rmarkdown::render("~/Work/Vw/R/Vw.Rmd")
+#rmarkdown::render("/Users/jhadfiel/Work/Va_simulations/6_Code_Test/Vw.Rmd")
 ```
 
 We generate the genotypes of a base-population under recombination-drift-mutation balance using MSprime, assign selection coefficients to the reference alleles and then run our experiment forward in time. In the first generation there is no selection and the replicates are set up with equal representation from the base individuals. The allele frequencies in the first generation of each replicate are measured. This is followed by a specified number of generations in which selection acts, after which allele frequencies are measured again. The allele frequency changes are analysed using mixed models where locus effects capture concordant selection-induced change in allele frequencies at a locus across replicates. From these analyses estimates of the additive genetic variance in fitness ($V_w$) are obtained. Various scenarios are considered for assigning selection coefficients to reference alleles, and various analytical methods are considered for analysing allele frequency change (either through alternate projections and/or assumptions about the between-locus covariance matrix).
@@ -48,7 +57,7 @@ AtleastOneRecomb<-TRUE
 MutationRate=1.3e-9
 Ne=1e6
 
-nsim<-1            # number of simulations
+nsim<-50            # number of simulations
 
 HapLength<-as.integer(seq(20000,20000,length=nsim))   # haplotype length
 
@@ -400,13 +409,10 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   }  
 
 
-  invSC<-solve(t(projp)%*%covp%*%projp)
+  SC<-t(projp)%*%covp%*%projp
 
-  invSC<-as(invSC, "sparseMatrix")
-  attr(invSC, "INVERSE")<-TRUE
-  attr(invSC,"rowNames")<-as.character(1:retain) # Used for sparse-form matrices
-  attr(invSC,"colNames")<-as.character(1:retain) # Used for sparse-form matrices
-  dimnames(invSC) <- list(1:retain,1:retain)  # used for full-form matrices
+  attr(SC, "INVERSE")<-FALSE
+  dimnames(SC) <- list(1:retain,1:retain)  # used for full-form matrices
 
   pbar1_proj<-pbar1%*%projp
   pbar2_proj<-pbar2%*%projp
@@ -420,9 +426,15 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   prior<-list(R=list(V=1, nu=0), G=list(G1=list(V=1, nu=1, alpha.mu=0, alpha.V=1000)))
   
   if(method=="REML"){
-    m1<-asreml(delta~1, random = ~vm(locus, invSC), data=dat.gaussian)
+    m1<-asreml(delta~1, random = ~vm(locus, SC), data=dat.gaussian)
   }
   if(method=="MCMC"){
+
+    invSC<-solve(t(projp)%*%covp%*%projp)
+    invSC <- as(invSC, "sparseMatrix") 
+    attr(invSC, "rowNames") <- 1:retain
+    attr(invSC, "colNames") <- 1:retain
+
     m1<-MCMCglmm(delta~1, random=~locus, data=dat.gaussian, ginverse=list(locus=invSC), family="gaussian", pr=TRUE, prior=prior)
   }
 
@@ -439,7 +451,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
     Vw_est<-posterior.mode(m1$VCV[,1])*TrV
   }
 
-  return(list(Vw_est=Vw_est, data=dat.gaussian, model=m1, invSC=invSC))
+  return(list(Vw_est=Vw_est, data=dat.gaussian, model=m1, SC=SC))
 
 }
 
@@ -447,7 +459,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
 ## Run the simulations
 
-```{r run_simulations, results="hide", eval=FALSE} 
+```{r run_simulations, results="hide"} 
 
 Vw0<-Vw2<-Vw_est<-1:nsim
 
