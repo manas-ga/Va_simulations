@@ -33,10 +33,9 @@ if(Sys.info()["nodename"]=="sce-bio-c04553"){
   print("Manas - you need to change this!")
   base_path<-""
 }
-
-
-source("~/Work/Vw/R/Recombination_from_msprime.R")
-#rmarkdown::render("/Users/jhadfiel/Work/Va_simulations/6_Code_Test/Vw.Rmd")
+ 
+source(file.path(base_path, "6_Code_Test/Recombination_from_msprime.R"))
+#rmarkdown::render(file.path(if(Sys.info()["nodename"]=="sce-bio-c04553"){"~/Work/Va_simulations"}else{""} , "6_Code_Test/Vw.Rmd"))
 ```
 
 We generate the genotypes of a base-population under recombination-drift-mutation balance using MSprime, assign selection coefficients to the reference alleles and then run our experiment forward in time. In the first generation there is no selection and the replicates are set up with equal representation from the base individuals. The allele frequencies in the first generation of each replicate are measured. This is followed by a specified number of generations in which selection acts, after which allele frequencies are measured again. The allele frequency changes are analysed using mixed models where locus effects capture concordant selection-induced change in allele frequencies at a locus across replicates. From these analyses estimates of the additive genetic variance in fitness ($V_w$) are obtained. Various scenarios are considered for assigning selection coefficients to reference alleles, and various analytical methods are considered for analysing allele frequency change (either through alternate projections and/or assumptions about the between-locus covariance matrix).
@@ -117,7 +116,7 @@ Vw_sim<-function(nind,                   # Number of parental flies
                  tol=sqrt(.Machine$double.eps),
                  save.L,                  # Should L be saved?
                  save.svdL,                 # Should the singular value decomposition of L be saved?
-                 Fstem="~/Work/Vw/Data/Intermediate/G",  # File path for storing msprime files
+                 Fstem=file.path(base_path, "6_Code_Test/tmp"),  # File path for storing msprime files
                  msp_path                # File path to msprime executable
                  ){
 
@@ -481,7 +480,7 @@ for(i in 1:nsim){
               LDalpha=LDalpha,
               save.L=TRUE,
               save.svdL=TRUE, 
-              Fstem="~/Work/Vw/Data/Intermediate/G",
+              Fstem=file.path(base_path, "6_Code_Test/tmp"),
               msp_path=msp_path)
 
   Vw0[i]<-sim$Vw0
@@ -520,7 +519,7 @@ for(i in 1:nsim){
 if(save){
   res<-list(HapLength=HapLength, RecombRate=RecombRate, AtleastOneRecomb=AtleastOneRecomb, 
   MutationRate=MutationRate, Ne=Ne, nind=nind, nrep=nrep, ngen=ngen, EVe=EVe, EVw=EVw, proj=proj, pdelta=pdelta, pa=pa, palpha=palpha, LDalpha=LDalpha, LDdelta=LDdelta, method=method, Vw0=Vw0, Vw2=Vw2, Vw_est=Vw_est)
-  save(res, file=paste0("~/Work/Vw/Data/Intermediate/res_", format(Sys.time(), "%H%M_%d_%m_%Y"), ".Rdata"))
+  save(res, file=paste0(file.path(base_path, "6_Code_Test/tmp"), "/res_", format(Sys.time(), "%H%M_%d_%m_%Y"), ".Rdata"))
 }
 
 plot(mod$data$delta~as.numeric(mod$data$locus), ylab="delta", xlab="locus", main="Change in (projected) allele frequency")
@@ -688,7 +687,7 @@ Haplotype frequencies obtained by simulating 1Mb of sequence
 
 ```{r results="hide", eval=FALSE} 
 
-d_data<-read.table("~/Work/Vw/Data/Raw/mu1.3e-9__r1.4e-8_2000Haplotypes.tsv", header=TRUE)
+d_data<-read.table(paste0(file.path(base_path, "6_Code_Test/tmp"), "/mu1.3e-9__r1.4e-8_2000Haplotypes.tsv"), header=TRUE)
 # haplotype frequencies and d obatined via simulating 1Mb of sequence
 
 N <- sum(d_data[1,c("X00", "X01", "X10", "X11")])/2
