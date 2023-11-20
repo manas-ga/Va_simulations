@@ -20,8 +20,15 @@ $(document).ready(function() {
 });
 </script>
 
+
 ```{r }
-rm(list=ls())  
+functions_only=TRUE
+#rmarkdown::render(file.path(if(Sys.info()["nodename"]=="sce-bio-c04553"){"~/Work/Va_simulations"}else{""} , "6_Code_Test/Vw.Rmd"))
+
+```
+
+```{r eval=!functions_only}
+rm(list=ls())
 library(MASS)
 library(lme4)
 library(MCMCglmm)
@@ -35,7 +42,6 @@ if(Sys.info()["nodename"]=="sce-bio-c04553"){
 }
  
 source(file.path(base_path, "6_Code_Test/Recombination_from_msprime.R"))
-#rmarkdown::render(file.path(if(Sys.info()["nodename"]=="sce-bio-c04553"){"~/Work/Va_simulations"}else{""} , "6_Code_Test/Vw.Rmd"))
 ```
 
 We generate the genotypes of a base-population under recombination-drift-mutation balance using MSprime, assign selection coefficients to the reference alleles and then run our experiment forward in time. In the first generation there is no selection and the replicates are set up with equal representation from the base individuals. The allele frequencies in the first generation of each replicate are measured. This is followed by a specified number of generations in which selection acts, after which allele frequencies are measured again. The allele frequency changes are analysed using mixed models where locus effects capture concordant selection-induced change in allele frequencies at a locus across replicates. From these analyses estimates of the additive genetic variance in fitness ($V_w$) are obtained. Various scenarios are considered for assigning selection coefficients to reference alleles, and various analytical methods are considered for analysing allele frequency change (either through alternate projections and/or assumptions about the between-locus covariance matrix).
@@ -45,7 +51,7 @@ We generate the genotypes of a base-population under recombination-drift-mutatio
 
 ### Genome and Experiment Parameters
 
-```{r Genome_and_Experiment_Parameters} 
+```{r Genome_and_Experiment_Parameters, eval=!functions_only} 
 ###########################################
 #          Pop Gen Parameters             #
 # Based on D melanogaster (genome ~150MB) #
@@ -80,21 +86,21 @@ if(Sys.info()["nodename"]=="basden.bio.ed.ac.uk"){
 
 The environmental variance and the target additive genetic variance can be set:
 
-```{r allelic_effect_parameters} 
+```{r allelic_effect_parameters, eval=!functions_only} 
 EVe<-1                              # Expected environmental variance for fitness 
 EVw<-seq(0.01, 0.1, length=nsim)    # Expected genetic variance for fitness 
 ```
 
 The possibility exists to give the allelic effects a specified covariance structure. Currently this is restricted to $\sigma_\alpha^2{\bf L}^{p_{\alpha}}$ where $\sigma_\alpha$ (`sda`) and $p_{\alpha}$ (`palpha`) can be specified. $p_\alpha=0$ gives i.i.d allelic effects, $p_\alpha=-1$ gives linearly orthogonal directions in genotype space equal contribution to $V_w$ (either because sites with high genetic diversity have large effect sizes, or alleles in positive LD have opposing effects on fitness.) It is also possible to ignore LD when specifying the distribution of allelic effects with `LDalpha=FALSE` such that  $\sigma_\alpha^2\text{Diag}({\bf L})^{p_{\alpha}}$ where $\text{Diag}$ sets the off-diagonal elements of the matrix to zero.
 
-```{r } 
+```{r , eval=!functions_only} 
 palpha<-0
 LDalpha<-TRUE
 ```
 
 It is also possible to switch the sign of the allelic effect so minor alleles are selected against when `minor_d=TRUE`.
 
-```{r } 
+```{r , eval=!functions_only} 
 minor_d<-FALSE
 ```
 
@@ -226,7 +232,7 @@ Rather than retain all vectors we only retain those eigenvectors whose square-ro
 
 These projections generate i.i.d projected allele frequency changes when the covariance of allele frequency change is proportional to  ${\bf L}^{p_{a}}$ (`proj="L"`) or $({\bf L}\circ {\bf M})^{p_{a}}$ (`proj="LoM"` or `proj="BLoM"`) respectively. Theoretically we expect the residuals to be i.i.d when `proj="LoM"` or  `proj="BLoM"` and $p_a=1$ (we also expect them to have unit variance when the environmental variance in fitness is zero since then the census and effective population size is equal (presumably the selection terms pick up the change in allele frequency caused by genetic variance in fitness, and so we only have to worry about the impact of the environmental variance on $N_e$). 
 
-```{r analysis_parameters} 
+```{r analysis_parameters, eval=!functions_only} 
 proj<-"BLoM"
 pa<-1
 ```
@@ -235,7 +241,7 @@ pa<-1
 
 The variance in allele frequency change *due to selection*, $VAR[E[\Delta {\bf p}]]$, is assumed to be proportional to $(n_g{\bf L}){\bf L}^{p_{\Delta}}({\bf L}n_g)$ (`Vs="L"`) or $({\bf L}\circ {\bf N}){\bf L}^{p_{\Delta}}({\bf L}\circ {\bf N})$ (`Vs="LoNL"`) where $n_g$ is the number of generations and $p_{\Delta}$  can be specified (`pdelta`). Theoretically, we expect allele frequency change *due to selection* to be proportional to $({\bf L}\circ {\bf N}){\bf L}^{p_{\Delta}}({\bf L}\circ {\bf N})$ where $p_{\Delta}=p_{\alpha}$ although `Vs="L"` with $p_{\Delta}=p_{\alpha}$ might serve as a good approximation. It is also possible to ignore LD when defining ${\bf L}^{p_{\Delta}}$ above using `LDdelta=FALSE`.
 
-```{r }
+```{r eval=!functions_only}
 Vs<-"LoNL"
 pdelta<-palpha
 LDdelta<-LDalpha
@@ -254,7 +260,7 @@ $$
 
 ### Method used to obtain estimates (REML or MCMC)
 
-```{r } 
+```{r eval=!functions_only} 
 method<-"REML"  
 ```
 
@@ -355,6 +361,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
      }
      if(LDdelta){
         DL<-D
+        UL<-U
      }
   }
 
@@ -458,7 +465,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
 ## Run the simulations
 
-```{r run_simulations, results="hide"} 
+```{r run_simulations, results="hide", eval=!functions_only} 
 
 Vw0<-Vw2<-Vw_est<-1:nsim
 
@@ -758,4 +765,6 @@ var(table(factor(no, levels=1:n)))
 4*(exp(v)-1+exp(-v/2))
 ```
 
-
+```{r results="hide"}
+rm(functions_only)
+```
