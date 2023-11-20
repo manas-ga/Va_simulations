@@ -22,7 +22,9 @@ $(document).ready(function() {
 
 
 ```{r }
-functions_only=TRUE
+if(!exists("functions_only")){
+  functions_only=TRUE
+}
 #rmarkdown::render(file.path(if(Sys.info()["nodename"]=="sce-bio-c04553"){"~/Work/Va_simulations"}else{""} , "6_Code_Test/Vw.Rmd"))
 
 ```
@@ -346,6 +348,12 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   # calculate projection matrices #
   #################################
   nsnps<-ncol(C0)
+  nrep<-nrow(pbar1)
+
+  if(ncol(pbar1)!=nsnps){stop("pbar1 should have as many columns as the number of columns in Co (the number of SNPs)")}
+  if(ncol(pbar2)!=nsnps){stop("pbar2 should have as many columns as the number of columns in Co (the number of SNPs)")}
+
+  if(nrow(pbar1)!=nrow(pbar2)){stop("pbar1 and pbar2 should have the same of rows (the number of replicates)")}
 
   if(proj=="L" | proj=="BLoM" | LDdelta){
 
@@ -387,7 +395,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
  
   if(proj=="N"){
     
-    projp<-diag(length(pbar1))
+    projp<-diag(nrow(pbar1))
 
   }else{
 
@@ -418,7 +426,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   SC<-t(projp)%*%covp%*%projp
 
   attr(SC, "INVERSE")<-FALSE
-  dimnames(SC) <- list(1:retain,1:retain)  # used for full-form matrices
+  dimnames(SC) <- list(1:nrow(SC),1:nrow(SC))  # used for full-form matrices
 
   pbar1_proj<-pbar1%*%projp
   pbar2_proj<-pbar2%*%projp
