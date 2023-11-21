@@ -15,30 +15,42 @@ initialize()
 mutationEffect(m2) { return 1.0; }  
 mutationEffect(m3) { return 1.0; }
 
-100000 late() { 
+
+
+1 late(){
     sim.readFromPopulationFile(slim_output_path + "/Output_history.trees");
     sim.treeSeqRememberIndividuals(p0.individuals);
+
 }
 
 
 
-100001 late() {
 
+1:150000 late() { //15000 is just a random large number that is higher than all the generations of interest
+	 
+	 // In generation eng_gen + 1 (F1 generation)	
+	 if (sim.cycle == end_gen + 1){	
 	 sim.outputFull(slim_output_path + "/Output_experiment_" + sim.cycle + ".txt");
 	 catn(sim.cycle);
+	 }
  
-}
 
-100002:100004 late() {
+
+	 // Experiment starts
+         if (sim.cycle>(end_gen + 1)){
 	 inds = sim.subpopulations.individuals; // Vector of all individuals
 	 phenotypes = inds.sumOfMutationsOfType(m2) + inds.sumOfMutationsOfType(m3) + rnorm(length(inds), 0, 1); // Sum of all the selection coefficients (both m2 and m3) in each individuals genomes
 	 inds.fitnessScaling = exp(phenotypes); // Calculate absolute fitness
 
 	 sim.outputFull(slim_output_path + "/Output_experiment_" + sim.cycle + ".txt");
 	 catn(sim.cycle);
-	 }
-100004 late() {
-    catn("Done.");
-    sim.treeSeqOutput(slim_output_path + "/Output_experiment.trees");
-    sim.simulationFinished();
+	 }	
+
+
+        // Stop the experiment (laste generation)
+        if (sim.cycle == end_gen + 4){
+        catn("Done.");
+        sim.treeSeqOutput(slim_output_path + "/Output_experiment.trees");
+        sim.simulationFinished();
+        }
 }
