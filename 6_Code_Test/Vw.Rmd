@@ -355,6 +355,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
      }
      if(LDdelta){
         DL<-D
+        UL<-U
      }
   }
 
