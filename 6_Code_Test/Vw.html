@@ -523,13 +523,24 @@ $(document).ready(function() {
   });
 });
 </script>
-<pre class="r"><code>rm(list=ls())  
+<pre class="r"><code>if(!exists(&quot;functions_only&quot;)){
+  functions_only=TRUE
+}
+#rmarkdown::render(file.path(if(Sys.info()[&quot;nodename&quot;]==&quot;sce-bio-c04553&quot;){&quot;~/Work/Va_simulations&quot;}else{&quot;&quot;} , &quot;6_Code_Test/Vw.Rmd&quot;))</code></pre>
+<pre class="r"><code>rm(list=ls())
 library(MASS)
 library(lme4)
 library(MCMCglmm)
 library(asreml)
-source(&quot;~/Work/Vw/R/Recombination_from_msprime.R&quot;)
-#rmarkdown::render(&quot;~/Work/Vw/R/Vw.Rmd&quot;)</code></pre>
+
+if(Sys.info()[&quot;nodename&quot;]==&quot;sce-bio-c04553&quot;){  
+  base_path&lt;-&quot;~/Work/Va_simulations&quot;
+}else{
+  print(&quot;Manas - you need to change this!&quot;)
+  base_path&lt;-&quot;&quot;
+}
+ 
+source(file.path(base_path, &quot;6_Code_Test/Recombination_from_msprime.R&quot;))</code></pre>
 <p>We generate the genotypes of a base-population under recombination-drift-mutation balance using MSprime, assign selection coefficients to the reference alleles and then run our experiment forward in time. In the first generation there is no selection and the replicates are set up with equal representation from the base individuals. The allele frequencies in the first generation of each replicate are measured. This is followed by a specified number of generations in which selection acts, after which allele frequencies are measured again. The allele frequency changes are analysed using mixed models where locus effects capture concordant selection-induced change in allele frequencies at a locus across replicates. From these analyses estimates of the additive genetic variance in fitness (<span class="math inline">\(V_w\)</span>) are obtained. Various scenarios are considered for assigning selection coefficients to reference alleles, and various analytical methods are considered for analysing allele frequency change (either through alternate projections and/or assumptions about the between-locus covariance matrix).</p>
 <div id="simulation-parameters" class="section level2">
 <h2>Simulation Parameters</h2>
@@ -545,14 +556,14 @@ AtleastOneRecomb&lt;-TRUE
 MutationRate=1.3e-9
 Ne=1e6
 
-nsim&lt;-1            # number of simulations
+nsim&lt;-50            # number of simulations
 
 HapLength&lt;-as.integer(seq(20000,20000,length=nsim))   # haplotype length
 
 nind&lt;-1000             # number of starting individuals
- print(&quot;Jarrod: nind refers to the number of parental individuals and the number of individuals per replicate during the experiment - sort this out&quot;)</code></pre>
-<pre><code>## [1] &quot;Jarrod: nind refers to the number of parental individuals and the number of individuals per replicate during the experiment - sort this out&quot;</code></pre>
-<pre class="r"><code>nrep&lt;-10               # number of replicate lines
+ print(&quot;Jarrod: nind refers to the number of parental individuals and the number of individuals per replicate during the experiment - sort this out&quot;)
+
+nrep&lt;-10               # number of replicate lines
 ngen&lt;-3               # number of generations of selection
 
 save&lt;-TRUE            # save results.
@@ -591,7 +602,7 @@ LDalpha&lt;-TRUE</code></pre>
                  tol=sqrt(.Machine$double.eps),
                  save.L,                  # Should L be saved?
                  save.svdL,                 # Should the singular value decomposition of L be saved?
-                 Fstem=&quot;~/Work/Vw/Data/Intermediate/G&quot;,  # File path for storing msprime files
+                 Fstem=file.path(base_path, &quot;6_Code_Test/tmp&quot;),  # File path for storing msprime files
                  msp_path                # File path to msprime executable
                  ){
 
@@ -797,6 +808,12 @@ VAR[E[\Delta \vec{\bf p}]]=&amp;{\bf D}^{-p_{a}}{\bf U}^{\top}VAR[E[\Delta {\bf 
   # calculate projection matrices #
   #################################
   nsnps&lt;-ncol(C0)
+  nrep&lt;-nrow(pbar1)
+
+  if(ncol(pbar1)!=nsnps){stop(&quot;pbar1 should have as many columns as the number of columns in Co (the number of SNPs)&quot;)}
+  if(ncol(pbar2)!=nsnps){stop(&quot;pbar2 should have as many columns as the number of columns in Co (the number of SNPs)&quot;)}
+
+  if(nrow(pbar1)!=nrow(pbar2)){stop(&quot;pbar1 and pbar2 should have the same of rows (the number of replicates)&quot;)}
 
   if(proj==&quot;L&quot; | proj==&quot;BLoM&quot; | LDdelta){
 
@@ -812,6 +829,7 @@ VAR[E[\Delta \vec{\bf p}]]=&amp;{\bf D}^{-p_{a}}{\bf U}^{\top}VAR[E[\Delta {\bf 
      }
      if(LDdelta){
         DL&lt;-D
+        UL&lt;-U
      }
   }
 
@@ -837,7 +855,7 @@ VAR[E[\Delta \vec{\bf p}]]=&amp;{\bf D}^{-p_{a}}{\bf U}^{\top}VAR[E[\Delta {\bf 
  
   if(proj==&quot;N&quot;){
     
-    projp&lt;-diag(length(pbar1))
+    projp&lt;-diag(nrow(pbar1))
 
   }else{
 
@@ -861,17 +879,14 @@ VAR[E[\Delta \vec{\bf p}]]=&amp;{\bf D}^{-p_{a}}{\bf U}^{\top}VAR[E[\Delta {\bf 
      covp&lt;-(L*N)%*%covp%*%(L*N)
   }
   if(Vs==&quot;L&quot;){
-     covp&lt;-(L*ngen)%*%covp%*%(L*ngen)
+     covp&lt;-(L*(ngen2 - ngen1))%*%covp%*%(L*(ngen2 - ngen1))
   }  
 
 
-  invSC&lt;-solve(t(projp)%*%covp%*%projp)
+  SC&lt;-t(projp)%*%covp%*%projp
 
-  invSC&lt;-as(invSC, &quot;sparseMatrix&quot;)
-  attr(invSC, &quot;INVERSE&quot;)&lt;-TRUE
-  attr(invSC,&quot;rowNames&quot;)&lt;-as.character(1:retain) # Used for sparse-form matrices
-  attr(invSC,&quot;colNames&quot;)&lt;-as.character(1:retain) # Used for sparse-form matrices
-  dimnames(invSC) &lt;- list(1:retain,1:retain)  # used for full-form matrices
+  attr(SC, &quot;INVERSE&quot;)&lt;-FALSE
+  dimnames(SC) &lt;- list(1:nrow(SC),1:nrow(SC))  # used for full-form matrices
 
   pbar1_proj&lt;-pbar1%*%projp
   pbar2_proj&lt;-pbar2%*%projp
@@ -885,9 +900,15 @@ VAR[E[\Delta \vec{\bf p}]]=&amp;{\bf D}^{-p_{a}}{\bf U}^{\top}VAR[E[\Delta {\bf 
   prior&lt;-list(R=list(V=1, nu=0), G=list(G1=list(V=1, nu=1, alpha.mu=0, alpha.V=1000)))
   
   if(method==&quot;REML&quot;){
-    m1&lt;-asreml(delta~1, random = ~vm(locus, invSC), data=dat.gaussian)
+    m1&lt;-asreml(delta~1, random = ~vm(locus, SC), data=dat.gaussian)
   }
   if(method==&quot;MCMC&quot;){
+
+    invSC&lt;-solve(t(projp)%*%covp%*%projp)
+    invSC &lt;- as(invSC, &quot;sparseMatrix&quot;) 
+    attr(invSC, &quot;rowNames&quot;) &lt;- 1:retain
+    attr(invSC, &quot;colNames&quot;) &lt;- 1:retain
+
     m1&lt;-MCMCglmm(delta~1, random=~locus, data=dat.gaussian, ginverse=list(locus=invSC), family=&quot;gaussian&quot;, pr=TRUE, prior=prior)
   }
 
@@ -904,7 +925,7 @@ VAR[E[\Delta \vec{\bf p}]]=&amp;{\bf D}^{-p_{a}}{\bf U}^{\top}VAR[E[\Delta {\bf 
     Vw_est&lt;-posterior.mode(m1$VCV[,1])*TrV
   }
 
-  return(list(Vw_est=Vw_est, data=dat.gaussian, model=m1, invSC=invSC))
+  return(list(Vw_est=Vw_est, data=dat.gaussian, model=m1, SC=SC))
 
 }</code></pre>
 </div>
@@ -931,7 +952,7 @@ for(i in 1:nsim){
               LDalpha=LDalpha,
               save.L=TRUE,
               save.svdL=TRUE, 
-              Fstem=&quot;~/Work/Vw/Data/Intermediate/G&quot;,
+              Fstem=file.path(base_path, &quot;6_Code_Test/tmp&quot;),
               msp_path=msp_path)
 
   Vw0[i]&lt;-sim$Vw0
@@ -970,7 +991,7 @@ for(i in 1:nsim){
 if(save){
   res&lt;-list(HapLength=HapLength, RecombRate=RecombRate, AtleastOneRecomb=AtleastOneRecomb, 
   MutationRate=MutationRate, Ne=Ne, nind=nind, nrep=nrep, ngen=ngen, EVe=EVe, EVw=EVw, proj=proj, pdelta=pdelta, pa=pa, palpha=palpha, LDalpha=LDalpha, LDdelta=LDdelta, method=method, Vw0=Vw0, Vw2=Vw2, Vw_est=Vw_est)
-  save(res, file=paste0(&quot;~/Work/Vw/Data/Intermediate/res_&quot;, format(Sys.time(), &quot;%H%M_%d_%m_%Y&quot;), &quot;.Rdata&quot;))
+  save(res, file=paste0(file.path(base_path, &quot;6_Code_Test/tmp&quot;), &quot;/res_&quot;, format(Sys.time(), &quot;%H%M_%d_%m_%Y&quot;), &quot;.Rdata&quot;))
 }
 
 plot(mod$data$delta~as.numeric(mod$data$locus), ylab=&quot;delta&quot;, xlab=&quot;locus&quot;, main=&quot;Change in (projected) allele frequency&quot;)
@@ -1108,7 +1129,7 @@ prob_novelB&lt;-function(P,Q,R,S, nH){
   sum((1-pbinom(min-1, y, 1-d/L))*dpois(y, x/2))
 }</code></pre>
 <p>Haplotype frequencies obtained by simulating 1Mb of sequence</p>
-<pre class="r"><code>d_data&lt;-read.table(&quot;~/Work/Vw/Data/Raw/mu1.3e-9__r1.4e-8_2000Haplotypes.tsv&quot;, header=TRUE)
+<pre class="r"><code>d_data&lt;-read.table(paste0(file.path(base_path, &quot;6_Code_Test/tmp&quot;), &quot;/mu1.3e-9__r1.4e-8_2000Haplotypes.tsv&quot;), header=TRUE)
 # haplotype frequencies and d obatined via simulating 1Mb of sequence
 
 N &lt;- sum(d_data[1,c(&quot;X00&quot;, &quot;X01&quot;, &quot;X10&quot;, &quot;X11&quot;)])/2
@@ -1156,6 +1177,7 @@ no&lt;-sample(1:n, size=2*n, prob=exp(w), replace=TRUE)
 
 var(table(factor(no, levels=1:n)))
 4*(exp(v)-1+exp(-v/2))</code></pre>
+<pre class="r"><code>rm(functions_only)</code></pre>
 </div>
 
 
