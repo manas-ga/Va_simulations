@@ -23,14 +23,14 @@ $(document).ready(function() {
 
 ```{r }
 if(!exists("functions_only")){
-  functions_only=TRUE
+  functions_only=FALSE
 }
 #rmarkdown::render(file.path(if(Sys.info()["nodename"]=="sce-bio-c04553"){"~/Work/Va_simulations"}else{""} , "6_Code_Test/Vw.Rmd"))
 
 ```
 
 ```{r eval=!functions_only}
-rm(list=ls())
+rm(list=ls()[-which(ls()=="functions_only")])
 library(MASS)
 library(lme4)
 library(MCMCglmm)
@@ -59,14 +59,17 @@ We generate the genotypes of a base-population under recombination-drift-mutatio
 # Based on D melanogaster (genome ~150MB) #
 ###########################################
 
-RecombRate<-1.4e-8      
-AtleastOneRecomb<-TRUE
-MutationRate=1.3e-9
+RecombRate.msprime<-1.4e-8      
+MutationRate.msprime<-1.3e-9
+
+RecombRate.experiment<-1.4e-8      
+AtleastOneRecomb<-FALSE
+
 Ne=1e6
 
-nsim<-50            # number of simulations
+nsim<-1            # number of simulations
 
-HapLength<-as.integer(seq(20000,20000,length=nsim))   # haplotype length
+HapLength<-as.integer(seq(100000,100000,length=nsim))   # haplotype length
 
 nind<-1000             # number of starting individuals
  print("Jarrod: nind refers to the number of parental individuals and the number of individuals per replicate during the experiment - sort this out")
@@ -90,7 +93,7 @@ The environmental variance and the target additive genetic variance can be set:
 
 ```{r allelic_effect_parameters, eval=!functions_only} 
 EVe<-1                              # Expected environmental variance for fitness 
-EVw<-seq(0.01, 0.1, length=nsim)    # Expected genetic variance for fitness 
+EVw<-seq(0.1, 0.1, length=nsim)    # Expected genetic variance for fitness 
 ```
 
 The possibility exists to give the allelic effects a specified covariance structure. Currently this is restricted to $\sigma_\alpha^2{\bf L}^{p_{\alpha}}$ where $\sigma_\alpha$ (`sda`) and $p_{\alpha}$ (`palpha`) can be specified. $p_\alpha=0$ gives i.i.d allelic effects, $p_\alpha=-1$ gives linearly orthogonal directions in genotype space equal contribution to $V_w$ (either because sites with high genetic diversity have large effect sizes, or alleles in positive LD have opposing effects on fitness.) It is also possible to ignore LD when specifying the distribution of allelic effects with `LDalpha=FALSE` such that  $\sigma_\alpha^2\text{Diag}({\bf L})^{p_{\alpha}}$ where $\text{Diag}$ sets the off-diagonal elements of the matrix to zero.
@@ -111,9 +114,10 @@ minor_d<-FALSE
 ```{r simulation_function} 
 Vw_sim<-function(nind,                   # Number of parental flies
                  HapLength,              # Genome Size
-                 RecombRate,             # Recombination rate between adjacent sites
-                 AtleastOneRecomb=TRUE,  # Should there be a minimum of one recombination event per meiosis?
-                 MutationRate,           # Mutation rate
+                 RecombRate.msprime,     # Recombination rate between adjacent sites in MSprime
+                 MutationRate.msprime,   # Mutation rate in MSprime
+                 RecombRate.experiment,  # Recombination rate between adjacent sites in experiment
+                 AtleastOneRecomb,       # Should there be a minimum of one recombination event per meiosis in experiment?
                  Ne,                     # Effective population size of population from which parental flies drawn.
                  nrep,                   # Number of replicate populations in experiment
                  ngen,                   # Allele frequencies sampled in generation 1 and generation ngen
@@ -128,7 +132,7 @@ Vw_sim<-function(nind,                   # Number of parental flies
                  msp_path                # File path to msprime executable
                  ){
 
-  MSP_SimulatedBasePopulation<-simulate_base_population(Nflies=nind,HapLength=HapLength,RecombRate=RecombRate, MutationRate=MutationRate,Ne=Ne, Fstem=Fstem, randomise_state_labels=TRUE, msp_path=msp_path)
+  MSP_SimulatedBasePopulation<-simulate_base_population(Nflies=nind,HapLength=HapLength,RecombRate=RecombRate.msprime, MutationRate=MutationRate.msprime,Ne=Ne, Fstem=Fstem, randomise_state_labels=TRUE, msp_path=msp_path)
   # simulate genomes of parental population 
 
   nsnps<-length(MSP_SimulatedBasePopulation$SNPs)
@@ -200,7 +204,7 @@ Vw_sim<-function(nind,                   # Number of parental flies
 
   for(j in 1:nrep){
 
-    Forward_SimulatedExperimentalPopulation<-simulate_forward_population(NGen=ngen,fitness_effects=a,HapLength=HapLength,starting_haps=MSP_SimulatedBasePopulation$Parental,vars=MSP_SimulatedBasePopulation$SNPs,RecombRate=RecombRate, AtleastOneRecomb=AtleastOneRecomb, Fstem="~/Work/Vw/Data/Intermediate/G",sdwe=sqrt(EVe))
+    Forward_SimulatedExperimentalPopulation<-simulate_forward_population(NGen=ngen,fitness_effects=a,HapLength=HapLength,starting_haps=MSP_SimulatedBasePopulation$Parental,vars=MSP_SimulatedBasePopulation$SNPs,RecombRate=RecombRate.experiment, AtleastOneRecomb=AtleastOneRecomb, Fstem="~/Work/Vw/Data/Intermediate/G",sdwe=sqrt(EVe))
     # note that fitness effects are divided by 2 because the predictors are 0,1,2 rather than 0, 1/2,1.
     
     pbar1[j,]<-colMeans(Forward_SimulatedExperimentalPopulation$FirstGeneration) # starting allele frequency
@@ -273,7 +277,7 @@ method<-"REML"
 form_nR<-function(SNPs,                   # SNP positions
                   RecombRate,             # Recombination rate between adjacent sites
                   HapLength,              # Genome size
-                  AtleastOneRecomb=TRUE   # Should there be at least one cross-over per meiosis?
+                  AtleastOneRecomb        # Should there be at least one cross-over per meiosis?
                   ){
 
   nsnps<-length(SNPs)
@@ -325,12 +329,12 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
                    pbar2,       # vector of allele frequencies at time-point 2
                    ngen2,       # number of generations between parents and time-point 2
                    nind,        # population size in each replicate
-                   proj="BLoM", # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
+                   proj, # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
                    LDdelta,
                    pa,
-                   pdelta=0,
+                   pdelta,
                    Vs,
-                   method="REML",
+                   method,
                    L=NULL,    # list with elements UL and DL
                    svdL=NULL,    # list with elements UL and DL
                    tol=sqrt(.Machine$double.eps)
@@ -483,9 +487,10 @@ for(i in 1:nsim){
 
   sim<-Vw_sim(nind=nind,                 
               HapLength=HapLength[i], 
-              RecombRate=RecombRate, 
-              AtleastOneRecomb=TRUE,  
-              MutationRate=MutationRate,
+              RecombRate.msprime=RecombRate.msprime, 
+              MutationRate.msprime=MutationRate.msprime,
+              RecombRate.experiment=RecombRate.msprime, 
+              AtleastOneRecomb=AtleastOneRecomb,  
               Ne=Ne, 
               nrep=nrep,      
               ngen=ngen,
@@ -502,9 +507,9 @@ for(i in 1:nsim){
   Vw2[i]<-sim$Vw2
 
   nR<-form_nR(sim$SNPs,                  
-              RecombRate,            
-              HapLength[i],              
-              AtleastOneRecomb=TRUE)
+              RecombRate=RecombRate.experiment,            
+              HapLength=HapLength[i],              
+              AtleastOneRecomb=AtleastOneRecomb)
 
 
   mod<-Vw_model(C0=sim$C0, 

@@ -1,7 +1,7 @@
 rm(list = ls())
 
 functions_only=TRUE
-rmarkdown::render(file.path(if(Sys.info()["nodename"]=="sce-bio-c04553"){"~/Work/Va_simulations"}else{""} , "6_Code_Test/Vw.Rmd"))
+rmarkdown::render(file.path(if(Sys.info()["nodename"]=="sce-bio-c04553"){"~/Work/Va_simulations"}else{"C:/Users/msamant/Documents/GitHub/Va_simulations"} , "6_Code_Test/Vw.Rmd"))
 
 ### Load my simulation data
 load("~/Downloads/test3.RData")
@@ -25,7 +25,7 @@ for (i in 1:n_cages){
 nseq<-100
 
 LL<-Vw_est<-1:nseq
-pdelta<-seq(-2.5,-1.5, length=nseq)
+pdelta<-seq(-4,2, length=nseq)
 
 for(i in 1:nseq){
 
