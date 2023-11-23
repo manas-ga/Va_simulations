@@ -10,7 +10,7 @@ rm(list = ls())
 ######### Packages #################
 ####################################
 
-library(matlib)
+#library(matlib)
 library(MCMCglmm)
 library(asreml)
 library(Matrix)
@@ -26,16 +26,20 @@ library(rmutil)
 if(Sys.info()["nodename"]=="vera.bio.ed.ac.uk"){
   
   base_path = "/data/home/msamant/Manas/Va_simulations/5_History_sim" ## ON VERA
+  Vw_path = "/data/home/msamant/Manas/Va_simulations/5_History_sim/Vw.Rmd"
+  
   
 }else{
   
   if(Sys.info()["sysname"]=="Linux"){
     
     base_path = "/mnt/c/Academics/Post-doc/Va_simulations/5_History_sim" ## Local Wsl
+    Vw_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/6_Code_test/Vw.Rmd"
     
   }else{
     
     base_path = "C:/Academics/Post-doc/Va_simulations/5_History_sim" ## Local windows
+    Vw_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/6_Code_test/Vw.Rmd"
     
   }
   
@@ -55,62 +59,63 @@ rdata_path = paste(base_path, "/b_Interim_files/Rdata", sep = "")
 output_path = paste(base_path, "/c_Output", sep = "")
 
 
+#################################
+#### Load Jarrod's functions ####
+#################################
 
-#####################################################
-################# True Parameters ###################
-#####################################################
+functions_only=TRUE ## Read only the functions
 
-
-Ne = 1e+06                # Population size
+rmarkdown::render(file.path(Vw_path))
 
 
 #####################################################
 ############ Simulation Parameters ##################
 #####################################################
 
+nsims = 20              # Number of simulations (change scale in each simulation)
+n_cages = 10              # The number of replicate cages in the experiment
+start_gen = 1             # 
+end_gen = 2          # How many generations should the SLiM simulation run for while simulating the history (burnin)
+output_freq = 100        # The frequency with which SLiM outputs are to be generated for the analysis of history (optional)
+ngen_expt = 3             # How many generations should allele frequency changes be calculated over in the experiment
+
+list_gen = seq(1,end_gen, output_freq) # List of generations for which measurements are to be made in the analysis of history
+history_test = F # Plot population parameters during the history?
+
+Ne = 1e+06                # Population size
 n_ind = 10000             # Number of individuals to be sampled in msprime and then run forward in SLiM
 n_ind_exp = 1000          # The population size of the experiment. In 00_History.slim the population reduces to n_ind_exp in the last generation to simulate the sampling of the parents for the experiment
-sequence_length = 1e+05   # Just have a single contuguous chromosome that is simulated
+n_sample = 1000           # Number of individuals to be sampled to construct the c matrix  (This is just because c matrices become awfully large) 
+
+sequence_length = 100000   # Just have a single continuous chromosome that is simulated
 r = 1.4e-06               # Recombination rate (per site per generation)
-r_expt = 1.4e-08          # Unscaled recombination rate to bee used during during the experiment
+r_expt = 1.4e-08          # Unscaled recombination rate to be used during during the experiment
 r_msp = 1.4e-08           # Recombination rate for msprime
-mu = 1.3e-07               # Mutation rate during the forward simulation of the history
-mu_msp = 1.3e-10           # A separate mutation rate for the msprime simulation
+AtleastOneRecomb = F      # Whether there has to be at least one recombination event
+mu = 1.3e-07              # Mutation rate during the forward simulation of the history
+mu_msp = 1.3e-10          # A separate mutation rate for the msprime simulation
 mu_expt = 0               # Mutation rate during the experiment
-mut_ratio = 0.01           # The ratio of beneficial:deleterious mutations in msprime
+mut_ratio = 0.01          # The ratio of beneficial:deleterious mutations in msprime
+
+##############################
+### DFE-related parameters ###
+##############################
+
+DFE = "n"                 # DFE can be "g" (gamma) or "n" (normal) 
+
+# If DFE is "g"
 shape = 0.2               # Shape of the gamma DFE ##### mean = shape*scale
 scale = 0.1              # Scale of the gamma DFE
 
-history_test = F # Plot population parameters during the history?
+# If DFE is "n" need to specify the mean and the variance of the normal distribution
+mean_alpha = 0
+var_alpha = 0.001
 
-start_gen = 1
-end_gen = 100          # How many generations should the SLiM simulation run for while simulating the history (burnin)
-output_freq = 100        # The frequency with which SLiM outputs are to be generated for the analysis of history (optional)
+############################################################################################
+######## Analysis parameters can be found as arguments of the function Vw_model ############
+############################################################################################
 
-n_sample = 1000           # Number of individuals to be sampled to construct the c matrix  (This is just because c matrices become awfully large) 
-list_gen = seq(1,end_gen, output_freq) # List of generations for which measurements are to be made in the analysis of hostory
-n_cages = 10              # The number of replicate cages in the experiment
-projection = "LoM"            # The matrix along which allele frequency changes in the experiment are to be projected ("L" or "LoM")
-p_alpha = 0 # Models the distribution of alphas; V_alpha = (sigma^2)*L^(P_alpha)
-p_delta = 2 # Models the covariance structure of the expected allele frequency change under selection (var(E(delP)) = )
-sinc<-1e-6            # increment added to diagonal of allelic effect covariance matrix to make pd
-method = "REML"           # "REML" or "MCMCglmm" (while fitting the model to calculate vA)
-ngen_expt = 3             # How many generations should allele frequency changes be calculated over in the experiment
-nsims = 10              # Number of simulations (change scale in each simulation)
-
-#### Jarrod's parameters
-
-nind = 1000        # population size in each replicate
-proj="BLoM" # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
-LDdelta = T
-pa = 1
-pdelta=0
-Vs = "LoNL"
-method="REML"
-L=NULL    # list with elements UL and DL
-svdL=NULL    # list with elements UL and DL
-tol=sqrt(.Machine$double.eps)
-
+####################################################################################################################################################
 
 
 # Create empty vectors to store true vA and estimates of vA from the model
@@ -118,16 +123,17 @@ tol=sqrt(.Machine$double.eps)
 vA_true = rep(NA, nsims) # Additive genetic variance
 va_true = rep(NA, nsims) # Additive genic variance
 vA_est = rep(NA, nsims)
-scale_list = rep(NA, nsims) # Vector to store scales
+scale_list = seq(0.075, 0.175, (0.175-0.075)/nsims) # Vector of scales
+var_alpha_list = seq(0.0001, 0.001, 0.001/nsims) # Vector to store variance of normal DFE
 
 
 
-for (sim in 0:nsims){
+for (sim in 1:nsims){
   
-    # Specify the scale of the the gamma distribution of selection coefficients
+    # Specify the scale of the the gamma distribution or the variance of the normal distribution of selection coefficients
   
-    scale = 0.075 + (sim/nsims)*0.175
-    scale_list[sim] = scale
+    scale = scale_list[sim] 
+    var_alpha = var_alpha_list[sim]
     
     message(paste("Simulation", sim, "in progress..."))
   
@@ -139,7 +145,7 @@ for (sim in 0:nsims){
     
     message("Running msprime...")
     
-    system(paste("python", msprime_path, Ne, n_ind, sequence_length, r_msp, mu_msp, shape, scale, msprime_output_path, mut_ratio))
+    system(paste("python", msprime_path, Ne, n_ind, sequence_length, r_msp, mu_msp, shape, scale, msprime_output_path, mut_ratio, DFE, mean_alpha, sqrt(var_alpha)))
     
     #####################################################
     ################# Run SLiM ##########################
@@ -261,17 +267,19 @@ for (sim in 0:nsims){
       
     message("Calculating the the matrix of non-recombinant fractions for the starting population...")
     
-    dist = matrix(0, nrow(L_ret), nrow(L_ret)) # Matrix of paired distances
+    #dist = matrix(0, nrow(L_ret), nrow(L_ret)) # Matrix of paired distances
     
-    # Loop through columns 
+    #### Loop through columns 
     
-    for (site in 1:nrow(L_ret)){
-      dist[, site] = abs(mutations_ret$Position - mutations_ret$Position[site])
-      #rf = 0.5*(1 - exp(-2*dist*r_expt))
-      #NRF[, site] =  1 - rf
-    }
+    #for (site in 1:nrow(L_ret)){
+    #  dist[, site] = abs(mutations_ret$Position - mutations_ret$Position[site])
+    #}
     
-    NRF = 1 - 0.5*(1 - exp(-2*dist*r_expt))
+    #NRF = 1 - 0.5*(1 - exp(-2*dist*r_expt))
+    
+    # Calculate the non-recombinant fraction using Jarrod's function
+    
+    NRF = form_nR(mutations_ret$Position, r_expt, sequence_length, AtleastOneRecomb)
       
       
     
@@ -422,152 +430,28 @@ for (sim in 0:nsims){
     
     message("Fitting the model...")
     
-    C0 = c_ind_ret/2          # parental genotypes (rows individuals, columns loci, coded as 0, 1/2 or 1) 
-    nR = NRF          # matrix of non-recombinant probabilities between loci
-    pbar1 = pbar1       # vector of allele frequencies at time-point 1
-    ngen1=1     # number of generations between parents and time-point 1
-    pbar2 = pbar2       # vector of allele frequencies at time-point 2
-    ngen2 = 4       # number of generations between parents and time-point 2
-    #nind = 1000        # population size in each replicate
-    #proj="BLoM" # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
-    #LDdelta = T
-    #pa = 1
-    #pdelta=0
-    #Vs = "LoNL"
-    #method="REML"
-    #L=NULL    # list with elements UL and DL
-    #svdL=NULL    # list with elements UL and DL
-    #tol=sqrt(.Machine$double.eps)
-    nrep = 10
+    
+    
+    m1<-Vw_model(C0 = c_ind_ret/2,          # parental genotypes (rows individuals, columns loci, coded as 0, 1/2 or 1) 
+                 nR = NRF,          # matrix of non-recombinant probabilities between loci
+                 pbar1 = pbar1,       # vector of allele frequencies at time-point 1
+                 ngen1=1,     # number of generations between parents and time-point 1
+                 pbar2 = pbar2,       # vector of allele frequencies at time-point 2
+                 ngen2 = 4,       # number of generations between parents and time-point 2
+                 nind = 1000,        # population size in each replicate
+                 proj="BLoM", # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
+                 LDdelta = TRUE,
+                 pa = 1,
+                 pdelta=0,
+                 Vs = "LoNL",
+                 method="REML",
+                 L=NULL,    # list with elements UL and DL
+                 svdL=NULL,    # list with elements UL and DL
+                 tol=sqrt(.Machine$double.eps))
     
     
     
-    if(is.null(L)){
-      L<-cov(C0)*(nind-1)/(nind)
-    }
-    
-    if(!proj%in%c("LoM", "BLoM", "L", "N")){stop("proj must be one of 'LoM', 'L', 'N'")}
-    if(!Vs%in%c("LoNL", "L")){stop("Vs must be either 'LoNL' or 'L'")}
-    if(!method%in%c("REML", "MCMC")){stop("method must be either 'REML' or 'MCMC'")}
-    
-    #################################
-    # calculate projection matrices #
-    #################################
-    nsnps<-ncol(C0)
-    
-    if(proj=="L" | proj=="BLoM" | LDdelta){
-      
-      if(is.null(svdL)){
-        svdC<-svd(t(scale(sqrt(1/nind)*C0, scale=FALSE)))
-        retain<-sum(svdC$d>tol)
-        U<-svdC$u[,1:retain]
-        D<-diag(svdC$d[1:retain])
-      }else{
-        U<-svdL$UL
-        D<-diag(svdL$DL)
-        retain<-ncol(U)
-      }
-      if(LDdelta){
-        DL<-D
-        UL<-U
-      }
-    }
-    
-    if(proj=="LoM" | proj=="BLoM"){ 
-      
-      M<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind))^(x-1))*(1/nind)*nR^x}, simplify=FALSE))
-      
-      if(proj=="LoM"){
-        sdLoM<-RSpectra::eigs(L*M, min(nind, nsnps))
-        retain<-sum(sqrt(sdLoM$values)>tol)
-        U<-sdLoM$vectors[,1:retain]
-        D<-diag(sqrt(sdLoM$values[1:retain]))
-      }
-      
-      if(proj=="BLoM"){ 
-        sdLoM<-RSpectra::eigs(t(U)%*%(L*M)%*%U, ncol(U))
-        retain<-sum(sqrt(sdLoM$values)>tol)
-        U<-U%*%sdLoM$vectors[,1:retain]
-        D<-diag(sqrt(sdLoM$values[1:retain]))
-      }   
-    } 
-    
-    
-    if(proj=="N"){
-      
-      projp<-diag(nrow(pbar1)) #### changed from length(pbar1) to nrow(pbar1)
-      
-    }else{
-      
-      projp<-U%*%diag(diag(D)^(-pa))
-      
-    }
-    
-    if(LDdelta){
-      if(pdelta==0){
-        covp<-diag(nsnps)
-      }else{
-        covp<-UL%*%diag(diag(DL)^(2*pdelta))%*%t(UL)
-      }  
-    }else{
-      covp<-diag(diag(L)^pdelta)
-    }
-    
-    if(Vs=="LoNL"){
-      N<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind))^(x-1))*nR^(x-1)}, simplify=FALSE))
-      
-      covp<-(L*N)%*%covp%*%(L*N)
-    }
-    if(Vs=="L"){
-      covp<-(L*(ngen2 - ngen1))%*%covp%*%(L*(ngen2 - ngen1))
-    }  
-    
-    
-    SC<-t(projp)%*%covp%*%projp
-    
-    attr(SC, "INVERSE")<-FALSE
-    dimnames(SC) <- list(1:nrow(SC),1:ncol(SC))  # used for full-form matrices, ## changing "retain" to "nrow(SC)" as retain does not exist when proj = "N" 
-    
-    pbar1_proj<-pbar1%*%projp 
-    pbar2_proj<-pbar2%*%projp 
-    
-    dat.gaussian<-data.frame(delta=c(pbar2_proj-pbar1_proj), locus=gl(ncol(pbar1_proj),nrep,ncol(pbar1_proj)*nrep), rep=gl(nrep,1,ncol(pbar1_proj)*nrep))
-    
-    ##############
-    # Fit models #
-    ##############
-    
-    prior<-list(R=list(V=1, nu=0), G=list(G1=list(V=1, nu=1, alpha.mu=0, alpha.V=1000)))
-    
-    if(method=="REML"){
-      m1<-asreml(delta~1, random = ~vm(locus, SC), data=dat.gaussian)
-    }
-    if(method=="MCMC"){
-      
-      invSC<-solve(t(projp)%*%covp%*%projp)
-      invSC <- as(invSC, "sparseMatrix") 
-      attr(invSC, "rowNames") <- 1:retain
-      attr(invSC, "colNames") <- 1:retain
-      
-      m1<-MCMCglmm(delta~1, random=~locus, data=dat.gaussian, ginverse=list(locus=invSC), family="gaussian", pr=TRUE, prior=prior)
-    }
-    
-    if(LDdelta){
-      TrV<-sum(diag(DL)^(2*(pdelta+1)))
-    }else{
-      TrV<-sum(diag(L%*%diag(diag(L)^pdelta)))
-    }
-    
-    if(method=="REML"){
-      Vw_est<-summary(m1)$varcomp[1,1]*TrV
-    }
-    if(method=="MCMC"){
-      Vw_est<-posterior.mode(m1$VCV[,1])*TrV
-    }
-    
-    #return(list(Vw_est=Vw_est, data=dat.gaussian, model=m1, SC=SC))
-    
-    vA_est[sim] = Vw_est
+    vA_est[sim] = m1$Vw_est
 
 }
 

@@ -61,10 +61,14 @@ for m in ots.mutations():
     
     if sid not in mut_map:
       
+      if sys.argv[10] == "g":
         
-      # DFE is gamma
-      mut_map[sid] = freq_array[numpy.random.randint(0, len(freq_array))]*(min(numpy.random.gamma(shape = float(sys.argv[6]), scale = float(sys.argv[7])), 1.0)) # The max() function prevents negative fitnesses
-      
+        # DFE is gamma
+        mut_map[sid] = freq_array[numpy.random.randint(0, len(freq_array))]*(min(numpy.random.gamma(shape = float(sys.argv[6]), scale = float(sys.argv[7])), 1.0)) # The max() function prevents negative fitnesses
+
+      if sys.argv[10] == "n":
+        mut_map[sid] = numpy.random.normal(float(sys.argv[11]), float(sys.argv[12]))
+        
 
       # DFE is just + or - s
       #s = float(sys.argv[1]) # Use the comman line arguement as specified in the R script
