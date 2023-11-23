@@ -4,9 +4,9 @@ functions_only=TRUE
 rmarkdown::render(file.path(if(Sys.info()["nodename"]=="sce-bio-c04553"){"~/Work/Va_simulations"}else{"C:/Users/msamant/Documents/GitHub/Va_simulations"} , "6_Code_Test/Vw.Rmd"))
 
 ### Load my simulation data
-load("~/Downloads/test3.RData")
+load("~/Downloads/Output.RData")
 
-rm(list=ls()[-which(ls()%in%c("c_ind_ret", "NRF", "n_cages", "n_sites", "P_matrix", "run", "Vw_model"))])
+rm(list=ls()[-which(ls()%in%c("c_ind_ret", "NRF", "n_cages", "n_sites", "P_matrix", "run", "Vw_model", "form_nR"))])
 
 ##### Calculate matrices of allele frequencies with rows as replicates ######
 
@@ -22,10 +22,10 @@ for (i in 1:n_cages){
   
 }
 
-nseq<-100
+nseq<-1
 
 LL<-Vw_est<-1:nseq
-pdelta<-seq(-4,2, length=nseq)
+pdelta<-seq(0, length=nseq)
 
 for(i in 1:nseq){
 

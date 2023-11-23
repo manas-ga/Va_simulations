@@ -287,32 +287,25 @@ form_nR<-function(SNPs,                   # SNP positions
 
   if(AtleastOneRecomb){
 
-    qfun<-actuar::qztpois
-    dfun<-actuar::dztpois
-    pfun<-actuar::pztpois
+    maxn<-actuar::qztpois(1-1e-5, RecombRate*HapLength)
+    # maximum number of total recombination events likely to be seen
 
+    nR<-matrix(0, nsnps, nsnps)
+
+    for(nt in 0:maxn){
+      for(ne in seq(0,maxn,2)){
+         nR<-nR+dbinom(ne, prob=Dist/HapLength, size=nt)*actuar::dztpois(nt, RecombRate*HapLength)
+         # Pr(even number of crossovers falling between snps given nt)*Pr(nt recombination events in total) then sum over nt
+      }
+    }
+    nR<-nR/actuar::pztpois(maxn, RecombRate*HapLength)
+    # rescale so diag(R)=1
+  
   }else{
 
-    # could probably do this more efficiently using Haldane's mapping function
-    qfun<-qpois
-    dfun<-dpois
-    pfun<-ppois
-  }  
-
-  maxn<-qfun(1-1e-5, RecombRate*HapLength)
-  # maximum number of total recombination events likely to be seen
-
-  nR<-matrix(0, nsnps, nsnps)
-
-  for(nt in 1:maxn){
-    for(ne in seq(0,maxn,2)){
-       nR<-nR+dbinom(ne, prob=Dist/HapLength, size=nt)*dfun(nt, RecombRate*HapLength)
-       # Pr(even number of crossovers falling between snps given nt)*Pr(nt recombination events in total) then sum over nt
-    }
+    nR<-1 - 0.5*(1 - exp(-2*Dist*RecombRate))
   }
-  nR<-nR/pfun(maxn, RecombRate*HapLength)
-  # rescale so diag(R)=1
- 
+
   return(nR)
 
 }
@@ -537,8 +530,7 @@ for(i in 1:nsim){
 
 
 if(save){
-  res<-list(HapLength=HapLength, RecombRate=RecombRate, AtleastOneRecomb=AtleastOneRecomb, 
-  MutationRate=MutationRate, Ne=Ne, nind=nind, nrep=nrep, ngen=ngen, EVe=EVe, EVw=EVw, proj=proj, pdelta=pdelta, pa=pa, palpha=palpha, LDalpha=LDalpha, LDdelta=LDdelta, method=method, Vw0=Vw0, Vw2=Vw2, Vw_est=Vw_est)
+  res<-list(HapLength=HapLength, RecombRate.msprime=RecombRate.msprime,   MutationRate.msprime=MutationRate.msprime, RecombRate.experiment=RecombRate.experiment, AtleastOneRecomb=AtleastOneRecomb, Ne=Ne, nind=nind, nrep=nrep, ngen=ngen, EVe=EVe, EVw=EVw, proj=proj, pdelta=pdelta, pa=pa, palpha=palpha, LDalpha=LDalpha, LDdelta=LDdelta, method=method, Vw0=Vw0, Vw2=Vw2, Vw_est=Vw_est)
   save(res, file=paste0(file.path(base_path, "6_Code_Test/tmp"), "/res_", format(Sys.time(), "%H%M_%d_%m_%Y"), ".Rdata"))
 }
 
