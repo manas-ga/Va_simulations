@@ -26,7 +26,7 @@ library(rmutil)
 if(Sys.info()["nodename"]=="vera.bio.ed.ac.uk"){
   
   base_path = "/data/home/msamant/Manas/Va_simulations/5_History_sim" ## ON VERA
-  Vw_path = "/data/home/msamant/Manas/Va_simulations/5_History_sim/Vw.Rmd"
+  Vw_path = "/data/home/msamant/Manas/Va_simulations/5_History_sim/Vw.Rmd"  ### Jarrod's functions and other code is stored here
   
   
 }else{
@@ -34,12 +34,12 @@ if(Sys.info()["nodename"]=="vera.bio.ed.ac.uk"){
   if(Sys.info()["sysname"]=="Linux"){
     
     base_path = "/mnt/c/Academics/Post-doc/Va_simulations/5_History_sim" ## Local Wsl
-    Vw_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/6_Code_test/Vw.Rmd"
+    Vw_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/6_Code_test/Vw.Rmd" ### Jarrod's functions and other code is stored here
     
   }else{
     
     base_path = "C:/Academics/Post-doc/Va_simulations/5_History_sim" ## Local windows
-    Vw_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/6_Code_test/Vw.Rmd"
+    Vw_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/6_Code_test/Vw.Rmd" ### Jarrod's functions and other code is stored here
     
   }
   
@@ -72,41 +72,41 @@ rmarkdown::render(file.path(Vw_path))
 ############ Simulation Parameters ##################
 #####################################################
 
-nsims = 20              # Number of simulations (change scale in each simulation)
-n_cages = 10              # The number of replicate cages in the experiment
-start_gen = 1             # 
-end_gen = 2          # How many generations should the SLiM simulation run for while simulating the history (burnin)
-output_freq = 100        # The frequency with which SLiM outputs are to be generated for the analysis of history (optional)
-ngen_expt = 3             # How many generations should allele frequency changes be calculated over in the experiment
+nsims = 20                             # Number of simulations (change scale in each simulation)
+n_cages = 10                           # The number of replicate cages in the experiment
+start_gen = 1                          # 
+end_gen = 2                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
+output_freq = 100                      # The frequency with which SLiM outputs are to be generated for the analysis of history (optional)
+ngen_expt = 3                          # How many generations should allele frequency changes be calculated over in the experiment
 
 list_gen = seq(1,end_gen, output_freq) # List of generations for which measurements are to be made in the analysis of history
 history_test = F # Plot population parameters during the history?
 
-Ne = 1e+06                # Population size
-n_ind = 10000             # Number of individuals to be sampled in msprime and then run forward in SLiM
-n_ind_exp = 1000          # The population size of the experiment. In 00_History.slim the population reduces to n_ind_exp in the last generation to simulate the sampling of the parents for the experiment
-n_sample = 1000           # Number of individuals to be sampled to construct the c matrix  (This is just because c matrices become awfully large) 
+Ne = 1e+06                             # Effective population size
+n_ind = 10000                          # Number of individuals to be sampled in msprime and then run forward in SLiM
+n_ind_exp = 1000                       # The population size of the experiment. In 00_History.slim the population reduces to n_ind_exp in the last generation to simulate the sampling of the parents for the experiment
+n_sample = 1000                        # Number of individuals to be sampled to construct the c matrix  (This is just because c matrices become awfully large) 
 
-sequence_length = 100000   # Just have a single continuous chromosome that is simulated
-r = 1.4e-06               # Recombination rate (per site per generation)
-r_expt = 1.4e-08          # Unscaled recombination rate to be used during during the experiment
-r_msp = 1.4e-08           # Recombination rate for msprime
-AtleastOneRecomb = F      # Whether there has to be at least one recombination event
-mu = 1.3e-07              # Mutation rate during the forward simulation of the history
-mu_msp = 1.3e-10          # A separate mutation rate for the msprime simulation
-mu_expt = 0               # Mutation rate during the experiment
-mut_ratio = 0.01          # The ratio of beneficial:deleterious mutations in msprime
+sequence_length = 1e+05               # Just have a single continuous chromosome that is simulated
+r = 1.4e-06                            # Recombination rate (per site per generation)
+r_expt = 1.4e-05                       # Unscaled recombination rate to be used during during the experiment (1.4e-08)
+r_msp = 1.4e-08                        # Recombination rate for msprime
+AtleastOneRecomb = F                   # Whether there has to be at least one recombination event
+mu = 1.3e-07                           # Mutation rate during the forward simulation of the history
+mu_msp = 1.3e-10                        # A separate mutation rate for the msprime simulation
+mu_expt = 0                            # Mutation rate during the experiment
+
 
 ##############################
 ### DFE-related parameters ###
 ##############################
 
-DFE = "n"                 # DFE can be "g" (gamma) or "n" (normal) 
+DFE = "n"                              # DFE can be "g" (gamma) or "n" (normal) 
 
 # If DFE is "g"
-shape = 0.2               # Shape of the gamma DFE ##### mean = shape*scale
-scale = 0.1              # Scale of the gamma DFE
-
+shape = 0.2                            # Shape of the gamma DFE ##### mean = shape*scale
+scale = 0.1                            # Scale of the gamma DFE
+mut_ratio = 0.01                       # The ratio of beneficial:deleterious mutations in msprime
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
 var_alpha = 0.001
@@ -124,7 +124,7 @@ vA_true = rep(NA, nsims) # Additive genetic variance
 va_true = rep(NA, nsims) # Additive genic variance
 vA_est = rep(NA, nsims)
 scale_list = seq(0.075, 0.175, (0.175-0.075)/nsims) # Vector of scales
-var_alpha_list = seq(0.0001, 0.001, 0.001/nsims) # Vector to store variance of normal DFE
+var_alpha_list = seq(0.001, 0.01, 0.01/nsims) # Vector to store variance of normal DFE
 
 
 
@@ -171,9 +171,12 @@ for (sim in 1:nsims){
     arg9 = paste("-d output_freq=", output_freq, sep = "")
     arg10 = paste("-d mut_ratio=", mut_ratio, sep = "")
     arg11 = paste("-d n_ind_exp=", n_ind_exp, sep = "") # The population size is to be reduced to n_ind_exp in generation end_gen (to simulate sampling of the parents for the experiment)
+    arg12 = paste("-d ", shQuote(paste("DFE=", "'", DFE, "'", sep = "")), sep = "")
+    arg13 = paste("-d mean_alpha=", mean_alpha, sep = "")
+    arg14 = paste("-d var_alpha=", var_alpha, sep = "")
     
-    system(paste("slim", arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, slim_history_path))
-    
+    system(paste("slim", arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, slim_history_path))
+    #system(paste("slim", arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,  slim_history_path))
     
     
     ########################################################################################################################
@@ -331,9 +334,12 @@ for (sim in 1:nsims){
       expt_arg6 = paste("-d ", shQuote(paste("slim_output_path=","'", slim_output_path, "'", sep = "")), sep = "") 
       expt_arg7 = paste("-d mut_ratio=", mut_ratio, sep = "")
       expt_arg8 = paste("-d end_gen=", end_gen, sep = "")
+      expt_arg9 = paste("-d ", shQuote(paste("DFE=", "'", DFE, "'", sep = "")), sep = "")
+      expt_arg10 = paste("-d mean_alpha=", mean_alpha, sep = "")
+      expt_arg11 = paste("-d var_alpha=", var_alpha, sep = "")
       
       
-      system(paste("slim", expt_arg1, expt_arg2, expt_arg3, expt_arg4, expt_arg5, expt_arg6, expt_arg7, expt_arg8, slim_expt_path))
+      system(paste("slim", expt_arg1, expt_arg2, expt_arg3, expt_arg4, expt_arg5, expt_arg6, expt_arg7, expt_arg8, expt_arg9, expt_arg10, expt_arg11, slim_expt_path))
       
       
       ###############################
@@ -452,7 +458,18 @@ for (sim in 1:nsims){
     
     
     vA_est[sim] = m1$Vw_est
+    plot(vA_est~vA_true)
+    abline(0,1)
+    
 
 }
 
-save.image(file = paste(output_path, "/Output.RData", sep =""))
+
+save.image(file = paste(output_path, "/Output", gsub(" ", "_", Sys.time()), ".RData", sep =""))
+
+pdf(paste(output_path, "/Output_",gsub(" ", "_", Sys.time()), ".pdf", sep = ""), onefile = F)
+
+plot(vA_est~vA_true)
+abline(0,1)
+
+dev.off()
