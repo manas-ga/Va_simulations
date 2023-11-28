@@ -72,7 +72,7 @@ rmarkdown::render(file.path(Vw_path))
 ############ Simulation Parameters ##################
 #####################################################
 
-nsims = 20                             # Number of simulations (change scale in each simulation)
+nsims = 1                             # Number of simulations (change scale in each simulation)
 n_cages = 10                           # The number of replicate cages in the experiment
 start_gen = 1                          # 
 end_gen = 2                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
@@ -124,7 +124,7 @@ vA_true = rep(NA, nsims) # Additive genetic variance
 va_true = rep(NA, nsims) # Additive genic variance
 vA_est = rep(NA, nsims)
 scale_list = seq(0.075, 0.175, (0.175-0.075)/nsims) # Vector of scales
-var_alpha_list = seq(0.001, 0.01, 0.01/nsims) # Vector to store variance of normal DFE
+var_alpha_list = seq(0.0001, 0.0011, 0.001/nsims) # Vector to store variance of normal DFE
 
 
 
@@ -210,7 +210,7 @@ for (sim in 1:nsims){
     
     message("Calculating the L matrix for the parents' generation...")
     
-    L = cov(c_ind/2)
+    L = cov(c_ind/2) 
     
     # Check for 0s on the diagonal of L
     #which(diag(L)==0)
@@ -260,7 +260,7 @@ for (sim in 1:nsims){
     message("Computing the actual Va for the starting population...")
     
     
-    list_alpha = mutations_ret$s
+    list_alpha = 2*(mutations_ret$s)
     
     vA_true[sim] = t(list_alpha)%*%L_ret%*%list_alpha  # Additive genetic variance
     va_true[sim] = sum(diag(L_ret)*list_alpha*list_alpha) # Additive genic variance
@@ -424,7 +424,7 @@ for (sim in 1:nsims){
     }
     
     for (i in 1:n_cages){
-      pbar2[i,] = P_matrix[((i-1)*n_sites + 1):((i-1)*n_sites + n_sites),5]
+      pbar2[i,] = P_matrix[((i-1)*n_sites + 1):((i-1)*n_sites + n_sites),ngen_expt + 2]
       
       
     }
@@ -443,7 +443,7 @@ for (sim in 1:nsims){
                  pbar1 = pbar1,       # vector of allele frequencies at time-point 1
                  ngen1=1,     # number of generations between parents and time-point 1
                  pbar2 = pbar2,       # vector of allele frequencies at time-point 2
-                 ngen2 = 4,       # number of generations between parents and time-point 2
+                 ngen2 = ngen_expt + 1,       # number of generations between parents and time-point 2
                  nind = 1000,        # population size in each replicate
                  proj="BLoM", # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
                  LDdelta = TRUE,
