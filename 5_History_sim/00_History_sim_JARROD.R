@@ -72,7 +72,7 @@ rmarkdown::render(file.path(Vw_path))
 ############ Simulation Parameters ##################
 #####################################################
 
-nsims = 1                             # Number of simulations (change scale in each simulation)
+nsims = 50                             # Number of simulations (change scale in each simulation)
 n_cages = 10                           # The number of replicate cages in the experiment
 start_gen = 1                          # 
 end_gen = 2                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
@@ -92,8 +92,8 @@ r = 1.4e-06                            # Recombination rate (per site per genera
 r_expt = 1.4e-05                       # Unscaled recombination rate to be used during during the experiment (1.4e-08)
 r_msp = 1.4e-08                        # Recombination rate for msprime
 AtleastOneRecomb = F                   # Whether there has to be at least one recombination event
-mu = 1.3e-07                           # Mutation rate during the forward simulation of the history
-mu_msp = 1.3e-10                        # A separate mutation rate for the msprime simulation
+mu = 1.3e-06                           # Mutation rate during the forward simulation of the history
+mu_msp = 1.3e-9                        # A separate mutation rate for the msprime simulation
 mu_expt = 0                            # Mutation rate during the experiment
 
 
@@ -101,19 +101,30 @@ mu_expt = 0                            # Mutation rate during the experiment
 ### DFE-related parameters ###
 ##############################
 
-DFE = "n"                              # DFE can be "g" (gamma) or "n" (normal) 
+DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal) 
 
 # If DFE is "g"
 shape = 0.2                            # Shape of the gamma DFE ##### mean = shape*scale
-scale = 0.1                            # Scale of the gamma DFE
+scale_list = seq(0.1, 0.2, length = nsims) # Vector of Scale of the gamma DFE
 mut_ratio = 0.01                       # The ratio of beneficial:deleterious mutations in msprime
+
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
-var_alpha = 0.001
+var_alpha_list = seq(0.00001, 0.00021, length = nsims) # Vector to store variance of normal DFE
 
 ############################################################################################
 ######## Analysis parameters can be found as arguments of the function Vw_model ############
 ############################################################################################
+
+proj="BLoM" # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
+LDdelta = TRUE
+pa = 1
+pdelta=0
+Vs = "LoNL"
+method="REML"
+nseq<-10 # The number of times pdelta is to be varied 
+pdelta_l = -2 # Lower limit of pdelta
+pdelta_u = 1 # Upper limit of pdelta
 
 ####################################################################################################################################################
 
@@ -122,10 +133,8 @@ var_alpha = 0.001
 
 vA_true = rep(NA, nsims) # Additive genetic variance
 va_true = rep(NA, nsims) # Additive genic variance
-vA_est = rep(NA, nsims)
-scale_list = seq(0.075, 0.175, (0.175-0.075)/nsims) # Vector of scales
-var_alpha_list = seq(0.0001, 0.0011, 0.001/nsims) # Vector to store variance of normal DFE
-
+vA_est = rep(NA, nsims)  # Estimated vA from the model
+pdelta_est = rep(NA, nsims) # pdelta is estimated in each simulation with the help of maximum likelihood (implemented manually)
 
 
 for (sim in 1:nsims){
@@ -337,9 +346,10 @@ for (sim in 1:nsims){
       expt_arg9 = paste("-d ", shQuote(paste("DFE=", "'", DFE, "'", sep = "")), sep = "")
       expt_arg10 = paste("-d mean_alpha=", mean_alpha, sep = "")
       expt_arg11 = paste("-d var_alpha=", var_alpha, sep = "")
+      expt_arg12 = paste("-d ngen_expt=", ngen_expt, sep = "")
       
       
-      system(paste("slim", expt_arg1, expt_arg2, expt_arg3, expt_arg4, expt_arg5, expt_arg6, expt_arg7, expt_arg8, expt_arg9, expt_arg10, expt_arg11, slim_expt_path))
+      system(paste("slim", expt_arg1, expt_arg2, expt_arg3, expt_arg4, expt_arg5, expt_arg6, expt_arg7, expt_arg8, expt_arg9, expt_arg10, expt_arg11, expt_arg12, slim_expt_path))
       
       
       ###############################
@@ -351,7 +361,7 @@ for (sim in 1:nsims){
       
       message("Extracting mutations...")
       
-      for (gen in (end_gen + 1):(end_gen + 4)){
+      for (gen in (end_gen + 1):(end_gen + 1 + ngen_expt)){
         message(paste((gen-end_gen)*100/5, "% extracted..."))
         system(paste("python", extract_mut_path, paste(slim_output_path, "/Output_experiment_", as.integer(gen), ".txt", sep = ""), mutations_path, as.integer(gen))) # as.integer done to avoid scientific notation
       }
@@ -420,11 +430,11 @@ for (sim in 1:nsims){
     pbar1 = matrix(NA, nrow = n_cages, ncol = n_sites)
     pbar2 = matrix(NA, nrow = n_cages, ncol = n_sites)
     for (i in 1:n_cages){
-      pbar1[i,] = P_matrix[((i-1)*n_sites + 1):((i-1)*n_sites + n_sites),2]
+      pbar1[i,] = P_matrix[((i-1)*n_sites + 1):((i-1)*n_sites + n_sites),2] ## Matrix of frequencies at the start of the experiment (ie F1 generation)
     }
     
     for (i in 1:n_cages){
-      pbar2[i,] = P_matrix[((i-1)*n_sites + 1):((i-1)*n_sites + n_sites),ngen_expt + 2]
+      pbar2[i,] = P_matrix[((i-1)*n_sites + 1):((i-1)*n_sites + n_sites),ngen_expt + 2] ## Matrix of frequencies at the end of the experiment
       
       
     }
@@ -436,28 +446,40 @@ for (sim in 1:nsims){
     
     message("Fitting the model...")
     
-    
-    
-    m1<-Vw_model(C0 = c_ind_ret/2,          # parental genotypes (rows individuals, columns loci, coded as 0, 1/2 or 1) 
-                 nR = NRF,          # matrix of non-recombinant probabilities between loci
-                 pbar1 = pbar1,       # vector of allele frequencies at time-point 1
-                 ngen1=1,     # number of generations between parents and time-point 1
-                 pbar2 = pbar2,       # vector of allele frequencies at time-point 2
-                 ngen2 = ngen_expt + 1,       # number of generations between parents and time-point 2
-                 nind = 1000,        # population size in each replicate
-                 proj="BLoM", # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
-                 LDdelta = TRUE,
-                 pa = 1,
-                 pdelta=0,
-                 Vs = "LoNL",
-                 method="REML",
-                 L=NULL,    # list with elements UL and DL
-                 svdL=NULL,    # list with elements UL and DL
-                 tol=sqrt(.Machine$double.eps))
+    ### Fit the model varying pdelta, select the estimate that has the highest log likelihood
     
     
     
-    vA_est[sim] = m1$Vw_est
+    LL<-Vw_est_temp<-1:nseq # Creating empty vectors to store pdelta and estimated vA in each model
+    
+    pdelta<-seq(pdelta_l, pdelta_u, length=nseq)
+    
+    for(i in 1:nseq){
+    
+      m1<-Vw_model(C0 = c_ind_ret/2,          # parental genotypes (rows individuals, columns loci, coded as 0, 1/2 or 1) 
+                   nR = NRF,          # matrix of non-recombinant probabilities between loci
+                   pbar1 = pbar1,       # vector of allele frequencies at time-point 1
+                   ngen1=1,     # number of generations between parents and time-point 1
+                   pbar2 = pbar2,       # vector of allele frequencies at time-point 2
+                   ngen2 = ngen_expt + 1,       # number of generations between parents and time-point 2
+                   nind = nrow(c_ind_ret),        # population size in each replicate
+                   proj="BLoM", # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
+                   LDdelta = TRUE,
+                   pa = pa,
+                   pdelta = pdelta[i],
+                   Vs = Vs,
+                   method = method,
+                   L = NULL,    # list with elements UL and DL
+                   svdL = NULL,    # list with elements UL and DL
+                   tol = sqrt(.Machine$double.eps))
+      
+      LL[i]<-m1$model$loglik
+      Vw_est_temp[i]<-m1$Vw_est
+      message(paste("Finding the best pdelta...", round((i/nseq)*100), "% complete"))
+    }
+    
+    vA_est[sim] = Vw_est_temp[which(LL == max(LL))] # Store the estimate from the model with the highest log likelihood
+    pdelta_est[sim] = pdelta[which(LL == max(LL))]
     plot(vA_est~vA_true)
     abline(0,1)
     
