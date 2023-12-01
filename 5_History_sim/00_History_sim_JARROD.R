@@ -59,6 +59,29 @@ rdata_path = paste(base_path, "/b_Interim_files/Rdata", sep = "")
 output_path = paste(base_path, "/c_Output", sep = "")
 
 
+###################################
+###### Create file structure ######
+###################################
+
+##### Create directory that stores outputs
+system(paste("mkdir -p", output_path)) # Make directory but ignore if already present
+system(paste("rm -rf", paste(output_path, "/*", sep = ""))) # Remove the contents of this directory
+
+
+
+##### Create directory that stores temp files and directories therein
+system(paste("mkdir -p", paste(base_path, "/b_Interim_files", sep = "")))
+system(paste("rm -rf", paste(base_path, "/b_Interim_files/*", sep = ""))) # Remove the contents of this directory
+
+system(paste("mkdir -p", paste(base_path, "/b_Interim_files/C_Matrices", sep = ""))) 
+system(paste("mkdir -p", paste(base_path, "/b_Interim_files/Genomes", sep = ""))) # Not needed
+system(paste("mkdir -p", paste(base_path, "/b_Interim_files/Msprime_outputs", sep = "")))
+system(paste("mkdir -p", paste(base_path, "/b_Interim_files/Mutations", sep = "")))
+system(paste("mkdir -p", paste(base_path, "/b_Interim_files/Rdata", sep = ""))) ## Not really needed
+system(paste("mkdir -p", paste(base_path, "/b_Interim_files/SLiM_outputs", sep = "")))
+
+
+
 #################################
 #### Load Jarrod's functions ####
 #################################
@@ -75,8 +98,8 @@ rmarkdown::render(file.path(Vw_path))
 nsims = 50                             # Number of simulations (change scale in each simulation)
 n_cages = 10                           # The number of replicate cages in the experiment
 start_gen = 1                          # 
-end_gen = 2                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
-output_freq = 100                      # The frequency with which SLiM outputs are to be generated for the analysis of history (optional)
+end_gen = 20000                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
+output_freq = 4000                      # The frequency with which SLiM outputs are to be generated for the analysis of history (optional)
 ngen_expt = 3                          # How many generations should allele frequency changes be calculated over in the experiment
 
 list_gen = seq(1,end_gen, output_freq) # List of generations for which measurements are to be made in the analysis of history
@@ -105,7 +128,7 @@ DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal)
 
 # If DFE is "g"
 shape = 0.2                            # Shape of the gamma DFE ##### mean = shape*scale
-scale_list = seq(0.1, 0.2, length = nsims) # Vector of Scale of the gamma DFE
+scale_list = seq(0.08, 0.1, length = nsims) # Vector of Scale of the gamma DFE
 mut_ratio = 0.01                       # The ratio of beneficial:deleterious mutations in msprime
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
@@ -122,7 +145,7 @@ pa = 1
 pdelta=0
 Vs = "LoNL"
 method="REML"
-nseq<-10 # The number of times pdelta is to be varied 
+nseq<-30 # The number of times pdelta is to be varied 
 pdelta_l = -2 # Lower limit of pdelta
 pdelta_u = 1 # Upper limit of pdelta
 
