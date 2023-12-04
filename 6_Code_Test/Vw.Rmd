@@ -60,9 +60,9 @@ We generate the genotypes of a base-population under recombination-drift-mutatio
 ###########################################
 
 RecombRate.msprime<-1.4e-8      
-MutationRate.msprime<-1.3e-9
+MutationRate.msprime<-1.3e-10
 
-RecombRate.experiment<-1.4e-8      
+RecombRate.experiment<-1.4e-5      
 AtleastOneRecomb<-FALSE
 
 Ne=1e6
@@ -93,7 +93,7 @@ The environmental variance and the target additive genetic variance can be set:
 
 ```{r allelic_effect_parameters, eval=!functions_only} 
 EVe<-1                              # Expected environmental variance for fitness 
-EVw<-seq(0.1, 0.1, length=nsim)    # Expected genetic variance for fitness 
+EVw<-seq(0, 0.14, length=nsim)    # Expected genetic variance for fitness 
 ```
 
 The possibility exists to give the allelic effects a specified covariance structure. Currently this is restricted to $\sigma_\alpha^2{\bf L}^{p_{\alpha}}$ where $\sigma_\alpha$ (`sda`) and $p_{\alpha}$ (`palpha`) can be specified. $p_\alpha=0$ gives i.i.d allelic effects, $p_\alpha=-1$ gives linearly orthogonal directions in genotype space equal contribution to $V_w$ (either because sites with high genetic diversity have large effect sizes, or alleles in positive LD have opposing effects on fitness.) It is also possible to ignore LD when specifying the distribution of allelic effects with `LDalpha=FALSE` such that  $\sigma_\alpha^2\text{Diag}({\bf L})^{p_{\alpha}}$ where $\text{Diag}$ sets the off-diagonal elements of the matrix to zero.
@@ -245,11 +245,11 @@ pa<-1
 
 ### Distributional assumptions about the change in allele frequency across loci.
 
-The variance in allele frequency change *due to selection*, $VAR[E[\Delta {\bf p}]]$, is assumed to be proportional to $(n_g{\bf L}){\bf L}^{p_{\Delta}}({\bf L}n_g)$ (`Vs="L"`) or $({\bf L}\circ {\bf N}){\bf L}^{p_{\Delta}}({\bf L}\circ {\bf N})$ (`Vs="LoNL"`) where $n_g$ is the number of generations and $p_{\Delta}$  can be specified (`pdelta`). Theoretically, we expect allele frequency change *due to selection* to be proportional to $({\bf L}\circ {\bf N}){\bf L}^{p_{\Delta}}({\bf L}\circ {\bf N})$ where $p_{\Delta}=p_{\alpha}$ although `Vs="L"` with $p_{\Delta}=p_{\alpha}$ might serve as a good approximation. It is also possible to ignore LD when defining ${\bf L}^{p_{\Delta}}$ above using `LDdelta=FALSE`.
+The variance in allele frequency change *due to selection*, $VAR[E[\Delta {\bf p}]]$, is assumed to be proportional to $(n_g{\bf L}){\bf L}^{p_{\Delta}}({\bf L}n_g)$ (`Vs="L"`) or $({\bf L}\circ {\bf N}){\bf L}^{p_{\Delta}}({\bf L}\circ {\bf N})$ (`Vs="LoNL"`) where $n_g$ is the number of generations and $p_{\Delta}$  can be specified (`pdelta`). Theoretically, we expect allele frequency change *due to selection* to be proportional to $({\bf L}\circ {\bf N}){\bf L}^{p_{\Delta}}({\bf L}\circ {\bf N})$ where $p_{\Delta}=p_{\alpha}$ although `Vs="L"` with $p_{\Delta}=p_{\alpha}$ might serve as a good approximation. It is also possible to ignore LD when defining ${\bf L}^{p_{\Delta}}$ above using `LDdelta=FALSE`. If `pdelta` is null then `Vw_model` will estimate it using calls to `optim`.
 
 ```{r eval=!functions_only}
 Vs<-"LoNL"
-pdelta<-palpha
+pdelta<-NULL
 LDdelta<-LDalpha
 ```
 
@@ -293,6 +293,7 @@ form_nR<-function(SNPs,                   # SNP positions
     nR<-matrix(0, nsnps, nsnps)
 
     for(nt in 0:maxn){
+      # could iterate nt from 1 since Pr(0 recombination events in total)=0.
       for(ne in seq(0,maxn,2)){
          nR<-nR+dbinom(ne, prob=Dist/HapLength, size=nt)*actuar::dztpois(nt, RecombRate*HapLength)
          # Pr(even number of crossovers falling between snps given nt)*Pr(nt recombination events in total) then sum over nt
@@ -314,7 +315,71 @@ form_nR<-function(SNPs,                   # SNP positions
 
 ### Function for model fitting
 
-```{r analysis_function} 
+
+```{r analysis_function}
+
+
+fit.model<-function(pdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp, pbar1, pbar2, nrep, LLonly=FALSE){
+
+  if(LDdelta){
+    if(pdelta==0){
+      covp<-diag(nsnps)
+    }else{
+      covp<-UL%*%diag(diag(DL)^(2*pdelta))%*%t(UL)
+    }  
+  }else{
+    covp<-diag(diag(L)^pdelta)
+  }
+
+  if(Vs=="LoNL"){
+     N<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind))^(x-1))*nR^(x-1)}, simplify=FALSE))
+
+     covp<-(L*N)%*%covp%*%(L*N)
+  }
+  if(Vs=="L"){
+     covp<-(L*(ngen2 - ngen1))%*%covp%*%(L*(ngen2 - ngen1))
+  }  
+
+
+  SC<-t(projp)%*%covp%*%projp
+
+  attr(SC, "INVERSE")<-FALSE
+  dimnames(SC) <- list(1:nrow(SC),1:nrow(SC))  # used for full-form matrices
+
+  pbar1_proj<-pbar1%*%projp
+  pbar2_proj<-pbar2%*%projp
+  
+  dat.gaussian<-data.frame(delta=c(pbar2_proj-pbar1_proj), locus=gl(ncol(pbar1_proj),nrep,ncol(pbar1_proj)*nrep), rep=gl(nrep,1,ncol(pbar1_proj)*nrep))
+
+  ##############
+  # Fit models #
+  ##############
+  
+  prior<-list(R=list(V=1, nu=0), G=list(G1=list(V=1, nu=1, alpha.mu=0, alpha.V=1000)))
+  
+  if(method=="REML"){
+    m1<-asreml(delta~1, random = ~vm(locus, SC), data=dat.gaussian)
+  }
+  if(method=="MCMC"){
+
+    if(LLonly){"method = MCMC specified so can't return log-likelihood with LLony=TRUE"}
+
+    invSC<-solve(t(projp)%*%covp%*%projp)
+    invSC <- as(invSC, "sparseMatrix") 
+    attr(invSC, "rowNames") <- 1:retain
+    attr(invSC, "colNames") <- 1:retain
+
+    m1<-MCMCglmm(delta~1, random=~locus, data=dat.gaussian, ginverse=list(locus=invSC), family="gaussian", pr=TRUE, prior=prior)
+  }
+  if(LLonly){
+    return(m1$loglik)
+  }else{
+    return(list(data=dat.gaussian, model=m1, SC=SC, pdelta=pdelta))
+  }
+}
+
+
+
 Vw_model<-function(C0,          # parental genotypes (rows individuals, columns loci, coded as 0, 1/2 or 1) 
                    nR,          # matrix of non-recombinant probabilities between loci
                    pbar1,       # vector of allele frequencies at time-point 1
@@ -400,69 +465,28 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
   }
 
-  if(LDdelta){
-    if(pdelta==0){
-      covp<-diag(nsnps)
-    }else{
-      covp<-UL%*%diag(diag(DL)^(2*pdelta))%*%t(UL)
-    }  
-  }else{
-    covp<-diag(diag(L)^pdelta)
+  if(is.null(pdelta)){
+
+    pdelta<-optim(0, fit.model, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, control = list(fnscale=-1))$par
+
   }
 
-  if(Vs=="LoNL"){
-     N<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind))^(x-1))*nR^(x-1)}, simplify=FALSE))
-
-     covp<-(L*N)%*%covp%*%(L*N)
-  }
-  if(Vs=="L"){
-     covp<-(L*(ngen2 - ngen1))%*%covp%*%(L*(ngen2 - ngen1))
-  }  
-
-
-  SC<-t(projp)%*%covp%*%projp
-
-  attr(SC, "INVERSE")<-FALSE
-  dimnames(SC) <- list(1:nrow(SC),1:nrow(SC))  # used for full-form matrices
-
-  pbar1_proj<-pbar1%*%projp
-  pbar2_proj<-pbar2%*%projp
-  
-  dat.gaussian<-data.frame(delta=c(pbar2_proj-pbar1_proj), locus=gl(ncol(pbar1_proj),nrep,ncol(pbar1_proj)*nrep), rep=gl(nrep,1,ncol(pbar1_proj)*nrep))
-
-  ##############
-  # Fit models #
-  ##############
-  
-  prior<-list(R=list(V=1, nu=0), G=list(G1=list(V=1, nu=1, alpha.mu=0, alpha.V=1000)))
-  
-  if(method=="REML"){
-    m1<-asreml(delta~1, random = ~vm(locus, SC), data=dat.gaussian)
-  }
-  if(method=="MCMC"){
-
-    invSC<-solve(t(projp)%*%covp%*%projp)
-    invSC <- as(invSC, "sparseMatrix") 
-    attr(invSC, "rowNames") <- 1:retain
-    attr(invSC, "colNames") <- 1:retain
-
-    m1<-MCMCglmm(delta~1, random=~locus, data=dat.gaussian, ginverse=list(locus=invSC), family="gaussian", pr=TRUE, prior=prior)
-  }
+  output<-fit.model(pdelta=pdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE)
 
   if(LDdelta){
-    TrV<-sum(diag(DL)^(2*(pdelta+1)))
+    TrV<-sum(diag(DL)^(2*(output$pdelta+1)))
   }else{
-    TrV<-sum(diag(L%*%diag(diag(L)^pdelta)))
+    TrV<-sum(diag(L%*%diag(diag(L)^output$pdelta)))
   }
 
   if(method=="REML"){
-    Vw_est<-summary(m1)$varcomp[1,1]*TrV
+    Vw_est<-summary(output$model)$varcomp[1,1]*TrV
   }
   if(method=="MCMC"){
-    Vw_est<-posterior.mode(m1$VCV[,1])*TrV
+    Vw_est<-posterior.mode(output$model$VCV[,1])*TrV
   }
 
-  return(list(Vw_est=Vw_est, data=dat.gaussian, model=m1, SC=SC))
+  return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, pdelta=output$pdelta))
 
 }
 
