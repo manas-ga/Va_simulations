@@ -3,9 +3,18 @@
     initializeSLiMModelType("WF");
     initializeTreeSeq();
     initializeMutationRate(mu);
-    initializeMutationType("m2", 0.5, "g", -shape*scale, shape);
-    initializeMutationType("m3", 0.5, "g", shape*scale, shape);
-    initializeGenomicElementType("g1", c(m2, m3), c(1.0, mut_ratio));
+
+    if (DFE == "g"){
+    	initializeMutationType("m2", 0.5, "g", -shape*scale, shape);
+    	initializeMutationType("m3", 0.5, "g", shape*scale, shape);
+    	initializeGenomicElementType("g1", c(m2, m3), c(1.0, mut_ratio));
+    }
+    
+    if (DFE == "n"){
+    	initializeMutationType("m2", 0.5, "n", mean_alpha, var_alpha);
+	initializeGenomicElementType("g1", m2, 1.0);
+	}
+
     initializeGenomicElement(g1, 0, sequence_length-1);
     initializeRecombinationRate(r);
     
@@ -23,28 +32,39 @@ mutationEffect(m3) { return 1.0; }
 1:150000 early(){
 
 	if (sim.cycle == end_gen){
-	  p0.setSubpopulationSize(n_ind_exp); // Reduce the population size to 1000
+	  	p0.setSubpopulationSize(n_ind_exp); // Reduce the population size to 1000
 	}
 		
 
 }
 
 1:150000 late() {
+	if (sim.cycle<end_gen){
+		inds = sim.subpopulations.individuals; // Vector of all individuals
 
-	inds = sim.subpopulations.individuals; // Vector of all individuals
-	phenotypes = inds.sumOfMutationsOfType(m2) + inds.sumOfMutationsOfType(m3) + rnorm(length(inds), 0, 1); // Sum of all the selection coefficients (both m2 and m3) in each individuals genomes
-	inds.fitnessScaling = exp(phenotypes); // Calculate absolute fitness
-	
+		if(DFE == "g"){
+			phenotypes = inds.sumOfMutationsOfType(m2) + inds.sumOfMutationsOfType(m3) + rnorm(length(inds), 0, 1); // Sum of all the selection coefficients (both m2 and m3) in each individuals genomes
+			}
+
+		if (DFE == "n"){
+			phenotypes = inds.sumOfMutationsOfType(m2) + rnorm(length(inds), 0, 1); // Sum of all the selection coefficients (of type m2) in each individuals genomes
+			}
+
+		inds.fitnessScaling = exp(phenotypes); // Calculate absolute fitness
+		}	
+
 	if (sim.cycle%output_freq == 1){
-	 sim.outputFull(slim_output_path + "/Output_" + sim.cycle + ".txt");
-	 catn(sim.cycle);
-	}
+		
+	 	sim.outputFull(slim_output_path + "/Output_" + sim.cycle + ".txt");
+	 	catn(sim.cycle);
+		}
 	
 	if (sim.cycle == end_gen){
-	    catn("Done.");
-	    sim.outputFull(slim_output_path + "/Output_" + sim.cycle + ".txt");
-	    sim.treeSeqOutput(slim_output_path + "/Output_history.trees");
-    	    sim.simulationFinished();
-	}
+		catn("The last generation of the burnin phase is " + sim.cycle);
+	   	catn("Done.");
+	    	sim.outputFull(slim_output_path + "/Output_" + sim.cycle + ".txt");
+	    	sim.treeSeqOutput(slim_output_path + "/Output_history.trees");
+    	    	sim.simulationFinished();
+		}
 	    
 }
