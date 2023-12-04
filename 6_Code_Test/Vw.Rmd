@@ -67,7 +67,7 @@ AtleastOneRecomb<-FALSE
 
 Ne=1e6
 
-nsim<-1            # number of simulations
+nsim<-30            # number of simulations
 
 HapLength<-as.integer(seq(100000,100000,length=nsim))   # haplotype length
 
@@ -93,13 +93,13 @@ The environmental variance and the target additive genetic variance can be set:
 
 ```{r allelic_effect_parameters, eval=!functions_only} 
 EVe<-1                              # Expected environmental variance for fitness 
-EVw<-seq(0, 0.14, length=nsim)    # Expected genetic variance for fitness 
+EVw<-seq(0, 0.1, length=nsim)    # Expected genetic variance for fitness 
 ```
 
 The possibility exists to give the allelic effects a specified covariance structure. Currently this is restricted to $\sigma_\alpha^2{\bf L}^{p_{\alpha}}$ where $\sigma_\alpha$ (`sda`) and $p_{\alpha}$ (`palpha`) can be specified. $p_\alpha=0$ gives i.i.d allelic effects, $p_\alpha=-1$ gives linearly orthogonal directions in genotype space equal contribution to $V_w$ (either because sites with high genetic diversity have large effect sizes, or alleles in positive LD have opposing effects on fitness.) It is also possible to ignore LD when specifying the distribution of allelic effects with `LDalpha=FALSE` such that  $\sigma_\alpha^2\text{Diag}({\bf L})^{p_{\alpha}}$ where $\text{Diag}$ sets the off-diagonal elements of the matrix to zero.
 
 ```{r , eval=!functions_only} 
-palpha<-0
+palpha<--1
 LDalpha<-TRUE
 ```
 
@@ -319,7 +319,7 @@ form_nR<-function(SNPs,                   # SNP positions
 ```{r analysis_function}
 
 
-fit.model<-function(pdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp, pbar1, pbar2, nrep, LLonly=FALSE){
+fit.model<-function(pdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp, pbar1, pbar2, nrep, nR, LLonly=FALSE){
 
   if(LDdelta){
     if(pdelta==0){
@@ -467,11 +467,11 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
   if(is.null(pdelta)){
 
-    pdelta<-optim(0, fit.model, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, control = list(fnscale=-1))$par
+    pdelta<-optim(0, fit.model, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, nR=nR, control = list(fnscale=-1))$par
 
   }
 
-  output<-fit.model(pdelta=pdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE)
+  output<-fit.model(pdelta=pdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, nR=nR)
 
   if(LDdelta){
     TrV<-sum(diag(DL)^(2*(output$pdelta+1)))
@@ -496,7 +496,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
 ```{r run_simulations, results="hide", eval=!functions_only} 
 
-Vw0<-Vw2<-Vw_est<-1:nsim
+Vw0<-Vw2<-Vw_est<-pdelta_est<-1:nsim
 
 for(i in 1:nsim){
 
@@ -547,6 +547,7 @@ for(i in 1:nsim){
                 tol=sqrt(.Machine$double.eps))
 
   Vw_est[i]<-mod$Vw_est
+  pdelta_est[i]<-mod$pdelta
 
   print(paste(i, " Vw=", round(Vw0[i],4), " Vw_est=",  round(Vw_est[i],4), sep=""))
 }
@@ -554,7 +555,7 @@ for(i in 1:nsim){
 
 
 if(save){
-  res<-list(HapLength=HapLength, RecombRate.msprime=RecombRate.msprime,   MutationRate.msprime=MutationRate.msprime, RecombRate.experiment=RecombRate.experiment, AtleastOneRecomb=AtleastOneRecomb, Ne=Ne, nind=nind, nrep=nrep, ngen=ngen, EVe=EVe, EVw=EVw, proj=proj, pdelta=pdelta, pa=pa, palpha=palpha, LDalpha=LDalpha, LDdelta=LDdelta, method=method, Vw0=Vw0, Vw2=Vw2, Vw_est=Vw_est)
+  res<-list(HapLength=HapLength, RecombRate.msprime=RecombRate.msprime,   MutationRate.msprime=MutationRate.msprime, RecombRate.experiment=RecombRate.experiment, AtleastOneRecomb=AtleastOneRecomb, Ne=Ne, nind=nind, nrep=nrep, ngen=ngen, EVe=EVe, EVw=EVw, proj=proj, pdelta=pdelta, pa=pa, palpha=palpha, LDalpha=LDalpha, LDdelta=LDdelta, method=method, Vw0=Vw0, Vw2=Vw2, Vw_est=Vw_est, pdelta_est=pdelta_est)
   save(res, file=paste0(file.path(base_path, "6_Code_Test/tmp"), "/res_", format(Sys.time(), "%H%M_%d_%m_%Y"), ".Rdata"))
 }
 
@@ -568,6 +569,11 @@ abline(0,1)
 plot(Vw_est~Vw2, ylab="Estimate of Vw", xlab="True value of Vw in final generation")
 abline(0,1)
 
+if(is.null(pdelta)){
+  par(mfrow=c(1,1))
+  plot(pdelta_est, ylab="Estimate of pdelta")
+  abline(h=palpha)
+}
 
 par(mfrow=c(1,1))
 plot(I(Vw_est-Vw0)~HapLength, ylab="Deviation of estimate of Vw from true value", xlab="Genome size")
