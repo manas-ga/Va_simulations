@@ -65,9 +65,6 @@ output_path = paste(base_path, "/c_Output", sep = "")
 
 ##### Create directory that stores outputs
 system(paste("mkdir -p", output_path)) # Make directory but ignore if already present
-system(paste("rm -rf", paste(output_path, "/*", sep = ""))) # Remove the contents of this directory
-
-
 
 ##### Create directory that stores temp files and directories therein
 system(paste("mkdir -p", paste(base_path, "/b_Interim_files", sep = "")))
@@ -95,11 +92,11 @@ rmarkdown::render(file.path(Vw_path))
 ############ Simulation Parameters ##################
 #####################################################
 
-nsims = 1                             # Number of simulations (change scale in each simulation)
+nsims = 15                             # Number of simulations (change scale in each simulation)
 n_cages = 10                           # The number of replicate cages in the experiment
 start_gen = 1                          # 
-end_gen = 2                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
-output_freq = 4000                      # The frequency with which SLiM outputs are to be generated for the analysis of history (optional)
+end_gen = 20000                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
+output_freq = 5000                      # The frequency with which SLiM outputs are to be generated for the analysis of history (optional)
 ngen_expt = 3                          # How many generations should allele frequency changes be calculated over in the experiment
 
 list_gen = seq(1,end_gen, output_freq) # List of generations for which measurements are to be made in the analysis of history
@@ -115,7 +112,7 @@ r = 1.4e-06                            # Recombination rate (per site per genera
 r_expt = 1.4e-05                       # Unscaled recombination rate to be used during during the experiment (1.4e-08)
 r_msp = 1.4e-08                        # Recombination rate for msprime
 AtleastOneRecomb = F                   # Whether there has to be at least one recombination event
-mu = 1.3e-06                           # Mutation rate during the forward simulation of the history
+mu = 1.3e-07                           # Mutation rate during the forward simulation of the history
 mu_msp = 1.3e-9                        # A separate mutation rate for the msprime simulation
 mu_expt = 0                            # Mutation rate during the experiment
 
@@ -129,7 +126,7 @@ DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal)
 # If DFE is "g"
 shape = 0.2                            # Shape of the gamma DFE ##### mean = shape*scale
 scale_list = seq(0.09, 0.11, length = nsims) # Vector of Scale of the gamma DFE
-mut_ratio = 0.0                       # The ratio of beneficial:deleterious mutations in msprime
+mut_ratio = 0.00                       # The ratio of beneficial:deleterious mutations in msprime
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
@@ -149,7 +146,7 @@ method="REML"
 # How is pdelta to be estimated? 
 # Can be "optim" (using the function optim()), or "fixed" or "manual"(estimated by manually scanning a range of pdelta values)
 
-pdelta_method = "manual" # "optim" or "manual" or "fixed"
+pdelta_method = "optim" # "optim" or "manual" or "fixed"
 
 if(pdelta_method=="fixed"){
   pdelta = -0.5 # Can be specified to any value
@@ -499,7 +496,8 @@ for (sim in 1:nsims){
         
         
         for(i in 1:nseq){
-        
+          
+          save.image(file = paste(output_path, "/Output_temp", ".RData", sep ="")) # Save the output to investigate when things crash due to segfaults
           m1<-Vw_model(C0 = c_ind_ret/2,          # parental genotypes (rows individuals, columns loci, coded as 0, 1/2 or 1) 
                        nR = NRF,          # matrix of non-recombinant probabilities between loci
                        pbar1 = pbar1,       # vector of allele frequencies at time-point 1
@@ -532,6 +530,7 @@ for (sim in 1:nsims){
     
     if(pdelta_method=="fixed"|pdelta_method=="optim"){
       
+      save.image(file = paste(output_path, "/Output_temp", ".RData", sep ="")) # Save the output to investigate when things crash due to segfaults
       m1<-Vw_model(C0 = c_ind_ret/2,          # parental genotypes (rows individuals, columns loci, coded as 0, 1/2 or 1) 
                    nR = NRF,          # matrix of non-recombinant probabilities between loci
                    pbar1 = pbar1,       # vector of allele frequencies at time-point 1
