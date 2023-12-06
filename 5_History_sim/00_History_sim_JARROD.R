@@ -98,7 +98,7 @@ rmarkdown::render(file.path(Vw_path))
 nsims = 1                             # Number of simulations (change scale in each simulation)
 n_cages = 10                           # The number of replicate cages in the experiment
 start_gen = 1                          # 
-end_gen = 200                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
+end_gen = 2                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
 output_freq = 4000                      # The frequency with which SLiM outputs are to be generated for the analysis of history (optional)
 ngen_expt = 3                          # How many generations should allele frequency changes be calculated over in the experiment
 
@@ -128,8 +128,8 @@ DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal)
 
 # If DFE is "g"
 shape = 0.2                            # Shape of the gamma DFE ##### mean = shape*scale
-scale_list = seq(0.08, 0.1, length = nsims) # Vector of Scale of the gamma DFE
-mut_ratio = 0.01                       # The ratio of beneficial:deleterious mutations in msprime
+scale_list = seq(0.09, 0.11, length = nsims) # Vector of Scale of the gamma DFE
+mut_ratio = 0.0                       # The ratio of beneficial:deleterious mutations in msprime
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
@@ -149,10 +149,10 @@ method="REML"
 # How is pdelta to be estimated? 
 # Can be "optim" (using the function optim()), or "fixed" or "manual"(estimated by manually scanning a range of pdelta values)
 
-pdelta_method = "optim" # "optim" or "manual" or "fixed"
+pdelta_method = "manual" # "optim" or "manual" or "fixed"
 
 if(pdelta_method=="fixed"){
-  pdelta = 0 # Can be specified to any value
+  pdelta = -0.5 # Can be specified to any value
 }
 
 if(pdelta_method=="optim"){
@@ -161,7 +161,7 @@ if(pdelta_method=="optim"){
 
 if(pdelta_method=="manual"){
   
-  nseq<-6 # The number of times pdelta is to be varied 
+  nseq<-20 # The number of times pdelta is to be varied 
   pdelta_l = -2 # Lower limit of pdelta
   pdelta_u = 2 # Upper limit of pdelta
   pdelta<-seq(pdelta_l, pdelta_u, length=nseq)
@@ -522,7 +522,7 @@ for (sim in 1:nsims){
           message(paste("Finding the best pdelta...", round((i/nseq)*100), "% complete"))
         }
         
-        vA_est[sim] = Vw_est_temp[which(LL == max(LL))] # Store the estimate from the model with the highest log likelihood
+        vA_est[sim] = vA_est_temp[which(LL == max(LL))] # Store the estimate from the model with the highest log likelihood
         pdelta_est[sim] = pdelta[which(LL == max(LL))]
         plot(vA_est~vA_true)
         abline(0,1)
