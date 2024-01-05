@@ -65,9 +65,6 @@ output_path = paste(base_path, "/c_Output", sep = "")
 
 ##### Create directory that stores outputs
 system(paste("mkdir -p", output_path)) # Make directory but ignore if already present
-system(paste("rm -rf", paste(output_path, "/*", sep = ""))) # Remove the contents of this directory
-
-
 
 ##### Create directory that stores temp files and directories therein
 system(paste("mkdir -p", paste(base_path, "/b_Interim_files", sep = "")))
@@ -95,11 +92,11 @@ rmarkdown::render(file.path(Vw_path))
 ############ Simulation Parameters ##################
 #####################################################
 
-nsims = 50                             # Number of simulations (change scale in each simulation)
+nsims = 15                             # Number of simulations (change scale in each simulation)
 n_cages = 10                           # The number of replicate cages in the experiment
 start_gen = 1                          # 
 end_gen = 20000                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
-output_freq = 4000                      # The frequency with which SLiM outputs are to be generated for the analysis of history (optional)
+output_freq = 5000                      # The frequency with which SLiM outputs are to be generated for the analysis of history (optional)
 ngen_expt = 3                          # How many generations should allele frequency changes be calculated over in the experiment
 
 list_gen = seq(1,end_gen, output_freq) # List of generations for which measurements are to be made in the analysis of history
@@ -115,7 +112,7 @@ r = 1.4e-06                            # Recombination rate (per site per genera
 r_expt = 1.4e-05                       # Unscaled recombination rate to be used during during the experiment (1.4e-08)
 r_msp = 1.4e-08                        # Recombination rate for msprime
 AtleastOneRecomb = F                   # Whether there has to be at least one recombination event
-mu = 1.3e-06                           # Mutation rate during the forward simulation of the history
+mu = 1.3e-07                           # Mutation rate during the forward simulation of the history
 mu_msp = 1.3e-9                        # A separate mutation rate for the msprime simulation
 mu_expt = 0                            # Mutation rate during the experiment
 
@@ -128,8 +125,8 @@ DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal)
 
 # If DFE is "g"
 shape = 0.2                            # Shape of the gamma DFE ##### mean = shape*scale
-scale_list = seq(0.08, 0.1, length = nsims) # Vector of Scale of the gamma DFE
-mut_ratio = 0.01                       # The ratio of beneficial:deleterious mutations in msprime
+scale_list = seq(0.09, 0.11, length = nsims) # Vector of Scale of the gamma DFE
+mut_ratio = 0.00                       # The ratio of beneficial:deleterious mutations in msprime
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
@@ -142,12 +139,34 @@ var_alpha_list = seq(0.00001, 0.00021, length = nsims) # Vector to store varianc
 proj="BLoM" # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
 LDdelta = TRUE
 pa = 1
-pdelta=0
 Vs = "LoNL"
 method="REML"
-nseq<-30 # The number of times pdelta is to be varied 
-pdelta_l = -2 # Lower limit of pdelta
-pdelta_u = 1 # Upper limit of pdelta
+
+
+# How is pdelta to be estimated? 
+# Can be "optim" (using the function optim()), or "fixed" or "manual"(estimated by manually scanning a range of pdelta values)
+
+pdelta_method = "optim" # "optim" or "manual" or "fixed"
+
+if(pdelta_method=="fixed"){
+  pdelta = -0.5 # Can be specified to any value
+}
+
+if(pdelta_method=="optim"){
+  pdelta = NULL # This triggers the use of optim() inside the function Vw_model()
+}
+
+if(pdelta_method=="manual"){
+  
+  nseq<-20 # The number of times pdelta is to be varied 
+  pdelta_l = -2 # Lower limit of pdelta
+  pdelta_u = 2 # Upper limit of pdelta
+  pdelta<-seq(pdelta_l, pdelta_u, length=nseq)
+  
+}
+
+
+
 
 ####################################################################################################################################################
 
@@ -469,16 +488,49 @@ for (sim in 1:nsims){
     
     message("Fitting the model...")
     
+    if(pdelta_method=="manual"){
+    
     ### Fit the model varying pdelta, select the estimate that has the highest log likelihood
     
+        LL<-vA_est_temp<-1:nseq # Creating empty vectors to store pdelta and estimated vA in each model
+        
+        
+        for(i in 1:nseq){
+          
+          save.image(file = paste(output_path, "/Output_temp", ".RData", sep ="")) # Save the output to investigate when things crash due to segfaults
+          m1<-Vw_model(C0 = c_ind_ret/2,          # parental genotypes (rows individuals, columns loci, coded as 0, 1/2 or 1) 
+                       nR = NRF,          # matrix of non-recombinant probabilities between loci
+                       pbar1 = pbar1,       # vector of allele frequencies at time-point 1
+                       ngen1=1,     # number of generations between parents and time-point 1
+                       pbar2 = pbar2,       # vector of allele frequencies at time-point 2
+                       ngen2 = ngen_expt + 1,       # number of generations between parents and time-point 2
+                       nind = nrow(c_ind_ret),        # population size in each replicate
+                       proj="BLoM", # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
+                       LDdelta = TRUE,
+                       pa = pa,
+                       pdelta = pdelta[i],
+                       Vs = Vs,
+                       method = method,
+                       L = NULL,    # list with elements UL and DL
+                       svdL = NULL,    # list with elements UL and DL
+                       tol = sqrt(.Machine$double.eps))
+          
+          LL[i]<-m1$model$loglik
+          vA_est_temp[i]<-m1$Vw_est
+          message(paste("Finding the best pdelta...", round((i/nseq)*100), "% complete"))
+        }
+        
+        vA_est[sim] = vA_est_temp[which(LL == max(LL))] # Store the estimate from the model with the highest log likelihood
+        pdelta_est[sim] = pdelta[which(LL == max(LL))]
+        plot(vA_est~vA_true)
+        abline(0,1)
+    
+    }
     
     
-    LL<-Vw_est_temp<-1:nseq # Creating empty vectors to store pdelta and estimated vA in each model
-    
-    pdelta<-seq(pdelta_l, pdelta_u, length=nseq)
-    
-    for(i in 1:nseq){
-    
+    if(pdelta_method=="fixed"|pdelta_method=="optim"){
+      
+      save.image(file = paste(output_path, "/Output_temp", ".RData", sep ="")) # Save the output to investigate when things crash due to segfaults
       m1<-Vw_model(C0 = c_ind_ret/2,          # parental genotypes (rows individuals, columns loci, coded as 0, 1/2 or 1) 
                    nR = NRF,          # matrix of non-recombinant probabilities between loci
                    pbar1 = pbar1,       # vector of allele frequencies at time-point 1
@@ -489,24 +541,24 @@ for (sim in 1:nsims){
                    proj="BLoM", # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
                    LDdelta = TRUE,
                    pa = pa,
-                   pdelta = pdelta[i],
+                   pdelta = pdelta,
                    Vs = Vs,
                    method = method,
                    L = NULL,    # list with elements UL and DL
                    svdL = NULL,    # list with elements UL and DL
                    tol = sqrt(.Machine$double.eps))
       
-      LL[i]<-m1$model$loglik
-      Vw_est_temp[i]<-m1$Vw_est
-      message(paste("Finding the best pdelta...", round((i/nseq)*100), "% complete"))
+      
+      vA_est[sim] = m1$Vw_est # Store the estimate from the model with the highest log likelihood
+      pdelta_est[sim] = m1$pdelta # The sample() functions ensures that only one value is selected in case there are multiple points with the highest LL
+      plot(vA_est~vA_true)
+      abline(0,1)
+      
     }
     
-    vA_est[sim] = Vw_est_temp[which(LL == max(LL))] # Store the estimate from the model with the highest log likelihood
-    pdelta_est[sim] = pdelta[which(LL == max(LL))]
-    plot(vA_est~vA_true)
-    abline(0,1)
-    
 
+    
+    
 }
 
 
