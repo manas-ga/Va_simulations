@@ -92,11 +92,11 @@ rmarkdown::render(file.path(Vw_path))
 ############ Simulation Parameters ##################
 #####################################################
 
-nsims = 15                             # Number of simulations (change scale in each simulation)
+nsims = 10                             # Number of simulations (change scale in each simulation)
 n_cages = 10                           # The number of replicate cages in the experiment
 start_gen = 1                          # 
 end_gen = 20000                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
-output_freq = 5000                      # The frequency with which SLiM outputs are to be generated for the analysis of history (optional)
+output_freq = 500                      # The frequency with which SLiM outputs are to be generated for the analysis of history (optional)
 ngen_expt = 3                          # How many generations should allele frequency changes be calculated over in the experiment
 
 list_gen = seq(1,end_gen, output_freq) # List of generations for which measurements are to be made in the analysis of history
@@ -107,12 +107,12 @@ n_ind = 10000                          # Number of individuals to be sampled in 
 n_ind_exp = 1000                       # The population size of the experiment. In 00_History.slim the population reduces to n_ind_exp in the last generation to simulate the sampling of the parents for the experiment
 n_sample = 1000                        # Number of individuals to be sampled to construct the c matrix  (This is just because c matrices become awfully large) 
 
-sequence_length = 1e+05               # Just have a single continuous chromosome that is simulated
+sequence_length = 1e+05                # Just have a single continuous chromosome that is simulated
 r = 1.4e-06                            # Recombination rate (per site per generation)
 r_expt = 1.4e-05                       # Unscaled recombination rate to be used during during the experiment (1.4e-08)
 r_msp = 1.4e-08                        # Recombination rate for msprime
 AtleastOneRecomb = F                   # Whether there has to be at least one recombination event
-mu = 1.3e-07                           # Mutation rate during the forward simulation of the history
+mu = 1.8e-06                           # Mutation rate during the forward simulation of the history
 mu_msp = 1.3e-9                        # A separate mutation rate for the msprime simulation
 mu_expt = 0                            # Mutation rate during the experiment
 
@@ -125,12 +125,12 @@ DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal)
 
 # If DFE is "g"
 shape = 0.2                            # Shape of the gamma DFE ##### mean = shape*scale
-scale_list = seq(0.09, 0.11, length = nsims) # Vector of Scale of the gamma DFE
+scale_list = seq(0.15, 0.15, length = nsims) # Vector of Scale of the gamma DFE
 mut_ratio = 0.00                       # The ratio of beneficial:deleterious mutations in msprime
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
-var_alpha_list = seq(0.00001, 0.00021, length = nsims) # Vector to store variance of normal DFE
+var_alpha_list = seq(0.00001, 0.00018, length = nsims) # Vector to store variance of normal DFE
 
 ############################################################################################
 ######## Analysis parameters can be found as arguments of the function Vw_model ############
@@ -146,10 +146,10 @@ method="REML"
 # How is pdelta to be estimated? 
 # Can be "optim" (using the function optim()), or "fixed" or "manual"(estimated by manually scanning a range of pdelta values)
 
-pdelta_method = "optim" # "optim" or "manual" or "fixed"
+pdelta_method = "manual" # "optim" or "manual" or "fixed"
 
 if(pdelta_method=="fixed"){
-  pdelta = -0.5 # Can be specified to any value
+  pdelta = 0 # Can be specified to any value
 }
 
 if(pdelta_method=="optim"){
@@ -158,9 +158,9 @@ if(pdelta_method=="optim"){
 
 if(pdelta_method=="manual"){
   
-  nseq<-20 # The number of times pdelta is to be varied 
+  nseq<-30 # The number of times pdelta is to be varied 
   pdelta_l = -2 # Lower limit of pdelta
-  pdelta_u = 2 # Upper limit of pdelta
+  pdelta_u = 1 # Upper limit of pdelta
   pdelta<-seq(pdelta_l, pdelta_u, length=nseq)
   
 }
@@ -177,7 +177,7 @@ vA_true = rep(NA, nsims) # Additive genetic variance
 va_true = rep(NA, nsims) # Additive genic variance
 vA_est = rep(NA, nsims)  # Estimated vA from the model
 pdelta_est = rep(NA, nsims) # pdelta is estimated in each simulation with the help of maximum likelihood (implemented manually)
-
+seg_sites = rep(NA, nsims) # Number of segregating sites at the beginning of the experiment in each simulation
 
 for (sim in 1:nsims){
   
@@ -303,6 +303,7 @@ for (sim in 1:nsims){
     # Calculate the number of loci that are retained
     
     n_sites_ret = ncol(c_ind_ret)
+    seg_sites[sim] = n_sites_ret
     
     ################################
     ### Calculate true vA and va ###
@@ -344,6 +345,7 @@ for (sim in 1:nsims){
     #######################################################################################
     
     message("Forward simulating the experiment using SLiM...")
+    message(paste("There are", nrow(L_ret), "Segregating sites..."))
     
     # Create empty vector to create the data frame containing the following variables as columns:
     # 1. Raw delta P
@@ -522,7 +524,7 @@ for (sim in 1:nsims){
         
         vA_est[sim] = vA_est_temp[which(LL == max(LL))] # Store the estimate from the model with the highest log likelihood
         pdelta_est[sim] = pdelta[which(LL == max(LL))]
-        plot(vA_est~vA_true)
+        plot(vA_est~vA_true, xlab = "True value of Vw", ylab = "Estimate of Vw")
         abline(0,1)
     
     }
@@ -551,7 +553,7 @@ for (sim in 1:nsims){
       
       vA_est[sim] = m1$Vw_est # Store the estimate from the model with the highest log likelihood
       pdelta_est[sim] = m1$pdelta # The sample() functions ensures that only one value is selected in case there are multiple points with the highest LL
-      plot(vA_est~vA_true)
+      plot(vA_est~vA_true, xlab = "True value of Vw", ylab = "Estimate of Vw")
       abline(0,1)
       
     }
@@ -566,7 +568,7 @@ save.image(file = paste(output_path, "/Output", gsub(" ", "_", Sys.time()), ".RD
 
 pdf(paste(output_path, "/Output_",gsub(" ", "_", Sys.time()), ".pdf", sep = ""), onefile = F)
 
-plot(vA_est~vA_true)
+plot(vA_est~vA_true, xlab = "True value of Vw", ylab = "Estimate of Vw")
 abline(0,1)
 
 dev.off()
