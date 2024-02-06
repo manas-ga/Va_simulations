@@ -36,7 +36,7 @@ sim_msprime_ancecstry = function(sequence_length,
   msprime <- reticulate::import("msprime")
   
   # Simulate the ancestry
-  ts <- msprime$sim_ancestry(n_sample, sequence_length=sequence_length, recombination_rate=r_msp)
+  ts <- msprime$sim_ancestry(n_sample, sequence_length=sequence_length, recombination_rate=r_msp, population_size=Ne)
   
   # Simulate mutations
   mts = msprime$sim_mutations(ts, rate=mu_msp)
