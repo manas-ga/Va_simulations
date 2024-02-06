@@ -95,7 +95,7 @@ EVe<-1                              # Expected environmental variance for fitnes
 EVw<-seq(0, 0.1, length=nsim)    # Expected genetic variance for fitness 
 ```
 
-The possibility exists to give the allelic effects a specified mean (${\boldsymbol \mu}_\alpha$) and covariance structure (${\bf V}_\alpha$). For the mean this is restricted to ${\boldsymbol \mu}_\alpha=\beta_\alpha(x_r-x_a)$ where $x_r$ is a property of the reference allele, and $x_a$ is the same property of the alternate allele. In what follows we will consider the scenario where $x_r=p$ and $x_a=q$. For the covariance structure we restrict the form to to ${\bf V}_\alpha=\sigma_\alpha^2{\bf L}^{p_{\alpha}}$ where $\sigma_\alpha$ (`sda`) and $p_{\alpha}$ (`palpha`) can be specified. $p_\alpha=0$ gives i.i.d allelic effects, $p_\alpha=-1$ gives linearly orthogonal directions in genotype space equal contribution to $V_w$ (either because sites with high genetic diversity have large effect sizes, or alleles in positive LD have opposing effects on fitness.) It is also possible to ignore LD when specifying the covariance structure of allelic effects with `LDalpha=FALSE` such that  ${\bf V}_\alpha=\sigma_\alpha^2\text{Diag}({\bf L})^{p_{\alpha}}$ where $\text{Diag}$ sets the off-diagonal elements of the matrix to zero.
+The possibility exists to give the allelic effects a specified mean (${\boldsymbol \mu}_\alpha$) and covariance structure (${\bf V}_\alpha$). For the mean this is restricted to ${\boldsymbol \mu}_\alpha=\beta_\alpha^{(0)}+\beta^{(1)}_\alpha(x_r-x_a)$ where $x_r$ is a property of the reference allele, and $x_a$ is the same property of the alternate allele. In what follows we will consider the scenario where $x_r=p$ and $x_a=q$. For the covariance structure we restrict the form to to ${\bf V}_\alpha=\sigma_\alpha^2{\bf L}^{p_{\alpha}}$ where $\sigma_\alpha$ (`sda`) and $p_{\alpha}$ (`palpha`) can be specified. $p_\alpha=0$ gives i.i.d allelic effects, $p_\alpha=-1$ gives linearly orthogonal directions in genotype space equal contribution to $V_w$ (either because sites with high genetic diversity have large effect sizes, or alleles in positive LD have opposing effects on fitness.) It is also possible to ignore LD when specifying the covariance structure of allelic effects with `LDalpha=FALSE` such that  ${\bf V}_\alpha=\sigma_\alpha^2\text{Diag}({\bf L})^{p_{\alpha}}$ where $\text{Diag}$ sets the off-diagonal elements of the matrix to zero.
 
 ```{r , eval=!functions_only} 
 palpha<--1
@@ -261,11 +261,11 @@ pa<-1
 
 ### Distributional assumptions about the change in allele frequency across loci.
 
-The global mean allele frequency change *due to selection*, $E[E[\Delta {\bf p}]]$, is assumed to be equal to $\beta^{(0)}_\Delta+\beta^{(1)}_\Delta(p-q)$, and the (co)variance $VAR[E[\Delta {\bf p}]]$, is assumed to be proportional to $(n_g{\bf L}){\bf L}^{p_{\Delta}}({\bf L}n_g)$ (`Vs="L"`) or $({\bf L}\circ {\bf N}){\bf L}^{p_{\Delta}}({\bf L}\circ {\bf N})$ (`Vs="LoNL"`) where $n_g$ is the number of generations and $p_{\Delta}$  can be specified (`pdelta`). Theoretically, we expect allele frequency change *due to selection* to have mean $\beta_\alpha(p-q)$ with covariance structure proportional to $({\bf L}\circ {\bf N}){\bf L}^{p_{\alpha}}({\bf L}\circ {\bf N})$, although `Vs="L"` with $p_{\Delta}=p_{\alpha}$ might serve as a good approximation. It is also possible to ignore LD when defining ${\bf L}^{p_{\Delta}}$ above using `LDdelta=FALSE`. If `pdelta` is null then `Vw_model` will estimate it using calls to `optim`. If either the intercept (`bdelta[1]`) or slope (`bdelta[2]` ) are `NA` then they will be estimated.
+The global mean allele frequency change *due to selection*, $E[E[\Delta {\bf p}]]$, is assumed to be equal to $\beta^{(0)}_\Delta+\beta^{(1)}_\Delta(p-q)$, and the (co)variance $VAR[E[\Delta {\bf p}]]$, is assumed to be proportional to $(n_g{\bf L}){\bf L}^{p_{\Delta}}({\bf L}n_g)$ (`Vs="L"`) or $({\bf L}\circ {\bf N}){\bf L}^{p_{\Delta}}({\bf L}\circ {\bf N})$ (`Vs="LoNL"`) where $n_g$ is the number of generations and $p_{\Delta}$  can be specified (`pdelta`). Theoretically, we expect allele frequency change *due to selection* to have mean $\beta_\alpha(p-q)$ with covariance structure proportional to $({\bf L}\circ {\bf N}){\bf L}^{p_{\alpha}}({\bf L}\circ {\bf N})$, although `Vs="L"` with $p_{\Delta}=p_{\alpha}$ might serve as a good approximation. It is also possible to ignore LD when defining ${\bf L}^{p_{\Delta}}$ above using `LDdelta=FALSE`. If `pdelta` is NA then `Vw_model` will estimate it using calls to `optim`. If either the intercept (`bdelta[1]`) or slope (`bdelta[2]` ) are `NA` then they will be estimated.
 
 ```{r eval=!functions_only}
 Vs<-"LoNL"
-pdelta<-palpha
+pdelta<-NA
 bdelta<-c(NA, NA)
 LDdelta<-LDalpha
 ```
@@ -511,7 +511,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
   }
 
-  if(is.null(pdelta)){
+  if(is.na(pdelta)){
 
     pdelta<-optim(0, fit.model, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, nR=nR, control = list(fnscale=-1))$par
 
@@ -628,7 +628,7 @@ abline(0,1)
 plot(Vw_est~Vw2, ylab="Estimate of Vw", xlab="True value of Vw in final generation")
 abline(0,1)
 
-if(is.null(pdelta)){
+if(is.na(pdelta)){
   par(mfrow=c(1,1))
   plot(pdelta_est, ylab="Estimate of pdelta")
   abline(h=palpha)
