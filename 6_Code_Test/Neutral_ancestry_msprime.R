@@ -32,7 +32,7 @@ sim_msprime_ancecstry = function(sequence_length,
   # Specify the path to python
   reticulate::use_python(python_path)
   
-  # Import msprim
+  # Import msprime
   msprime <- reticulate::import("msprime")
   
   # Simulate the ancestry
@@ -44,8 +44,8 @@ sim_msprime_ancecstry = function(sequence_length,
   print(paste("There are ", mts$num_sites, " sites with ", mts$num_mutations, " mutations"))
   
   # Store the c matrix
-    c = t(mts$genotype_matrix())
-  
+  c = t(mts$genotype_matrix()%%2)
+
   # Store the position
   pos = mts$sites_position
   
