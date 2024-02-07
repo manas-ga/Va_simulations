@@ -1,7 +1,7 @@
 rm(list = ls())
 # source("C:/Academics/Post-doc/Va_simulations/5_History_sim/00_History_sim_JARROD.R") ## Local windows
 
-# source("/mnt/c/Academics/Post-doc/Va_simulations/5_History_sim/00_History_sim_JARROD.R") ## Local Wsl
+# source("/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim/00_History_sim_JARROD.R") ## Local Wsl
 
 # source("/data/home/msamant/Manas/Va_simulations/5_History_sim/00_History_sim_JARROD.R")  ## ON VERA
 
@@ -33,7 +33,7 @@ if(Sys.info()["nodename"]=="vera.bio.ed.ac.uk"){
   
   if(Sys.info()["sysname"]=="Linux"){
     
-    base_path = "/mnt/c/Academics/Post-doc/Va_simulations/5_History_sim" ## Local Wsl
+    base_path = "mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim" ## Local Wsl
     Vw_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/6_Code_test/Vw.Rmd" ### Jarrod's functions and other code is stored here
     
   }else{
@@ -95,7 +95,7 @@ rmarkdown::render(file.path(Vw_path))
 nsims = 10                             # Number of simulations (change scale in each simulation)
 n_cages = 10                           # The number of replicate cages in the experiment
 start_gen = 1                          # 
-end_gen = 20000                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
+end_gen = 2                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
 output_freq = 500                      # The frequency with which SLiM outputs are to be generated for the analysis of history (optional)
 ngen_expt = 3                          # How many generations should allele frequency changes be calculated over in the experiment
 
@@ -121,7 +121,7 @@ mu_expt = 0                            # Mutation rate during the experiment
 ### DFE-related parameters ###
 ##############################
 
-DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal) 
+DFE = "n"                              # DFE can be "g" (gamma) or "n" (normal) 
 
 # If DFE is "g"
 shape = 0.2                            # Shape of the gamma DFE ##### mean = shape*scale
@@ -165,7 +165,7 @@ if(pdelta_method=="manual"){
   
 }
 
-
+bdelta = c(NA, 0)
 
 
 ####################################################################################################################################################
