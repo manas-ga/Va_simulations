@@ -91,8 +91,9 @@ save<-TRUE            # save results.
 The environmental variance and the target additive genetic variance can be set:
 
 ```{r allelic_effect_parameters, eval=!functions_only} 
-EVe<-1                              # Expected environmental variance for fitness 
-EVw<-seq(0.01, 0.1, length=nsim)    # Expected genetic variance for fitness 
+EVe<-1                             # Expected environmental variance for fitness 
+EVw<-seq(1e-6, 0.1, length=nsim)    # Expected genetic variance for fitness
+Ne_factor<-1 # 4/(3+exp(EVe))
 ```
 
 The possibility exists to give the allelic effects a specified mean (${\boldsymbol \mu}_\alpha$) and covariance structure (${\bf V}_\alpha$). For the mean this is restricted to ${\boldsymbol \mu}_\alpha=\beta_\alpha^{(0)}+\beta^{(1)}_\alpha(x_r-x_a)$ where $x_r$ is a property of the reference allele, and $x_a$ is the same property of the alternate allele. In what follows we will consider the scenario where $x_r=p$ and $x_a=q$. For the covariance structure we restrict the form to to ${\bf V}_\alpha=\sigma_\alpha^2{\bf L}^{p_{\alpha}}$ where $\sigma_\alpha$ (`sda`) and $p_{\alpha}$ (`palpha`) can be specified. $p_\alpha=0$ gives i.i.d allelic effects, $p_\alpha=-1$ gives linearly orthogonal directions in genotype space equal contribution to $V_w$ (either because sites with high genetic diversity have large effect sizes, or alleles in positive LD have opposing effects on fitness.) It is also possible to ignore LD when specifying the covariance structure of allelic effects with `LDalpha=FALSE` such that  ${\bf V}_\alpha=\sigma_\alpha^2\text{Diag}({\bf L})^{p_{\alpha}}$ where $\text{Diag}$ sets the off-diagonal elements of the matrix to zero.
@@ -105,7 +106,7 @@ LDalpha<-TRUE
 It is also to allow the difference in average effects between the two alleles to depend on the difference in there initial frequencies, with intercept and slope specified in the vector  `balpha`.
 
 ```{r , eval=!functions_only} 
-balpha<-c(0,-0.01)
+balpha<-c(0,0)
 ```
 
 ### Function for running simulations
@@ -123,8 +124,8 @@ Vw_sim<-function(nind,                   # Number of parental flies
                  EVw,                    # Target additive genetic variance in fitness
                  EVe,                    # Environmental variance in fitness
                  palpha,                 # power for the average effect covariance matrix
+                 balpha,                  # regression parameters for average effect on p-q.
                  LDalpha,                # if false average effect covariance matrix is diagonal
-                 balpha,                  # regression parameter for average effect on p-q.
                  tol=sqrt(.Machine$double.eps),
                  save.L,                  # Should L be saved?
                  save.svdL,                 # Should the singular value decomposition of L be saved?
@@ -273,8 +274,8 @@ The global mean allele frequency change *due to selection*, $E[E[\Delta {\bf p}]
 
 ```{r eval=!functions_only}
 Vs<-"LoNL"
-pdelta<-NA
-bdelta<-c(NA, NA)
+pdelta<-palpha
+bdelta<-balpha
 LDdelta<-LDalpha
 ```
 
@@ -352,7 +353,7 @@ form_nR<-function(SNPs,                   # SNP positions
 ```{r analysis_function}
 
 
-fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp, pbar0, pbar1, pbar2, nrep, nR, LLonly=FALSE){
+fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp, pbar0, pbar1, pbar2, nrep, nR, Ne_factor=1, LLonly=FALSE){
 
   if(LDdelta){
     if(pdelta==0){
@@ -367,7 +368,7 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
   pmq<-2*pbar0-1
 
   if(Vs=="LoNL"){
-     N<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind))^(x-1))*nR^(x-1)}, simplify=FALSE))
+     N<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind*Ne_factor))^(x-1))*nR^(x-1)}, simplify=FALSE))
 
      covp<-(L*N)%*%covp%*%(L*N)
      pmq<-(L*N)%*%pmq
@@ -458,7 +459,8 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
                    Vs,
                    method,
                    L=NULL,    # list with elements UL and DL
-                   svdL=NULL,    # list with elements UL and DL
+                   svdL=NULL,    # list with elements UL and DL,
+                   Ne_factor=1,
                    tol=sqrt(.Machine$double.eps)
   ){
 
@@ -503,7 +505,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
   if(proj=="LoM" | proj=="BLoM"){ 
 
-     M<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind))^(x-1))*(1/nind)*nR^x}, simplify=FALSE))
+     M<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind*Ne_factor))^(x-1))*(1/(nind*Ne_factor))*nR^x}, simplify=FALSE))
 
     if(proj=="LoM"){
         sdLoM<-RSpectra::eigs(L*M, min(nind, nsnps))
@@ -533,11 +535,11 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
   if(is.na(pdelta)){
 
-    pdelta<-optim(0, fit.model, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, nR=nR, control = list(fnscale=-1))$par
+    pdelta<-optim(0, fit.model, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, nR=nR, Ne_factor=Ne_factor, control = list(fnscale=-1))$par
 
   }
 
-  output<-fit.model(pdelta=pdelta, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, nR=nR)
+  output<-fit.model(pdelta=pdelta, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, nR=nR, Ne_factor=Ne_factor)
 
   if(method=="REML"){
     sigma2delta<-summary(output$model)$varcomp[1,1]
@@ -573,7 +575,6 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, pdelta=output$pdelta, bdelta=bdelta))
 
 }
-
 ```
 
 ## Run the simulations
@@ -630,6 +631,7 @@ for(i in 1:nsim){
                 method=method,
                 L=sim$L,
                 svdL=sim$svdL,   
+                Ne_factor=Ne_factor,
                 tol=sqrt(.Machine$double.eps))
 
   Vw_est[i]<-mod$Vw_est
@@ -642,7 +644,7 @@ for(i in 1:nsim){
 
 
 if(save){
-  res<-list(HapLength=HapLength, RecombRate.msprime=RecombRate.msprime,   MutationRate.msprime=MutationRate.msprime, RecombRate.experiment=RecombRate.experiment, AtleastOneRecomb=AtleastOneRecomb, Ne=Ne, nind=nind, nrep=nrep, ngen=ngen, EVe=EVe, EVw=EVw, proj=proj, pdelta=pdelta, pa=pa, palpha=palpha, LDalpha=LDalpha, LDdelta=LDdelta, method=method, Vw0=Vw0, Vw2=Vw2, Vw_est=Vw_est, pdelta_est=pdelta_est)
+  res<-list(HapLength=HapLength, RecombRate.msprime=RecombRate.msprime,   MutationRate.msprime=MutationRate.msprime, RecombRate.experiment=RecombRate.experiment, AtleastOneRecomb=AtleastOneRecomb, Ne=Ne, nind=nind, nrep=nrep, ngen=ngen, EVe=EVe, EVw=EVw, proj=proj, pdelta=pdelta, pa=pa, palpha=palpha, LDalpha=LDalpha, LDdelta=LDdelta, method=method, Vw0=Vw0, Vw2=Vw2, Vw_est=Vw_est, pdelta_est=pdelta_est,                 Ne_factor=Ne_factor)
   save(res, file=paste0(file.path(base_path, "6_Code_Test/tmp"), "/res_", format(Sys.time(), "%H%M_%d_%m_%Y"), ".Rdata"))
 }
 
