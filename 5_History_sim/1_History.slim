@@ -55,14 +55,14 @@ mutationEffect(m3) { return 1.0; }
 
 	if (sim.cycle%output_freq == 1){
 		
-	 	sim.outputFull(slim_output_path + "/sim" + simulation + "_output_history_" + sim.cycle + ".txt");
+	 	//sim.outputFull(slim_output_path + "/sim" + simulation + "_output_history_" + sim.cycle + ".txt");
 	 	catn(sim.cycle);
 		}
 	
 	if (sim.cycle == end_gen){
 		catn("The last generation of the burnin phase is " + sim.cycle);
 	   	catn("Done.");
-	    	sim.outputFull(slim_output_path + "/sim" + simulation + "_output_history_" + sim.cycle + ".txt");
+	    	//sim.outputFull(slim_output_path + "/sim" + simulation + "_output_history_" + sim.cycle + ".txt");
 	    	sim.treeSeqOutput(slim_output_path + "/sim" + simulation + "_output_history.trees");
     	    	sim.simulationFinished();
 		}

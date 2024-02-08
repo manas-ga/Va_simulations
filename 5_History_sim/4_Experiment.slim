@@ -29,7 +29,7 @@ mutationEffect(m3) { return 1.0; }
 
 
 1 late(){
-    sim.readFromPopulationFile(msprime_output_path + "/sim" + simulation + "_output_history_with_neutral.trees");
+    sim.readFromPopulationFile(slim_output_path + "/sim" + simulation + "_output_history_with_neutral.trees");
     sim.treeSeqRememberIndividuals(p0.individuals);
     sim.outputFull(slim_output_path + "/sim" + simulation + "_output_parents.txt");
     catn(sim.cycle + " (parents' generation)");
@@ -67,7 +67,7 @@ mutationEffect(m3) { return 1.0; }
 
         if (sim.cycle == (end_gen + 1 + ngen_expt)){
         catn("Done.");
-        sim.treeSeqOutput(slim_output_path + "/sim" + simulation + "_cage" + cage + "_output_experiment.trees");
+        sim.treeSeqOutput(slim_output_path + "/sim" + simulation + "_cage" + cage + "_output_final.trees");
         sim.simulationFinished();
         }
 }
