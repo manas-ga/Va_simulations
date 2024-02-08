@@ -73,9 +73,9 @@ AtleastOneRecomb<-FALSE
 
 Ne=1e6
 
-nsim<-1            # number of simulations
+nsim<-10            # number of simulations
 
-HapLength<-as.integer(seq(10000,10000,length=nsim))   # haplotype length
+HapLength<-as.integer(seq(100000,100000,length=nsim))   # haplotype length
 
 nind<-1000             # number of starting individuals
  print("Jarrod: nind refers to the number of parental individuals and the number of individuals per replicate during the experiment - sort this out")
@@ -92,7 +92,7 @@ The environmental variance and the target additive genetic variance can be set:
 
 ```{r allelic_effect_parameters, eval=!functions_only} 
 EVe<-1                              # Expected environmental variance for fitness 
-EVw<-seq(0, 0.1, length=nsim)    # Expected genetic variance for fitness 
+EVw<-seq(0.01, 0.1, length=nsim)    # Expected genetic variance for fitness 
 ```
 
 The possibility exists to give the allelic effects a specified mean (${\boldsymbol \mu}_\alpha$) and covariance structure (${\bf V}_\alpha$). For the mean this is restricted to ${\boldsymbol \mu}_\alpha=\beta_\alpha^{(0)}+\beta^{(1)}_\alpha(x_r-x_a)$ where $x_r$ is a property of the reference allele, and $x_a$ is the same property of the alternate allele. In what follows we will consider the scenario where $x_r=p$ and $x_a=q$. For the covariance structure we restrict the form to to ${\bf V}_\alpha=\sigma_\alpha^2{\bf L}^{p_{\alpha}}$ where $\sigma_\alpha$ (`sda`) and $p_{\alpha}$ (`palpha`) can be specified. $p_\alpha=0$ gives i.i.d allelic effects, $p_\alpha=-1$ gives linearly orthogonal directions in genotype space equal contribution to $V_w$ (either because sites with high genetic diversity have large effect sizes, or alleles in positive LD have opposing effects on fitness.) It is also possible to ignore LD when specifying the covariance structure of allelic effects with `LDalpha=FALSE` such that  ${\bf V}_\alpha=\sigma_\alpha^2\text{Diag}({\bf L})^{p_{\alpha}}$ where $\text{Diag}$ sets the off-diagonal elements of the matrix to zero.
@@ -105,7 +105,7 @@ LDalpha<-TRUE
 It is also to allow the difference in average effects between the two alleles to depend on the difference in there initial frequencies, with intercept and slope specified in the vector  `balpha`.
 
 ```{r , eval=!functions_only} 
-balpha<-c(0,-0.1)
+balpha<-c(0,-0.01)
 ```
 
 ### Function for running simulations
@@ -179,9 +179,17 @@ Vw_sim<-function(nind,                   # Number of parental flies
   # generate allelic effects #
   ############################
 
+  Ea<-balpha[1]+balpha[2]*(2*pbar0-1)
+
+  Evw_resid<-EVw-Ea%*%L%*%Ea
+
+  if(Evw_resid<0){
+    stop(paste("It is not possible to generate an EVw with these balpha parameters since they produce",  round(Ea%*%L%*%Ea,3), "variance"))
+  }
+
   if(palpha==0){
 
-    sda<-sqrt(EVw/sum(diag(L)))
+    sda<-sqrt(Evw_resid/sum(diag(L)))
 
     a<-rnorm(nsnps, 0, sda)
 
@@ -197,7 +205,7 @@ Vw_sim<-function(nind,                   # Number of parental flies
       D_alpha<-diag(sqrt(diag(L)))
     }      
 
-    sda<-sqrt(EVw/sum(diag(D_alpha)^(2*(palpha+1))))
+    sda<-sqrt(Evw_resid/sum(diag(D_alpha)^(2*(palpha+1))))
 
     a<-rnorm(retain_alpha, 0, sda)
 
@@ -206,7 +214,7 @@ Vw_sim<-function(nind,                   # Number of parental flies
     }
   }
 
-  a<-a+balpha[1]+balpha[2]*(2*pbar0-1)
+  a<-Ea+a
 
 
   ###############################
@@ -384,6 +392,9 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
   if(!is.na(bdelta[2])){
      dat.gaussian$pmq<-dat.gaussian$pmq*bdelta[2]
   }
+  if(!is.na(bdelta[1])){
+    int_offset<-bdelta[1]
+  }
 
 
   ##############
@@ -393,12 +404,21 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
   prior<-list(R=list(V=1, nu=0), G=list(G1=list(V=1, nu=1, alpha.mu=0, alpha.V=1000)))
   
   if(method=="REML"){
-    if(is.na(bdelta[2])){
-        m1<-asreml(delta~pmq, random = ~vm(locus, SC), data=dat.gaussian)
-    }else{
-        m1<-asreml(delta~offset(pmq), random = ~vm(locus, SC), data=dat.gaussian)
-    }    
+    if(is.na(bdelta[1]) & is.na(bdelta[2])){
+        m1<-asreml(delta~pmq, random = ~vm(locus, SC), data=dat.gaussian, Cfixed=TRUE)
+    }
+    if(is.na(bdelta[1]) & !is.na(bdelta[2])){
+        m1<-asreml(delta~offset(pmq), random = ~vm(locus, SC), data=dat.gaussian, Cfixed=TRUE)
+    }
+    if(!is.na(bdelta[1]) & is.na(bdelta[2])){
+        m1<-asreml(I(delta-bdelta[1])~pmq-1, random = ~vm(locus, SC), data=dat.gaussian, Cfixed=TRUE)
+    }
+    if(!is.na(bdelta[1]) & !is.na(bdelta[2])){
+      warning("asreml doesn't allow models without fixed effects, so intercept fitted but replaced with bdelta[1]!")
+        m1<-asreml(I(delta-bdelta[1])~offset(pmq), random = ~vm(locus, SC), data=dat.gaussian, Cfixed=TRUE)
+    } 
   }
+
   if(method=="MCMC"){
 
     if(LLonly){"method = MCMC specified so can't return log-likelihood with LLony=TRUE"}
@@ -407,11 +427,11 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
     invSC <- as(invSC, "sparseMatrix") 
     attr(invSC, "rowNames") <- 1:retain
     attr(invSC, "colNames") <- 1:retain
-    if(is.na(bdelta[2])){
-      prior<-list(B=list(mu=c(0, 0), V=diag(2)*1e+10))
-    }else{
-      prior<-list(B=list(mu=c(0, bdelta[2]), V=diag(c(1e+10, 1e-10))))
-    }
+
+    prior<-list(B=list(mu=bdelta, V=diag(2)*1e+10))
+    diag(prior$B$V)[which(!is.na(bdelta))]<-1e-10
+    prior$B$mu[which(is.na(bdelta))]<-0
+
     m1<-MCMCglmm(delta~pmq, random=~locus, data=dat.gaussian, ginverse=list(locus=invSC), family="gaussian", pr=TRUE, prior=prior)
   }
   if(LLonly){
@@ -521,22 +541,28 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
   if(method=="REML"){
     sigma2delta<-summary(output$model)$varcomp[1,1]
-    if(is.na(bdelta[2])){
-      bdelta<-summary(output$model, coef=TRUE)$coef.fixed[,1]
-    }else{
-      bdelta[1]<-summary(output$model, coef=TRUE)$coef.fixed[,1]
-    }  
+
+    if(is.na(bdelta[1]) & is.na(bdelta[2])){
+        bdelta<-summary(output$model, coef=TRUE)$coef.fixed[,1]
+    }
+    if(is.na(bdelta[1]) & !is.na(bdelta[2])){
+       bdelta[1]<-summary(output$model, coef=TRUE)$coef.fixed[,1]
+    }
+    if(!is.na(bdelta[1]) & is.na(bdelta[2])){
+        bdelta[2]<-summary(output$model, coef=TRUE)$coef.fixed[,1]
+    }
   }
   if(method=="MCMC"){
     sigma2delta<-posterior.mode(output$model$VCV[,1])
     bdelta<-colMeans(output$model$Sol[,1:2])
   }
 
-  pred<-cbind(rep(1, length(pbar0)), 2*pbar0-1)%*%bdelta
+  X<-cbind(rep(1, length(pbar0)), 2*pbar0-1)
 
   if(LDdelta){
     TrV<-sum(diag(DL)^(2*(output$pdelta+1)))*sigma2delta
-    aLa<-t(pred)%*%L%*%pred
+    aLa<-t(X%*%bdelta)%*%L%*%X%*%bdelta
+    #-sum(diag(t(X)%*%L%*%X))
   }else{
     TrV<-sum(diag(L%*%diag(diag(L)^output$pdelta)))*sigma2delta
     aLa<-sum(diag(L)*pred^2)
@@ -544,7 +570,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
   Vw_est<-TrV+aLa
 
-  return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, pdelta=output$pdelta))
+  return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, pdelta=output$pdelta, bdelta=bdelta))
 
 }
 
@@ -555,6 +581,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 ```{r run_simulations, results="hide", eval=!functions_only} 
 
 Vw0<-Vw2<-Vw_est<-pdelta_est<-1:nsim
+bdelta_est<-matrix(NA, nsim,2)
 
 for(i in 1:nsim){
 
@@ -607,6 +634,7 @@ for(i in 1:nsim){
 
   Vw_est[i]<-mod$Vw_est
   pdelta_est[i]<-mod$pdelta
+  bdelta_est[i,]<-mod$bdelta
 
   print(paste(i, " Vw=", round(Vw0[i],4), " Vw_est=",  round(Vw_est[i],4), sep=""))
 }
@@ -632,6 +660,14 @@ if(is.na(pdelta)){
   par(mfrow=c(1,1))
   plot(pdelta_est, ylab="Estimate of pdelta")
   abline(h=palpha)
+}
+
+if(any(is.na(pdelta))){
+  par(mfrow=c(1,2))
+  plot(bdelta_est[,1], ylab="Estimate of bdelta[1]")
+  abline(h=balpha[1])
+  plot(bdelta_est[,2], ylab="Estimate of bdelta[2]")
+  abline(h=balpha[2])
 }
 
 par(mfrow=c(1,1))
