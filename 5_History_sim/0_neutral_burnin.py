@@ -10,12 +10,12 @@ import sys
 
 ############## Output path #################
 
-output_path = sys.argv[8] ### The output path is a command line argument to be fed by the controlling R script
+msprime_output_path = sys.argv[8] ### The output path is a command line argument to be fed by the controlling R script
 
 ###### Simulate a neutral ancestry using msprime ######
 
 demog_model = msprime.Demography()
-demog_model.add_population(initial_size=float(sys.argv[1]))
+demog_model.add_population(initial_size=float(sys.argv[1])) # Ne
 
 ots = msprime.sim_ancestry(samples=float(sys.argv[2]), sequence_length = float(sys.argv[3]), demography=demog_model, recombination_rate=float(sys.argv[4]))
 
@@ -92,4 +92,4 @@ ts_metadata = tables.metadata
 ts_metadata["SLiM"]["model_type"] = "WF"
 tables.metadata = ts_metadata
 ots = tables.tree_sequence()
-ots.dump(output_path)
+ots.dump(f"{msprime_output_path}/sim{sys.argv[13]}_neutral_burnin.trees")

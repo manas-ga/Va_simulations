@@ -5,14 +5,16 @@ initialize()
     initializeMutationRate(mu);
     
      if (DFE == "g"){
+        initializeMutationType("m1", 0.5, "f", 0.0);
     	initializeMutationType("m2", 0.5, "g", -shape*scale, shape);
     	initializeMutationType("m3", 0.5, "g", shape*scale, shape);
-    	initializeGenomicElementType("g1", c(m2, m3), c(1.0, mut_ratio));
+    	initializeGenomicElementType("g1", c(m1, m2, m3), c(10.0, 1.0, mut_ratio));
     }
     
     if (DFE == "n"){
+        initializeMutationType("m1", 0.5, "f", 0.0);
     	initializeMutationType("m2", 0.5, "n", mean_alpha, var_alpha);
-	initializeGenomicElementType("g1", m2, 1.0);
+	initializeGenomicElementType("g1", c(m1, m2), c(10.0, 1.0));
 	}
 
     initializeGenomicElement(g1, 0, sequence_length-1);
@@ -27,8 +29,10 @@ mutationEffect(m3) { return 1.0; }
 
 
 1 late(){
-    sim.readFromPopulationFile(slim_output_path + "/Output_history.trees");
+    sim.readFromPopulationFile(msprime_output_path + "/sim" + simulation + "_output_history_with_neutral.trees");
     sim.treeSeqRememberIndividuals(p0.individuals);
+    sim.outputFull(slim_output_path + "/sim" + simulation + "_output_parents.txt");
+    catn(sim.cycle + " (parents' generation)");
 
 }
 
@@ -54,16 +58,16 @@ mutationEffect(m3) { return 1.0; }
 				}
 		
 	 	inds.fitnessScaling = exp(phenotypes); // Calculate absolute fitness
-	 	sim.outputFull(slim_output_path + "/Output_experiment_" + sim.cycle + ".txt");
+	 	sim.outputFull(slim_output_path + "/sim" + simulation + "_cage" + cage + "_output_experiment_" + sim.cycle + ".txt");
 	 	catn(sim.cycle);
 	 	}	
 
 
         // Stop the experiment (last generation)
 
-        if (sim.cycle == end_gen + 4){
+        if (sim.cycle == (end_gen + 1 + ngen_expt)){
         catn("Done.");
-        sim.treeSeqOutput(slim_output_path + "/Output_experiment.trees");
+        sim.treeSeqOutput(slim_output_path + "/sim" + simulation + "_cage" + cage + "_output_experiment.trees");
         sim.simulationFinished();
         }
 }
