@@ -73,7 +73,7 @@ AtleastOneRecomb<-FALSE
 
 Ne=1e6
 
-nsim<-10            # number of simulations
+nsim<-100            # number of simulations
 
 HapLength<-as.integer(seq(100000,100000,length=nsim))   # haplotype length
 
@@ -91,9 +91,8 @@ save<-TRUE            # save results.
 The environmental variance and the target additive genetic variance can be set:
 
 ```{r allelic_effect_parameters, eval=!functions_only} 
-EVe<-1                             # Expected environmental variance for fitness 
-EVw<-seq(1e-6, 0.1, length=nsim)    # Expected genetic variance for fitness
-Ne_factor<-1 # 4/(3+exp(EVe))
+EVe<-1                              # Expected environmental variance for fitness 
+EVw<-seq(0.01, 0.1, length=nsim)    # Expected genetic variance for fitness
 ```
 
 The possibility exists to give the allelic effects a specified mean (${\boldsymbol \mu}_\alpha$) and covariance structure (${\bf V}_\alpha$). For the mean this is restricted to ${\boldsymbol \mu}_\alpha=\beta_\alpha^{(0)}+\beta^{(1)}_\alpha(x_r-x_a)$ where $x_r$ is a property of the reference allele, and $x_a$ is the same property of the alternate allele. In what follows we will consider the scenario where $x_r=p$ and $x_a=q$. For the covariance structure we restrict the form to to ${\bf V}_\alpha=\sigma_\alpha^2{\bf L}^{p_{\alpha}}$ where $\sigma_\alpha$ (`sda`) and $p_{\alpha}$ (`palpha`) can be specified. $p_\alpha=0$ gives i.i.d allelic effects, $p_\alpha=-1$ gives linearly orthogonal directions in genotype space equal contribution to $V_w$ (either because sites with high genetic diversity have large effect sizes, or alleles in positive LD have opposing effects on fitness.) It is also possible to ignore LD when specifying the covariance structure of allelic effects with `LDalpha=FALSE` such that  ${\bf V}_\alpha=\sigma_\alpha^2\text{Diag}({\bf L})^{p_{\alpha}}$ where $\text{Diag}$ sets the off-diagonal elements of the matrix to zero.
@@ -106,7 +105,7 @@ LDalpha<-TRUE
 It is also to allow the difference in average effects between the two alleles to depend on the difference in there initial frequencies, with intercept and slope specified in the vector  `balpha`.
 
 ```{r , eval=!functions_only} 
-balpha<-c(0,0)
+balpha<-c(0,-0.01)
 ```
 
 ### Function for running simulations
@@ -261,21 +260,22 @@ The allele frequencies can be analysed as is (`proj="N"`) or they can be project
 
 Rather than retain all vectors we only retain those eigenvectors whose square-rooted eigenvalues exceed `tol`.  For `proj="L"` and `proj="BLoM"` the maximum number of retained vector is equal to the number of individuals or the number of segregating sites, which ever is smaller. Since ${\bf L}\circ {\bf M}$ is typically full-rank the `proj="LoM"` projection may have substantially more retained eigenvectors but here we restrict the maximum retained to be the minimum of the number of individuals or the number of segregating sites, which ever is smaller.
 
-These projections generate i.i.d projected allele frequency changes when the covariance of allele frequency change is proportional to  ${\bf L}^{p_{a}}$ (`proj="L"`) or $({\bf L}\circ {\bf M})^{p_{a}}$ (`proj="LoM"` or `proj="BLoM"`) respectively. Theoretically we expect the residuals to be i.i.d when `proj="LoM"` or  `proj="BLoM"` and $p_a=1$ (we also expect them to have unit variance when the environmental variance in fitness is zero since then the census and effective population size is equal (presumably the selection terms pick up the change in allele frequency caused by genetic variance in fitness, and so we only have to worry about the impact of the environmental variance on $N_e$). 
+These projections generate i.i.d projected allele frequency changes when the covariance of allele frequency change is proportional to  ${\bf L}^{p_{a}}$ (`proj="L"`) or $({\bf L}\circ {\bf M})^{p_{a}}$ (`proj="LoM"` or `proj="BLoM"`) respectively. Theoretically we expect the residuals to be i.i.d when `proj="LoM"` or  `proj="BLoM"` and $p_a=1$ (we also expect them to have unit variance when the environmental variance in fitness is zero since then the census and effective population size is equal (presumably the selection terms pick up the change in allele frequency caused by genetic variance in fitness, and so we only have to worry about the impact of the environmental variance on $N_e$). When the the environmental variance in fitness is non-zero we expect the effective population size to be smaller than the census population size by a factor `4/(3+exp(EVe))` and this can be specified through the term `Ne_factor`.
 
 ```{r analysis_parameters, eval=!functions_only} 
 proj<-"BLoM"
 pa<-1
+Ne_factor<-1 #4/(3+exp(EVe))
 ```
 
 ### Distributional assumptions about the change in allele frequency across loci.
 
-The global mean allele frequency change *due to selection*, $E[E[\Delta {\bf p}]]$, is assumed to be equal to $\beta^{(0)}_\Delta+\beta^{(1)}_\Delta(p-q)$, and the (co)variance $VAR[E[\Delta {\bf p}]]$, is assumed to be proportional to $(n_g{\bf L}){\bf L}^{p_{\Delta}}({\bf L}n_g)$ (`Vs="L"`) or $({\bf L}\circ {\bf N}){\bf L}^{p_{\Delta}}({\bf L}\circ {\bf N})$ (`Vs="LoNL"`) where $n_g$ is the number of generations and $p_{\Delta}$  can be specified (`pdelta`). Theoretically, we expect allele frequency change *due to selection* to have mean $\beta_\alpha(p-q)$ with covariance structure proportional to $({\bf L}\circ {\bf N}){\bf L}^{p_{\alpha}}({\bf L}\circ {\bf N})$, although `Vs="L"` with $p_{\Delta}=p_{\alpha}$ might serve as a good approximation. It is also possible to ignore LD when defining ${\bf L}^{p_{\Delta}}$ above using `LDdelta=FALSE`. If `pdelta` is NA then `Vw_model` will estimate it using calls to `optim`. If either the intercept (`bdelta[1]`) or slope (`bdelta[2]` ) are `NA` then they will be estimated.
+The global mean allele frequency change *due to selection*, $E[E[\Delta {\bf p}]]$, is assumed to be equal to $\beta^{(0)}_\Delta+\beta^{(1)}_\Delta(p-q)$, and the (co)variance $VAR[E[\Delta {\bf p}]]$, is assumed to be proportional to $(n_g{\bf L}){\bf L}^{p_{\Delta}}({\bf L}n_g)$ (`Vs="L"`) or $({\bf L}\circ {\bf N}){\bf L}^{p_{\Delta}}({\bf L}\circ {\bf N})$ (`Vs="LoNL"`) where $n_g$ is the number of generations and $p_{\Delta}$  can be specified (`pdelta`). Theoretically, we expect allele frequency change *due to selection* to have mean $\beta_\alpha(p-q)$ with covariance structure proportional to $({\bf L}\circ {\bf N}){\bf L}^{p_{\alpha}}({\bf L}\circ {\bf N})$, although `Vs="L"` with $p_{\Delta}=p_{\alpha}$ might serve as a good approximation. It is also possible to ignore LD when defining ${\bf L}^{p_{\Delta}}$ above using `LDdelta=FALSE`. If `pdelta` is NA then `Vw_model` will estimate it using calls to `optim`. If either the intercept (`bdelta[1]`) or slope (`bdelta[2]` ) are `NA` then they will be estimated.  
 
 ```{r eval=!functions_only}
 Vs<-"LoNL"
-pdelta<-palpha
-bdelta<-balpha
+pdelta<-NA
+bdelta<-c(NA, NA)
 LDdelta<-LDalpha
 ```
 
@@ -541,17 +541,23 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
   output<-fit.model(pdelta=pdelta, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, nR=nR, Ne_factor=Ne_factor)
 
+
   if(method=="REML"){
+    
     sigma2delta<-summary(output$model)$varcomp[1,1]
+    S<-matrix(0,2,2)
 
     if(is.na(bdelta[1]) & is.na(bdelta[2])){
         bdelta<-summary(output$model, coef=TRUE)$coef.fixed[,1]
+        S<-output$model$Cfixed
     }
     if(is.na(bdelta[1]) & !is.na(bdelta[2])){
        bdelta[1]<-summary(output$model, coef=TRUE)$coef.fixed[,1]
+       S[1,1]<-output$model$Cfixed
     }
     if(!is.na(bdelta[1]) & is.na(bdelta[2])){
         bdelta[2]<-summary(output$model, coef=TRUE)$coef.fixed[,1]
+        S[2,2]<-output$model$Cfixed
     }
   }
   if(method=="MCMC"){
@@ -563,11 +569,10 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
   if(LDdelta){
     TrV<-sum(diag(DL)^(2*(output$pdelta+1)))*sigma2delta
-    aLa<-t(X%*%bdelta)%*%L%*%X%*%bdelta
-    #-sum(diag(t(X)%*%L%*%X))
+    aLa<-t(X%*%bdelta)%*%L%*%X%*%bdelta-sum(diag(t(X)%*%L%*%X%*%S))
   }else{
     TrV<-sum(diag(L%*%diag(diag(L)^output$pdelta)))*sigma2delta
-    aLa<-sum(diag(L)*pred^2)
+    aLa<-sum(diag(L)*pred^2)-sum(diag(t(X)%*%diag(diag(L))%*%X%*%S))
   }
 
   Vw_est<-TrV+aLa
@@ -664,7 +669,7 @@ if(is.na(pdelta)){
   abline(h=palpha)
 }
 
-if(any(is.na(pdelta))){
+if(any(is.na(bdelta))){
   par(mfrow=c(1,2))
   plot(bdelta_est[,1], ylab="Estimate of bdelta[1]")
   abline(h=balpha[1])
