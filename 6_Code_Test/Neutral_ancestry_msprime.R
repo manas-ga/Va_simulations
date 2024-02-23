@@ -7,7 +7,7 @@
 
 
 ### The function takes the following inputs:
-# 1. sequence_length, 2. mu_msp (mutation rate for the msprime sim), 3. r_msp (recombination rate), 4. n_samples (number of diplod individuals to be sampled), 5. python_path (The path where python is tored on the system)
+# 1. sequence_length, 2. mu_msp (mutation rate for the msprime sim), 3. r_msp (recombination rate), 4. n_samples (number of diploid individuals to be sampled), 5. python_path (The path where python is stored on the system)
 
 
 ### Produces the following outputs
