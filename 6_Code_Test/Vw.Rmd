@@ -404,19 +404,22 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
   
   prior<-list(R=list(V=1, nu=0), G=list(G1=list(V=1, nu=1, alpha.mu=0, alpha.V=1000)))
   
+  SC[lower.tri(SC)]<-t(SC)[lower.tri(SC)]
+  # force symmetry in case it is not exactly symmetric
+
   if(method=="REML"){
     if(is.na(bdelta[1]) & is.na(bdelta[2])){
-        m1<-asreml(delta~pmq, random = ~vm(locus, SC), data=dat.gaussian, Cfixed=TRUE)
+        m1<-asreml(delta~pmq, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
     }
     if(is.na(bdelta[1]) & !is.na(bdelta[2])){
-        m1<-asreml(delta~offset(pmq), random = ~vm(locus, SC), data=dat.gaussian, Cfixed=TRUE)
+        m1<-asreml(delta~offset(pmq), random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
     }
     if(!is.na(bdelta[1]) & is.na(bdelta[2])){
-        m1<-asreml(I(delta-bdelta[1])~pmq-1, random = ~vm(locus, SC), data=dat.gaussian, Cfixed=TRUE)
+        m1<-asreml(I(delta-bdelta[1])~pmq-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
     }
     if(!is.na(bdelta[1]) & !is.na(bdelta[2])){
       warning("asreml doesn't allow models without fixed effects, so intercept fitted but replaced with bdelta[1]!")
-        m1<-asreml(I(delta-bdelta[1])~offset(pmq), random = ~vm(locus, SC), data=dat.gaussian, Cfixed=TRUE)
+        m1<-asreml(I(delta-bdelta[1])~offset(pmq), random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
     } 
   }
 
