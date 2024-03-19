@@ -188,7 +188,7 @@ Vw_sim<-function(nind,                   # Number of parental flies
   }
 
   if(palpha==0){
-
+    
     sda<-sqrt(Evw_resid/sum(diag(L)))
 
     a<-rnorm(nsnps, 0, sda)
@@ -466,6 +466,8 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
                    Ne_factor=1,
                    tol=sqrt(.Machine$double.eps)
   ){
+  
+  asreml.options(Cfixed = TRUE)
 
   if(is.null(L)){
     L<-cov(C0)*(nind-1)/(nind)
@@ -538,7 +540,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
   if(is.na(pdelta)){
 
-    pdelta<-optim(0, fit.model, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, nR=nR, Ne_factor=Ne_factor, control = list(fnscale=-1))$par
+    pdelta<-optim(0, fit.model, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, nR=nR, Ne_factor=Ne_factor, method = "L-BFGS-B", lower = -5, upper =5, control = list(fnscale=-1))$par
 
   }
 
