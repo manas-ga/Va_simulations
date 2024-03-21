@@ -545,6 +545,8 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
     pdelta_var<-1/pdelta$hessian
     pdelta<-pdelta$par
 
+  }else{
+    pdelta_var<-0
   }
 
   output<-fit.model(pdelta=pdelta, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, nR=nR, Ne_factor=Ne_factor)
