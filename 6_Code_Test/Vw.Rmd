@@ -542,7 +542,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
     pdelta<-optim(0, fit.model, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, nR=nR, Ne_factor=Ne_factor, method = "L-BFGS-B", lower = -5, upper =5, control = list(fnscale=-1), hessian=TRUE)
 
-    pdelta_var<-1/pdelta$hessian
+    pdelta_var<--1/pdelta$hessian
     pdelta<-pdelta$par
 
   }else{
