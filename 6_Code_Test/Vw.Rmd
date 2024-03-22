@@ -582,7 +582,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
     aLa<-t(X%*%bdelta)%*%L%*%X%*%bdelta-sum(diag(t(X)%*%L%*%X%*%S))
   }else{
     TrV<-sum(diag(L%*%diag(diag(L)^output$pdelta)))*sigma2delta
-    aLa<-sum(diag(L)*pred^2)-sum(diag(t(X)%*%diag(diag(L))%*%X%*%S))
+    aLa<-sum(diag(L)*(X%*%bdelta)^2)-sum(diag(t(X)%*%diag(diag(L))%*%X%*%S))
   }
 
   Vw_est<-TrV+aLa
