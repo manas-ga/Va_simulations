@@ -587,7 +587,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
   Vw_est<-TrV+aLa
 
-  return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, pdelta=output$pdelta, bdelta=bdelta, pdelta_var=pdelta_var))
+  return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, pdelta=output$pdelta, bdelta=bdelta, pdelta_var=pdelta_var, bdelta_var=S))
 
 }
 ```
