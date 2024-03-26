@@ -558,11 +558,11 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
     S<-matrix(0,2,2)
 
     if(is.na(bdelta[1]) & is.na(bdelta[2])){
-        bdelta<-summary(output$model, coef=TRUE)$coef.fixed[c("(intercept)", "pmq"),1]
-        S<-output$model$Cfixed[c("(intercept)", "pmq"),c("(intercept)", "pmq")])
+        bdelta<-summary(output$model, coef=TRUE)$coef.fixed[c("(Intercept)", "pmq"),1]
+        S<-output$model$Cfixed[c("(Intercept)", "pmq"),c("(Intercept)", "pmq")]
     }
     if(is.na(bdelta[1]) & !is.na(bdelta[2])){
-       bdelta[1]<-summary(output$model, coef=TRUE)$coef.fixed["(intercept)",1]
+       bdelta[1]<-summary(output$model, coef=TRUE)$coef.fixed["(Intercept)",1]
        S[1,1]<-output$model$Cfixed
     }
     if(!is.na(bdelta[1]) & is.na(bdelta[2])){
@@ -572,7 +572,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   }
   if(method=="MCMC"){
     sigma2delta<-posterior.mode(output$model$VCV[,1])
-    bdelta<-colMeans(output$model$Sol[,c("(intercept)", "pmq")])
+    bdelta<-colMeans(output$model$Sol[,c("(Intercept)", "pmq")])
   }
 
   X<-cbind(rep(1, length(pbar0)), 2*pbar0-1)
