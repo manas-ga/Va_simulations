@@ -387,16 +387,17 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
   pbar1_proj<-pbar1%*%projp
   pbar2_proj<-pbar2%*%projp
   pmq_proj<-t(matrix(pmq, nsnps,nrep))%*%projp
+  int_proj<-t(matrix(1, nsnps,nrep))%*%projp
 
-  dat.gaussian<-data.frame(delta=c(pbar2_proj-pbar1_proj), locus=gl(ncol(pbar1_proj),nrep,ncol(pbar1_proj)*nrep), rep=gl(nrep,1,ncol(pbar1_proj)*nrep), pmq=c(pmq_proj))
+  dat.gaussian<-data.frame(delta=c(pbar2_proj-pbar1_proj), locus=gl(ncol(pbar1_proj),nrep,ncol(pbar1_proj)*nrep), rep=gl(nrep,1,ncol(pbar1_proj)*nrep), pmq=c(pmq_proj), int=c(int_proj))
 
+
+  if(!is.na(bdelta[1])){
+     dat.gaussian$int<-dat.gaussian$int*bdelta[1]
+  }
   if(!is.na(bdelta[2])){
      dat.gaussian$pmq<-dat.gaussian$pmq*bdelta[2]
   }
-  if(!is.na(bdelta[1])){
-    int_offset<-bdelta[1]
-  }
-
 
   ##############
   # Fit models #
@@ -409,17 +410,17 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
 
   if(method=="REML"){
     if(is.na(bdelta[1]) & is.na(bdelta[2])){
-        m1<-asreml(delta~pmq, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
+        m1<-asreml(delta~int+pmq-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
     }
     if(is.na(bdelta[1]) & !is.na(bdelta[2])){
-        m1<-asreml(delta~offset(pmq), random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
+        m1<-asreml(delta~int+offset(pmq)-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
     }
     if(!is.na(bdelta[1]) & is.na(bdelta[2])){
-        m1<-asreml(I(delta-bdelta[1])~pmq-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
+        m1<-asreml(delta~offset(int)+pmq-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
     }
     if(!is.na(bdelta[1]) & !is.na(bdelta[2])){
-      warning("asreml doesn't allow models without fixed effects, so intercept fitted but replaced with bdelta[1]!")
-        m1<-asreml(I(delta-bdelta[1])~offset(pmq), random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
+  #    warning("asreml doesn't allow models without fixed effects, so intercept fitted but replaced with bdelta[1]!")
+        m1<-asreml(delta~offset(pmq)+offset(int)-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
     } 
   }
 
@@ -436,7 +437,7 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
     diag(prior$B$V)[which(!is.na(bdelta))]<-1e-10
     prior$B$mu[which(is.na(bdelta))]<-0
 
-    m1<-MCMCglmm(delta~pmq, random=~locus, data=dat.gaussian, ginverse=list(locus=invSC), family="gaussian", pr=TRUE, prior=prior)
+    m1<-MCMCglmm(delta~pmq+int-1, random=~locus, data=dat.gaussian, ginverse=list(locus=invSC), family="gaussian", pr=TRUE, prior=prior)
   }
   if(LLonly){
     return(m1$loglik)
@@ -558,11 +559,11 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
     S<-matrix(0,2,2)
 
     if(is.na(bdelta[1]) & is.na(bdelta[2])){
-        bdelta<-summary(output$model, coef=TRUE)$coef.fixed[c("(Intercept)", "pmq"),1]
-        S<-output$model$Cfixed[c("(Intercept)", "pmq"),c("(Intercept)", "pmq")]
+        bdelta<-summary(output$model, coef=TRUE)$coef.fixed[c("int", "pmq"),1]
+        S<-output$model$Cfixed[c("int", "pmq"),c("int", "pmq")]
     }
     if(is.na(bdelta[1]) & !is.na(bdelta[2])){
-       bdelta[1]<-summary(output$model, coef=TRUE)$coef.fixed["(Intercept)",1]
+       bdelta[1]<-summary(output$model, coef=TRUE)$coef.fixed["int",1]
        S[1,1]<-output$model$Cfixed
     }
     if(!is.na(bdelta[1]) & is.na(bdelta[2])){
@@ -572,7 +573,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   }
   if(method=="MCMC"){
     sigma2delta<-posterior.mode(output$model$VCV[,1])
-    bdelta<-colMeans(output$model$Sol[,c("(Intercept)", "pmq")])
+    bdelta<-colMeans(output$model$Sol[,c("int", "pmq")])
   }
 
   X<-cbind(rep(1, length(pbar0)), 2*pbar0-1)
