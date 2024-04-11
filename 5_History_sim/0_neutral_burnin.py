@@ -43,14 +43,14 @@ tables.mutations.clear()
 # Decide the relative frequencies of neutral vs selected mutations
 
 
-freq_deleterious = 1000
+freq_deleterious = 10000
 freq_beneficial = int(freq_deleterious*float(sys.argv[9]))
 freq_neutral = 0
 
 # Creae a list of 0s and 1s in frequencies of neutral and selected mutations
 # This list will be used to generate a random 0 or 1 to decide whether the mutation becomes neutral or selected
 
-freq_array = [0]*freq_neutral + [-1]*freq_deleterious + [1]*freq_beneficial 
+freq_array = [0]*freq_neutral  + [1]*freq_beneficial + [-1]*freq_deleterious
 
 mut_map = {}
 for m in ots.mutations():
