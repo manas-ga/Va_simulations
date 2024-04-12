@@ -372,10 +372,12 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
 
      covp<-(L*N)%*%covp%*%(L*N)
      pmq<-(L*N)%*%pmq
+     int<-(L*N)%*%rep(1, nsnps)
   }
   if(Vs=="L"){
      covp<-(L*(ngen2 - ngen1))%*%covp%*%(L*(ngen2 - ngen1))
      pmq<-(L*(ngen2 - ngen1))%*%pmq
+     int<-(L*(ngen2 - ngen1))%*%rep(1, nsnps)
   }  
 
 
@@ -387,7 +389,7 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
   pbar1_proj<-pbar1%*%projp
   pbar2_proj<-pbar2%*%projp
   pmq_proj<-t(matrix(pmq, nsnps,nrep))%*%projp
-  int_proj<-t(matrix(1, nsnps,nrep))%*%projp
+  int_proj<-t(matrix(int, nsnps,nrep))%*%projp
 
   dat.gaussian<-data.frame(delta=c(pbar2_proj-pbar1_proj), locus=gl(ncol(pbar1_proj),nrep,ncol(pbar1_proj)*nrep), rep=gl(nrep,1,ncol(pbar1_proj)*nrep), pmq=c(pmq_proj), int=c(int_proj))
 
@@ -403,6 +405,8 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
   # Fit models #
   ##############
   
+  
+
   prior<-list(R=list(V=1, nu=0), G=list(G1=list(V=1, nu=1, alpha.mu=0, alpha.V=1000)))
   
   SC[lower.tri(SC)]<-t(SC)[lower.tri(SC)]
@@ -419,8 +423,8 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
         m1<-asreml(delta~offset(int)+pmq-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
     }
     if(!is.na(bdelta[1]) & !is.na(bdelta[2])){
-  #    warning("asreml doesn't allow models without fixed effects, so intercept fitted but replaced with bdelta[1]!")
-        m1<-asreml(delta~offset(pmq)+offset(int)-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
+      warning("asreml doesn't allow models without fixed effects, so intercept fitted but replaced with bdelta[1]!")
+      m1<-asreml(delta~offset(pmq + int), random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
     } 
   }
 
@@ -439,6 +443,7 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
 
     m1<-MCMCglmm(delta~pmq+int-1, random=~locus, data=dat.gaussian, ginverse=list(locus=invSC), family="gaussian", pr=TRUE, prior=prior)
   }
+  
   if(LLonly){
     return(m1$loglik)
   }else{
