@@ -569,11 +569,11 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
     }
     if(is.na(bdelta[1]) & !is.na(bdelta[2])){
        bdelta[1]<-summary(output$model, coef=TRUE)$coef.fixed["int",1]
-       S[1,1]<-output$model$Cfixed
+       S["int","int"]<-output$model$Cfixed
     }
     if(!is.na(bdelta[1]) & is.na(bdelta[2])){
         bdelta[2]<-summary(output$model, coef=TRUE)$coef.fixed["pmq",1]
-        S[2,2]<-output$model$Cfixed
+        S["pmq","pmq"]<-output$model$Cfixed
     }
   }
   if(method=="MCMC"){
