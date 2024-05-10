@@ -482,7 +482,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
                    L=NULL,    # list with elements UL and DL
                    svdL=NULL,    # list with elements UL and DL,
                    Ne_factor=1,
-                   bigalgebra = TRUE, # Should "bigalgebra" be used for svd and eigendecomposition
+                   bigalgebra = FALSE, # Should "bigalgebra" be used for svd and eigendecomposition
                    tol=sqrt(.Machine$double.eps)
   ){
   
