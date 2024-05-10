@@ -315,15 +315,19 @@ form_nR<-function(SNPs,                   # SNP positions
                   ){
 
   nsnps<-length(SNPs)
+  
+  message("Computing the distance matrix...")
 
   Dist<-as.matrix(dist(SNPs, diag=TRUE, upper=TRUE))
   # conditional on the total number of recombination events (tn) along a chromosome, the number that fall in the interval is binomial with probability equal to the relative length of the interval to the whole and number of trials equal to tn. The non-recombination fraction is then the probability that an even number of events (including zero) fall in the interval. 
 
+  message("Computing nR...")
+  
   if(AtleastOneRecomb){
 
     maxn<-actuar::qztpois(1-1e-5, RecombRate*HapLength)
     # maximum number of total recombination events likely to be seen
-
+  
     nR<-matrix(0, nsnps, nsnps)
 
     for(nt in 0:maxn){
@@ -354,20 +358,24 @@ form_nR<-function(SNPs,                   # SNP positions
 
 
 fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp, pbar0, pbar1, pbar2, nrep, nR, Ne_factor=1, LLonly=FALSE){
-
+  
+  message("Computing the covariance structure of locus effects...")
+  
   if(LDdelta){
     if(pdelta==0){
       covp<-diag(nsnps)
     }else{
-      covp<-UL%*%diag(diag(DL)^(2*pdelta))%*%t(UL)
+      covp<-UL%*%diag(DL^(2*pdelta))%*%t(UL)
     }  
   }else{
     covp<-diag(diag(L)^pdelta)
   }
 
+  rm(list = c("UL", "DL"))
   pmq<-2*pbar0-1
 
   if(Vs=="LoNL"){
+    message("Computing N...")
      N<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind*Ne_factor))^(x-1))*nR^(x-1)}, simplify=FALSE))
 
      covp<-(L*N)%*%covp%*%(L*N)
@@ -380,12 +388,16 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
      int<-(L*(ngen2 - ngen1))%*%rep(1, nsnps)
   }  
 
-
+  rm("N")
+  message("Computing SC...")
+  
   SC<-t(projp)%*%covp%*%projp
 
   attr(SC, "INVERSE")<-FALSE
   dimnames(SC) <- list(1:nrow(SC),1:nrow(SC))  # used for full-form matrices
-
+  
+  message("Projecting allele frequencies...")
+  
   pbar1_proj<-pbar1%*%projp
   pbar2_proj<-pbar2%*%projp
   pmq_proj<-t(matrix(pmq, nsnps,nrep))%*%projp
@@ -405,7 +417,7 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
   # Fit models #
   ##############
   
-  
+  message("Fitting linear mixed model...")
 
   prior<-list(R=list(V=1, nu=0), G=list(G1=list(V=1, nu=1, alpha.mu=0, alpha.V=1000)))
   
@@ -470,12 +482,14 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
                    L=NULL,    # list with elements UL and DL
                    svdL=NULL,    # list with elements UL and DL,
                    Ne_factor=1,
+                   bigalgebra = TRUE, # Should "bigalgebra" be used for svd and eigendecomposition
                    tol=sqrt(.Machine$double.eps)
   ){
   
   asreml.options(Cfixed = TRUE)
 
   if(is.null(L)){
+    message("Computing L in the parents' generation...")
     L<-cov(C0)*(nind-1)/(nind)
   }
 
@@ -499,53 +513,115 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   if(proj=="L" | proj=="BLoM" | LDdelta){
 
      if(is.null(svdL)){
-        svdC<-svd(t(scale(sqrt(1/nind)*C0, scale=FALSE)))
-        retain<-sum(svdC$d>tol)
-        U<-svdC$u[,1:retain]
-        D<-diag(svdC$d[1:retain])
+        message("Performing SVD on C0...")
+        C0=scale(sqrt(1/nind)*C0, scale=FALSE)
+        
+        if(bigalgebra){
+            D = matrix(0,nrow=min(nsnps, nind), ncol=1)
+            U = matrix(0,nrow=nsnps,ncol=min(nsnps, nind))
+            VT = matrix(0,nrow=min(nsnps, nind),ncol=nind)
+            message("Applying dgesdd()")
+            bigalgebra::dgesdd(JOBZ = "S", A = t(C0), S = D, U = U, VT = VT)
+            rm("VT")
+        }else{
+          
+           svdC<-svd(C0, nu = 0)
+           retain<-sum(svdC$d>tol)
+           U<-svdC$v[,1:retain]
+           D<-svdC$d[1:retain]
+           rm("svdC")
+          
+        }
+
+        
      }else{
         U<-svdL$UL
         D<-diag(svdL$DL)
         retain<-ncol(U)
      }
      if(LDdelta){
-        DL<-D
+        DL<-c(D)
         UL<-U
      }
   }
 
   if(proj=="LoM" | proj=="BLoM"){ 
+    
+     message("Computing M...")
 
      M<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind*Ne_factor))^(x-1))*(1/(nind*Ne_factor))*nR^x}, simplify=FALSE))
 
     if(proj=="LoM"){
-        sdLoM<-RSpectra::eigs(L*M, min(nind, nsnps))
-        retain<-sum(sqrt(sdLoM$values)>tol)
-        U<-sdLoM$vectors[,1:retain]
-        D<-diag(sqrt(sdLoM$values[1:retain]))
+        message("Performing eigendecomposition of L*M...")
+      
+        if(bigalgebra){
+          A = L*M
+          WR= matrix(0,nrow=nrow(A),ncol=1) # real part of eigenvalues
+          WI= matrix(0,nrow=nrow(A),ncol=1) # complex part of eigenvalues
+          VR = matrix(0,ncol=nrow(A),nrow=nrow(A))# Right eigenvectors
+          VL = matrix(0,ncol=nrow(A),nrow=nrow(A))# Left eigenvectors
+          bigalgebra::dgeev(A=A,WR=WR,WI=WI,VR=VR, VL=VL)
+          D = c(sqrt(WR))
+          U = VR
+        
+        }else{
+          sdLoM<-RSpectra::eigs(L*M, min(nind, nsnps))
+          retain<-sum(sqrt(sdLoM$values)>tol)
+          U<-sdLoM$vectors[,1:retain]
+          D<-sqrt(sdLoM$values[1:retain])
+          rm("sdLoM")
+        }
+        
     }
 
     if(proj=="BLoM"){ 
-      sdLoM<-RSpectra::eigs(t(U)%*%(L*M)%*%U, ncol(U))
-      retain<-sum(sqrt(sdLoM$values)>tol)
-      U<-U%*%sdLoM$vectors[,1:retain]
-      D<-diag(sqrt(sdLoM$values[1:retain]))
+      message("Performing eigendecomposition of t(U)%*%(L*M)%*%U...")
+      
+      if(bigalgebra){
+        A = t(U)%*%(L*M)%*%U
+        WR= matrix(0,nrow=nrow(A),ncol=1) # real part of eigenvalues
+        WI= matrix(0,nrow=nrow(A),ncol=1) # complex part of eigenvalues
+        VR = matrix(0,ncol=nrow(A),nrow=nrow(A))# Right eigenvectors
+        VL = matrix(0,ncol=nrow(A),nrow=nrow(A))# Left eigenvectors
+        bigalgebra::dgeev(A=A,WR=WR,WI=WI,VR=VR, VL=VL)
+        U = U%*%VR
+        D = c(sqrt(WR))
+        rm(list = c("A", "WR", "WI", "VL"))
+        
+      }else{
+        
+        sdLoM<-RSpectra::eigs(t(U)%*%(L*M)%*%U, ncol(U))
+        retain<-sum(sqrt(sdLoM$values)>tol)
+        U<-U%*%sdLoM$vectors[,1:retain]
+        D<-sqrt(sdLoM$values[1:retain])
+        rm("sdLoM")
+        
+      }
+      
+      
+      
     }   
   } 
-
- 
+  rm("M")
+  
+  message("Computing the projection matrix...")
+  
   if(proj=="N"){
     
     projp<-diag(nrow(pbar1))
 
   }else{
 
-    projp<-U%*%diag(diag(D)^(-pa))
+    projp<-U%*%diag(D^(-pa))
 
   }
+  
+  rm(list = c("U", "D"))
+  
+  
 
   if(is.na(pdelta)){
-
+    message("Estimating pdelta...")
     pdelta<-optim(0, fit.model, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, nR=nR, Ne_factor=Ne_factor, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1), hessian=TRUE)
 
     pdelta_var<--1/pdelta$hessian
@@ -554,10 +630,11 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   }else{
     pdelta_var<-0
   }
-
+  message("Fitting the final model...")
   output<-fit.model(pdelta=pdelta, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, nR=nR, Ne_factor=Ne_factor)
 
-
+  message("Calculating the estimate of Vw...")
+  
   if(method=="REML"){
     
     sigma2delta<-summary(output$model)$varcomp[1,1]
@@ -584,7 +661,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   X<-cbind(rep(1, length(pbar0)), 2*pbar0-1)
 
   if(LDdelta){
-    TrV<-sum(diag(DL)^(2*(output$pdelta+1)))*sigma2delta
+    TrV<-sum(DL^(2*(output$pdelta+1)))*sigma2delta
     aLa<-t(X%*%bdelta)%*%L%*%X%*%bdelta-sum(diag(t(X)%*%L%*%X%*%S))
   }else{
     TrV<-sum(diag(L%*%diag(diag(L)^output$pdelta)))*sigma2delta
