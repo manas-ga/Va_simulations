@@ -360,6 +360,7 @@ form_nR<-function(SNPs,                   # SNP positions
 fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp, pbar0, pbar1, pbar2, nrep, nR, Ne_factor=1, LLonly=FALSE){
   
   message("Computing the covariance structure of locus effects...")
+  message("Computing covp over 1 generation...")
   
   if(LDdelta){
     if(pdelta==0){
@@ -375,14 +376,15 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
   pmq<-2*pbar0-1
 
   if(Vs=="LoNL"){
-    message("Computing N...")
+     message("Computing N...")
      N<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind*Ne_factor))^(x-1))*nR^(x-1)}, simplify=FALSE))
-
+     message("Computing covp over ngen2 - ngen1 genrations...")
      covp<-(L*N)%*%covp%*%(L*N)
      pmq<-(L*N)%*%pmq
      int<-(L*N)%*%rep(1, nsnps)
   }
   if(Vs=="L"){
+     message("Computing covp over ngen2 - ngen1 genrations...")
      covp<-(L*(ngen2 - ngen1))%*%covp%*%(L*(ngen2 - ngen1))
      pmq<-(L*(ngen2 - ngen1))%*%pmq
      int<-(L*(ngen2 - ngen1))%*%rep(1, nsnps)
