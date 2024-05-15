@@ -1,10 +1,10 @@
 rm(list = ls())
 
-# source("C:/Academics/Post-doc/Va_simulations/5_History_sim/00_History_sim_JARROD.R") ## Local windows
+# source("C:/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim/00_History_sim_JARROD.R") ## Local windows
 
-# source("/mnt/c/Academics/Post-doc/Va_simulations/5_History_sim/00_History_sim_JARROD.R") ## Local Wsl
+# source("/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim/00_History_sim_JARROD.R") ## Local Wsl
 
-# source("/data/home/msamant/Manas/Va_simulations/5_History_sim/00_History_sim_JARROD.R")  ## ON VERA
+# source("/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/5_History_sim/00_History_sim_JARROD.R")  ## ON VERA
 
 
 ########################################################################
@@ -16,7 +16,7 @@ rm(list = ls())
 
 if(Sys.info()["nodename"]=="vera.bio.ed.ac.uk"){
   
-  base_path = "/data/home/msamant/Manas/Va_simulations/5_History_sim" ## ON VERA
+  base_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/5_History_sim" ## ON VERA
   Vw_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/6_Code_Test/Vw.Rmd"  ### Jarrod's functions and other code is stored here
   
   
@@ -24,14 +24,12 @@ if(Sys.info()["nodename"]=="vera.bio.ed.ac.uk"){
   
   if(Sys.info()["sysname"]=="Linux"){
     
-    base_path = "/mnt/c/Academics/Post-doc/Va_simulations/5_History_sim" ## Local Wsl
+    base_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim" ## Local Wsl
     Vw_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/6_Code_test/Vw.Rmd" ### Jarrod's functions and other code is stored here
-    #Vw_path = "/mnt/c/Academics/Post-doc/Va_simulations/5_History_sim/Vw.Rmd" # Jarrod's code from 4 Dec 2023
-    #Vw_path = "/mnt/c/Academics/Post-doc/Va_simulations/5_History_sim/Vw1.Rmd" # Jarrod's code from 19 Mar 2024
-    
+
   }else{
     
-    base_path = "C:/Academics/Post-doc/Va_simulations/5_History_sim" ## Local windows
+    base_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim" ## Local windows
     Vw_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/6_Code_test/Vw.Rmd" ### Jarrod's functions and other code is stored here
     
   }
