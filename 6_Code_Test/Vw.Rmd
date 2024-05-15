@@ -357,7 +357,7 @@ form_nR<-function(SNPs,                   # SNP positions
 ```{r analysis_function}
 
 
-fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp, pbar0, pbar1, pbar2, nrep, nR, Ne_factor=1, LLonly=FALSE){
+fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp, pbar0, pbar1, pbar2, nrep, N, Ne_factor=1, LLonly=FALSE){
   
   message("Computing the covariance structure of locus effects...")
   message("Computing covp over 1 generation...")
@@ -376,8 +376,8 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
   pmq<-2*pbar0-1
 
   if(Vs=="LoNL"){
-     message("Computing N...")
-     N<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind*Ne_factor))^(x-1))*nR^(x-1)}, simplify=FALSE))
+     #message("Computing N...")
+     #N<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind*Ne_factor))^(x-1))*nR^(x-1)}, simplify=FALSE))
      message("Computing covp over ngen2 - ngen1 genrations...")
      covp<-(L*N)%*%covp%*%(L*N)
      pmq<-(L*N)%*%pmq
@@ -550,8 +550,24 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   if(proj=="LoM" | proj=="BLoM"){ 
     
      message("Computing M...")
-
-     M<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind*Ne_factor))^(x-1))*(1/(nind*Ne_factor))*nR^x}, simplify=FALSE))
+     
+     M = ((1-1/(2*nind*Ne_factor))^(ngen1))*(1/(nind*Ne_factor))*nR^(1+ngen1)
+     
+     for (x in (ngen1 + 2):(1+ngen2-ngen1)){
+       M = M + ((1-1/(2*nind*Ne_factor))^(x-1))*(1/(nind*Ne_factor))*nR^x
+     }
+      
+     # M<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind*Ne_factor))^(x-1))*(1/(nind*Ne_factor))*nR^x}, simplify=FALSE))
+     
+     message("Computing N...")
+     
+     N = {((1-1/(2*nind*Ne_factor))^(ngen1))*nR^(ngen1)}
+     
+     for (y in (ngen1 + 2):(1+ngen2-ngen1)){
+       N = N + {((1-1/(2*nind*Ne_factor))^(y-1))*nR^(y-1)}
+     }
+     
+     # N<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind*Ne_factor))^(x-1))*nR^(x-1)}, simplify=FALSE))
 
     if(proj=="LoM"){
         message("Performing eigendecomposition of L*M...")
@@ -572,6 +588,8 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
           U<-sdLoM$vectors[,1:retain]
           D<-sqrt(sdLoM$values[1:retain])
           rm("sdLoM")
+          # Garbage collection
+          gc(verbose = FALSE)
         }
         
     }
@@ -589,6 +607,8 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
         U = U%*%VR
         D = c(sqrt(WR))
         rm(list = c("A", "WR", "WI", "VL"))
+        # Garbage collection
+        gc(verbose = FALSE)
         
       }else{
         
@@ -597,6 +617,8 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
         U<-U%*%sdLoM$vectors[,1:retain]
         D<-sqrt(sdLoM$values[1:retain])
         rm("sdLoM")
+        # Garbage collection
+        gc(verbose = FALSE)
         
       }
       
@@ -605,6 +627,8 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
     }   
   } 
   rm("M")
+  # Garbage collection
+  gc(verbose = FALSE)
   
   message("Computing the projection matrix...")
   
@@ -619,6 +643,8 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   }
   
   rm(list = c("U", "D"))
+  # Garbage collection
+  gc(verbose = FALSE)
   
   
 
