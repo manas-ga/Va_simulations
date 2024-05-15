@@ -110,7 +110,7 @@ simulate = TRUE                        # To run the simulation or not
 analyse = TRUE                         # To perform the analysis on simulated data or not
 record = FALSE                          # Should the data of the simulations be appended to "data.csv" 
 
-nsims = 3                              # Number of simulations (change scale in each simulation)
+nsims = 15                              # Number of simulations (change scale in each simulation)
 n_cages = 10                           # The number of replicate cages in the experiment
 start_gen = 1                          # 
 end_gen = 2                        # How many generations should the SLiM simulation run for while simulating the history (burnin)
