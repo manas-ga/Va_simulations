@@ -499,7 +499,7 @@ for (sim in 3:nsims){
         for (gen in (end_gen+1):(end_gen+ngen_expt+1)){
           
           # Read the file storing mutation information
-          mut = read.csv(paste(mutations_path ,"/Mutations_", as.integer(gen), ".txt", sep = ""), sep = " ") # as.integer gets rid of scientific notation
+          mut = read.csv(paste(mutations_path ,"/mutations_", as.integer(gen), ".txt", sep = ""), sep = " ") # as.integer gets rid of scientific notation
           
           # Sort mutations based on the Temp_ID, so that the order of loci matches the order in the C and L matrices
           
