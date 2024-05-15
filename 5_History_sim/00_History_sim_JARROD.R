@@ -113,7 +113,7 @@ record = FALSE                          # Should the data of the simulations be 
 nsims = 3                              # Number of simulations (change scale in each simulation)
 n_cages = 10                           # The number of replicate cages in the experiment
 start_gen = 1                          # 
-end_gen = 2                        # How many generations should the SLiM simulation run for while simulating the history (burnin)
+end_gen = 20000                        # How many generations should the SLiM simulation run for while simulating the history (burnin)
 output_freq = 5000                     # The frequency with which SLiM outputs are to be generated for the analysis of history 
 ngen_expt = 3                          # How many generations should allele frequency changes be calculated over in the experiment
 
