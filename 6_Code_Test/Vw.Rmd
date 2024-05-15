@@ -650,7 +650,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
   if(is.na(pdelta)){
     message("Estimating pdelta...")
-    pdelta<-optim(0, fit.model, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, nR=nR, Ne_factor=Ne_factor, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1), hessian=TRUE)
+    pdelta<-optim(0, fit.model, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, N=N, Ne_factor=Ne_factor, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1), hessian=TRUE)
 
     pdelta_var<--1/pdelta$hessian
     pdelta<-pdelta$par
@@ -659,7 +659,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
     pdelta_var<-0
   }
   message("Fitting the final model...")
-  output<-fit.model(pdelta=pdelta, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, nR=nR, Ne_factor=Ne_factor)
+  output<-fit.model(pdelta=pdelta, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, N=N, Ne_factor=Ne_factor)
 
   message("Calculating the estimate of Vw...")
   
