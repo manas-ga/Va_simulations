@@ -167,6 +167,10 @@ def extract_mutations_genomes(slim_output_path, # Path of the .txt file containi
 
     c_1 = numpy.asarray(c)
 
+    # Convert c_1 into integers insteead of floa to save memory
+
+    c_1 = c_1.astype(int)
+
 
     numpy.savetxt(c_matrix_path, c_1, delimiter = ",")
 
