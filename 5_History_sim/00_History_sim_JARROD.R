@@ -227,7 +227,7 @@ bdelta_var_est = rep(NA, nsims)
 seg_sites = rep(NA, nsims) # Number of segregating sites in the parents' generation in each simulation
 mem = c() # Create an empty vector to track memory, to investigate crashes
 
-for (sim in 1:nsims){
+for (sim in 5:nsims){
   
   if(simulate){
   
