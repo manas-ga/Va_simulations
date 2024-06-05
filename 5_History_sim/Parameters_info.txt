@@ -1,0 +1,56 @@
+##################################################
+############ Parameter for sims ##################
+##################################################
+
+
+############################
+## A. Sims without burnin ##
+############################
+
+sequence_length = 1e+05
+end_gen = 2
+DFE = "g"
+shape = 0.3
+scale = 0.025
+mut_ratio = 1
+mu_list = [8.5e-08, 7.5e-07]
+mu_msp = mu_list/1000
+mu_neutral = mu_msp/3
+Ne = 1.33e+06
+
+
+############################################
+## A. Sims with burnin (only deleterious) ##
+############################################
+
+(i) If one wants to restrict the loss of Va between the parents and the experiment to about 7-8%
+
+# This results in the maximum number of segregatng sites to be around 33000
+
+sequence_length = 1e+06
+end_gen = 20000
+DFE = "g"
+shape = 0.3
+scale = 0.05
+mut_ratio = 0
+mu_list = [3.45e-07, 3.45e-06]
+mu_msp = mu_list/1000
+mu_neutral = mu_msp/3
+Ne = 1.33e+06
+
+(ii) If one wants to restrict the loss of Va between the parents and the experiment to about 5%
+
+# This results in the maximum number of segregatng sites to be around 60000
+
+sequence_length = 1e+06
+end_gen = 20000
+DFE = "g"
+shape = 0.3
+scale = 0.05
+mut_ratio = 0
+mu_list = [5.56e-07, 5.56e-06]
+mu_msp = mu_list/1000
+mu_neutral = mu_msp/3
+Ne = 1.33e+06
+
+
