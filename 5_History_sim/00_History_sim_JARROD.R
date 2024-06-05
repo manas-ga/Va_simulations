@@ -6,6 +6,8 @@ rm(list = ls())
 
 # source("/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/5_History_sim/00_History_sim_JARROD.R")  ## ON VERA
 
+# source("/ceph/users/marun/Va_simulations/Github/Va_simulations/5_History_sim/00_History_sim_JARROD.R")  ## ON QMASTER
+
 
 ########################################################################
 ########### paths of various scripts and functions #####################
@@ -14,27 +16,39 @@ rm(list = ls())
 
 ### Base path and path to Vw.Rmd (file containing Jarrod's functions) (depending on the system) ###
 
-if(Sys.info()["nodename"]=="vera.bio.ed.ac.uk"){
+if(Sys.info()["nodename"]=="qmaster"){
   
-  base_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/5_History_sim" ## ON VERA
-  Vw_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/6_Code_Test/Vw.Rmd"  ### Jarrod's functions and other code is stored here
-  
+  base_path = "/ceph/users/marun/Va_simulations/5_History_sim"
+  Vw_path = "/ceph/users/marun/Va_simulations/6_Code_Test/Vw.Rmd"
   
 }else{
   
-  if(Sys.info()["sysname"]=="Linux"){
+  
+  if(Sys.info()["nodename"]=="vera.bio.ed.ac.uk"){
     
-    base_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim" ## Local Wsl
-    Vw_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/6_Code_test/Vw.Rmd" ### Jarrod's functions and other code is stored here
-
+    base_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/5_History_sim" ## ON VERA
+    Vw_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/6_Code_Test/Vw.Rmd"  ### Jarrod's functions and other code is stored here
+    
+    
   }else{
     
-    base_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim" ## Local windows
-    Vw_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/6_Code_test/Vw.Rmd" ### Jarrod's functions and other code is stored here
+    if(Sys.info()["sysname"]=="Linux"){
+      
+      base_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim" ## Local Wsl
+      Vw_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/6_Code_test/Vw.Rmd" ### Jarrod's functions and other code is stored here
+      
+    }else{
+      
+      base_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim" ## Local windows
+      Vw_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/6_Code_test/Vw.Rmd" ### Jarrod's functions and other code is stored here
+      
+    }
     
   }
   
+  
 }
+
 
 # Paths to various scripts that are used for running the simulations and extracting information from SLiM outputs
 
