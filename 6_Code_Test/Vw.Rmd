@@ -373,6 +373,7 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
   }
 
   rm(list = c("UL", "DL"))
+  gc(verbose = FALSE)
   pmq<-2*pbar0-1
 
   if(Vs=="LoNL"){
@@ -391,6 +392,7 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
   }  
 
   rm("N")
+  gc(verbose = FALSE)
   message("Computing SC...")
   
   SC<-t(projp)%*%covp%*%projp
@@ -525,6 +527,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
             message("Applying dgesdd()")
             bigalgebra::dgesdd(JOBZ = "S", A = t(C0), S = D, U = U, VT = VT)
             rm("VT")
+            gc(verbose = FALSE)
         }else{
           
            svdC<-svd(C0, nu = 0)
@@ -532,6 +535,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
            U<-svdC$v[,1:retain]
            D<-svdC$d[1:retain]
            rm("svdC")
+           gc(verbose = FALSE)
           
         }
 

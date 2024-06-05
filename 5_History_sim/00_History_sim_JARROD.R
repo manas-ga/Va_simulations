@@ -122,7 +122,7 @@ ngen_expt = 3                          # How many generations should allele freq
 ########### Pop gen parameters ############
 ###########################################
 
-Ne = 1.33e+06                          # Effective population size
+Ne = 1.33e+05                          # Effective population size
 n_ind = 2500                          # Number of individuals to be sampled in msprime and then run forward in SLiM
 n_ind_exp = 1000                       # The population size of the experiment. In 00_History.slim the population reduces to n_ind_exp in the last generation to simulate the sampling of the parents for the experiment
 n_sample = n_ind_exp                        # Number of individuals to be sampled to construct the c matrix  (This is just because c matrices become awfully large). Typically should be the same as n_ind_exp 
@@ -171,7 +171,7 @@ bigalgebra = FALSE # Should bigalgebra be used for eigendecomposition?
 # How is pdelta to be estimated? 
 # Can be "optim" (using the function optim()), or "fixed" or "manual"(estimated by manually scanning a range of pdelta values)
 
-pdelta_method = "optim" # "optim" or "manual" or "fixed". If "this is "no_analysis", the estimate of Vw is not calculated, but the rest of the code still runs.
+pdelta_method = "fixed" # "optim" or "manual" or "fixed". If "this is "no_analysis", the estimate of Vw is not calculated, but the rest of the code still runs.
 
 if(pdelta_method=="fixed"){
   pdelta = 0 # Can be specified to any value
@@ -192,7 +192,7 @@ if(pdelta_method=="manual"){
 
 # How should bdelta[1] (intercept) and bdelta[2] (slope of (p-q)) be estimated
 
-bdelta_method = "estimate" # Can be "fixed" or "estimate"
+bdelta_method = "fixed" # Can be "fixed" or "estimate"
 
 if(bdelta_method=="estimate"){
   bdelta = c(NA, NA)
@@ -227,7 +227,7 @@ bdelta_var_est = rep(NA, nsims)
 seg_sites = rep(NA, nsims) # Number of segregating sites in the parents' generation in each simulation
 mem = c() # Create an empty vector to track memory, to investigate crashes
 
-for (sim in 5:nsims){
+for (sim in 1:nsims){
   
   if(simulate){
   
@@ -366,6 +366,7 @@ for (sim in 5:nsims){
       
       # Remove c_genome to save memory
       rm("c_genome")
+      gc(verbose = FALSE)
       
       # If one samples individuals from the parents' generation while building the c matrix (i.e. when sample_size is less than n_ind_exp), the sample may not contain some low frequency mutations, i.e. some loci are not segregating in the sample, but are in the parents' population
       
@@ -425,6 +426,7 @@ for (sim in 5:nsims){
       
       vA_true[sim] = t(list_alpha)%*%L%*%list_alpha         # Additive genetic variance
       rm("L") # remove L to save memory
+      gc(verbose = FALSE)
       
       message(paste("The true Vw in the parents' generation is", vA_true[sim]))
       
