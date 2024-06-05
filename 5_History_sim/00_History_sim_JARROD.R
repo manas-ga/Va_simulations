@@ -6,7 +6,7 @@ rm(list = ls())
 
 # source("/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/5_History_sim/00_History_sim_JARROD.R")  ## ON VERA
 
-# source("/ceph/users/marun/Va_simulations/Github/Va_simulations/5_History_sim/00_History_sim_JARROD.R")  ## ON QMASTER
+# source("/ceph/users/marun/Va_simulations/5_History_sim/00_History_sim_JARROD.R")  ## ON QMASTER
 
 
 ########################################################################
