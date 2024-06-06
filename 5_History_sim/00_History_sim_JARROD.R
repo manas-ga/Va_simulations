@@ -16,7 +16,7 @@ rm(list = ls())
 
 ### Base path and path to Vw.Rmd (file containing Jarrod's functions) (depending on the system) ###
 
-if(Sys.info()["nodename"]=="qmaster"){
+if(Sys.info()["nodename"]=="bigshot"){
   
   base_path = "/ceph/users/marun/Va_simulations/5_History_sim"
   Vw_path = "/ceph/users/marun/Va_simulations/6_Code_Test/Vw.Rmd"
