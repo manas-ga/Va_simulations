@@ -92,4 +92,4 @@ ts_metadata = tables.metadata
 ts_metadata["SLiM"]["model_type"] = "WF"
 tables.metadata = ts_metadata
 ots = tables.tree_sequence()
-ots.dump(f"{msprime_output_path}/sim{sys.argv[13]}_neutral_burnin.trees")
+ots.dump(f"{msprime_output_path}/{sys.argv[13]}_sim{sys.argv[14]}_neutral_burnin.trees")
