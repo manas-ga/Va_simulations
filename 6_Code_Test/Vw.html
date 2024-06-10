@@ -463,7 +463,7 @@ AtleastOneRecomb&lt;-FALSE
 
 Ne=1e6
 
-nsim&lt;-100            # number of simulations
+nsim&lt;-10            # number of simulations
 
 HapLength&lt;-as.integer(seq(100000,100000,length=nsim))   # haplotype length
 
@@ -707,17 +707,21 @@ Ne_factor&lt;-1 #4/(3+exp(EVe))</code></pre>
 across loci.</h3>
 <p>The global mean allele frequency change <em>due to selection</em>,
 <span class="math inline">\(E[E[\Delta {\bf p}]]\)</span>, is assumed to
-be equal to <span class="math inline">\(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta(p-q)\)</span>,
-and the (co)variance <span class="math inline">\(VAR[E[\Delta {\bf
-p}]]\)</span>, is assumed to be proportional to <span class="math inline">\((n_g{\bf L}){\bf L}^{p_{\Delta}}({\bf
-L}n_g)\)</span> (<code>Vs=&quot;L&quot;</code>) or <span class="math inline">\(({\bf L}\circ {\bf N}){\bf L}^{p_{\Delta}}({\bf
-L}\circ {\bf N})\)</span> (<code>Vs=&quot;LoNL&quot;</code>) where <span class="math inline">\(n_g\)</span> is the number of generations and
-<span class="math inline">\(p_{\Delta}\)</span> can be specified
+be equal to <span class="math inline">\(n_g{\bf
+L}\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf
+{q})\right)\)</span> (<code>Vs=&quot;L&quot;</code>) or <span class="math inline">\({\bf L}\circ {\bf
+N}\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf
+{q})\right)\)</span> or (<code>Vs=&quot;LoNL&quot;</code>) where <span class="math inline">\(n_g\)</span> is the number of generations and
+<span class="math inline">\(\beta^{(0)}_\Delta\)</span> and <span class="math inline">\(\beta^{(1)}_\Delta\)</span> can be specified
+(<code>bdelta</code>). The (co)variance <span class="math inline">\(VAR[E[\Delta {\bf p}]]\)</span>, is assumed to be
+proportional to <span class="math inline">\((n_g{\bf L}){\bf
+L}^{p_{\Delta}}({\bf L}n_g)\)</span> (<code>Vs=&quot;L&quot;</code>) or <span class="math inline">\(({\bf L}\circ {\bf N}){\bf L}^{p_{\Delta}}({\bf
+L}\circ {\bf N})\)</span> (<code>Vs=&quot;LoNL&quot;</code>) where <span class="math inline">\(p_{\Delta}\)</span> can be specified
 (<code>pdelta</code>). Theoretically, we expect allele frequency change
-<em>due to selection</em> to have mean <span class="math inline">\(\beta_\alpha(p-q)\)</span> with covariance
-structure proportional to <span class="math inline">\(({\bf L}\circ {\bf
-N}){\bf L}^{p_{\alpha}}({\bf L}\circ {\bf N})\)</span>, although
-<code>Vs=&quot;L&quot;</code> with <span class="math inline">\(p_{\Delta}=p_{\alpha}\)</span> might serve as a
+<em>due to selection</em> to have mean <span class="math inline">\({\bf
+L}\circ {\bf N}\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf
+{q})\right)\)</span> and covariance structure proportional to <span class="math inline">\(({\bf L}\circ {\bf N}){\bf L}^{p_{\alpha}}({\bf
+L}\circ {\bf N})\)</span>, although <code>Vs=&quot;L&quot;</code> with <span class="math inline">\(p_{\Delta}=p_{\alpha}\)</span> might serve as a
 good approximation. It is also possible to ignore LD when defining <span class="math inline">\({\bf L}^{p_{\Delta}}\)</span> above using
 <code>LDdelta=FALSE</code>. If <code>pdelta</code> is NA then
 <code>Vw_model</code> will estimate it using calls to
@@ -764,15 +768,19 @@ U}^{\top}VAR[E[\Delta {\bf p}]]{\bf U}{\bf D}^{-p_{a}}\\
                   ){
 
   nsnps&lt;-length(SNPs)
+  
+  message(&quot;Computing the distance matrix...&quot;)
 
   Dist&lt;-as.matrix(dist(SNPs, diag=TRUE, upper=TRUE))
   # conditional on the total number of recombination events (tn) along a chromosome, the number that fall in the interval is binomial with probability equal to the relative length of the interval to the whole and number of trials equal to tn. The non-recombination fraction is then the probability that an even number of events (including zero) fall in the interval. 
 
+  message(&quot;Computing nR...&quot;)
+  
   if(AtleastOneRecomb){
 
     maxn&lt;-actuar::qztpois(1-1e-5, RecombRate*HapLength)
     # maximum number of total recombination events likely to be seen
-
+  
     nR&lt;-matrix(0, nsnps, nsnps)
 
     for(nt in 0:maxn){
@@ -796,55 +804,71 @@ U}^{\top}VAR[E[\Delta {\bf p}]]{\bf U}{\bf D}^{-p_{a}}\\
 </div>
 <div id="function-for-model-fitting" class="section level3">
 <h3>Function for model fitting</h3>
-<pre class="r"><code>fit.model&lt;-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp, pbar0, pbar1, pbar2, nrep, nR, Ne_factor=1, LLonly=FALSE){
+<pre class="r"><code>fit.model&lt;-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp, pbar0, pbar1, pbar2, nrep, N, Ne_factor=1, Vs, LLonly=FALSE){
+  
+  message(&quot;Computing the covariance structure of locus effects...&quot;)
+  message(&quot;Computing covp over 1 generation...&quot;)
+  
+  if(!Vs%in%c(&quot;LoNL&quot;, &quot;L&quot;)){stop(&quot;Vs must be `LoNL` or `L`&quot;)}
 
   if(LDdelta){
     if(pdelta==0){
       covp&lt;-diag(nsnps)
     }else{
-      covp&lt;-UL%*%diag(diag(DL)^(2*pdelta))%*%t(UL)
+      covp&lt;-UL%*%diag(DL^(2*pdelta))%*%t(UL)
     }  
   }else{
     covp&lt;-diag(diag(L)^pdelta)
   }
 
+  rm(list = c(&quot;UL&quot;, &quot;DL&quot;))
+  gc(verbose = FALSE)
   pmq&lt;-2*pbar0-1
 
   if(Vs==&quot;LoNL&quot;){
-     N&lt;-Reduce(&#39;+&#39;, sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind*Ne_factor))^(x-1))*nR^(x-1)}, simplify=FALSE))
-
-     covp&lt;-(L*N)%*%covp%*%(L*N)
-     pmq&lt;-(L*N)%*%pmq
-  }
+     L&lt;-L*N
+     rm(&quot;N&quot;)
+     gc(verbose = FALSE)
+  }   
   if(Vs==&quot;L&quot;){
-     covp&lt;-(L*(ngen2 - ngen1))%*%covp%*%(L*(ngen2 - ngen1))
-     pmq&lt;-(L*(ngen2 - ngen1))%*%pmq
-  }  
+    L&lt;-L*(ngen2 - ngen1)
+  }
+  message(&quot;Computing covp over ngen2 - ngen1 genrations...&quot;)
+  covp&lt;-L%*%covp
+  covp&lt;-covp%*%L
+  pmq&lt;-L%*%pmq
+  int&lt;-L%*%rep(1, nsnps)
 
-
+  message(&quot;Computing SC...&quot;)
+  
   SC&lt;-t(projp)%*%covp%*%projp
 
   attr(SC, &quot;INVERSE&quot;)&lt;-FALSE
   dimnames(SC) &lt;- list(1:nrow(SC),1:nrow(SC))  # used for full-form matrices
-
+  
+  message(&quot;Projecting allele frequencies...&quot;)
+  
   pbar1_proj&lt;-pbar1%*%projp
   pbar2_proj&lt;-pbar2%*%projp
   pmq_proj&lt;-t(matrix(pmq, nsnps,nrep))%*%projp
+  int_proj&lt;-t(matrix(int, nsnps,nrep))%*%projp
 
-  dat.gaussian&lt;-data.frame(delta=c(pbar2_proj-pbar1_proj), locus=gl(ncol(pbar1_proj),nrep,ncol(pbar1_proj)*nrep), rep=gl(nrep,1,ncol(pbar1_proj)*nrep), pmq=c(pmq_proj))
+  dat.gaussian&lt;-data.frame(delta=c(pbar2_proj-pbar1_proj), locus=gl(ncol(pbar1_proj),nrep,ncol(pbar1_proj)*nrep), rep=gl(nrep,1,ncol(pbar1_proj)*nrep), pmq=c(pmq_proj), int=c(int_proj))
 
+
+  if(!is.na(bdelta[1])){
+     dat.gaussian$int&lt;-dat.gaussian$int*bdelta[1]
+  }
   if(!is.na(bdelta[2])){
      dat.gaussian$pmq&lt;-dat.gaussian$pmq*bdelta[2]
   }
-  if(!is.na(bdelta[1])){
-    int_offset&lt;-bdelta[1]
-  }
-
 
   ##############
   # Fit models #
   ##############
   
+  message(&quot;Fitting linear mixed model...&quot;)
+
   prior&lt;-list(R=list(V=1, nu=0), G=list(G1=list(V=1, nu=1, alpha.mu=0, alpha.V=1000)))
   
   SC[lower.tri(SC)]&lt;-t(SC)[lower.tri(SC)]
@@ -852,17 +876,17 @@ U}^{\top}VAR[E[\Delta {\bf p}]]{\bf U}{\bf D}^{-p_{a}}\\
 
   if(method==&quot;REML&quot;){
     if(is.na(bdelta[1]) &amp; is.na(bdelta[2])){
-        m1&lt;-asreml(delta~pmq, random = ~vm(locus, SC, singG=&quot;PSD&quot;), data=dat.gaussian, Cfixed=TRUE)
+        m1&lt;-asreml(delta~int+pmq-1, random = ~vm(locus, SC, singG=&quot;PSD&quot;), data=dat.gaussian, Cfixed=TRUE)
     }
     if(is.na(bdelta[1]) &amp; !is.na(bdelta[2])){
-        m1&lt;-asreml(delta~offset(pmq), random = ~vm(locus, SC, singG=&quot;PSD&quot;), data=dat.gaussian, Cfixed=TRUE)
+        m1&lt;-asreml(delta~int+offset(pmq)-1, random = ~vm(locus, SC, singG=&quot;PSD&quot;), data=dat.gaussian, Cfixed=TRUE)
     }
     if(!is.na(bdelta[1]) &amp; is.na(bdelta[2])){
-        m1&lt;-asreml(I(delta-bdelta[1])~pmq-1, random = ~vm(locus, SC, singG=&quot;PSD&quot;), data=dat.gaussian, Cfixed=TRUE)
+        m1&lt;-asreml(delta~offset(int)+pmq-1, random = ~vm(locus, SC, singG=&quot;PSD&quot;), data=dat.gaussian, Cfixed=TRUE)
     }
     if(!is.na(bdelta[1]) &amp; !is.na(bdelta[2])){
       warning(&quot;asreml doesn&#39;t allow models without fixed effects, so intercept fitted but replaced with bdelta[1]!&quot;)
-        m1&lt;-asreml(I(delta-bdelta[1])~offset(pmq), random = ~vm(locus, SC, singG=&quot;PSD&quot;), data=dat.gaussian, Cfixed=TRUE)
+      m1&lt;-asreml(delta~offset(pmq + int), random = ~vm(locus, SC, singG=&quot;PSD&quot;), data=dat.gaussian, Cfixed=TRUE)
     } 
   }
 
@@ -879,8 +903,9 @@ U}^{\top}VAR[E[\Delta {\bf p}]]{\bf U}{\bf D}^{-p_{a}}\\
     diag(prior$B$V)[which(!is.na(bdelta))]&lt;-1e-10
     prior$B$mu[which(is.na(bdelta))]&lt;-0
 
-    m1&lt;-MCMCglmm(delta~pmq, random=~locus, data=dat.gaussian, ginverse=list(locus=invSC), family=&quot;gaussian&quot;, pr=TRUE, prior=prior)
+    m1&lt;-MCMCglmm(delta~pmq+int-1, random=~locus, data=dat.gaussian, ginverse=list(locus=invSC), family=&quot;gaussian&quot;, pr=TRUE, prior=prior)
   }
+  
   if(LLonly){
     return(m1$loglik)
   }else{
@@ -907,12 +932,14 @@ Vw_model&lt;-function(C0,          # parental genotypes (rows individuals, colum
                    L=NULL,    # list with elements UL and DL
                    svdL=NULL,    # list with elements UL and DL,
                    Ne_factor=1,
+                   bigalgebra = FALSE, # Should &quot;bigalgebra&quot; be used for svd and eigendecomposition
                    tol=sqrt(.Machine$double.eps)
   ){
   
   asreml.options(Cfixed = TRUE)
 
   if(is.null(L)){
+    message(&quot;Computing L in the parents&#39; generation...&quot;)
     L&lt;-cov(C0)*(nind-1)/(nind)
   }
 
@@ -936,96 +963,192 @@ Vw_model&lt;-function(C0,          # parental genotypes (rows individuals, colum
   if(proj==&quot;L&quot; | proj==&quot;BLoM&quot; | LDdelta){
 
      if(is.null(svdL)){
-        svdC&lt;-svd(t(scale(sqrt(1/nind)*C0, scale=FALSE)))
-        retain&lt;-sum(svdC$d&gt;tol)
-        U&lt;-svdC$u[,1:retain]
-        D&lt;-diag(svdC$d[1:retain])
+        message(&quot;Performing SVD on C0...&quot;)
+        C0=scale(sqrt(1/nind)*C0, scale=FALSE)
+        
+        if(bigalgebra){
+            D = matrix(0,nrow=min(nsnps, nind), ncol=1)
+            U = matrix(0,nrow=nsnps,ncol=min(nsnps, nind))
+            VT = matrix(0,nrow=min(nsnps, nind),ncol=nind)
+            message(&quot;Applying dgesdd()&quot;)
+            bigalgebra::dgesdd(JOBZ = &quot;S&quot;, A = t(C0), S = D, U = U, VT = VT)
+            rm(&quot;VT&quot;)
+            gc(verbose = FALSE)
+        }else{
+          
+           svdC&lt;-svd(C0, nu = 0)
+           retain&lt;-sum(svdC$d&gt;tol)
+           U&lt;-svdC$v[,1:retain]
+           D&lt;-svdC$d[1:retain]
+           rm(&quot;svdC&quot;)
+           gc(verbose = FALSE)
+          
+        }
+
+        
      }else{
         U&lt;-svdL$UL
         D&lt;-diag(svdL$DL)
         retain&lt;-ncol(U)
      }
      if(LDdelta){
-        DL&lt;-D
+        DL&lt;-c(D)
         UL&lt;-U
      }
   }
 
   if(proj==&quot;LoM&quot; | proj==&quot;BLoM&quot;){ 
-
-     M&lt;-Reduce(&#39;+&#39;, sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind*Ne_factor))^(x-1))*(1/(nind*Ne_factor))*nR^x}, simplify=FALSE))
+    
+     message(&quot;Computing M...&quot;)
+     
+     M = ((1-1/(2*nind*Ne_factor))^(ngen1))*(1/(nind*Ne_factor))*nR^(1+ngen1)
+     
+     for (x in (ngen1 + 2):(1+ngen2-ngen1)){
+       M = M + ((1-1/(2*nind*Ne_factor))^(x-1))*(1/(nind*Ne_factor))*nR^x
+     }
+      
+     # M&lt;-Reduce(&#39;+&#39;, sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind*Ne_factor))^(x-1))*(1/(nind*Ne_factor))*nR^x}, simplify=FALSE))
+     
+     message(&quot;Computing N...&quot;)
+     
+     N = {((1-1/(2*nind*Ne_factor))^(ngen1))*nR^(ngen1)}
+     
+     for (y in (ngen1 + 2):(1+ngen2-ngen1)){
+       N = N + {((1-1/(2*nind*Ne_factor))^(y-1))*nR^(y-1)}
+     }
+     
+     # N&lt;-Reduce(&#39;+&#39;, sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind*Ne_factor))^(x-1))*nR^(x-1)}, simplify=FALSE))
 
     if(proj==&quot;LoM&quot;){
-        sdLoM&lt;-RSpectra::eigs(L*M, min(nind, nsnps))
-        retain&lt;-sum(sqrt(sdLoM$values)&gt;tol)
-        U&lt;-sdLoM$vectors[,1:retain]
-        D&lt;-diag(sqrt(sdLoM$values[1:retain]))
+        message(&quot;Performing eigendecomposition of L*M...&quot;)
+      
+        if(bigalgebra){
+          A = L*M
+          WR= matrix(0,nrow=nrow(A),ncol=1) # real part of eigenvalues
+          WI= matrix(0,nrow=nrow(A),ncol=1) # complex part of eigenvalues
+          VR = matrix(0,ncol=nrow(A),nrow=nrow(A))# Right eigenvectors
+          VL = matrix(0,ncol=nrow(A),nrow=nrow(A))# Left eigenvectors
+          bigalgebra::dgeev(A=A,WR=WR,WI=WI,VR=VR, VL=VL)
+          D = c(sqrt(WR))
+          U = VR
+        
+        }else{
+          sdLoM&lt;-RSpectra::eigs(L*M, min(nind, nsnps))
+          retain&lt;-sum(sqrt(sdLoM$values)&gt;tol)
+          U&lt;-sdLoM$vectors[,1:retain]
+          D&lt;-sqrt(sdLoM$values[1:retain])
+          rm(&quot;sdLoM&quot;)
+          # Garbage collection
+          gc(verbose = FALSE)
+        }
+        
     }
 
     if(proj==&quot;BLoM&quot;){ 
-      sdLoM&lt;-RSpectra::eigs(t(U)%*%(L*M)%*%U, ncol(U))
-      retain&lt;-sum(sqrt(sdLoM$values)&gt;tol)
-      U&lt;-U%*%sdLoM$vectors[,1:retain]
-      D&lt;-diag(sqrt(sdLoM$values[1:retain]))
+      message(&quot;Performing eigendecomposition of t(U)%*%(L*M)%*%U...&quot;)
+      
+      if(bigalgebra){
+        A = t(U)%*%(L*M)%*%U
+        WR= matrix(0,nrow=nrow(A),ncol=1) # real part of eigenvalues
+        WI= matrix(0,nrow=nrow(A),ncol=1) # complex part of eigenvalues
+        VR = matrix(0,ncol=nrow(A),nrow=nrow(A))# Right eigenvectors
+        VL = matrix(0,ncol=nrow(A),nrow=nrow(A))# Left eigenvectors
+        bigalgebra::dgeev(A=A,WR=WR,WI=WI,VR=VR, VL=VL)
+        U = U%*%VR
+        D = c(sqrt(WR))
+        rm(list = c(&quot;A&quot;, &quot;WR&quot;, &quot;WI&quot;, &quot;VL&quot;))
+        # Garbage collection
+        gc(verbose = FALSE)
+        
+      }else{
+        
+        sdLoM&lt;-RSpectra::eigs(t(U)%*%(L*M)%*%U, ncol(U))
+        retain&lt;-sum(sqrt(sdLoM$values)&gt;tol)
+        U&lt;-U%*%sdLoM$vectors[,1:retain]
+        D&lt;-sqrt(sdLoM$values[1:retain])
+        rm(&quot;sdLoM&quot;)
+        # Garbage collection
+        gc(verbose = FALSE)
+        
+      }
+      
+      
+      
     }   
   } 
-
- 
+  rm(&quot;M&quot;)
+  # Garbage collection
+  gc(verbose = FALSE)
+  
+  message(&quot;Computing the projection matrix...&quot;)
+  
   if(proj==&quot;N&quot;){
     
     projp&lt;-diag(nrow(pbar1))
 
   }else{
 
-    projp&lt;-U%*%diag(diag(D)^(-pa))
+    projp&lt;-U%*%diag(D^(-pa))
 
   }
+  
+  rm(list = c(&quot;U&quot;, &quot;D&quot;))
+  # Garbage collection
+  gc(verbose = FALSE)
+  
+  
 
   if(is.na(pdelta)){
+    message(&quot;Estimating pdelta...&quot;)
+    pdelta&lt;-optim(0, fit.model, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, N=N, Ne_factor=Ne_factor, Vs=Vs, method = &quot;L-BFGS-B&quot;, lower = -2, upper =2, control = list(fnscale=-1), hessian=TRUE)
 
-    pdelta&lt;-optim(0, fit.model, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, nR=nR, Ne_factor=Ne_factor, method = &quot;L-BFGS-B&quot;, lower = -5, upper =5, control = list(fnscale=-1))$par
+    pdelta_var&lt;--1/pdelta$hessian
+    pdelta&lt;-pdelta$par
 
+  }else{
+    pdelta_var&lt;-0
   }
+  message(&quot;Fitting the final model...&quot;)
+  output&lt;-fit.model(pdelta=pdelta, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, N=N, Ne_factor=Ne_factor, Vs=Vs)
 
-  output&lt;-fit.model(pdelta=pdelta, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, nR=nR, Ne_factor=Ne_factor)
-
-
+  message(&quot;Calculating the estimate of Vw...&quot;)
+  
   if(method==&quot;REML&quot;){
     
     sigma2delta&lt;-summary(output$model)$varcomp[1,1]
     S&lt;-matrix(0,2,2)
 
     if(is.na(bdelta[1]) &amp; is.na(bdelta[2])){
-        bdelta&lt;-summary(output$model, coef=TRUE)$coef.fixed[,1]
-        S&lt;-output$model$Cfixed
+        bdelta&lt;-summary(output$model, coef=TRUE)$coef.fixed[c(&quot;int&quot;, &quot;pmq&quot;),1]
+        S&lt;-output$model$Cfixed[c(&quot;int&quot;, &quot;pmq&quot;),c(&quot;int&quot;, &quot;pmq&quot;)]
     }
     if(is.na(bdelta[1]) &amp; !is.na(bdelta[2])){
-       bdelta[1]&lt;-summary(output$model, coef=TRUE)$coef.fixed[,1]
-       S[1,1]&lt;-output$model$Cfixed
+       bdelta[1]&lt;-summary(output$model, coef=TRUE)$coef.fixed[&quot;int&quot;,1]
+       S[&quot;int&quot;,&quot;int&quot;]&lt;-output$model$Cfixed
     }
     if(!is.na(bdelta[1]) &amp; is.na(bdelta[2])){
-        bdelta[2]&lt;-summary(output$model, coef=TRUE)$coef.fixed[,1]
-        S[2,2]&lt;-output$model$Cfixed
+        bdelta[2]&lt;-summary(output$model, coef=TRUE)$coef.fixed[&quot;pmq&quot;,1]
+        S[&quot;pmq&quot;,&quot;pmq&quot;]&lt;-output$model$Cfixed
     }
   }
   if(method==&quot;MCMC&quot;){
     sigma2delta&lt;-posterior.mode(output$model$VCV[,1])
-    bdelta&lt;-colMeans(output$model$Sol[,1:2])
+    bdelta&lt;-colMeans(output$model$Sol[,c(&quot;int&quot;, &quot;pmq&quot;)])
   }
 
   X&lt;-cbind(rep(1, length(pbar0)), 2*pbar0-1)
 
   if(LDdelta){
-    TrV&lt;-sum(diag(DL)^(2*(output$pdelta+1)))*sigma2delta
+    TrV&lt;-sum(DL^(2*(output$pdelta+1)))*sigma2delta
     aLa&lt;-t(X%*%bdelta)%*%L%*%X%*%bdelta-sum(diag(t(X)%*%L%*%X%*%S))
   }else{
     TrV&lt;-sum(diag(L%*%diag(diag(L)^output$pdelta)))*sigma2delta
-    aLa&lt;-sum(diag(L)*pred^2)-sum(diag(t(X)%*%diag(diag(L))%*%X%*%S))
+    aLa&lt;-sum(diag(L)*(X%*%bdelta)^2)-sum(diag(t(X)%*%diag(diag(L))%*%X%*%S))
   }
 
   Vw_est&lt;-TrV+aLa
 
-  return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, pdelta=output$pdelta, bdelta=bdelta))
+  return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, pdelta=output$pdelta, bdelta=bdelta, pdelta_var=pdelta_var, bdelta_var=S))
 
 }</code></pre>
 </div>

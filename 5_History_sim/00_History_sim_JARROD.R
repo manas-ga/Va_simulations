@@ -125,12 +125,13 @@ simulate = TRUE                        # To run the simulation or not
 analyse = TRUE                         # To perform the analysis on simulated data or not
 record = FALSE                         # Should the data of the simulations be appended to "data.csv" 
 
-nsims = 10                              # Number of simulations (change scale in each simulation)
-n_cages = 10                           # The number of replicate cages in the experiment
+nsims = 1                              # Number of simulations (change scale in each simulation)
+n_cages = (as.numeric(commandArgs(trailingOnly = TRUE)[4]))                           # The number of replicate cages in the experiment
+print(n_cages)
 start_gen = 1                          # 
 end_gen = 2                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
 output_freq = 5000                     # The frequency with which SLiM outputs are to be generated for the analysis of history 
-ngen_expt = 3                          # How many generations should allele frequency changes be calculated over in the experiment
+ngen_expt = (as.numeric(commandArgs(trailingOnly = TRUE)[5]))                          # How many generations should allele frequency changes be calculated over in the experiment
 
 
 ###########################################
@@ -139,12 +140,12 @@ ngen_expt = 3                          # How many generations should allele freq
 
 Ne = 1.33e+06                          # Effective population size
 n_ind = 2500                          # Number of individuals to be sampled in msprime and then run forward in SLiM
-n_ind_exp = 1000                       # The population size of the experiment. In 00_History.slim the population reduces to n_ind_exp in the last generation to simulate the sampling of the parents for the experiment
+n_ind_exp = (as.numeric(commandArgs(trailingOnly = TRUE)[3]))                       # The population size of the experiment. In 00_History.slim the population reduces to n_ind_exp in the last generation to simulate the sampling of the parents for the experiment
 n_sample = n_ind_exp                        # Number of individuals to be sampled to construct the c matrix  (This is just because c matrices become awfully large). Typically should be the same as n_ind_exp 
 
 sequence_length = 1e+06                # Just have a single continuous chromosome that is simulated
 r = 1.4e-07                            # Recombination rate (per site per generation) during the forward simulation of history
-r_expt = 1.4e-06                       # Recombination rate to be used during during the experiment (Drosophila melanogaster ~ 1.4e-08)
+r_expt = (as.numeric(commandArgs(trailingOnly = TRUE)[2]))/sequence_length                       # Recombination rate to be used during during the experiment (Drosophila melanogaster ~ 1.4e-08)
 r_msp = 1.4e-09                        # Recombination rate for the initial msprime simulation
 AtleastOneRecomb = FALSE               # Whether there has to be at least one recombination event
 
@@ -207,7 +208,7 @@ if(pdelta_method=="manual"){
 
 # How should bdelta[1] (intercept) and bdelta[2] (slope of (p-q)) be estimated
 
-bdelta_method = "fixed" # Can be "fixed" or "estimate"
+bdelta_method = commandArgs(trailingOnly = TRUE)[1] # Can be "fixed" or "estimate"
 
 if(bdelta_method=="estimate"){
   bdelta = c(NA, NA)
@@ -220,7 +221,7 @@ if(bdelta_method=="estimate"){
 
 if(!DFE%in%c("n", "g")){stop("DFE must be one of 'g', 'n'")}
 if(!pdelta_method%in%c("optim", "fixed", "manual", "no_analysis")){stop("pdelta_method must be one of 'optim', 'fixed', 'manual', 'no_analysis'")}
-if(!bdelta_method%in%c("estimate", "fixed")){stop("pdelta_method must be one of 'estimate', 'fixed'")}
+if(!bdelta_method%in%c("estimate", "fixed")){stop("bdelta_method must be one of 'estimate', 'fixed'")}
 if(!randomise%in%c(TRUE, FALSE)){stop("randomise must be one of TRUE or FALSE")}
 if(!simulate%in%c(TRUE, FALSE)){stop("simulate must be one of TRUE or FALSE")}
 if(!analyse%in%c(TRUE, FALSE)){stop("analyse must be one of TRUE or FALSE")}
