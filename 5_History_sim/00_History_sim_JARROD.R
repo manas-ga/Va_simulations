@@ -102,6 +102,8 @@ if(!file.exists(paste(output_path, "/Data.csv", sep = ""))){
 ######### Packages #################
 ####################################
 
+print(commandArgs(trailingOnly = TRUE))
+
 library(MCMCglmm)
 library(asreml)
 library(Matrix)
@@ -127,7 +129,6 @@ record = FALSE                         # Should the data of the simulations be a
 
 nsims = 1                              # Number of simulations (change scale in each simulation)
 n_cages = (as.numeric(commandArgs(trailingOnly = TRUE)[4]))                           # The number of replicate cages in the experiment
-print(n_cages)
 start_gen = 1                          # 
 end_gen = 2                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
 output_freq = 5000                     # The frequency with which SLiM outputs are to be generated for the analysis of history 
@@ -209,7 +210,6 @@ if(pdelta_method=="manual"){
 # How should bdelta[1] (intercept) and bdelta[2] (slope of (p-q)) be estimated
 
 bdelta_method = commandArgs(trailingOnly = TRUE)[1] # Can be "fixed" or "estimate"
-print(bdelta_method)
 
 if(bdelta_method=="estimate"){
   bdelta = c(NA, NA)
