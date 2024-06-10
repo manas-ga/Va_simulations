@@ -209,6 +209,7 @@ if(pdelta_method=="manual"){
 # How should bdelta[1] (intercept) and bdelta[2] (slope of (p-q)) be estimated
 
 bdelta_method = commandArgs(trailingOnly = TRUE)[1] # Can be "fixed" or "estimate"
+print(bdelta_method)
 
 if(bdelta_method=="estimate"){
   bdelta = c(NA, NA)
