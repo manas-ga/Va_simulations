@@ -17,7 +17,7 @@ param_matrix[,3] = rep(10, 9)
 param_matrix[6,3] = 5
 param_matrix[7,3] = 3
 
-param_matrix[,4] = rep(9, 3)
+param_matrix[,4] = rep(3, 9)
 param_matrix[8,4] = 1
 param_matrix[9,4] = 5
 
