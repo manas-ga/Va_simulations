@@ -102,8 +102,6 @@ if(!file.exists(paste(output_path, "/Data.csv", sep = ""))){
 ######### Packages #################
 ####################################
 
-print(commandArgs(trailingOnly = TRUE))
-
 library(MCMCglmm)
 library(asreml)
 library(Matrix)
@@ -123,9 +121,13 @@ rmarkdown::render(file.path(Vw_path))
 ############ Simulation Parameters ##################
 #####################################################
 
+# Print command line arguments to screen
+print(c("bdelta_method", "recombination rate (M)", "Population size", "No. of cages", "Experimental generations" ))
+print(commandArgs(trailingOnly = TRUE))
+
 simulate = TRUE                        # To run the simulation or not
 analyse = TRUE                         # To perform the analysis on simulated data or not
-record = FALSE                         # Should the data of the simulations be appended to "data.csv" 
+record = TRUE                         # Should the data of the simulations be appended to "data.csv" 
 
 nsims = 1                              # Number of simulations (change scale in each simulation)
 n_cages = (as.numeric(commandArgs(trailingOnly = TRUE)[4]))                           # The number of replicate cages in the experiment
@@ -678,7 +680,7 @@ for (sim in 1:nsims){
             vA_est_temp[i]<-m1$Vw_est
             bdelta_intercept_temp[i] = m1$bdelta[1]
             bdelta_slope_temp[i] = m1$bdelta[2]
-            bdelta_var_temp[i] = m1$bdelta_var 
+            bdelta_var_temp[i] = paste(m1$bdelta_var[1,1], m1$bdelta_var[2,2], m1$bdelta_var[1,2], sep = "_") 
             message(paste("Finding the best pdelta...", round((i/nseq)*100), "% complete"))
           }
           
@@ -687,8 +689,8 @@ for (sim in 1:nsims){
           bdelta_intercept_est[sim] = bdelta_intercept_temp[which(LL == max(LL))]
           bdelta_slope_est[sim] = bdelta_slope_temp[which(LL == max(LL))]
           bdelta_var_est[sim] = bdelta_var_temp[which(LL == max(LL))]
-          plot(vA_est~vA_true, xlab = "True value of Vw", ylab = "Estimate of Vw")
-          abline(0,1)
+          #plot(vA_est~vA_true, xlab = "True value of Vw", ylab = "Estimate of Vw")
+          #abline(0,1)
           mem = cbind(mem, mem_used()) # Store the memory usage
       
       }
@@ -724,9 +726,9 @@ for (sim in 1:nsims){
         pdelta_var_est[sim] = m1$pdelta_var
         bdelta_intercept_est[sim] = m1$bdelta[1]
         bdelta_slope_est[sim] = m1$bdelta[2]
-        bdelta_var_est[sim] = m1$bdelta_var
-        plot(vA_est~vA_true, xlab = "True value of Vw", ylab = "Estimate of Vw")
-        abline(0,1)
+        bdelta_var_est[sim] = paste(m1$bdelta_var[1,1], m1$bdelta_var[2,2], m1$bdelta_var[1,2], sep = "_")
+        #plot(vA_est~vA_true, xlab = "True value of Vw", ylab = "Estimate of Vw")
+        #abline(0,1)
         
         mem = cbind(mem, mem_used()) # Store the memory usage
         
@@ -752,12 +754,12 @@ for (sim in 1:nsims){
   
 }
 
-pdf(paste(output_path, "/Output_",gsub(" ", "_", Sys.time()), ".pdf", sep = ""), onefile = F)
+#pdf(paste(output_path, "/Output_",gsub(" ", "_", Sys.time()), ".pdf", sep = ""), onefile = F)
 
-plot(vA_est~vA_true, xlab = "True value of Vw", ylab = "Estimate of Vw")
-abline(0,1)
+#plot(vA_est~vA_true, xlab = "True value of Vw", ylab = "Estimate of Vw")
+#abline(0,1)
 
-dev.off()
+#dev.off()
 
 #save.image(file = paste(output_path, "/output", gsub(" ", "_", Sys.time()), ".RData", sep =""))
 
