@@ -130,7 +130,7 @@ simulate = TRUE                        # To run the simulation or not
 analyse = TRUE                         # To perform the analysis on simulated data or not
 record = TRUE                         # Should the data of the simulations be appended to "data.csv" 
 
-nsims = 1                              # Number of simulations (change scale in each simulation)
+nsims = 100                              # Number of simulations (change scale in each simulation)
 n_cages = (as.numeric(commandArgs(trailingOnly = TRUE)[4]))                           # The number of replicate cages in the experiment
 start_gen = 1                          # 
 end_gen = 2                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
@@ -375,7 +375,7 @@ for (sim in 1:nsims){
       c_genome = read.csv(paste(c_matrix_path,  "/", Set_ID, "_sim", sim, "_c_matrix_parents.csv", sep =""), header=F) # as.integer done to avoid scientific notation
       
       # Delete the .csv file
-      system(paste("rm ", paste(c_matrix_path,  "/", Set_ID, "_sim", sim, "_c_matrix_parents.csv", sep ="")), sep = "")
+      system(paste("rm", paste(c_matrix_path,  "/", Set_ID, "_sim", sim, "_c_matrix_parents.csv", sep =""), sep = " "))
       
       c_genome = as.matrix(c_genome)
       
