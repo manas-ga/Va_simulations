@@ -90,6 +90,7 @@ system(paste("mkdir -p", paste(base_path, "/b_Interim_files/SLiM_outputs", sep =
 
 Set_ID = as.character(paste(Sys.info()["nodename"], Sys.time()))
 Set_ID = gsub(" ", "_", Set_ID)
+Set_ID = paste(Set_ID, commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[2], commandArgs(trailingOnly = TRUE)[3], commandArgs(trailingOnly = TRUE)[4], commandArgs(trailingOnly = TRUE)[5], sep = "_")
 
 
 if(!file.exists(paste(output_path, "/Data.csv", sep = ""))){
