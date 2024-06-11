@@ -374,6 +374,9 @@ for (sim in 1:nsims){
       # Read genomes
       c_genome = read.csv(paste(c_matrix_path,  "/", Set_ID, "_sim", sim, "_c_matrix_parents.csv", sep =""), header=F) # as.integer done to avoid scientific notation
       
+      # Delete the .csv file
+      system(paste("rm ", paste(c_matrix_path,  "/", Set_ID, "_sim", sim, "_c_matrix_parents.csv", sep ="")), sep = "")
+      
       c_genome = as.matrix(c_genome)
       
       # Convert genome data into individual data (rows are individuals and columns are allele counts {0,1 or 2} at various sites). 
