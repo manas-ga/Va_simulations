@@ -260,8 +260,8 @@ for (sim in 1:nsims){
       
       mu = mu_list[sim]
       mu_msp = mu/10000
-      mu_neutral = 0
-      #mu_neutral = 0
+      mu_neutral = mu_msp/3
+      
       
       
       message(paste("Simulation", sim, "in progress..."))
