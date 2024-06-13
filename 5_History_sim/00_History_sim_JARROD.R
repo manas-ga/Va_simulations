@@ -93,7 +93,7 @@ Set_ID = gsub(" ", "_", Set_ID)
 Set_ID = paste(Set_ID, commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[2], commandArgs(trailingOnly = TRUE)[3], commandArgs(trailingOnly = TRUE)[4], commandArgs(trailingOnly = TRUE)[5], sep = "_")
 
 
-if(!file.exists(paste(output_path, "/Data.csv", sep = ""))){
+if(!file.exists(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""))){
   col_names = as.matrix(t(c("Set_ID","Time","end_gen", "ngen_expt", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "proj", "LDdelta", "pa", "Vs", "randomise", "pdelta_method", "bdelta_method", "vA_true", "vA_est", "pdelta_est", "pdelta_var_est", "bdelta_intercept_est", "bdelta_slope_est", "seg_sites", "bdelta_var_est", "va_lost")))
   write.table(col_names, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
 }
@@ -130,7 +130,7 @@ simulate = TRUE                        # To run the simulation or not
 analyse = TRUE                         # To perform the analysis on simulated data or not
 record = TRUE                         # Should the data of the simulations be appended to "data.csv" 
 
-nsims = 10                              # Number of simulations (change scale in each simulation)
+nsims = 1                              # Number of simulations (change scale in each simulation)
 n_cages = (as.numeric(commandArgs(trailingOnly = TRUE)[4]))                           # The number of replicate cages in the experiment
 start_gen = 1                          # 
 end_gen = 2                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
@@ -752,7 +752,7 @@ for (sim in 1:nsims){
   if(record == TRUE){
   dat = read.csv(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""), header=FALSE)
   dat = rbind(dat, c(Set_ID, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, proj, LDdelta, pa, Vs, randomise, pdelta_method, bdelta_method, vA_true[sim], vA_est[sim], pdelta_est[sim], pdelta_var_est[sim], bdelta_intercept_est[sim], bdelta_slope_est[sim], seg_sites[sim], bdelta_var_est[sim], va_lost[sim]))
-  write.table(dat, file = paste(output_path, "/", Set_ID, "Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
+  write.table(dat, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
   }
   
   
