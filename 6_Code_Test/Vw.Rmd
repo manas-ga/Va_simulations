@@ -386,7 +386,7 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
   if(Vs=="L"){
     L<-L*(ngen2 - ngen1)
   }
-  message("Computing covp over ngen2 - ngen1 genrations...")
+  message("Computing covp over ngen2 - ngen1 generations...")
   covp<-L%*%covp
   covp<-covp%*%L
   pmq<-L%*%pmq
