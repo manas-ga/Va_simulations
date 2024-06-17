@@ -130,7 +130,7 @@ simulate = TRUE                        # To run the simulation or not
 analyse = TRUE                         # To perform the analysis on simulated data or not
 record = TRUE                         # Should the data of the simulations be appended to "data.csv" 
 
-nsims = 100                              # Number of simulations (change scale in each simulation)
+nsims = 10                              # Number of simulations (change scale in each simulation)
 n_cages = (as.numeric(commandArgs(trailingOnly = TRUE)[4]))                           # The number of replicate cages in the experiment
 start_gen = 1                          # 
 end_gen = 2                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
@@ -191,7 +191,7 @@ bigalgebra = FALSE # Should bigalgebra be used for eigendecomposition?
 # How is pdelta to be estimated? 
 # Can be "optim" (using the function optim()), or "fixed" or "manual"(estimated by manually scanning a range of pdelta values)
 
-pdelta_method = "optim" # "optim" or "manual" or "fixed". If "this is "no_analysis", the estimate of Vw is not calculated, but the rest of the code still runs.
+pdelta_method = "fixed" # "optim" or "manual" or "fixed". If "this is "no_analysis", the estimate of Vw is not calculated, but the rest of the code still runs.
 
 if(pdelta_method=="fixed"){
   pdelta = 0 # Can be specified to any value
