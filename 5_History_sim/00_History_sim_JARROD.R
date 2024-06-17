@@ -9,6 +9,13 @@ rm(list = ls())
 # source("/ceph/users/marun/Va_simulations/5_History_sim/00_History_sim_JARROD.R")  ## ON QMASTER
 
 
+##########################################
+######## Code parallelization ############
+##########################################
+
+# parallel -j 18 --colsep "\s" --delay 5.0 Rscript 00_History_sim_JARROD.R :::: 000_parameter_grid.txt
+# https://www.danielecook.com/using-gnu-parallel-for-bioinformatics/
+
 ########################################################################
 ########### paths of various scripts and functions #####################
 ########################################################################
