@@ -553,23 +553,39 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   if(proj=="LoM" | proj=="BLoM"){ 
     
      message("Computing M...")
-     
+    
+     # Calculate the summation in two steps to save memory: (1) Write down the first term, (2) add the remaining terms only if ngen2 - ngen1 >1  
      M = ((1-1/(2*nind*Ne_factor))^(ngen1))*(1/(nind*Ne_factor))*nR^(1+ngen1)
      
-     for (x in (ngen1 + 2):(1+ngen2-ngen1)){
-       M = M + ((1-1/(2*nind*Ne_factor))^(x-1))*(1/(nind*Ne_factor))*nR^x
+     # Only perform further summations if (ngen2-ngen1 > 1)
+     
+     if((ngen2 - ngen1) > 1){
+       
+       for (x in (ngen1 + 2):(ngen2)){
+        M = M + ((1-1/(2*nind*Ne_factor))^(x-1))*(1/(nind*Ne_factor))*nR^x
+      }
+       
      }
-      
+     
+     # Old code>>>>>
      # M<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind*Ne_factor))^(x-1))*(1/(nind*Ne_factor))*nR^x}, simplify=FALSE))
      
      message("Computing N...")
      
+     # Calculate the summation in two steps to save memory: (1) Write down the first term, (2) add the remaining terms only if ngen2 - ngen1 >1  
      N = {((1-1/(2*nind*Ne_factor))^(ngen1))*nR^(ngen1)}
      
-     for (y in (ngen1 + 2):(1+ngen2-ngen1)){
-       N = N + {((1-1/(2*nind*Ne_factor))^(y-1))*nR^(y-1)}
+     # Only perform further summations if (ngen2-ngen1 > 1)
+     
+     if((ngen2 - ngen1) > 1){
+     
+       for (y in (ngen1 + 2):(ngen2)){
+         N = N + {((1-1/(2*nind*Ne_factor))^(y-1))*nR^(y-1)}
+      }
      }
      
+     
+     # Old code>>>>>
      # N<-Reduce('+', sapply(1+ngen1:(ngen2-ngen1), function(x){((1-1/(2*nind*Ne_factor))^(x-1))*nR^(x-1)}, simplify=FALSE))
 
     if(proj=="LoM"){
