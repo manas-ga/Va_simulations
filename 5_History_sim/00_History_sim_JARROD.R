@@ -23,7 +23,7 @@ rm(list = ls())
 
 ### Base path and path to Vw.Rmd (file containing Jarrod's functions) (depending on the system) ###
 
-if(Sys.info()["nodename"]=="bigfoot"){
+if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig")){
   
   base_path = "/ceph/users/marun/Va_simulations/5_History_sim"
   Vw_path = "/ceph/users/marun/Va_simulations/6_Code_Test/Vw.Rmd"
@@ -457,7 +457,7 @@ for (sim in 1:nsims){
       message("Calculating the true Vw in the parents' generation...")
       
       vA_true[sim] = t(list_alpha)%*%L%*%list_alpha         # Additive genetic variance
-      rm("L") # remove L to save memory
+      
       gc(verbose = FALSE)
       
       message(paste("The true Vw in the parents' generation is", vA_true[sim]))
@@ -682,7 +682,7 @@ for (sim in 1:nsims){
                          bdelta = bdelta,
                          Vs = Vs,
                          method = method,
-                         L = NULL,    # list with elements UL and DL
+                         L = L,    # list with elements UL and DL
                          svdL = NULL,    # list with elements UL and DL
                          bigalgebra = bigalgebra, 
                          tol = sqrt(.Machine$double.eps))
@@ -726,7 +726,7 @@ for (sim in 1:nsims){
                      bdelta = bdelta,
                      Vs = Vs,
                      method = method,
-                     L = NULL,    # list with elements UL and DL
+                     L = L,    # list with elements UL and DL
                      svdL = NULL,    # list with elements UL and DL
                      bigalgebra = bigalgebra, 
                      tol = sqrt(.Machine$double.eps))
