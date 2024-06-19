@@ -7,7 +7,7 @@
 ## A. Sims without burnin ##
 ############################
 
-sequence_length = 1e+05
+sequence_length = 1e+06
 end_gen = 2
 DFE = "g"
 shape = 0.3
