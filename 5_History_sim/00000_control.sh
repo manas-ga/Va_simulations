@@ -8,7 +8,7 @@
 #$ -l h_vmem=500G
 #$ -pe smp 1
 #$ -e /mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim/b_Interim_files/std_out/
-#$ -o//mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim/b_Interim_files/std_out/
+#$ -o /mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim/b_Interim_files/std_out/
 
 
 Param=`cat 000_parameter_grid.txt | awk "NR==$SGE_TASK_ID"`
