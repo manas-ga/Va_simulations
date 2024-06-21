@@ -5,8 +5,7 @@
 #$ -N Vw_test
 #$ -t 1-18
 #$ -tc 18
-#$ -l h_vmem=50G
-#$ -l h="bigfoot"
+#$ -l h="bigbird"
 #$ -e /mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim/b_Interim_files/std_out/
 #$ -o /mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim/b_Interim_files/std_out/
 
