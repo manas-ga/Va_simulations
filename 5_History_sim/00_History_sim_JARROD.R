@@ -130,7 +130,7 @@ rmarkdown::render(file.path(Vw_path))
 #####################################################
 
 # Print command line arguments to screen
-print(c("bdelta_method", "recombination rate (M)", "Population size", "No. of cages", "Experimental generations" ))
+print(c("Mutation rate", "recombination rate (M)", "Population size", "No. of cages", "Experimental generations" ))
 print(commandArgs(trailingOnly = TRUE))
 
 simulate = TRUE                        # To run the simulation or not
