@@ -1,7 +1,9 @@
 ########################################################################
-##### Script tp write a text file containing the grid of parameters ####
+##### Script to write a text file containing the grid of parameters ####
 ########################################################################
 
+nsims = 10 # number of simulations for each set
+mu_list = seq(5.56e-07, 5.56e-06, length = nsims)
 
 param_matrix = matrix(NA, nrow = 9, ncol  = 4)
 
@@ -21,10 +23,25 @@ param_matrix[,4] = rep(3, 9)
 param_matrix[8,4] = 1
 param_matrix[9,4] = 5
 
-param_matrix = rbind(param_matrix, param_matrix)
+# Repeat the matrix nsims times
 
-param_matrix = cbind(c(rep("fixed", 9), rep("estimate", 9)), param_matrix)
+param_matrix_full = c()
+
+for (sim in 1:nsims){
+  param_matrix_full = rbind(param_matrix_full,param_matrix)
+}
+
+mu_list = rep(mu_list, nrow(param_matrix))
+mu_list = sort(mu_list)
+
+param_matrix_full = cbind(mu_list, param_matrix_full)
+param_matrix_full = param_matrix_full[order(param_matrix_full[,1]),]
+
+param_matrix_full = param_matrix_full[seq(1, 90, 9),] ## TEMP trial selection (TO BE DELETED !!!!!)
+
+#param_matrix = rbind(param_matrix, param_matrix)
+#param_matrix = cbind(c(rep("fixed", 9), rep("estimate", 9)), param_matrix)
 
 
 
-write.table(param_matrix, file = "param.txt", sep = " ", col.names = FALSE, row.names = FALSE)
+write.table(param_matrix_full, file = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim/000_parameter_grid.txt", sep = " ", col.names = FALSE, row.names = FALSE)

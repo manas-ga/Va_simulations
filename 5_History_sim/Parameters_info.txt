@@ -17,6 +17,8 @@ mu_list = [8.5e-08, 7.5e-07]
 mu_msp = mu_list/1000
 mu_neutral = mu_msp/3
 Ne = 1.33e+06
+pdelta_method = "optim"
+bdelta_method = "estimate"
 
 
 ############################################
@@ -37,6 +39,8 @@ mu_list = [3.45e-07, 3.45e-06]
 mu_msp = mu_list/1000
 mu_neutral = mu_msp/3
 Ne = 1.33e+06
+pdelta_method = "optim"
+bdelta_method = "estimate"
 
 (ii) If one wants to restrict the loss of Va between the parents and the experiment to about 5%
 
@@ -52,5 +56,6 @@ mu_list = [5.56e-07, 5.56e-06]
 mu_msp = mu_list/1000
 mu_neutral = mu_msp/3
 Ne = 1.33e+06
-
+pdelta_method = "optim"
+bdelta_method = "estimate"
 
