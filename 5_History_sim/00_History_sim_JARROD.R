@@ -140,7 +140,7 @@ record = TRUE                         # Should the data of the simulations be ap
 nsims = 1                              # Number of simulations (change scale in each simulation)
 n_cages = (as.numeric(commandArgs(trailingOnly = TRUE)[4]))                           # The number of replicate cages in the experiment
 start_gen = 1                          # 
-end_gen = 20000                        # How many generations should the SLiM simulation run for while simulating the history (burnin)
+end_gen = 2                        # How many generations should the SLiM simulation run for while simulating the history (burnin)
 output_freq = 2500                     # The frequency with which SLiM outputs are to be generated for the analysis of history 
 ngen_expt = (as.numeric(commandArgs(trailingOnly = TRUE)[5]))                          # How many generations should allele frequency changes be calculated over in the experiment
 
@@ -177,7 +177,7 @@ DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal)
 # If DFE is "g"
 shape = 0.3                                  # Shape of the gamma DFE ##### mean = shape*scale
 scale_list = seq(0.033, 0.033, length = nsims)  # Vector of Scale of the gamma DFE
-mut_ratio = 0                          # The ratio of beneficial:deleterious mutations in msprime
+mut_ratio = 1                          # The ratio of beneficial:deleterious mutations in msprime
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
