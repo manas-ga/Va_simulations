@@ -5,7 +5,9 @@
 #$ -N Vw_test
 #$ -t 1-18
 #$ -tc 18
-#$ -l h_vmem=50G
+#$ -l mem_free=250G
+#$ -l s_vmem=350G
+#$ -l h_vmem=400G
 #$ -e /ceph/users/marun/Va_simulations/5_History_sim/b_Interim_files/std_out/
 #$ -o /ceph/users/marun/Va_simulations/5_History_sim/b_Interim_files/std_out/
 
