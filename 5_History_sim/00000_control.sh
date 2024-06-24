@@ -8,6 +8,7 @@
 #$ -l mem_free=250G
 #$ -l s_vmem=350G
 #$ -l h_vmem=400G
+#$ -pe smp 64
 #$ -e /ceph/users/marun/Va_simulations/5_History_sim/b_Interim_files/std_out/
 #$ -o /ceph/users/marun/Va_simulations/5_History_sim/b_Interim_files/std_out/
 
