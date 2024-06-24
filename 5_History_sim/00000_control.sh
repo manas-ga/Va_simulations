@@ -5,7 +5,7 @@
 #$ -N Vw_test
 #$ -t 1-18
 #$ -tc 18
-#$ -l h="bigfoot"
+#$ -l h_vmem=50G
 #$ -e /ceph/users/marun/Va_simulations/5_History_sim/b_Interim_files/std_out/
 #$ -o /ceph/users/marun/Va_simulations/5_History_sim/b_Interim_files/std_out/
 
