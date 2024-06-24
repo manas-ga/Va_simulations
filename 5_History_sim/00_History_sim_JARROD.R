@@ -682,7 +682,7 @@ for (sim in 1:nsims){
                          bdelta = bdelta,
                          Vs = Vs,
                          method = method,
-                         L = L,    # list with elements UL and DL
+                         L = NULL,    # list with elements UL and DL
                          svdL = NULL,    # list with elements UL and DL
                          bigalgebra = bigalgebra, 
                          tol = sqrt(.Machine$double.eps))
@@ -726,7 +726,7 @@ for (sim in 1:nsims){
                      bdelta = bdelta,
                      Vs = Vs,
                      method = method,
-                     L = L,    # list with elements UL and DL
+                     L = NULL,    # list with elements UL and DL
                      svdL = NULL,    # list with elements UL and DL
                      bigalgebra = bigalgebra, 
                      tol = sqrt(.Machine$double.eps))
