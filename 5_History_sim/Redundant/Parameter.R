@@ -3,7 +3,7 @@
 ########################################################################
 
 nsims = 10 # number of simulations for each set
-mu_list = seq(5.56e-07, 5.56e-06, length = nsims)
+mu_list = seq(8.5e-08, 7.5e-07, length = nsims)
 
 param_matrix = matrix(NA, nrow = 9, ncol  = 4)
 
