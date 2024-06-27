@@ -3,8 +3,8 @@
 #$ -V
 #$ -cwd
 #$ -N Vw_test
-#$ -t 1
-#$ -tc 1
+#$ -t 1-30
+#$ -tc 15
 #$ -l mem_free=450G
 #$ -l s_vmem=480G
 #$ -l h_vmem=500G
