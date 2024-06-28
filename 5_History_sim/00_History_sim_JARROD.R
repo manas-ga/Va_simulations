@@ -150,9 +150,9 @@ ngen_expt = (as.numeric(commandArgs(trailingOnly = TRUE)[5]))                   
 ###########################################
 
 Ne = 1.33e+06                          # Effective population size
-n_ind = 2500                          # Number of individuals to be sampled in msprime and then run forward in SLiM
+n_ind = 2500                           # Number of individuals to be sampled in msprime and then run forward in SLiM
 n_ind_exp = (as.numeric(commandArgs(trailingOnly = TRUE)[3]))                       # The population size of the experiment. In 00_History.slim the population reduces to n_ind_exp in the last generation to simulate the sampling of the parents for the experiment
-n_sample = n_ind_exp                        # Number of individuals to be sampled to construct the c matrix  (This is just because c matrices become awfully large). Typically should be the same as n_ind_exp 
+n_sample = n_ind_exp                   # Number of individuals to be sampled to construct the c matrix  (This is just because c matrices become awfully large). Typically should be the same as n_ind_exp 
 
 sequence_length = 1e+06                # Just have a single continuous chromosome that is simulated
 r = 1.4e-07                            # Recombination rate (per site per generation) during the forward simulation of history
