@@ -101,7 +101,7 @@ Set_ID = paste(Set_ID, commandArgs(trailingOnly = TRUE)[1], commandArgs(trailing
 
 
 if(!file.exists(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""))){
-  col_names = as.matrix(t(c("Set_ID","Time","end_gen", "ngen_expt", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "proj", "LDdelta", "pa", "Vs", "randomise", "pdelta_method", "bdelta_method", "vA_true", "vA_est", "pdelta_est", "pdelta_var_est", "bdelta_intercept_est", "bdelta_slope_est", "seg_sites", "bdelta_var_est", "va_lost")))
+  col_names = as.matrix(t(c("Set_ID","Time","end_gen", "ngen_expt", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "proj", "LDdelta", "pa", "Vs", "randomise", "pdelta_method", "bdelta_method", "vA_true", "vA_est", "pdelta_est", "pdelta_var_est", "bdelta_intercept_est", "bdelta_slope_est", "seg_sites", "bdelta_var_est", "vA_left")))
   write.table(col_names, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
 }
 
@@ -140,7 +140,7 @@ record = TRUE                         # Should the data of the simulations be ap
 nsims = 1                              # Number of simulations (change scale in each simulation)
 n_cages = (as.numeric(commandArgs(trailingOnly = TRUE)[4]))                           # The number of replicate cages in the experiment
 start_gen = 1                          # 
-end_gen = 20000                        # How many generations should the SLiM simulation run for while simulating the history (burnin)
+end_gen = 2                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
 output_freq = 2500                     # The frequency with which SLiM outputs are to be generated for the analysis of history 
 ngen_expt = (as.numeric(commandArgs(trailingOnly = TRUE)[5]))                          # How many generations should allele frequency changes be calculated over in the experiment
 
@@ -177,7 +177,7 @@ DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal)
 # If DFE is "g"
 shape = 0.3                                  # Shape of the gamma DFE ##### mean = shape*scale
 scale_list = seq(0.033, 0.033, length = nsims)  # Vector of Scale of the gamma DFE
-mut_ratio = 0                          # The ratio of beneficial:deleterious mutations in msprime
+mut_ratio = 1                          # The ratio of beneficial:deleterious mutations in msprime
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
@@ -198,7 +198,7 @@ bigalgebra = FALSE # Should bigalgebra be used for eigendecomposition?
 # How is pdelta to be estimated? 
 # Can be "optim" (using the function optim()), or "fixed" or "manual"(estimated by manually scanning a range of pdelta values)
 
-pdelta_method = "optim" # "optim" or "manual" or "fixed". If "this is "no_analysis", the estimate of Vw is not calculated, but the rest of the code still runs.
+pdelta_method = "fixed" # "optim" or "manual" or "fixed". If "this is "no_analysis", the estimate of Vw is not calculated, but the rest of the code still runs.
 
 if(pdelta_method=="fixed"){
   pdelta = 0 # Can be specified to any value
@@ -242,7 +242,7 @@ if(!analyse%in%c(TRUE, FALSE)){stop("analyse must be one of TRUE or FALSE")}
 
 # Create empty vectors to store true vA and estimates of vA from the model
 
-va_lost = rep(NA, nsims)
+vA_left = rep(NA, nsims)
 vA_true = rep(NA, nsims) # Additive genetic variance
 va_true = rep(NA, nsims) # Additive genic variance
 vA_est = rep(NA, nsims)  # Estimated vA from the model
@@ -581,12 +581,21 @@ for (sim in 1:nsims){
         
       }
       
-      # Calculate the additive genic variance that is lost between the parents and the first generation of the experiment in replicate 1
+      # Many loci get fixed between the parents' and the first generation
+      # Loop through cages to calculate the average vA remaining in the first generation
+      # This is not the actual vA in gen1, but really the vA in the parents' generation if the loci that were to be lost in gen1 were removed
       
-      fixed = which(pbar1[1,]==0|pbar1[1,]==1)
-      va_lost[sim] = sum(diversity[fixed]*list_alpha[fixed]*list_alpha[fixed])
+      vA_left_current = rep(NA, n_cages)
       
-      message(paste("The percentage lost Va in between the parents' generation and the experiment in Cage 1 is", va_lost[sim]*100/va_true[sim], "%"))
+      for (cage in 1:n_cages){
+        seg_sites_gen1 = which(pbar1[cage,]<1&pbar1[cage,]>0) # indices of sites segregating in gen1 of the experiment
+        vA_left_current[cage] = t(list_alpha[seg_sites_gen1])%*%L[seg_sites_gen1, seg_sites_gen1]%*%list_alpha[seg_sites_gen1]
+        
+      }
+      
+      vA_left[sim] = mean(vA_left_current)
+      
+      message(paste("The percentage lost Va in between the parents' generation and the experiment in Cage 1 is", vA_left[sim]*100/va_true[sim], "%"))
       
       ################################################################
       ######## Randomise the reference allele in the c matrix ########
@@ -614,7 +623,21 @@ for (sim in 1:nsims){
         
       }
       
+      #####################################################
+      ######## Randomise the reference allele in L ########
+      #####################################################
       
+      if(randomise==TRUE){
+        
+        # Create a new vector of -1s (wherever ran_vect has -2) and 1s (wherever ran_vect has 0)
+        ran_vect_L = ifelse(ran_vect==-1, -1, 1)
+        
+        # Calculate a matrix that decides which off-diagonal elements in L get their signs flipped
+        
+        ran_matrix_L = ran_vect_L%*%t(ran_vect_L)
+        L = L*ran_matrix_L
+        
+      }
       
       ################################################################
       ######## Randomise the reference allele in pbar1 and pbar2 #####
@@ -639,6 +662,8 @@ for (sim in 1:nsims){
         pbar2 = abs(pbar2 + ran_matrix_pbar)
         
       }
+      
+      # 
       
       # Store the memory
       
@@ -682,7 +707,7 @@ for (sim in 1:nsims){
                          bdelta = bdelta,
                          Vs = Vs,
                          method = method,
-                         L = NULL,    # list with elements UL and DL
+                         L = L,    # list with elements UL and DL
                          svdL = NULL,    # list with elements UL and DL
                          bigalgebra = bigalgebra, 
                          tol = sqrt(.Machine$double.eps))
@@ -726,7 +751,7 @@ for (sim in 1:nsims){
                      bdelta = bdelta,
                      Vs = Vs,
                      method = method,
-                     L = NULL,    # list with elements UL and DL
+                     L = L,    # list with elements UL and DL
                      svdL = NULL,    # list with elements UL and DL
                      bigalgebra = bigalgebra, 
                      tol = sqrt(.Machine$double.eps))
@@ -758,7 +783,7 @@ for (sim in 1:nsims){
   
   if(record == TRUE){
   dat = read.csv(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""), header=FALSE)
-  dat = rbind(dat, c(Set_ID, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, proj, LDdelta, pa, Vs, randomise, pdelta_method, bdelta_method, vA_true[sim], vA_est[sim], pdelta_est[sim], pdelta_var_est[sim], bdelta_intercept_est[sim], bdelta_slope_est[sim], seg_sites[sim], bdelta_var_est[sim], va_lost[sim]))
+  dat = rbind(dat, c(Set_ID, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, proj, LDdelta, pa, Vs, randomise, pdelta_method, bdelta_method, vA_true[sim], vA_est[sim], pdelta_est[sim], pdelta_var_est[sim], bdelta_intercept_est[sim], bdelta_slope_est[sim], seg_sites[sim], bdelta_var_est[sim], vA_left[sim]))
   write.table(dat, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
   }
   
