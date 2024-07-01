@@ -155,9 +155,9 @@ n_ind_exp = (as.numeric(commandArgs(trailingOnly = TRUE)[3]))                   
 n_sample = n_ind_exp                   # Number of individuals to be sampled to construct the c matrix  (This is just because c matrices become awfully large). Typically should be the same as n_ind_exp 
 
 sequence_length = 1e+06                # Just have a single continuous chromosome that is simulated
-r = 1.4e-07                            # Recombination rate (per site per generation) during the forward simulation of history
+r = (as.numeric(commandArgs(trailingOnly = TRUE)[2]))/sequence_length                            # Recombination rate (per site per generation) during the forward simulation of history
 r_expt = (as.numeric(commandArgs(trailingOnly = TRUE)[2]))/sequence_length                       # Recombination rate to be used during during the experiment (Drosophila melanogaster ~ 1.4e-08)
-r_msp = 1.4e-09                        # Recombination rate for the initial msprime simulation
+r_msp = r/532                        # Recombination rate for the initial msprime simulation
 AtleastOneRecomb = FALSE               # Whether there has to be at least one recombination event
 
 #mu = 1.3e-06                          # Mutation rate of non_neutral mutations during the forward simulation of the history
@@ -266,10 +266,8 @@ for (sim in 1:nsims){
       # Specify the mutation rate for the SLiM history simulation
       
       mu = mu_list[sim]
-      mu_msp = mu/10000
+      mu_msp = mu/532
       mu_neutral = mu_msp/3
-      
-      
       
       message(paste("Simulation", sim, "in progress..."))
     
@@ -297,9 +295,6 @@ for (sim in 1:nsims){
       arg4 = paste("-d sequence_length=", sequence_length, sep = "")
       arg5 = paste("-d r=", r, sep = "")
       arg6 = paste("-d ", shQuote(paste("msprime_output_path=","'", slim_output_path, "'", sep = "")), sep = "") # Path where the msprime burnin is stored (it's same as slim_output_path)
-      
-      # Could have got rid of arg6 since it is identical to arg7, but keeping it so as to avoid having to edit downstream code
-      
       arg7 = paste("-d ", shQuote(paste("slim_output_path=","'", slim_output_path, "'", sep = "")), sep = "") 
       arg8 = paste("-d end_gen=", end_gen, sep = "")
       arg9 = paste("-d output_freq=", output_freq, sep = "")
