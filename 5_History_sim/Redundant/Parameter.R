@@ -2,8 +2,8 @@
 ##### Script to write a text file containing the grid of parameters ####
 ########################################################################
 
-nsims = 30 # number of simulations for each set
-mu_list = seq(5.56e-07, 5.56e-06, length = nsims)
+nsims = 100 # number of simulations for each set
+mu_list = seq(5.0e-08, 3.5e-07, length = nsims)
 
 param_matrix = matrix(NA, nrow = 9, ncol  = 4)
 
@@ -37,7 +37,7 @@ mu_list = sort(mu_list)
 param_matrix_full = cbind(mu_list, param_matrix_full)
 param_matrix_full = param_matrix_full[order(param_matrix_full[,1]),]
 
-param_matrix_full = param_matrix_full[seq(1, 270, 9),] ## TEMP trial selection (TO BE DELETED !!!!!)
+param_matrix_full = param_matrix_full[seq(1, 9*nsims, 9),] ## TEMP trial selection (TO BE DELETED !!!!!)
 
 #param_matrix = rbind(param_matrix, param_matrix)
 #param_matrix = cbind(c(rep("fixed", 9), rep("estimate", 9)), param_matrix)

@@ -3,10 +3,10 @@
 #$ -V
 #$ -cwd
 #$ -N Vw_test
-#$ -t 1-8
-#$ -tc 4
-#$ -l mem_free=450g,s_vmem=480g,h_vmem=500g
-#$ -pe smp64 25
+#$ -t 1-100
+#$ -tc 10
+#$ -l mem_free=100g,s_vmem=80g,h_vmem=90g
+#$ -pe smp64 5
 #$ -e /ceph/users/marun/Va_simulations/5_History_sim/b_Interim_files/std_out/
 #$ -o /ceph/users/marun/Va_simulations/5_History_sim/b_Interim_files/std_out/
 
