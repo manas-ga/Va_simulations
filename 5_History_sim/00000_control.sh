@@ -2,8 +2,8 @@
 
 #$ -V
 #$ -cwd
-#$ -N Vw_test
-#$ -t 1-100
+#$ -N Vw_no_burnin
+#$ -t 1-50
 #$ -tc 10
 #$ -l mem_free=130g,s_vmem=1200g,h_vmem=150g
 #$ -pe smp64 20
