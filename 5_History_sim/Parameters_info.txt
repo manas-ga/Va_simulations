@@ -7,6 +7,25 @@
 ## A. Sims without burnin ##
 ############################
 
+### NEW PARAMETERS ###
+
+These parameters, ensure that the DFE is comparable to the simulations with burnin
+
+sequence_length = 1e+06
+end_gen = 2
+DFE = "g"
+shape = 0.3
+scale = 0.033
+mut_ratio = 1
+mu_list = [2.66e-09, 1.86e-08]
+mu_msp = mu_list/532              # The ratio of 1.33 million (Ne) to 2500 (population size in the forward simulations)
+mu_neutral = mu_msp/3
+Ne = 1.33e+06
+pdelta_method = "optim"
+bdelta_method = "estimate"
+
+### OLD PARAMETERS ###
+
 sequence_length = 1e+06
 end_gen = 2
 DFE = "g"
@@ -36,7 +55,7 @@ shape = 0.3
 scale = 0.05
 mut_ratio = 0
 mu_list = [3.45e-07, 3.45e-06]
-mu_msp = mu_list/1000
+mu_msp = mu_list/532
 mu_neutral = mu_msp/3
 Ne = 1.33e+06
 pdelta_method = "optim"
@@ -53,7 +72,7 @@ shape = 0.3
 scale = 0.033
 mut_ratio = 0
 mu_list = [5.56e-07, 5.56e-06]
-mu_msp = mu_list/1000
+mu_msp = mu_list/532
 mu_neutral = mu_msp/3
 Ne = 1.33e+06
 pdelta_method = "optim"
