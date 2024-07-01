@@ -4,7 +4,7 @@
 
 nsims = 100 # number of simulations for each set
 mu_list = seq(2.27e-09, 2.46e-08, length = nsims)
-test = FALSE # If TRUE, only selects parameters for the "standard" simulation set
+test = TRUE # If TRUE, only selects parameters for the "standard" simulation set
 
 param_matrix = matrix(NA, nrow = 9, ncol  = 4)
 
