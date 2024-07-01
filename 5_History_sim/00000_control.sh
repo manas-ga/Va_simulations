@@ -2,7 +2,7 @@
 
 #$ -V
 #$ -cwd
-#$ -N Vw_no_burnin
+#$ -N Vw_sim
 #$ -t 1-900
 #$ -tc 10
 #$ -l mem_free=130g,s_vmem=120g,h_vmem=150g

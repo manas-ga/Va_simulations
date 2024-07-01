@@ -2,9 +2,9 @@
 ##### Script to write a text file containing the grid of parameters ####
 ########################################################################
 
-nsims = 50 # number of simulations for each set
+nsims = 100 # number of simulations for each set
 mu_list = seq(3.0e-09, 2.0e-08, length = nsims)
-test = TRUE # If TRUE, only selects parameters for the "standard" simulation set
+test = FALSE # If TRUE, only selects parameters for the "standard" simulation set
 
 param_matrix = matrix(NA, nrow = 9, ncol  = 4)
 
