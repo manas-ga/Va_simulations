@@ -2,7 +2,7 @@ library(ggplot2)
 
 #### Code for making plots
 
-d = read.csv("c_Output/Data_no_burnin.csv", header=T)
+d = read.csv("Data_no_burnin.csv", header=T)
 
 # Delete row names in every alternate line
 
