@@ -33,7 +33,7 @@ d$ngen_expt = factor(d$ngen_expt, levels = c("1", "3", "5"))
 
 d_std = d[d$ngen_expt=="3"&d$n_ind_exp=="1000"&d$n_cages=="10"&d$r_expt==1.4e-06,]
 p_std = ggplot(d_std, aes(y = vA_est, x = vA_true))
-p_std + theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1) + labs(x = "True Vw", y = "Estimate of Vw") + theme(text = element_text(size = 15))
+p_std + theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1) + labs(x = "True Vw", y = "Estimate of Vw") + theme(text = element_text(size = 15)) 
 
 ##################################################################################################
 

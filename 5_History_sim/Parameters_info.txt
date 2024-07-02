@@ -11,6 +11,8 @@
 
 These parameters, ensure that the DFE is comparable to the simulations with burnin
 
+Ne = 1.33e+6
+n_ind = 2500
 sequence_length = 1e+06
 end_gen = 2
 DFE = "g"
@@ -26,6 +28,8 @@ bdelta_method = "estimate"
 
 ### OLD PARAMETERS ###
 
+Ne = 1.33e+6
+n_ind = 2500
 sequence_length = 1e+06
 end_gen = 2
 DFE = "g"
@@ -48,6 +52,8 @@ bdelta_method = "estimate"
 
 # This results in the maximum number of segregatng sites to be around 33000
 
+Ne = 1.33e+6
+n_ind = 2500
 sequence_length = 1e+06
 end_gen = 20000
 DFE = "g"
@@ -65,6 +71,8 @@ bdelta_method = "estimate"
 
 # This results in the maximum number of segregatng sites to be around 60000
 
+Ne = 1.33e+6
+n_ind = 2500
 sequence_length = 1e+06
 end_gen = 20000
 DFE = "g"
