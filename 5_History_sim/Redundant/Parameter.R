@@ -4,7 +4,7 @@
 
 nsims = 10 # number of simulations for each set
 mu_list = seq(5.56e-07, 5.56e-06, length = nsims)
-test = FALSE # If TRUE, only selects parameters for the "standard" simulation set
+test = TRUE # If TRUE, only selects parameters for the "standard" simulation set
 
 param_matrix = matrix(NA, nrow = 9, ncol  = 4)
 
@@ -39,7 +39,7 @@ param_matrix_full = cbind(mu_list, param_matrix_full)
 param_matrix_full = param_matrix_full[order(param_matrix_full[,1]),]
 
 if(test){
-  param_matrix_full = param_matrix_full[seq(1, 9*nsims, 9),] ## TEMP trial selection (TO BE DELETED !!!!!)
+  param_matrix_full = param_matrix_full[seq(2, 9*nsims, 9),] ## TEMP trial selection (TO BE DELETED !!!!!)
 }
 
 write.table(param_matrix_full, file = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim/000_parameter_grid.txt", sep = " ", col.names = FALSE, row.names = FALSE)

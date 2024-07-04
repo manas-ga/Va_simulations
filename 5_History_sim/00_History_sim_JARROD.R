@@ -264,7 +264,7 @@ for (sim in 1:nsims){
       # Specify the mutation rate for the SLiM history simulation
       
       mu = mu_list[sim]
-      mu_msp = mu/532
+      mu_msp = mu/5320
       mu_neutral = mu_msp/3
       
       message(paste("Simulation", sim, "in progress..."))
@@ -588,7 +588,7 @@ for (sim in 1:nsims){
       
       vA_left[sim] = mean(vA_left_current)
       
-      message(paste("The percentage lost Va in between the parents' generation and the experiment in Cage 1 is", vA_left[sim]*100/va_true[sim], "%"))
+      message(paste("The average vA left in gen1 of the experiment is ", vA_left[sim]*100/va_true[sim], "%"))
       
       ################################################################
       ######## Randomise the reference allele in the c matrix ########
