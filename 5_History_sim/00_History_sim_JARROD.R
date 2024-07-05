@@ -138,11 +138,11 @@ analyse = TRUE                         # To perform the analysis on simulated da
 record = TRUE                         # Should the data of the simulations be appended to "data.csv" 
 
 nsims = 1                              # Number of simulations (change scale in each simulation)
-n_cages = (as.numeric(commandArgs(trailingOnly = TRUE)[4]))                           # The number of replicate cages in the experiment
+n_cages = (as.numeric(commandArgs(trailingOnly = TRUE)[5]))                           # The number of replicate cages in the experiment
 start_gen = 1                          # 
 end_gen = 20000                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
 output_freq = 2500                     # The frequency with which SLiM outputs are to be generated for the analysis of history 
-ngen_expt = (as.numeric(commandArgs(trailingOnly = TRUE)[5]))                          # How many generations should allele frequency changes be calculated over in the experiment
+ngen_expt = (as.numeric(commandArgs(trailingOnly = TRUE)[6]))                          # How many generations should allele frequency changes be calculated over in the experiment
 
 
 ###########################################
@@ -151,12 +151,12 @@ ngen_expt = (as.numeric(commandArgs(trailingOnly = TRUE)[5]))                   
 
 Ne = 1.33e+06                          # Effective population size
 n_ind = 2500                           # Number of individuals to be sampled in msprime and then run forward in SLiM
-n_ind_exp = (as.numeric(commandArgs(trailingOnly = TRUE)[3]))                       # The population size of the experiment. In 00_History.slim the population reduces to n_ind_exp in the last generation to simulate the sampling of the parents for the experiment
+n_ind_exp = (as.numeric(commandArgs(trailingOnly = TRUE)[4]))                       # The population size of the experiment. In 00_History.slim the population reduces to n_ind_exp in the last generation to simulate the sampling of the parents for the experiment
 n_sample = n_ind_exp                   # Number of individuals to be sampled to construct the c matrix  (This is just because c matrices become awfully large). Typically should be the same as n_ind_exp 
 
 sequence_length = 1e+06                # Just have a single continuous chromosome that is simulated
 r = (as.numeric(commandArgs(trailingOnly = TRUE)[2]))/sequence_length                            # Recombination rate (per site per generation) during the forward simulation of history
-r_expt = (as.numeric(commandArgs(trailingOnly = TRUE)[2]))/sequence_length                       # Recombination rate to be used during during the experiment (Drosophila melanogaster ~ 1.4e-08)
+r_expt = (as.numeric(commandArgs(trailingOnly = TRUE)[3]))/sequence_length                       # Recombination rate to be used during during the experiment (Drosophila melanogaster ~ 1.4e-08)
 r_msp = r/532                        # Recombination rate for the initial msprime simulation
 AtleastOneRecomb = FALSE               # Whether there has to be at least one recombination event
 

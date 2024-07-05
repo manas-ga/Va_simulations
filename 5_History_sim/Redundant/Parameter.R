@@ -6,23 +6,26 @@ nsims = 10 # number of simulations for each set
 mu_list = seq(5.56e-07, 5.56e-06, length = nsims)
 test = TRUE # If TRUE, only selects parameters for the "standard" simulation set
 
-param_matrix = matrix(NA, nrow = 9, ncol  = 4)
+param_matrix = matrix(NA, nrow = 9, ncol  = 5)
+
 
 param_matrix[,1] = rep(1.4, 9)
 param_matrix[2,1] = 0.14
 param_matrix[3,1] = 0.014
 
-param_matrix[,2] = rep(1000, 9)
-param_matrix[4,2] = 500
-param_matrix[5,2] = 100
+param_matrix[,2] = param_matrix[,1] # For noy recombination rates in both phases are the same!!!
 
-param_matrix[,3] = rep(10, 9)
-param_matrix[6,3] = 5
-param_matrix[7,3] = 3
+param_matrix[,3] = rep(1000, 9)
+param_matrix[4,3] = 500
+param_matrix[5,3] = 100
 
-param_matrix[,4] = rep(3, 9)
-param_matrix[8,4] = 1
-param_matrix[9,4] = 5
+param_matrix[,4] = rep(10, 9)
+param_matrix[6,4] = 5
+param_matrix[7,4] = 3
+
+param_matrix[,5] = rep(3, 9)
+param_matrix[8,5] = 1
+param_matrix[9,5] = 5
 
 # Repeat the matrix nsims times
 
