@@ -15,6 +15,7 @@ d$pdelta_est = as.numeric(d$pdelta_est)
 d$bdelta_intercept_est = as.numeric(d$bdelta_intercept_est)
 d$bdelta_slope_est = as.numeric(d$bdelta_slope_est)
 d$r_expt = as.numeric(d$r_expt)
+d$r = as.numeric(d$r)
 d$sequence_length = as.numeric(d$sequence_length)
 d$mu = as.numeric(d$mu)
 
