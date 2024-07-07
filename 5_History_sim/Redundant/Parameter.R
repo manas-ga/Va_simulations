@@ -2,6 +2,13 @@
 ##### Script to write a text file containing the grid of parameters ####
 ########################################################################
 
+# Col 1 = mu
+# Col 2 = r*sequence_length
+# Col 3 = r_expt*sequence_length
+# Col 4 = n_ind_exp
+# Col 5 = n_cages
+# Col 6 = ngen_expt
+
 nsims = 10 # number of simulations for each set
 mu_list = seq(5.56e-07, 5.56e-06, length = nsims)
 test = TRUE # If TRUE, only selects parameters for the "standard" simulation set
