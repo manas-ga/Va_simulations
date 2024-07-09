@@ -427,9 +427,9 @@ for (sim in 1:nsims){
       n_individuals = nrow(c_ind)/2
       n_sites_ret = ncol(c_ind)
       seg_sites[sim] = n_sites_ret
-      seg_sites_neu[sim] = sum(mutations_0$S == 0)
-      seg_sites_ben[sim] = sum(mutations_0$S > 0)
-      seg_sites_del[sim] = sum(mutations_0$S < 0)
+      seg_sites_neu[sim] = sum(mutations_0$s == 0)
+      seg_sites_ben[sim] = sum(mutations_0$s > 0)
+      seg_sites_del[sim] = sum(mutations_0$s < 0)
       
       message(paste("There are", n_sites_ret, "Segregating sites in the parents' generation..."))
       
