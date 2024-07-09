@@ -611,7 +611,8 @@ for (sim in 1:nsims){
       # Then take a mod
       
       
-      if(randomise==TRUE){
+      if(randomise==TRUE&pdelta_method!="no_analysis"){
+        message("Randomising reference alleles in c_ind...")
         # Generate a random vector of 0s (for no change) and -1s (for loci where the reference allele is to be switched)
         ran_vect = sample(c(0, -1), ncol(c_ind),  replace = T) 
         
@@ -631,7 +632,9 @@ for (sim in 1:nsims){
       ######## Randomise the reference allele in L ########
       #####################################################
       
-      if(randomise==TRUE){
+      if(randomise==TRUE&pdelta_method!="no_analysis"){
+        
+        message("Randomising reference alleles in L...")
         
         # Create a new vector of -1s (wherever ran_vect has -2) and 1s (wherever ran_vect has 0)
         ran_vect_L = ifelse(ran_vect==-1, -1, 1)
@@ -652,8 +655,8 @@ for (sim in 1:nsims){
       # Add 0s to the frequencies of those alleles that stay the same, and -1 to those alleles that are to be switched
       # Then take a mod
       
-      if(randomise==TRUE){
-        
+      if(randomise==TRUE&pdelta_method!="no_analysis"){
+        message("Randomising reference alleles in pbar1 and pbar2...")
         # Create a matrix with with as many rows as c_ind. Each row of this matrix should be made up of ran_vect (computed while randomising c_ind). 
         # Because the same changes need to be applied to each individual
         # Note that ran_vect needs to be restricted to retained loci
