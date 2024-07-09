@@ -589,17 +589,22 @@ for (sim in 1:nsims){
       # Loop through cages to calculate the average vA remaining in the first generation
       # This is not the actual vA in gen1, but really the vA in the parents' generation if the loci that were to be lost in gen1 were removed
       
-      vA_left_current = rep(NA, n_cages)
-      
-      for (cage in 1:n_cages){
-        seg_sites_gen1 = which(pbar1[cage,]<1&pbar1[cage,]>0) # indices of sites segregating in gen1 of the experiment
-        vA_left_current[cage] = t(list_alpha[seg_sites_gen1])%*%L[seg_sites_gen1, seg_sites_gen1]%*%list_alpha[seg_sites_gen1]
+      if(pdelta_method!="no_analysis"){
+        
+        vA_left_current = rep(NA, n_cages)
+        
+        for (cage in 1:n_cages){
+          seg_sites_gen1 = which(pbar1[cage,]<1&pbar1[cage,]>0) # indices of sites segregating in gen1 of the experiment
+          vA_left_current[cage] = t(list_alpha[seg_sites_gen1])%*%L[seg_sites_gen1, seg_sites_gen1]%*%list_alpha[seg_sites_gen1]
+          
+        }
+        
+        vA_left[sim] = mean(vA_left_current)
+        
+        message(paste("The average vA left in gen1 of the experiment is ", vA_left[sim]*100/vA_true[sim], "%"))
         
       }
       
-      vA_left[sim] = mean(vA_left_current)
-      
-      message(paste("The average vA left in gen1 of the experiment is ", vA_left[sim]*100/vA_true[sim], "%"))
       
       ################################################################
       ######## Randomise the reference allele in the c matrix ########
