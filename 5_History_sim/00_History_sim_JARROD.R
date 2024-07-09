@@ -101,7 +101,7 @@ Set_ID = paste(Set_ID, commandArgs(trailingOnly = TRUE)[1], commandArgs(trailing
 
 
 if(!file.exists(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""))){
-  col_names = as.matrix(t(c("Set_ID","Time","end_gen", "ngen_expt", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "proj", "LDdelta", "pa", "Vs", "randomise", "pdelta_method", "bdelta_method", "vA_true", "vA_est", "pdelta_est", "pdelta_var_est", "bdelta_intercept_est", "bdelta_slope_est", "seg_sites", "bdelta_var_est", "vA_left")))
+  col_names = as.matrix(t(c("Set_ID","Time","end_gen", "ngen_expt", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "proj", "LDdelta", "pa", "Vs", "randomise", "pdelta_method", "bdelta_method", "vA_true", "vA_est", "pdelta_est", "pdelta_var_est", "bdelta_intercept_est", "bdelta_slope_est", "seg_sites", "bdelta_var_est", "vA_left", "seg_sites_neu", "seg_sites_ben", "seg_sites_del", "s_pmq")))
   write.table(col_names, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
 }
 
@@ -196,7 +196,7 @@ bigalgebra = FALSE # Should bigalgebra be used for eigendecomposition?
 # How is pdelta to be estimated? 
 # Can be "optim" (using the function optim()), or "fixed" or "manual"(estimated by manually scanning a range of pdelta values)
 
-pdelta_method = "optim" # "optim" or "manual" or "fixed". If "this is "no_analysis", the estimate of Vw is not calculated, but the rest of the code still runs.
+pdelta_method = "no_analysis" # "optim" or "manual" or "fixed" or "no_analysis". If this is "no_analysis", the estimate of Vw is not calculated, but the rest of the code still runs.
 
 if(pdelta_method=="fixed"){
   pdelta = 0 # Can be specified to any value
@@ -250,6 +250,10 @@ bdelta_intercept_est = rep(NA, nsims) # Estimate of bdelta[1] from the model
 bdelta_slope_est = rep(NA, nsims) # Estimate of bdelta[2] from the model
 bdelta_var_est = rep(NA, nsims)
 seg_sites = rep(NA, nsims) # Number of segregating sites in the parents' generation in each simulation
+seg_sites_neu = rep(NA, nsims) # Number of neutral segregating sites
+seg_sites_ben = rep(NA, nsims) # Number of segregating sites where the derived allele is beneficial
+seg_sites_del = rep(NA, nsims) # Number of segregating sites where the derived allele is deleterious
+s_pmq = rep(NA, nsims)         # The slope of the linear regression of 2p-1 on alphas
 mem = c() # Create an empty vector to track memory, to investigate crashes
 
 for (sim in 1:nsims){
@@ -423,11 +427,11 @@ for (sim in 1:nsims){
       n_individuals = nrow(c_ind)/2
       n_sites_ret = ncol(c_ind)
       seg_sites[sim] = n_sites_ret
+      seg_sites_neu[sim] = sum(mutations_0$S == 0)
+      seg_sites_ben[sim] = sum(mutations_0$S > 0)
+      seg_sites_del[sim] = sum(mutations_0$S < 0)
       
       message(paste("There are", n_sites_ret, "Segregating sites in the parents' generation..."))
-      
-      
-      
       
       
       ### Calculate true vA (additive genetic variance) and va (additive genic variance) 
@@ -440,26 +444,33 @@ for (sim in 1:nsims){
       va_true[sim] = sum(diversity*list_alpha*list_alpha)     # Additive genic variance
       message(paste("The true Va in the parents' generation is", va_true[sim]))
       
-      if(pdelta_method!="no_analysis"){
-        
-      message("Calculating L in the parents' generation...")
-        
-      L = cov(c_ind/2)*(n_individuals-1)/(n_individuals)
-      L = L[retained_loci, retained_loci] # Trim L to contain only the retained loci
+      # Calculate the empirical relationship between alphas and 2p-1
       
-      message("Calculating the true Vw in the parents' generation...")
-      
-      vA_true[sim] = t(list_alpha)%*%L%*%list_alpha         # Additive genetic variance
-      
+      fit_s_pmq = lm(list_alpha ~ I(2*(mutations_0$Number)/n_ind_exp - 1))
+      s_pmq[sim] = coef(fit_s_pmq)[2]
+      rm("fit_s_pmq")
       gc(verbose = FALSE)
       
-      message(paste("The true Vw in the parents' generation is", vA_true[sim]))
-      
-      message("Calculating the the matrix of non-recombinant fractions for the parents' generation...")
-      
-      # Calculate the non-recombinant fraction using Jarrod's function
-      
-      NRF = form_nR(mutations_0$Position, r_expt, sequence_length, AtleastOneRecomb)
+      if(pdelta_method!="no_analysis"){
+        
+        message("Calculating L in the parents' generation...")
+        
+        L = cov(c_ind/2)*(n_individuals-1)/(n_individuals)
+        L = L[retained_loci, retained_loci] # Trim L to contain only the retained loci
+        
+        message("Calculating the true Vw in the parents' generation...")
+        
+        vA_true[sim] = t(list_alpha)%*%L%*%list_alpha         # Additive genetic variance
+        
+        gc(verbose = FALSE)
+        
+        message(paste("The true Vw in the parents' generation is", vA_true[sim]))
+        
+        message("Calculating the the matrix of non-recombinant fractions for the parents' generation...")
+        
+        # Calculate the non-recombinant fraction using Jarrod's function
+        
+        NRF = form_nR(mutations_0$Position, r_expt, sequence_length, AtleastOneRecomb)
       }
       
       
@@ -588,7 +599,7 @@ for (sim in 1:nsims){
       
       vA_left[sim] = mean(vA_left_current)
       
-      message(paste("The average vA left in gen1 of the experiment is ", vA_left[sim]*100/va_true[sim], "%"))
+      message(paste("The average vA left in gen1 of the experiment is ", vA_left[sim]*100/vA_true[sim], "%"))
       
       ################################################################
       ######## Randomise the reference allele in the c matrix ########
@@ -727,7 +738,7 @@ for (sim in 1:nsims){
       
       if(pdelta_method=="fixed"|pdelta_method=="optim"){
         
-        message("Saving a copy of the environment...")
+        #message("Saving a copy of the environment...")
         #save.image(file = paste(output_path, "/Output_temp", ".RData", sep ="")) # Save the output to investigate when things crash due to segfaults
         message("Performing analyses...")
         m1<-Vw_model(C0 = c_ind/2,          # parental genotypes (rows individuals, columns loci, coded as 0, 1/2 or 1) 
@@ -776,7 +787,7 @@ for (sim in 1:nsims){
   
   if(record == TRUE){
   dat = read.csv(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""), header=FALSE)
-  dat = rbind(dat, c(Set_ID, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, proj, LDdelta, pa, Vs, randomise, pdelta_method, bdelta_method, vA_true[sim], vA_est[sim], pdelta_est[sim], pdelta_var_est[sim], bdelta_intercept_est[sim], bdelta_slope_est[sim], seg_sites[sim], bdelta_var_est[sim], vA_left[sim]))
+  dat = rbind(dat, c(Set_ID, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, proj, LDdelta, pa, Vs, randomise, pdelta_method, bdelta_method, vA_true[sim], vA_est[sim], pdelta_est[sim], pdelta_var_est[sim], bdelta_intercept_est[sim], bdelta_slope_est[sim], seg_sites[sim], bdelta_var_est[sim], vA_left[sim], seg_sites_neu[sim], seg_sites_ben[sim], seg_sites_del[sim], s_pmq[sim]))
   write.table(dat, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
   }
   
