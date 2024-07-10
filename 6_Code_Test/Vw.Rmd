@@ -351,6 +351,50 @@ form_nR<-function(SNPs,                   # SNP positions
 
 ```
 
+### Function for estimating the alpha distribution from actual values
+
+```{r alpha_distribution}
+
+
+alpha_distribution<-function(alpha, p){
+
+  pmq<-2*p-1
+  pq<-p*(1-p)/2
+  pdelta_fit<-function(pdelta, alpha, pmq, pq){
+       -logLik(lm(alpha~pmq, weights=1/(pq^pdelta)))
+  }
+  pdelta<-optim(0, pdelta_fit, alpha=alpha, pmq=pmq, pq=pq, method="Brent", lower=-5, upper=5)$par
+  m1<-lm(alpha~pmq, weights=1/(pq^pdelta))
+  
+  result<-list(pdelta=pdelta, 
+                bdelta_int=coef(m1)["(Intercept)"], 
+                bdelta_slope=coef(m1)["pmq"],
+                sigma2delta=summary(m1)$sigma^2)
+
+  return(result)
+}
+
+# and check yo make sure OK
+n<-100000
+
+p<-runif(n)
+
+bdelta_int<-0
+bdelta_slope<-0.1
+pdelta<--0.5
+sigma2delta<-1.5
+
+mu<-bdelta_int+bdelta_slope*(2*p-1)
+v<-sigma2delta*(p*(1-p)/2)^pdelta
+
+alpha<-rnorm(n, mu, sqrt(v))
+
+alpha_distribution(alpha, p)
+
+# Good
+
+```
+
 ### Function for model fitting
 
 
@@ -482,8 +526,8 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
                    bdelta,
                    Vs,
                    method,
-                   L=NULL,    # list with elements UL and DL
-                   svdL=NULL,    # list with elements UL and DL,
+                   L=NULL,      # L
+                   svdL=NULL,   # list with elements UL and DL,
                    Ne_factor=1,
                    bigalgebra = FALSE, # Should "bigalgebra" be used for svd and eigendecomposition
                    tol=sqrt(.Machine$double.eps)
