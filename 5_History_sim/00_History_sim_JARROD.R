@@ -268,8 +268,8 @@ for (sim in 1:nsims){
       # Specify the mutation rate for the SLiM history simulation
       
       mu = mu_list[sim]
-      mu_msp = mu/5320
-      mu_neutral = mu/(3*532)
+      mu_msp = ifelse(end_gen==2, mu/532, mu/5320)
+      mu_neutral = ifelse(end_gen==2, mu_msp/3, mu/3)
       
       message(paste("Simulation", sim, "in progress..."))
     
