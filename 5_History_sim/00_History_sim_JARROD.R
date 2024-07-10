@@ -257,6 +257,7 @@ pdelta_emp = rep(NA, nsims)            # The actual pdelta
 bdelta_intercept_emp = rep(NA, nsims)  # The actual bdelta_intercept
 bdelta_slope_emp = rep(NA, nsims)      # The actual bdelta_slope
 sigma2delta_emp = rep(NA, nsims)       # The actual variance in alpha  
+s_pmq = rep(NA, nsims)                 # The actual bdelta_slope (from a simple linear model)
 
 seg_sites = rep(NA, nsims) # Number of segregating sites in the parents' generation in each simulation
 seg_sites_neu = rep(NA, nsims) # Number of neutral segregating sites

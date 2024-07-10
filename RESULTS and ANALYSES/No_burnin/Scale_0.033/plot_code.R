@@ -15,14 +15,20 @@ d$pdelta_est = as.numeric(d$pdelta_est)
 d$bdelta_intercept_est = as.numeric(d$bdelta_intercept_est)
 d$bdelta_slope_est = as.numeric(d$bdelta_slope_est)
 d$r_expt = as.numeric(d$r_expt)
+d$r = as.numeric(d$r)
 d$sequence_length = as.numeric(d$sequence_length)
 d$mu = as.numeric(d$mu)
-
+d$s_pmq = as.numeric(d$s_pmq)
+d$seg_sites = as.numeric(d$seg_sites)
+d$seg_sites_neu = as.numeric(d$seg_sites_neu)
+d$seg_sites_del = as.numeric(d$seg_sites_del)
+d$seg_sites_ben = as.numeric(d$seg_sites_ben)
 d$n_cages = factor(d$n_cages, levels = c("3", "5", "10"))
 d$n_ind_exp = factor(d$n_ind_exp, levels = c("100", "500", "1000"))
 d$ngen_expt = factor(d$ngen_expt, levels = c("1", "3", "5"))
 
-
+d$map_length_history = factor(d$r*d$sequence_length)
+d$map_length_expt = factor(d$r_expt*d$sequence_length)
 
 
 
