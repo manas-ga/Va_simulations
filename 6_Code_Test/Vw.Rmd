@@ -356,7 +356,12 @@ form_nR<-function(SNPs,                   # SNP positions
 ```{r alpha_distribution}
 
 
-alpha_distribution<-function(alpha, p){
+alpha_distribution<-function(alpha, p, tproj=NULL){
+
+  if(!is.null(tproj)){
+    p<-p%*%tproj
+    alpha<-alpha%*%tproj
+  }
 
   pmq<-2*p-1
   pq<-p*(1-p)/2
@@ -401,7 +406,7 @@ alpha_distribution(alpha, p)
 ```{r analysis_function}
 
 
-fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp, pbar0, pbar1, pbar2, nrep, N, Ne_factor=1, Vs, LLonly=FALSE){
+fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, tprojp, pbar0, pbar1, pbar2, nrep, N, Ne_factor=1, Vs, LLonly=FALSE){
   
   message("Computing the covariance structure of locus effects...")
   message("Computing covp over 1 generation...")
@@ -438,17 +443,17 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
 
   message("Computing SC...")
   
-  SC<-t(projp)%*%covp%*%projp
+  SC<-t(tprojp)%*%covp%*%tprojp
 
   attr(SC, "INVERSE")<-FALSE
   dimnames(SC) <- list(1:nrow(SC),1:nrow(SC))  # used for full-form matrices
   
   message("Projecting allele frequencies...")
   
-  pbar1_proj<-pbar1%*%projp
-  pbar2_proj<-pbar2%*%projp
-  pmq_proj<-t(matrix(pmq, nsnps,nrep))%*%projp
-  int_proj<-t(matrix(int, nsnps,nrep))%*%projp
+  pbar1_proj<-pbar1%*%tprojp
+  pbar2_proj<-pbar2%*%tprojp
+  pmq_proj<-t(matrix(pmq, nsnps,nrep))%*%tprojp
+  int_proj<-t(matrix(int, nsnps,nrep))%*%tprojp
 
   dat.gaussian<-data.frame(delta=c(pbar2_proj-pbar1_proj), locus=gl(ncol(pbar1_proj),nrep,ncol(pbar1_proj)*nrep), rep=gl(nrep,1,ncol(pbar1_proj)*nrep), pmq=c(pmq_proj), int=c(int_proj))
 
@@ -491,7 +496,7 @@ fit.model<-function(pdelta, bdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, projp,
 
     if(LLonly){"method = MCMC specified so can't return log-likelihood with LLony=TRUE"}
 
-    invSC<-solve(t(projp)%*%covp%*%projp)
+    invSC<-solve(t(tprojp)%*%covp%*%tprojp)
     invSC <- as(invSC, "sparseMatrix") 
     attr(invSC, "rowNames") <- 1:retain
     attr(invSC, "colNames") <- 1:retain
@@ -697,11 +702,11 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   
   if(proj=="N"){
     
-    projp<-diag(nrow(pbar1))
+    tprojp<-diag(nrow(pbar1))
 
   }else{
 
-    projp<-U%*%diag(D^(-pa))
+    tprojp<-U%*%diag(D^(-pa))
 
   }
   
@@ -713,7 +718,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
   if(is.na(pdelta)){
     message("Estimating pdelta...")
-    pdelta<-optim(0, fit.model, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, N=N, Ne_factor=Ne_factor, Vs=Vs, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1), hessian=TRUE)
+    pdelta<-optim(0, fit.model, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, N=N, Ne_factor=Ne_factor, Vs=Vs, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1), hessian=TRUE)
 
     pdelta_var<--1/pdelta$hessian
     pdelta<-pdelta$par
@@ -722,7 +727,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
     pdelta_var<-0
   }
   message("Fitting the final model...")
-  output<-fit.model(pdelta=pdelta, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, projp=projp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, N=N, Ne_factor=Ne_factor, Vs=Vs)
+  output<-fit.model(pdelta=pdelta, bdelta=bdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, N=N, Ne_factor=Ne_factor, Vs=Vs)
 
   message("Calculating the estimate of Vw...")
   
