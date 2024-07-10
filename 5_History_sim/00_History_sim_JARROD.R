@@ -101,7 +101,7 @@ Set_ID = paste(Set_ID, commandArgs(trailingOnly = TRUE)[1], commandArgs(trailing
 
 
 if(!file.exists(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""))){
-  col_names = as.matrix(t(c("Set_ID","Time","end_gen", "ngen_expt", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "proj", "LDdelta", "pa", "Vs", "randomise", "pdelta_method", "bdelta_method", "vA_true", "vA_est", "pdelta_est", "pdelta_var_est", "bdelta_intercept_est", "bdelta_slope_est", "seg_sites", "bdelta_var_est", "vA_left", "seg_sites_neu", "seg_sites_ben", "seg_sites_del", "s_pmq")))
+  col_names = as.matrix(t(c("Set_ID","Time","end_gen", "ngen_expt", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "proj", "LDdelta", "pa", "Vs", "randomise", "pdelta_method", "bdelta_method", "va_true", "vA_true", "vA_est", "vA_left", "pdelta_emp", "bdelta_intercept_emp", "bdelta_slope_emp", "sigma2delta_emp", "pdelta_est", "pdelta_var_est", "bdelta_intercept_est", "bdelta_slope_est", "bdelta_var_est", "sigma2delta_est", "seg_sites", "seg_sites_neu", "seg_sites_ben", "seg_sites_del", "s_pmq")))
   write.table(col_names, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
 }
 
@@ -237,23 +237,32 @@ if(!analyse%in%c(TRUE, FALSE)){stop("analyse must be one of TRUE or FALSE")}
 
 ####################################################################################################################################################
 
+##############################################################################
+##### Create empty vectors for data that needs to be stored for each sim #####
+##############################################################################
 
-# Create empty vectors to store true vA and estimates of vA from the model
-
-vA_left = rep(NA, nsims)
+vA_left = rep(NA, nsims) # Average vA left in gen1
 vA_true = rep(NA, nsims) # Additive genetic variance
 va_true = rep(NA, nsims) # Additive genic variance
 vA_est = rep(NA, nsims)  # Estimated vA from the model
-pdelta_est = rep(NA, nsims) # pdelta is estimated in each simulation with the help of maximum likelihood (implemented manually)
+
+pdelta_est = rep(NA, nsims) # pdelta is fixed to 0 or is estimated in each simulation with the help of maximum likelihood (implemented manually or using optim())
 pdelta_var_est = rep(NA, nsims)
 bdelta_intercept_est = rep(NA, nsims) # Estimate of bdelta[1] from the model
 bdelta_slope_est = rep(NA, nsims) # Estimate of bdelta[2] from the model
 bdelta_var_est = rep(NA, nsims)
+sigma2delta_est = rep(NA, nsims)  # Estimate of var_alpha from asreml()
+
+pdelta_emp = rep(NA, nsims)            # The actual pdelta
+bdelta_intercept_emp = rep(NA, nsims)  # The actual bdelta_intercept
+bdelta_slope_emp = rep(NA, nsims)      # The actual bdelta_slope
+sigma2delta_emp = rep(NA, nsims)       # The actual variance in alpha  
+
 seg_sites = rep(NA, nsims) # Number of segregating sites in the parents' generation in each simulation
 seg_sites_neu = rep(NA, nsims) # Number of neutral segregating sites
 seg_sites_ben = rep(NA, nsims) # Number of segregating sites where the derived allele is beneficial
 seg_sites_del = rep(NA, nsims) # Number of segregating sites where the derived allele is deleterious
-s_pmq = rep(NA, nsims)         # The slope of the linear regression of 2p-1 on alphas
+
 mem = c() # Create an empty vector to track memory, to investigate crashes
 
 for (sim in 1:nsims){
@@ -440,7 +449,8 @@ for (sim in 1:nsims){
       
       
       list_alpha = 2*(mutations_0$s)
-      diversity = (colMeans(c_ind/2))*(1 - colMeans(c_ind/2))/2
+      p_parents = colMeans(c_ind/2) # Allele frequencies in parents
+      diversity = (p_parents)*(1 - p_parents)/2
       va_true[sim] = sum(diversity*list_alpha*list_alpha)     # Additive genic variance
       message(paste("The true Va in the parents' generation is", va_true[sim]))
       
@@ -633,15 +643,15 @@ for (sim in 1:nsims){
         
       }
       
-      #####################################################
-      ######## Randomise the reference allele in L ########
-      #####################################################
+      ####################################################################
+      ######## Randomise the reference allele in L and list_alpha ########
+      ####################################################################
       
       if(randomise==TRUE&pdelta_method!="no_analysis"){
         
         message("Randomising reference alleles in L...")
         
-        # Create a new vector of -1s (wherever ran_vect has -2) and 1s (wherever ran_vect has 0)
+        # Create a new vector of -1s (wherever ran_vect has -1) and 1s (wherever ran_vect has 0)
         ran_vect_L = ifelse(ran_vect==-1, -1, 1)
         
         # Calculate a matrix that decides which off-diagonal elements in L get their signs flipped
@@ -649,11 +659,13 @@ for (sim in 1:nsims){
         ran_matrix_L = ran_vect_L%*%t(ran_vect_L)
         L = L*ran_matrix_L
         
+        list_alpha = list_alpha*ran_vect_L
+        
       }
       
-      ################################################################
-      ######## Randomise the reference allele in pbar1 and pbar2 #####
-      ################################################################
+      ###########################################################################
+      ######## Randomise the reference allele in p_parents, pbar1 and pbar2 #####
+      ###########################################################################
       
       # Randomly change the reference allele
       # This can be done as follows:
@@ -672,6 +684,7 @@ for (sim in 1:nsims){
         
         pbar1 = abs(pbar1 + ran_matrix_pbar)
         pbar2 = abs(pbar2 + ran_matrix_pbar)
+        p_parents = abs(p_parents + ran_vect)
         
       }
       
@@ -729,6 +742,8 @@ for (sim in 1:nsims){
             bdelta_intercept_temp[i] = m1$bdelta[1]
             bdelta_slope_temp[i] = m1$bdelta[2]
             bdelta_var_temp[i] = paste(m1$bdelta_var[1,1], m1$bdelta_var[2,2], m1$bdelta_var[1,2], sep = "_") 
+            sigma2delta_temp[i] = summary(m1$model)$varcomp[1,1]
+            
             message(paste("Finding the best pdelta...", round((i/nseq)*100), "% complete"))
           }
           
@@ -737,6 +752,8 @@ for (sim in 1:nsims){
           bdelta_intercept_est[sim] = bdelta_intercept_temp[which(LL == max(LL))]
           bdelta_slope_est[sim] = bdelta_slope_temp[which(LL == max(LL))]
           bdelta_var_est[sim] = bdelta_var_temp[which(LL == max(LL))]
+          sigma2delta_est[sim] = sigma2delta_temp[which(LL == max(LL))]
+          
           #plot(vA_est~vA_true, xlab = "True value of Vw", ylab = "Estimate of Vw")
           #abline(0,1)
           mem = cbind(mem, mem_used()) # Store the memory usage
@@ -775,6 +792,7 @@ for (sim in 1:nsims){
         bdelta_intercept_est[sim] = m1$bdelta[1]
         bdelta_slope_est[sim] = m1$bdelta[2]
         bdelta_var_est[sim] = paste(m1$bdelta_var[1,1], m1$bdelta_var[2,2], m1$bdelta_var[1,2], sep = "_")
+        sigma2delta_est[sim] = summary(m1$model)$varcomp[1,1]
         #plot(vA_est~vA_true, xlab = "True value of Vw", ylab = "Estimate of Vw")
         #abline(0,1)
         
@@ -786,8 +804,19 @@ for (sim in 1:nsims){
       # Garbage collection
       gc(verbose = FALSE)
   
-  }    
+  }
+  
+  ########################################################
+  ##### Store empirical pdelta and bdelta for the sim ####
+  ########################################################
+  
+  
+   alpha_properties = alpha_distribution(alpha = list_alpha, p = p_parents)
    
+   pdelta_emp[sim] = alpha_properties$pdelta
+   bdelta_intercept_emp[sim] = alpha_properties$bdelta_int
+   bdelta_slope_emp[sim] = alpha_properties$bdelta_slope
+   sigma2delta_emp[sim] = alpha_properties$sigma2delta
   
   ########################################################
   ######### Save simulation data in a spreadsheet ########
@@ -795,7 +824,7 @@ for (sim in 1:nsims){
   
   if(record == TRUE){
   dat = read.csv(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""), header=FALSE)
-  dat = rbind(dat, c(Set_ID, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, proj, LDdelta, pa, Vs, randomise, pdelta_method, bdelta_method, vA_true[sim], vA_est[sim], pdelta_est[sim], pdelta_var_est[sim], bdelta_intercept_est[sim], bdelta_slope_est[sim], seg_sites[sim], bdelta_var_est[sim], vA_left[sim], seg_sites_neu[sim], seg_sites_ben[sim], seg_sites_del[sim], s_pmq[sim]))
+  dat = rbind(dat, c(Set_ID, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, proj, LDdelta, pa, Vs, randomise, pdelta_method, bdelta_method, va_true[sim], vA_true[sim], vA_est[sim], vA_left[sim], pdelta_emp[sim], bdelta_intercept_emp[sim], bdelta_slope_emp[sim], sigma2delta_emp[sim], pdelta_est[sim], pdelta_var_est[sim], bdelta_intercept_est[sim], bdelta_slope_est[sim], bdelta_var_est[sim], sigma2delta_est[sim], seg_sites[sim], seg_sites_neu[sim], seg_sites_ben[sim], seg_sites_del[sim], s_pmq[sim]))
   write.table(dat, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
   }
   
