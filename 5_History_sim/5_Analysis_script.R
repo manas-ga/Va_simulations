@@ -2,8 +2,48 @@
 ########## Read, process, and analyse SLiM outputs ###########
 ##############################################################
 
-base_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim" ## Local Wsl
-Vw_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/6_Code_test/Vw.Rmd" ### Jarrod's functions and other code is stored here
+rm(list = ls())
+
+########################################################################
+########### paths of various scripts and functions #####################
+########################################################################
+
+
+### Base path and path to Vw.Rmd (file containing Jarrod's functions) (depending on the system) ###
+
+if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig", "c1", "c2", "c3", "c4", "c5", "c6")){
+  
+  base_path = "/ceph/users/marun/Va_simulations/5_History_sim"
+  Vw_path = "/ceph/users/marun/Va_simulations/6_Code_Test/Vw.Rmd"
+  
+}else{
+  
+  
+  if(Sys.info()["nodename"]=="vera.bio.ed.ac.uk"){
+    
+    base_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/5_History_sim" ## ON VERA
+    Vw_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/6_Code_Test/Vw.Rmd"  ### Jarrod's functions and other code is stored here
+    
+    
+  }else{
+    
+    if(Sys.info()["sysname"]=="Linux"){
+      
+      base_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim" ## Local Wsl
+      Vw_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/6_Code_test/Vw.Rmd" ### Jarrod's functions and other code is stored here
+      
+    }else{
+      
+      base_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim" ## Local windows
+      Vw_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/6_Code_test/Vw.Rmd" ### Jarrod's functions and other code is stored here
+      
+    }
+    
+  }
+  
+  
+}
+
 
 # Paths to various scripts that are used for running the simulations and extracting information from SLiM outputs
 
@@ -41,7 +81,11 @@ functions_only=TRUE ## Read only the functions
 
 rmarkdown::render(file.path(Vw_path))
 
+#### Enter the Set_ID of the simulations to be analysed ###
+
 Set_ID = "bigbird_2024-07-01_235849.623757_3e-09_0.14_1000_10_3"
+
+### Analyse ###
 
 analysis_data = read_analyse_simdata(Set_ID = Set_ID,
                                      slim_output_path = slim_output_path, 
