@@ -98,7 +98,7 @@ analysis_data = read_analyse_simdata(Set_ID = Set_ID,
                                      n_sample = 1000,
                                      n_cages = 10,
                                      ngen_expt = 3,
-                                     end_gen = 2,
+                                     end_gen = 20000,
                                      r_expt = 1.4e-6,
                                      proj="BLoM", # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
                                      LDdelta = FALSE,
