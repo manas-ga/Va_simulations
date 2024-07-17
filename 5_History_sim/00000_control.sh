@@ -3,8 +3,8 @@
 #$ -V
 #$ -cwd
 #$ -N Vw_sim
-#$ -t 1-28
-#$ -tc 7
+#$ -t 1-10
+#$ -tc 10
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g
 #$ -pe smp64 22
 #$ -j y
