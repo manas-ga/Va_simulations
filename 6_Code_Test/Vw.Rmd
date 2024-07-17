@@ -1068,7 +1068,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
                    bigalgebra = FALSE, # Should "bigalgebra" be used for svd and eigendecomposition
                    tol=sqrt(.Machine$double.eps),
                    save_tprojp=FALSE)
-  ){
+  {
   
   asreml.options(Cfixed = TRUE)
 
