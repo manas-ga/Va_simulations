@@ -83,7 +83,7 @@ rmarkdown::render(file.path(Vw_path))
 
 #### Enter the Set_ID of the simulations to be analysed ###
 
-Set_ID = "bigfoot_2024-07-15_14:35:24.574016_3.45e-07_1.4_1.4_1000_10_3"
+Set_ID = "bigfoot_2024-07-15_143524.574984_1.38e-06_1.4_1.4_1000_10_3"
 
 ### Analyse ###
 
@@ -104,7 +104,7 @@ analysis_data = read_analyse_simdata(Set_ID = Set_ID,
                                      LDdelta = FALSE,
                                      pa = 1,
                                      pdelta = NA,
-                                     bdelta = c(NA, NA),
+                                     bdelta = c(0, 0),
                                      pdelta_method = "optim",
                                      Vs = "LoNL",
                                      method = "REML",
