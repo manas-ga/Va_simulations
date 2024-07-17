@@ -404,6 +404,14 @@ plot_alpha_distribution<-function(alpha=NULL, p=NULL, tproj=NULL, parameters, pa
   abline(parameters$bdelta_int, parameters$bdelta_slope)
   lines(u.x~pmq.x)
   lines(l.x~pmq.x)
+  if(!is.null(parameters2)){
+    abline(parameters2$bdelta_int, parameters2$bdelta_slope, col="red")
+    sd.x<-sqrt(parameters2$sigma2delta*pq.x^parameters2$pdelta)
+    u.x<-qnorm(0.975, parameters2$bdelta_int+parameters2$bdelta_slope*pmq.x, sd.x)
+    l.x<-qnorm(0.025, parameters2$bdelta_int+parameters2$bdelta_slope*pmq.x, sd.x)
+    lines(u.x~pmq.x, col="red")
+    lines(l.x~pmq.x, col="red")
+  }
 }
 
 
