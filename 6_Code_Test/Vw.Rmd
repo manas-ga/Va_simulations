@@ -3,7 +3,7 @@ title: "Simulations to test methods for estimating $V_w$ from evolve and reseque
 author: "Jarrod Hadfield"
 output: 
   html_document:
-  toc: TRUE
+    toc: true
 css: custom.css
 ---
   
@@ -356,7 +356,7 @@ form_nR<-function(SNPs,                   # SNP positions
 ```{r alpha_distribution}
 
 
-alpha_distribution<-function(alpha, p, tproj=NULL, plot=FALSE, ...){
+alpha_distribution<-function(alpha, p, tproj=NULL){
 
   if(!is.null(tproj)){
     p<-p%*%tproj
@@ -376,22 +376,37 @@ alpha_distribution<-function(alpha, p, tproj=NULL, plot=FALSE, ...){
                 bdelta_int=coef(m1)["(Intercept)"], 
                 bdelta_slope=coef(m1)["pmq"],
                 sigma2delta=summary(m1)$sigma^2)
-
-  if(plot){
-    plot(alpha~pmq, ylab="alpha", xlab="p-q", ...)
-    abline(result$bdelta_int, result$bdelta_slope)
-
-    pmq.x<-seq(-0.9999,0.9999, length=100)
-    pq.x = (pmq.x+1)*(1-pmq.x)/8
-
-    sd.x<-sqrt(result$sigma2delta*pq.x^result$pdelta)
-    
-    lines(qnorm(0.975, result$bdelta_int+result$bdelta_slope*pmq.x, sd.x)~pmq.x)
-    lines(qnorm(0.025, result$bdelta_int+result$bdelta_slope*pmq.x, sd.x)~pmq.x)
-  }  
-
   return(result)
 }
+
+
+plot_alpha_distribution<-function(alpha=NULL, p=NULL, tproj=NULL, parameters, parameters2=NULL, ...){
+
+  if(!is.null(tproj)){
+    p<-p%*%tproj
+    alpha<-alpha%*%tproj
+  }
+
+  pmq.x<-seq(-0.9999,0.9999, length=100)
+  pq.x = (pmq.x+1)*(1-pmq.x)/8
+
+  sd.x<-sqrt(parameters$sigma2delta*pq.x^parameters$pdelta)
+
+  u.x<-qnorm(0.975, parameters$bdelta_int+parameters$bdelta_slope*pmq.x, sd.x)
+  l.x<-qnorm(0.025, parameters$bdelta_int+parameters$bdelta_slope*pmq.x, sd.x)
+
+  if(is.null(alpha) | is.null(p)){
+    plot(1, ylab="alpha", xlab="p-q", type="n", xlim=c(-1,1), ylim=c(0.9*min(l.x), max(u.x)*1.1), ...)
+  }else{
+    pmq<-2*p-1
+    plot(alpha~pmq, ylab="alpha", xlab="p-q", , xlim=c(-1,1), ...)
+  }
+  abline(parameters$bdelta_int, parameters$bdelta_slope)
+  lines(u.x~pmq.x)
+  lines(l.x~pmq.x)
+}
+
+
 
 # and check yo make sure OK
 n<-1000
@@ -408,9 +423,11 @@ v<-sigma2delta*(p*(1-p)/2)^pdelta
 
 alpha<-rnorm(n, mu, sqrt(v))
 
-alpha_distribution(alpha, p, plot=TRUE)
+parameters<-alpha_distribution(alpha, p)
+parameters
 # Good
 
+plot_alpha_distribution(alpha, p, parameters=parameters)
 ```
 
 ### Function for model fitting
