@@ -116,6 +116,13 @@ library(Matrix)
 library(rmutil)
 library(pryr) ## For tracking memory usage using mem_used()
 library(bigalgebra)
+library(RhpcBLASctl)
+
+# BLAS - which performs - matricx operations in R occupies all availale cores by default
+# This create issue while running things on the cluster
+# Restrict the number of cores during matrix manipulations ##
+
+blas_set_num_threads(10)
 
 #################################
 #### Load Jarrod's functions ####
