@@ -201,7 +201,7 @@ bigalgebra = FALSE # Should bigalgebra be used for eigendecomposition?
 # How is pdelta to be estimated? 
 # Can be "optim" (using the function optim()), or "fixed" or "manual"(estimated by manually scanning a range of pdelta values)
 
-pdelta_method = "optim" # "optim" or "manual" or "fixed" or "no_analysis". If this is "no_analysis", the estimate of Vw is not calculated, but the rest of the code still runs.
+pdelta_method = "fixed" # "optim" or "manual" or "fixed" or "no_analysis". If this is "no_analysis", the estimate of Vw is not calculated, but the rest of the code still runs.
 
 if(pdelta_method=="fixed"){
   pdelta = 0 # Can be specified to any value
