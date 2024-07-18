@@ -116,6 +116,11 @@ library(Matrix)
 library(rmutil)
 library(pryr) ## For tracking memory usage using mem_used()
 library(bigalgebra)
+library(RhpcBLASctl)
+
+# Set the number of threads in BLAS to 1. Otherwise matrix manipulations in R spill over to all available cores creating issues
+
+blas_set_num_threads(10)
 
 #################################
 #### Load Jarrod's functions ####
