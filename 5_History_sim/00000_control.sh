@@ -14,4 +14,3 @@
 Param=`cat 000_parameter_grid.txt | awk "NR==$SGE_TASK_ID"`
 
 Rscript 00_History_sim_JARROD.R $Param
-
