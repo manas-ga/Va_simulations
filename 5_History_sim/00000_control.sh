@@ -8,7 +8,7 @@
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g
 #$ -pe smp64 10
 #$ -j y
-#$ -o /ceph/users/marun/Va_simulations/5_History_sim/b_Interim_files/std_out
+#$ -o /data/obbard/Va_simulations/analyses/b_Interim_files/std_out
 
 
 Param=`cat 000_parameter_grid.txt | awk "NR==$SGE_TASK_ID"`

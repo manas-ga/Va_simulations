@@ -29,7 +29,7 @@ if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "bigga
   
   base_path = "/ceph/users/marun/Va_simulations/5_History_sim" # Directory that contains the scripts (except "Vw.Rmd" which is in Vw_path)
   Vw_path = "/ceph/users/marun/Va_simulations/6_Code_Test/Vw.Rmd"
-  file_storage_path = base_path # All the interim_files and outputs created need to be stored in the obbard group storage space on AC3
+  file_storage_path = "/data/obbard/Va_simulations/analyses" # All the interim_files and outputs created need to be stored in the obbard group storage space on AC3
   
 }
 
@@ -39,7 +39,7 @@ if(Sys.info()["nodename"]=="vera.bio.ed.ac.uk"){
   
   base_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/5_History_sim" ## ON VERA
   Vw_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/6_Code_Test/Vw.Rmd"  ### Jarrod's functions and other code is stored here
-  file_storage_path = base_path # temp files and outputs
+  file_storage_path = base_path
 }
 
 ### On the PC "SCE-BIO-C06645" ###
