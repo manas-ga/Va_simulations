@@ -70,10 +70,6 @@ if(Sys.info()["nodename"]=="SCE-BIO-C06645"){
 
 }
   
-  
-  
-
-
 
 # Paths to various scripts that are used for running the simulations and extracting information from SLiM outputs
 
