@@ -6,7 +6,7 @@
 #$ -t 1-1
 #$ -tc 1
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g
-#$ -pe smp 10
+#$ -pe sharedmem 10
 #$ -j y
 #$ -o /exports/eddie/scratch/msamant/Va_simulations/b_Interim_files/std_out/
 
