@@ -11,4 +11,4 @@
 #$ -o /ceph/users/marun/Va_simulations/5_History_sim/b_Interim_files/std_out/
 
 
-Rscript 00_History_sim_JARROD.R  1.2e-06 1.4 1.4 1000 10 3
+Rscript 00_History_sim_JARROD.R 1.2e-06 1.4 1.4 1000 10 3
