@@ -97,7 +97,7 @@ system(paste("mkdir -p", paste(base_path, "/b_Interim_files/SLiM_outputs", sep =
 
 Set_ID = as.character(paste(Sys.info()["nodename"], Sys.time()))
 Set_ID = gsub(" ", "_", Set_ID)
-Set_ID = paste(Set_ID, commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[2], commandArgs(trailingOnly = TRUE)[3], commandArgs(trailingOnly = TRUE)[4], commandArgs(trailingOnly = TRUE)[5], commandArgs(trailingOnly = TRUE)[6], commandArgs(trailingOnly = TRUE)[7], sep = "_")
+Set_ID = paste(Set_ID, commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[2], commandArgs(trailingOnly = TRUE)[3], commandArgs(trailingOnly = TRUE)[4], commandArgs(trailingOnly = TRUE)[5], commandArgs(trailingOnly = TRUE)[6], sep = "_")
 
 
 if(!file.exists(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""))){
@@ -224,7 +224,7 @@ if(pdelta_method=="manual"){
 
 # How should bdelta[1] (intercept) and bdelta[2] (slope of (p-q)) be estimated
 
-bdelta_method = commandArgs(trailingOnly = TRUE)[7] # Can be "fixed" or "estimate"
+bdelta_method = "estimate" # Can be "fixed" or "estimate"
 
 if(bdelta_method=="estimate"){
   bdelta = c(NA, NA)
