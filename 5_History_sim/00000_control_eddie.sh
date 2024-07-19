@@ -8,10 +8,10 @@
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g
 #$ -pe smp 10
 #$ -j y
-#$ -o /ceph/users/marun/Va_simulations/5_History_sim/b_Interim_files/std_out/
+#$ -o /exports/eddie/scratch/msamant/Va_simulations/b_Interim_files/std_out/
 
 
-# std_out on Eddie: /exports/eddie/scratch/msamant/Va_simulations/b_Interim_files/std_out
+# std_out on Eddie: /exports/eddie/scratch/msamant/Va_simulations/b_Interim_files/std_out/
 # std_out on AC3: /ceph/users/marun/Va_simulations/5_History_sim/b_Interim_files/std_out/
 
 
