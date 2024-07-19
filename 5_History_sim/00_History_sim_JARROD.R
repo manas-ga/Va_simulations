@@ -29,7 +29,7 @@ if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "bigga
   
   base_path = "/ceph/users/marun/Va_simulations/5_History_sim" # Path to all the scripts except "Vw.Rmd"
   Vw_path = "/ceph/users/marun/Va_simulations/6_Code_Test/Vw.Rmd"
-  file_storage_path = "/data/obbard/Va_simulations/anlyses" # File storage path is the designated storage space on AC3 instead of the /home directory on qm
+  file_storage_path = "/data/obbard/Va_simulations/analyses" # File storage path is the designated storage space on AC3 instead of the /home directory on qm
   
 }
   
@@ -238,12 +238,12 @@ if(pdelta_method=="manual"){
 
 # How should bdelta[1] (intercept) and bdelta[2] (slope of (p-q)) be estimated
 
-bdelta_method = "estimate" # Can be "fixed" or "estimate"
+bdelta_method = "fixed" # Can be "fixed" or "estimate"
 
 if(bdelta_method=="estimate"){
   bdelta = c(NA, NA)
 }else{
-  bdelta = c(0, 0) # This only estimates the slope while keeping the intercept fixed at 0
+  bdelta = c(0, 0) # This only estimates the intercept while keeping the slope fixed at 0
 }
 
 
