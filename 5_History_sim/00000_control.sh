@@ -11,6 +11,6 @@
 #$ -o /ceph/users/marun/Va_simulations/5_History_sim/b_Interim_files/std_out/
 
 
-Param=`cat 000_parameter_grid.txt | awk "NR==1"`
+Param=`000_parameter_grid.txt | awk "NR==1"`
 
 Rscript 00_History_sim_JARROD.R $Param
