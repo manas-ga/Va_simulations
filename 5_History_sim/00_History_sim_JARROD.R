@@ -157,12 +157,12 @@ print(commandArgs(trailingOnly = TRUE))
 
 simulate = TRUE                        # To run the simulation or not
 analyse = TRUE                         # To perform the analysis on simulated data or not
-record = TRUE                         # Should the data of the simulations be appended to "data.csv" 
+record = TRUE                          # Should the data of the simulations be appended to "data.csv" 
 
 nsims = 1                              # Number of simulations (change scale in each simulation)
 n_cages = (as.numeric(commandArgs(trailingOnly = TRUE)[5]))     # The number of replicate cages in the experiment
 start_gen = 1                          # 
-end_gen = 20000                            # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+end_gen = 20000                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
 output_freq = 2500                     # The frequency with which SLiM outputs are to be generated for the analysis of history 
 ngen_expt = (as.numeric(commandArgs(trailingOnly = TRUE)[6]))                          # How many generations should allele frequency changes be calculated over in the experiment
 flip_sel_coef = 1 # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
