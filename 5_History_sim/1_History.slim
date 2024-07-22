@@ -41,19 +41,7 @@ mutationEffect(m3) { return 1.0; }
 
 1:150000 late() {
 
-	// Optionally flip the signs of randomly chosen selection coefficients
-
-	if(sim.cycle==end_gen-1){
-		if(shuffle_sel_coef==1){
-			cat("Is this loop working?????");
-			muts = sim.mutations;
-			for(mut in muts){
-				mut.setSelectionCoeff(sample(c(-1,1), 1)*mut.selectionCoeff);
-				cat(mut.selectionCoeff);
-			}
-		}	
-	}
-
+	
 	if (sim.cycle<end_gen){
 		inds = sim.subpopulations.individuals; // Vector of all individuals
 		

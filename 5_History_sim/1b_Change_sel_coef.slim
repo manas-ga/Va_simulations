@@ -1,0 +1,47 @@
+initialize()
+{
+	initializeSLiMModelType("WF");
+	initializeTreeSeq();
+	initializeMutationRate(0);
+	
+	if (DFE == "g"){
+		initializeMutationType("m1", 0.5, "f", 0.0);
+		initializeMutationType("m2", 0.5, "g", -shape*scale, shape);
+		initializeMutationType("m3", 0.5, "g", shape*scale, shape);
+		initializeGenomicElementType("g1", c(m1, m2, m3), c(0.33, 1.0, mut_ratio));
+	}
+	
+	if (DFE == "n"){
+		initializeMutationType("m1", 0.5, "f", 0.0);
+		initializeMutationType("m2", 0.5, "n", mean_alpha, var_alpha);
+		initializeGenomicElementType("g1", c(m1, m2), c(0.33, 1.0));
+	}
+	
+	initializeGenomicElement(g1, 0, sequence_length-1);
+	initializeRecombinationRate(0);
+ 
+}
+
+
+
+1 late(){
+	sim.readFromPopulationFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_with_neutral.trees");
+	sim.treeSeqRememberIndividuals(p0.individuals);
+	
+	if(shuffle_sel_coef==1){
+		cat("Flipping selection coefficients ant randomly selected sites...");
+		muts = sim.mutations;
+		for(mut in muts){
+			mut.setSelectionCoeff(sample(c(-1,1), 1)*mut.selectionCoeff);
+			cat(mut.selectionCoeff);
+		}
+	}
+	
+	sim.outputFull(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_parents.txt");
+	catn(sim.cycle + " (parents' output saved as a .txt file)");
+
+}
+
+
+
+
