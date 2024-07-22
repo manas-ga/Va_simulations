@@ -1,70 +1,86 @@
-	initialize()
-{        
-    initializeSLiMModelType("WF");
-    initializeTreeSeq();
-    initializeMutationRate(mu);
-
-    if (DFE == "g"){
-    	initializeMutationType("m2", 0.5, "g", -shape*scale, shape);
-    	initializeMutationType("m3", 0.5, "g", shape*scale, shape);
-    	initializeGenomicElementType("g1", c(m2, m3), c(1.0, mut_ratio));
-    }
-    
-    if (DFE == "n"){
-    	initializeMutationType("m2", 0.5, "n", mean_alpha, var_alpha);
-	initializeGenomicElementType("g1", m2, 1.0);
+initialize()
+{
+	initializeSLiMModelType("WF");
+	initializeTreeSeq();
+	initializeMutationRate(mu);
+	
+	if (DFE == "g"){
+		initializeMutationType("m2", 0.5, "g", -shape*scale, shape);
+		initializeMutationType("m3", 0.5, "g", shape*scale, shape);
+		initializeGenomicElementType("g1", c(m2, m3), c(1.0, mut_ratio));
 	}
+	
+	if (DFE == "n"){
+		initializeMutationType("m2", 0.5, "n", mean_alpha, var_alpha);
+		initializeGenomicElementType("g1", m2, 1.0);
+	}
+	
+	initializeGenomicElement(g1, 0, sequence_length-1);
+	initializeRecombinationRate(r);
 
-    initializeGenomicElement(g1, 0, sequence_length-1);
-    initializeRecombinationRate(r);
-    
 }
 
 
 mutationEffect(m2) { return 1.0; }
 mutationEffect(m3) { return 1.0; }
-1 late() { 
-    sim.readFromPopulationFile(msprime_output_path + "/" + Set_ID + "_sim" + simulation + "_neutral_burnin.trees");
-    sim.treeSeqRememberIndividuals(p0.individuals);
+
+1 late() {
+	sim.readFromPopulationFile(msprime_output_path + "/" + Set_ID + "_sim" + simulation + "_neutral_burnin.trees");
+	sim.treeSeqRememberIndividuals(p0.individuals);
 
 }
 
 1:150000 early(){
-
+	
 	if (sim.cycle == end_gen){
-	  	p0.setSubpopulationSize(n_ind_exp); // Reduce the population size to 1000
+		p0.setSubpopulationSize(n_ind_exp); // Reduce the population size to 1000
 	}
-		
+
 
 }
 
 1:150000 late() {
+
+	// Optionally flip the signs of randomly chosen selection coefficients
+
+	if(sim.cycle==end_gen-1){
+		if(shuffle_sel_coef==1){
+			cat("Is this loop working?????");
+			muts = sim.mutations;
+			for(mut in muts){
+				mut.setSelectionCoeff(sample(c(-1,1), 1)*mut.selectionCoeff);
+				cat(mut.selectionCoeff);
+			}
+		}	
+	}
+
 	if (sim.cycle<end_gen){
 		inds = sim.subpopulations.individuals; // Vector of all individuals
-
+		
 		if(DFE == "g"){
 			phenotypes = inds.sumOfMutationsOfType(m2) + inds.sumOfMutationsOfType(m3) + rnorm(length(inds), 0, 1); // Sum of all the selection coefficients (both m2 and m3) in each individuals genomes
-			}
-
+		}
+		
 		if (DFE == "n"){
 			phenotypes = inds.sumOfMutationsOfType(m2) + rnorm(length(inds), 0, 1); // Sum of all the selection coefficients (of type m2) in each individuals genomes
-			}
-
+		}
+		
 		inds.fitnessScaling = exp(phenotypes); // Calculate absolute fitness
-		}	
-
+	}
+	
 	if (sim.cycle%output_freq == 1){
 		
-	 	//sim.outputFull(slim_output_path + "/sim" + simulation + "_output_history_" + sim.cycle + ".txt");
-	 	catn(sim.cycle);
-		}
+		//sim.outputFull(slim_output_path + "/sim" + simulation + "_output_history_" + sim.cycle + ".txt");
+		catn(sim.cycle);
+	}
 	
 	if (sim.cycle == end_gen){
 		catn("The last generation of the burnin phase is " + sim.cycle);
-	   	catn("Done.");
-	    	//sim.outputFull(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_" + sim.cycle + ".txt");
-	    	sim.treeSeqOutput(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history.trees");
-    	    	sim.simulationFinished();
-		}
-	    
+		catn("Done.");
+		sim.outputFull(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_" + sim.cycle + ".txt");
+		sim.treeSeqOutput(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history.trees");
+		cat(sim.mutations.selectionCoeff);
+		sim.simulationFinished();
+	}
+
 }

@@ -159,12 +159,12 @@ analyse = TRUE                         # To perform the analysis on simulated da
 record = TRUE                         # Should the data of the simulations be appended to "data.csv" 
 
 nsims = 1                              # Number of simulations (change scale in each simulation)
-n_cages = (as.numeric(commandArgs(trailingOnly = TRUE)[5]))                           # The number of replicate cages in the experiment
+n_cages = (as.numeric(commandArgs(trailingOnly = TRUE)[5]))     # The number of replicate cages in the experiment
 start_gen = 1                          # 
-end_gen = 20000                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
+end_gen = 2                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
 output_freq = 2500                     # The frequency with which SLiM outputs are to be generated for the analysis of history 
 ngen_expt = (as.numeric(commandArgs(trailingOnly = TRUE)[6]))                          # How many generations should allele frequency changes be calculated over in the experiment
-
+shuffle_sel_coef = 0 # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
 
 ###########################################
 ########### Pop gen parameters ############
@@ -255,6 +255,7 @@ if(!bdelta_method%in%c("estimate", "fixed")){stop("bdelta_method must be one of 
 if(!randomise%in%c(TRUE, FALSE)){stop("randomise must be one of TRUE or FALSE")}
 if(!simulate%in%c(TRUE, FALSE)){stop("simulate must be one of TRUE or FALSE")}
 if(!analyse%in%c(TRUE, FALSE)){stop("analyse must be one of TRUE or FALSE")}
+if(!shuffle_sel_coef%in%c(0, 1)){stop("shuffle_sel_coef must be one of 0 or 1")}
 
 ####################################################################################################################################################
 
@@ -338,8 +339,9 @@ for (sim in 1:nsims){
       arg14 = paste("-d var_alpha=", var_alpha, sep = "")
       arg15 = paste("-d ", shQuote(paste("Set_ID=", "'", Set_ID, "'", sep = "")), sep = "")
       arg16 = paste("-d simulation=", sim, sep = "")
+      arg17 = paste("-d shuffle_sel_coef=", shuffle_sel_coef, sep = "")
       
-      system(paste("slim", arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, slim_history_path))
+      system(paste("slim", arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, slim_history_path))
       
       ###################################################################
       ############### Add neutral mutations using msprime ###############
