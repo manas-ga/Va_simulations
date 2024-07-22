@@ -25,7 +25,13 @@ mutationEffect(m2) { return 1.0; }
 mutationEffect(m3) { return 1.0; }
 
 1 late() {
-	sim.readFromPopulationFile(msprime_output_path + "/" + Set_ID + "_sim" + simulation + "_neutral_burnin.trees");
+	
+	// Read from the msprime simulation if no burnin
+	if(end_gen==2){
+		sim.readFromPopulationFile(msprime_output_path + "/" + Set_ID + "_sim" + simulation + "_neutral_burnin.trees");
+	}else{sim.addSubpop("p0", n_ind);} // For sims with burnin the initial msprime step is skipped
+	
+	
 	sim.treeSeqRememberIndividuals(p0.individuals);
 
 }
@@ -65,9 +71,8 @@ mutationEffect(m3) { return 1.0; }
 	if (sim.cycle == end_gen){
 		catn("The last generation of the burnin phase is " + sim.cycle);
 		catn("Done.");
-		sim.outputFull(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_" + sim.cycle + ".txt");
 		sim.treeSeqOutput(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history.trees");
-		cat(sim.mutations.selectionCoeff);
+		sim.outputFull(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_parents.txt");
 		sim.simulationFinished();
 	}
 

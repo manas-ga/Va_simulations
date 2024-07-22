@@ -22,14 +22,19 @@ initialize()
     
 }
 
-
 mutationEffect(m2) { return 1.0; }  // Ensures no selection by default, unless fitness effects are specified manually
 mutationEffect(m3) { return 1.0; }
 
 
-
 1 late(){
-    sim.readFromPopulationFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_parents.txt");
+
+	// If no burnin (end_gen==2) reaf from the "..._output_history.trees" file
+	// Otherwise (for sims with burnin) read from the "_output_parents.txt" file, which is the output after recapitulating neutral mutations and (optionally) flipping selection coefficients)
+
+	 if(end_gen==2){ 
+			sim.readFromPopulationFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history.trees"); 
+	 }else{sim.readFromPopulationFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_parents.txt");}	
+    
     sim.treeSeqRememberIndividuals(p0.individuals);
     catn(sim.cycle + " (parents' generation)");
 

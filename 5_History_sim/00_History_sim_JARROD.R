@@ -162,10 +162,10 @@ record = TRUE                         # Should the data of the simulations be ap
 nsims = 1                              # Number of simulations (change scale in each simulation)
 n_cages = (as.numeric(commandArgs(trailingOnly = TRUE)[5]))     # The number of replicate cages in the experiment
 start_gen = 1                          # 
-end_gen = 2                            # How many generations should the SLiM simulation run for while simulating the history (burnin)
+end_gen = 20000                            # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
 output_freq = 2500                     # The frequency with which SLiM outputs are to be generated for the analysis of history 
 ngen_expt = (as.numeric(commandArgs(trailingOnly = TRUE)[6]))                          # How many generations should allele frequency changes be calculated over in the experiment
-flip_sel_coef = 0 # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
+flip_sel_coef = 1 # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
 
 ###########################################
 ########### Pop gen parameters ############
@@ -311,10 +311,16 @@ for (sim in 1:nsims){
       ############# Run msprime (neutral burnin) ##########
       #####################################################
       
-      message("Running msprime...")
+      # Run only for sims without a burnin, i.e. if(end_gen==2)
+      
+      if(end_gen==2){
+      
+      #message("Running msprime...")
       
       system(paste("python", msprime_burnin_path, Ne, n_ind, sequence_length, r_msp, mu_msp, shape, scale, slim_output_path, mut_ratio, DFE, mean_alpha, sqrt(var_alpha), Set_ID, sim))
       
+      }
+        
       ###############################################################
       ################# Simulate the history in SLim ################
       ###############################################################
@@ -323,6 +329,7 @@ for (sim in 1:nsims){
       
       ### This has lot's of command line arguments. Creating separate strings for each argument
       
+      arg0 = paste("-d n_ind=", n_ind, sep = "")
       arg1 = paste("-d mu=", mu, sep = "")
       arg2 = paste("-d shape=", shape, sep = "")
       arg3 = paste("-d scale=", scale, sep = "")
@@ -340,21 +347,24 @@ for (sim in 1:nsims){
       arg15 = paste("-d ", shQuote(paste("Set_ID=", "'", Set_ID, "'", sep = "")), sep = "")
       arg16 = paste("-d simulation=", sim, sep = "")
       
-      system(paste("slim", arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, slim_history_path))
+      system(paste("slim", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, slim_history_path))
       
       ###################################################################
       ############### Add neutral mutations using msprime ###############
       ###################################################################
       
-      message("Adding neutral mutations...")
+      # Only for sims with a burnin phase
       
-      system(paste("python", msprime_add_neutral_path, slim_output_path, mu_neutral, Set_ID, sim))
-      
+      if(end_gen>2){
+        message("Adding neutral mutations...")
+        system(paste("python", msprime_add_neutral_path, slim_output_path, mu_neutral, Set_ID, sim))
+      }
       
       #####################################################################
       ### Randomly swap selection coefficients (if flip_sel_coef==T) ###
       #####################################################################
       
+      # Needs to be performed only for sims with burnin i.e., end_gen>2
       # For some reason, changing selection coefficients manually in SLiM does not get recorded in .trees output
       # Any manual changes to selection coefficients can only be recorded in a .txt "standard" SLiM output file
       # There, changing selection coefficients only after neutral mutations have been added, and the output stored as a .trees file
@@ -372,19 +382,25 @@ for (sim in 1:nsims){
       
       # Strictly speaking the parameters regarding DFE shouldn't be necessary, but keeping them on just in case
       
-      flip_arg1 = paste("-d shape=", shape, sep = "")
-      flip_arg2 = paste("-d scale=", scale, sep = "")
-      flip_arg3 = paste("-d sequence_length=", sequence_length, sep = "")
-      flip_arg4 = paste("-d ", shQuote(paste("slim_output_path=","'", slim_output_path, "'", sep = "")), sep = "") 
-      flip_arg5 = paste("-d mut_ratio=", mut_ratio, sep = "")
-      flip_arg6 = paste("-d ", shQuote(paste("DFE=", "'", DFE, "'", sep = "")), sep = "")
-      flip_arg7 = paste("-d mean_alpha=", mean_alpha, sep = "")
-      flip_arg8 = paste("-d var_alpha=", var_alpha, sep = "")
-      flip_arg9 = paste("-d ", shQuote(paste("Set_ID=", "'", Set_ID, "'", sep = "")), sep = "")
-      flip_arg10 = paste("-d simulation=", sim, sep = "")
-      flip_arg11 = paste("-d flip_sel_coef=", flip_sel_coef, sep = "")
-   
-      system(paste("slim", flip_arg1, flip_arg2, flip_arg3, flip_arg4, flip_arg5, flip_arg6, flip_arg7, flip_arg8, flip_arg9, flip_arg10, flip_arg11, slim_flip_sel_coef_path))
+      if(end_gen>2){
+        
+        flip_arg1 = paste("-d shape=", shape, sep = "")
+        flip_arg2 = paste("-d scale=", scale, sep = "")
+        flip_arg3 = paste("-d sequence_length=", sequence_length, sep = "")
+        flip_arg4 = paste("-d ", shQuote(paste("slim_output_path=","'", slim_output_path, "'", sep = "")), sep = "") 
+        flip_arg5 = paste("-d mut_ratio=", mut_ratio, sep = "")
+        flip_arg6 = paste("-d ", shQuote(paste("DFE=", "'", DFE, "'", sep = "")), sep = "")
+        flip_arg7 = paste("-d mean_alpha=", mean_alpha, sep = "")
+        flip_arg8 = paste("-d var_alpha=", var_alpha, sep = "")
+        flip_arg9 = paste("-d ", shQuote(paste("Set_ID=", "'", Set_ID, "'", sep = "")), sep = "")
+        flip_arg10 = paste("-d simulation=", sim, sep = "")
+        flip_arg11 = paste("-d flip_sel_coef=", flip_sel_coef, sep = "")
+        
+        system(paste("slim", flip_arg1, flip_arg2, flip_arg3, flip_arg4, flip_arg5, flip_arg6, flip_arg7, flip_arg8, flip_arg9, flip_arg10, flip_arg11, slim_flip_sel_coef_path))
+        
+        
+      }
+      
       
       
       ###################################################

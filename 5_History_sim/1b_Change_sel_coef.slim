@@ -28,17 +28,16 @@ initialize()
 	sim.readFromPopulationFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_with_neutral.trees");
 	sim.treeSeqRememberIndividuals(p0.individuals);
 	
-	if(shuffle_sel_coef==1){
+	if(flip_sel_coef==1){
 		cat("Flipping selection coefficients ant randomly selected sites...");
 		muts = sim.mutations;
 		for(mut in muts){
 			mut.setSelectionCoeff(sample(c(-1,1), 1)*mut.selectionCoeff);
-			cat(mut.selectionCoeff);
 		}
 	}
 	
 	sim.outputFull(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_parents.txt");
-	catn(sim.cycle + " (parents' output saved as a .txt file)");
+	catn("Generation " + sim.cycle + ": parents' output saved as a .txt file");
 
 }
 
