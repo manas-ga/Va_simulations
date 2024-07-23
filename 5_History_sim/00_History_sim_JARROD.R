@@ -149,13 +149,6 @@ record = TRUE                          # Should the data of the simulations be a
 
 nsims = 10                              # Number of simulations (change scale in each simulation)
 
-# Add a check that stops the sim if nsim > 1 on one of the two clusters (AC3 or Eddie)
-# On AC3 and Eddie nsims should always be 1 with parameters varied usin command line arguments.
-
-if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig", "c1", "c2", "c3", "c4", "c5", "c6")|grepl("ecdf.ed.ac.uk", Sys.info()["nodename"])){
-  if(nsims!=1){stop("nsims must be 1 when running on a cluster")}
-}
-
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
 end_gen = 2                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
@@ -178,7 +171,7 @@ n_sample = n_ind_exp                   # Number of individuals to be sampled to 
 sequence_length = 1e+06                # Just have a single continuous chromosome that is simulated
 r = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1.4, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))/sequence_length                            # Recombination rate (per site per generation) during the forward simulation of history
 r_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1.4, (as.numeric(commandArgs(trailingOnly = TRUE)[3])))/sequence_length                       # Recombination rate to be used during during the experiment (Drosophila melanogaster ~ 1.4e-08)
-r_msp = r/532                        # Recombination rate for the initial msprime simulation
+r_msp = r/532                          # Recombination rate for the initial msprime simulation
 AtleastOneRecomb = FALSE               # Whether there has to be at least one recombination event
 
 #mu = 1.3e-06                          # Mutation rate of non_neutral mutations during the forward simulation of the history
@@ -278,6 +271,14 @@ if(!randomise%in%c(TRUE, FALSE)){stop("randomise must be one of TRUE or FALSE")}
 if(!simulate%in%c(TRUE, FALSE)){stop("simulate must be one of TRUE or FALSE")}
 if(!analyse%in%c(TRUE, FALSE)){stop("analyse must be one of TRUE or FALSE")}
 if(!flip_sel_coef%in%c(0, 1)){stop("flip_sel_coef must be one of 0 or 1")}
+
+# Add a check that stops the sim if nsim > 1 on one of the two clusters (AC3 or Eddie)
+# On AC3 and Eddie nsims should always be 1 with parameters varied usin command line arguments.
+
+if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig", "c1", "c2", "c3", "c4", "c5", "c6")|grepl("ecdf.ed.ac.uk", Sys.info()["nodename"])){
+  if(nsims!=1){stop("nsims must be 1 when running on a cluster")}
+}
+
 
 ####################################################################################################################################################
 
