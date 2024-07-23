@@ -122,7 +122,7 @@ library(RhpcBLASctl)
 # This create issue while running things on the cluster
 # Restrict the number of cores during matrix manipulations ##
 
-blas_set_num_threads(10)
+blas_set_num_threads(15)
 
 #################################
 #### Load Jarrod's functions ####
@@ -151,7 +151,7 @@ nsims = 10                              # Number of simulations (change scale in
 
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
-end_gen = 2                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+end_gen = 20000                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
 
 if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
