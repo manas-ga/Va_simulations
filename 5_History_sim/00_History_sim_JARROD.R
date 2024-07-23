@@ -147,7 +147,7 @@ simulate = TRUE                        # To run the simulation or not
 analyse = TRUE                         # To perform the analysis on simulated data or not
 record = TRUE                          # Should the data of the simulations be appended to "data.csv" 
 
-nsims = 10                              # Number of simulations (change scale in each simulation)
+nsims = 1                              # Number of simulations (change scale in each simulation)
 
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
