@@ -147,10 +147,21 @@ simulate = TRUE                        # To run the simulation or not
 analyse = TRUE                         # To perform the analysis on simulated data or not
 record = TRUE                          # Should the data of the simulations be appended to "data.csv" 
 
-nsims = 1                              # Number of simulations (change scale in each simulation)
+nsims = 10                              # Number of simulations (change scale in each simulation)
+
+# Add a check that stops the sim if nsim > 1 on one of the two clusters (AC3 or Eddie)
+# On AC3 and Eddie nsims should always be 1 with parameters varied usin command line arguments.
+
+if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig", "c1", "c2", "c3", "c4", "c5", "c6")|grepl("ecdf.ed.ac.uk", Sys.info()["nodename"])){
+  if(nsims!=1){stop("nsims must be 1 when running on a cluster")}
+}
+
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
-start_gen = 1                          # 
-end_gen = 20000                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+
+end_gen = 2                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+
+if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
+
 output_freq = 1000                     # The frequency with which SLiM outputs are to be generated for the analysis of history 
 ngen_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 3, (as.numeric(commandArgs(trailingOnly = TRUE)[6])))                          # How many generations should allele frequency changes be calculated over in the experiment
 flip_sel_coef = 1 # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
@@ -171,7 +182,7 @@ r_msp = r/532                        # Recombination rate for the initial msprim
 AtleastOneRecomb = FALSE               # Whether there has to be at least one recombination event
 
 #mu = 1.3e-06                          # Mutation rate of non_neutral mutations during the forward simulation of the history
-mu_list = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", seq(3e-8, 2e-7, length = nsims), seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims))  # If mu is to be varied in order to vary true Vw # (1.5-6.0 e-06 works splendidly)
+if(Sys.info()["nodename"]=="SCE-BIO-C06645"){mu_list=seq(3e-8, 2e-7, length = nsims)}else{mu_list=seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw # (1.5-6.0 e-06 works splendidly)
 mu_expt = 0                             # Mutation rate during the experiment
 
 # mu_msp and mu_neutral are specified within the loop over sims
@@ -251,7 +262,7 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
 }
 
 if(!file.exists(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""))){
-  col_names = as.matrix(t(c("Set_ID","Time","end_gen", "ngen_expt", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "proj", "LDdelta", "pa", "Vs", "randomise", "pdelta_method", "bdelta_method", "va_true", "vA_true", "vA_est", "vA_left", "pdelta_emp", "bdelta_intercept_emp", "bdelta_slope_emp", "sigma2delta_emp", "pdelta_est", "pdelta_var_est", "bdelta_intercept_est", "bdelta_slope_est", "bdelta_var_est", "sigma2delta_est", "seg_sites", "seg_sites_neu", "seg_sites_ben", "seg_sites_del", "s_pmq")))
+  col_names = as.matrix(t(c("Set_ID","Time","end_gen", "ngen_expt", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "proj", "LDdelta", "pa", "Vs", "randomise", "pdelta_method", "bdelta_method", "va_true", "vA_true", "vA_est", "vA_left", "vA_alpha_emp", "pdelta_emp", "bdelta_intercept_emp", "bdelta_slope_emp", "sigma2delta_emp", "pdelta_est", "pdelta_var_est", "bdelta_intercept_est", "bdelta_slope_est", "bdelta_var_est", "sigma2delta_est", "seg_sites", "seg_sites_neu", "seg_sites_ben", "seg_sites_del", "s_pmq")))
   write.table(col_names, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
 }
 
@@ -278,6 +289,7 @@ vA_left = rep(NA, nsims) # Average vA left in gen1
 vA_true = rep(NA, nsims) # Additive genetic variance
 va_true = rep(NA, nsims) # Additive genic variance
 vA_est = rep(NA, nsims)  # Estimated vA from the model
+vA_alpha_emp = rep(NA, nsims) # vA_estimated using L; A, DL and X (obtained from Vw_model()),  and empirical alpha properties (obtained using alpha_distribution())
 
 pdelta_est = rep(NA, nsims) # pdelta is fixed to 0 or is estimated in each simulation with the help of maximum likelihood (implemented manually or using optim())
 pdelta_var_est = rep(NA, nsims)
@@ -641,7 +653,6 @@ for (sim in 1:nsims){
           # Add the vector freq to P
           
           P = cbind(P, freq)
-          #print(paste(round((gen-start_gen)*100/(end_gen-start_gen), 2), " % complete!"))
           
         }
        
@@ -886,6 +897,22 @@ for (sim in 1:nsims){
    bdelta_intercept_emp[sim] = alpha_properties$bdelta_int
    bdelta_slope_emp[sim] = alpha_properties$bdelta_slope
    sigma2delta_emp[sim] = alpha_properties$sigma2delta
+   
+   # Calculate vA from these empirical properties of alpha
+   
+   bdelta_emp = c(bdelta_intercept_emp[sim], bdelta_slope_emp[sim])
+   
+   if(LDdelta){
+     TrV<-sum((m1$DL)^(2*(pdelta_emp[sim]+1)))*sigma2delta_emp[sim]
+     aLa<-t((m1$X)%*%bdelta_emp)%*%L%*%(m1$X)%*%bdelta_emp-sum(diag(t(m1$X)%*%L%*%(m1$X)%*%(m1$S)))
+   }else{
+     TrV<-sum(diag(L%*%diag(diag(L)^pdelta_emp[sim])))*sigma2delta_emp[sim]
+     aLa<-sum(diag(L)*((m1$X)%*%bdelta_emp)^2)-sum(diag(t(m1$X)%*%diag(diag(L))%*%(m1$X)%*%(m1$S)))
+   }
+   
+   vA_alpha_emp[sim]<-TrV+aLa
+   
+   
   
   ########################################################
   ######### Save simulation data in a spreadsheet ########
@@ -893,7 +920,7 @@ for (sim in 1:nsims){
   
   if(record == TRUE){
   dat = read.csv(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""), header=FALSE)
-  dat = rbind(dat, c(Set_ID, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, proj, LDdelta, pa, Vs, randomise, pdelta_method, bdelta_method, va_true[sim], vA_true[sim], vA_est[sim], vA_left[sim], pdelta_emp[sim], bdelta_intercept_emp[sim], bdelta_slope_emp[sim], sigma2delta_emp[sim], pdelta_est[sim], pdelta_var_est[sim], bdelta_intercept_est[sim], bdelta_slope_est[sim], bdelta_var_est[sim], sigma2delta_est[sim], seg_sites[sim], seg_sites_neu[sim], seg_sites_ben[sim], seg_sites_del[sim], s_pmq[sim]))
+  dat = rbind(dat, c(Set_ID, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, proj, LDdelta, pa, Vs, randomise, pdelta_method, bdelta_method, va_true[sim], vA_true[sim], vA_est[sim], vA_left[sim], vA_alpha_emp[sim], pdelta_emp[sim], bdelta_intercept_emp[sim], bdelta_slope_emp[sim], sigma2delta_emp[sim], pdelta_est[sim], pdelta_var_est[sim], bdelta_intercept_est[sim], bdelta_slope_est[sim], bdelta_var_est[sim], sigma2delta_est[sim], seg_sites[sim], seg_sites_neu[sim], seg_sites_ben[sim], seg_sites_del[sim], s_pmq[sim]))
   write.table(dat, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
   }
   
