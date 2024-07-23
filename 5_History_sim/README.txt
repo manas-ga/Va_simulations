@@ -49,6 +49,20 @@
 
 # A python script that reads a SLiM output file and extracts the information on mutations stooring it as a .txt file in "b_interim_files/Mutations"
 
+### 1b_Change_sel_coef.slim ###
+
+# In this SLiM script, we first read the .trees file generated after adding neutral mutations, i.e. slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_with_neutral.trees".
+# We then randomly swap signs of selection coefficients *** if flip_sel_coef==T ***, and save two output files
+# 1. a .txt file (slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_parents.txt") = This file is for downstream snalyses, it is not read by 4_Experiment.slim script
+# 2. a .trees file (slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_with_neutral.trees", metadata = sel_coef)
+# By default the .trees file does not record changes to the selection coefficients. Therefore while saving the .trees file we also need to pass as metadata a dictionary containing the mutation ids and selection coeficients
+# All in just one tick
+# This script does not run the simulation
+# It's just a hack to read the .trees output, swap selection coefficients (if required), and then store the output as a .txt file
+# The flip_sel_coef==T check happens within the script
+# Irrespective of whether flip_sel_coef==T, the script is run, minimally to convert the output from .trees to .txt
+      
+
 
 ### 3_Extract_genomes.py ###
 
