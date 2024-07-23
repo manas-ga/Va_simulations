@@ -105,22 +105,6 @@ system(paste("mkdir -p", paste(file_storage_path, "/b_Interim_files/Mutations", 
 system(paste("mkdir -p", paste(file_storage_path, "/b_Interim_files/SLiM_outputs", sep = "")))
 
 
-##### Create a spreadsheet to store cumulative data across all simulations (only if it doesn't exist already)
-
-# Assign a "Set_ID" to each set of simulations 
-# The set ID is the name of the system + time at which this script starts running. It stays constant throughout (for all the simulations run in that particular set).
-
-Set_ID = as.character(paste(Sys.info()["nodename"], Sys.time()))
-Set_ID = gsub(" ", "_", Set_ID)
-Set_ID = paste(Set_ID, commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[2], commandArgs(trailingOnly = TRUE)[3], commandArgs(trailingOnly = TRUE)[4], commandArgs(trailingOnly = TRUE)[5], commandArgs(trailingOnly = TRUE)[6], sep = "_")
-
-
-if(!file.exists(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""))){
-  col_names = as.matrix(t(c("Set_ID","Time","end_gen", "ngen_expt", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "proj", "LDdelta", "pa", "Vs", "randomise", "pdelta_method", "bdelta_method", "va_true", "vA_true", "vA_est", "vA_left", "pdelta_emp", "bdelta_intercept_emp", "bdelta_slope_emp", "sigma2delta_emp", "pdelta_est", "pdelta_var_est", "bdelta_intercept_est", "bdelta_slope_est", "bdelta_var_est", "sigma2delta_est", "seg_sites", "seg_sites_neu", "seg_sites_ben", "seg_sites_del", "s_pmq")))
-  write.table(col_names, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
-}
-
-
 ####################################
 ######### Packages #################
 ####################################
@@ -151,21 +135,24 @@ rmarkdown::render(file.path(Vw_path))
 ############ Simulation Parameters ##################
 #####################################################
 
-# Print command line arguments to screen
-print(c("Mutation rate", "recombination rate (M)", "Population size", "No. of cages", "Experimental generations" ))
-print(commandArgs(trailingOnly = TRUE))
+if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
+  # Print command line arguments to screen
+  print(c("Mutation rate", "recombination rate (M)", "Population size", "No. of cages", "Experimental generations" ))
+  print(commandArgs(trailingOnly = TRUE))
+}
+
 
 simulate = TRUE                        # To run the simulation or not
 analyse = TRUE                         # To perform the analysis on simulated data or not
 record = TRUE                          # Should the data of the simulations be appended to "data.csv" 
 
 nsims = 1                              # Number of simulations (change scale in each simulation)
-n_cages = (as.numeric(commandArgs(trailingOnly = TRUE)[5]))     # The number of replicate cages in the experiment
+n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 start_gen = 1                          # 
-end_gen = 20000                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+end_gen = 2                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
 output_freq = 2500                     # The frequency with which SLiM outputs are to be generated for the analysis of history 
-ngen_expt = (as.numeric(commandArgs(trailingOnly = TRUE)[6]))                          # How many generations should allele frequency changes be calculated over in the experiment
-flip_sel_coef = 1 # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
+ngen_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 3, (as.numeric(commandArgs(trailingOnly = TRUE)[6])))                          # How many generations should allele frequency changes be calculated over in the experiment
+flip_sel_coef = 0 # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
 
 ###########################################
 ########### Pop gen parameters ############
@@ -173,17 +160,17 @@ flip_sel_coef = 1 # (1 for TRUE and 0 for FALSE) Multiply the selection coeffici
 
 Ne = 1.33e+06                          # Effective population size
 n_ind = 2500                           # Number of individuals to be sampled in msprime and then run forward in SLiM
-n_ind_exp = (as.numeric(commandArgs(trailingOnly = TRUE)[4]))                       # The population size of the experiment. In 00_History.slim the population reduces to n_ind_exp in the last generation to simulate the sampling of the parents for the experiment
+n_ind_exp = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1000, (as.numeric(commandArgs(trailingOnly = TRUE)[4])))                       # The population size of the experiment. In 00_History.slim the population reduces to n_ind_exp in the last generation to simulate the sampling of the parents for the experiment
 n_sample = n_ind_exp                   # Number of individuals to be sampled to construct the c matrix  (This is just because c matrices become awfully large). Typically should be the same as n_ind_exp 
 
 sequence_length = 1e+06                # Just have a single continuous chromosome that is simulated
-r = (as.numeric(commandArgs(trailingOnly = TRUE)[2]))/sequence_length                            # Recombination rate (per site per generation) during the forward simulation of history
-r_expt = (as.numeric(commandArgs(trailingOnly = TRUE)[3]))/sequence_length                       # Recombination rate to be used during during the experiment (Drosophila melanogaster ~ 1.4e-08)
+r = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1.4, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))/sequence_length                            # Recombination rate (per site per generation) during the forward simulation of history
+r_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1.4, (as.numeric(commandArgs(trailingOnly = TRUE)[3])))/sequence_length                       # Recombination rate to be used during during the experiment (Drosophila melanogaster ~ 1.4e-08)
 r_msp = r/532                        # Recombination rate for the initial msprime simulation
 AtleastOneRecomb = FALSE               # Whether there has to be at least one recombination event
 
 #mu = 1.3e-06                          # Mutation rate of non_neutral mutations during the forward simulation of the history
-mu_list = seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)  # If mu is to be varied in order to vary true Vw # (1.5-6.0 e-06 works splendidly)
+mu_list = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", seq(3e-8, 2e-7, length = nsims), seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims))  # If mu is to be varied in order to vary true Vw # (1.5-6.0 e-06 works splendidly)
 mu_expt = 0                             # Mutation rate during the experiment
 
 # mu_msp and mu_neutral are specified within the loop over sims
@@ -247,6 +234,28 @@ if(bdelta_method=="estimate"){
   bdelta = c(0, 0) # This only estimates the intercept while keeping the slope fixed at 0
 }
 
+###################################################################################################################
+##### Create a spreadsheet to store cumulative data across all simulations (only if it doesn't exist already) #####
+###################################################################################################################
+
+# Assign a "Set_ID" to each set of simulations 
+# The set ID is the name of the system + time at which this script starts running. It stays constant throughout (for all the simulations run in that particular set).
+
+Set_ID = as.character(paste(Sys.info()["nodename"], Sys.time()))
+Set_ID = gsub(" ", "_", Set_ID)
+
+## Only attach command line parameters to the set id if not running on the PC
+if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
+  Set_ID = paste(Set_ID, commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[2], commandArgs(trailingOnly = TRUE)[3], commandArgs(trailingOnly = TRUE)[4], commandArgs(trailingOnly = TRUE)[5], commandArgs(trailingOnly = TRUE)[6], sep = "_")
+}
+
+if(!file.exists(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""))){
+  col_names = as.matrix(t(c("Set_ID","Time","end_gen", "ngen_expt", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "proj", "LDdelta", "pa", "Vs", "randomise", "pdelta_method", "bdelta_method", "va_true", "vA_true", "vA_est", "vA_left", "pdelta_emp", "bdelta_intercept_emp", "bdelta_slope_emp", "sigma2delta_emp", "pdelta_est", "pdelta_var_est", "bdelta_intercept_est", "bdelta_slope_est", "bdelta_var_est", "sigma2delta_est", "seg_sites", "seg_sites_neu", "seg_sites_ben", "seg_sites_del", "s_pmq")))
+  write.table(col_names, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
+}
+
+
+
 
 ####################################################################################################################################################
 
@@ -301,7 +310,7 @@ for (sim in 1:nsims){
       # Specify the mutation rate for the SLiM history simulation
       
       mu = mu_list[sim]
-      mu_msp = ifelse(end_gen==2, mu/532, mu/5320)
+      mu_msp = ifelse(end_gen==2, mu/5320, mu/5320)
       mu_neutral = ifelse(end_gen==2, mu_msp/3, mu/2000)
       
       message(paste("Simulation", sim, "in progress..."))
@@ -311,15 +320,10 @@ for (sim in 1:nsims){
       ############# Run msprime (neutral burnin) ##########
       #####################################################
       
-      # Run only for sims without a burnin, i.e. if(end_gen==2)
-      
-      if(end_gen==2){
-      
-      #message("Running msprime...")
+      message("Running msprime...")
       
       system(paste("python", msprime_burnin_path, Ne, n_ind, sequence_length, r_msp, mu_msp, shape, scale, slim_output_path, mut_ratio, DFE, mean_alpha, sqrt(var_alpha), Set_ID, sim))
       
-      }
         
       ###############################################################
       ################# Simulate the history in SLim ################
@@ -346,62 +350,50 @@ for (sim in 1:nsims){
       arg14 = paste("-d var_alpha=", var_alpha, sep = "")
       arg15 = paste("-d ", shQuote(paste("Set_ID=", "'", Set_ID, "'", sep = "")), sep = "")
       arg16 = paste("-d simulation=", sim, sep = "")
+      arg17 = paste("-d flip_sel_coef=", flip_sel_coef, sep = "")
       
-      system(paste("slim", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, slim_history_path))
+      system(paste("slim", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, slim_history_path))
       
       ###################################################################
       ############### Add neutral mutations using msprime ###############
       ###################################################################
       
-      # Only for sims with a burnin phase
+      message("Adding neutral mutations...")
+      system(paste("python", msprime_add_neutral_path, slim_output_path, mu_neutral, Set_ID, sim))
       
-      if(end_gen>2){
-        message("Adding neutral mutations...")
-        system(paste("python", msprime_add_neutral_path, slim_output_path, mu_neutral, Set_ID, sim))
-      }
+      ######################################################################
+      ##### Randomly swap selection coefficients (if flip_sel_coef==T) #####
+      ######################################################################
       
-      #####################################################################
-      ### Randomly swap selection coefficients (if flip_sel_coef==T) ###
-      #####################################################################
-      
-      # Needs to be performed only for sims with burnin i.e., end_gen>2
-      # For some reason, changing selection coefficients manually in SLiM does not get recorded in .trees output
-      # Any manual changes to selection coefficients can only be recorded in a .txt "standard" SLiM output file
-      # There, changing selection coefficients only after neutral mutations have been added, and the output stored as a .trees file
-      # In this SLiM script, we first read that .trees file, i.e. slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_with_neutral.trees".
-      # We then randomly swap signs of selection coefficients, and save the output as a .txt file (slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_parents.txt")
+      # In this SLiM script, we first read the .trees file generated after adding neutral mutations, i.e. slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_with_neutral.trees".
+      # We then randomly swap signs of selection coefficients *** if flip_sel_coef==T ***, and save two output files
+      # 1. a .txt file (slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_parents.txt") = This file is for downstream snalyses, it is not read by 4_Experiment.slim script
+      # 2. a .trees file (slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_with_neutral.trees", metadata = sel_coef)
+      # By default the .trees file does not record changes to the selection coefficients. Therefore while saving the .trees file we also need to pass as metadata a dictionary containing the mutation ids and selection coeficients
       # All in just one tick
       # This script does not run the simulation
       # It's just a hack to read the .trees output, swap selection coefficients (if required), and then store the output as a .txt file
       # The flip_sel_coef==T check happens within the script
       # Irrespective of whether flip_sel_coef==T, the script is run, minimally to convert the output from .trees to .txt
       
-      if(flip_sel_coef){message("Coverting output to .txt and randomly swapping selection coefficients...")}else{message("Coverting output to .txt...")}
+      if(flip_sel_coef==1){message("Randomly flipping selection coefficients and Coverting .trees output in the parents' generation to .txt for analyses...")}else{message("Coverting .trees output in the parents' genreation to .txt for analyses...")}
       
       ### This has lot's of command line arguments. Creating separate strings for each argument
-      
       # Strictly speaking the parameters regarding DFE shouldn't be necessary, but keeping them on just in case
       
-      if(end_gen>2){
-        
-        flip_arg1 = paste("-d shape=", shape, sep = "")
-        flip_arg2 = paste("-d scale=", scale, sep = "")
-        flip_arg3 = paste("-d sequence_length=", sequence_length, sep = "")
-        flip_arg4 = paste("-d ", shQuote(paste("slim_output_path=","'", slim_output_path, "'", sep = "")), sep = "") 
-        flip_arg5 = paste("-d mut_ratio=", mut_ratio, sep = "")
-        flip_arg6 = paste("-d ", shQuote(paste("DFE=", "'", DFE, "'", sep = "")), sep = "")
-        flip_arg7 = paste("-d mean_alpha=", mean_alpha, sep = "")
-        flip_arg8 = paste("-d var_alpha=", var_alpha, sep = "")
-        flip_arg9 = paste("-d ", shQuote(paste("Set_ID=", "'", Set_ID, "'", sep = "")), sep = "")
-        flip_arg10 = paste("-d simulation=", sim, sep = "")
-        flip_arg11 = paste("-d flip_sel_coef=", flip_sel_coef, sep = "")
-        
-        system(paste("slim", flip_arg1, flip_arg2, flip_arg3, flip_arg4, flip_arg5, flip_arg6, flip_arg7, flip_arg8, flip_arg9, flip_arg10, flip_arg11, slim_flip_sel_coef_path))
-        
-        
-      }
+      flip_arg1 = paste("-d shape=", shape, sep = "")
+      flip_arg2 = paste("-d scale=", scale, sep = "")
+      flip_arg3 = paste("-d sequence_length=", sequence_length, sep = "")
+      flip_arg4 = paste("-d ", shQuote(paste("slim_output_path=","'", slim_output_path, "'", sep = "")), sep = "") 
+      flip_arg5 = paste("-d mut_ratio=", mut_ratio, sep = "")
+      flip_arg6 = paste("-d ", shQuote(paste("DFE=", "'", DFE, "'", sep = "")), sep = "")
+      flip_arg7 = paste("-d mean_alpha=", mean_alpha, sep = "")
+      flip_arg8 = paste("-d var_alpha=", var_alpha, sep = "")
+      flip_arg9 = paste("-d ", shQuote(paste("Set_ID=", "'", Set_ID, "'", sep = "")), sep = "")
+      flip_arg10 = paste("-d simulation=", sim, sep = "")
+      flip_arg11 = paste("-d flip_sel_coef=", flip_sel_coef, sep = "")
       
-      
+      system(paste("slim", flip_arg1, flip_arg2, flip_arg3, flip_arg4, flip_arg5, flip_arg6, flip_arg7, flip_arg8, flip_arg9, flip_arg10, flip_arg11, slim_flip_sel_coef_path))
       
       ###################################################
       ######### Simulate the experiment in SLiM #########
@@ -433,8 +425,9 @@ for (sim in 1:nsims){
         expt_arg13 = paste("-d ", shQuote(paste("Set_ID=", "'", Set_ID, "'", sep = "")), sep = "")
         expt_arg14 = paste("-d simulation=", sim, sep = "")
         expt_arg15 = paste("-d cage=", cage, sep = "")
+        expt_arg16 = paste("-d flip_sel_coef=", flip_sel_coef, sep = "")
         
-        system(paste("slim", expt_arg1, expt_arg2, expt_arg3, expt_arg4, expt_arg5, expt_arg6, expt_arg7, expt_arg8, expt_arg9, expt_arg10, expt_arg11, expt_arg12, expt_arg13, expt_arg14, expt_arg15, slim_expt_path))
+        system(paste("slim", expt_arg1, expt_arg2, expt_arg3, expt_arg4, expt_arg5, expt_arg6, expt_arg7, expt_arg8, expt_arg9, expt_arg10, expt_arg11, expt_arg12, expt_arg13, expt_arg14, expt_arg15, expt_arg16, slim_expt_path))
         
       }
     

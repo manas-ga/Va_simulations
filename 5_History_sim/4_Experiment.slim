@@ -1,25 +1,25 @@
 initialize()
-{   
-    initializeSLiMModelType("WF");
-    initializeTreeSeq();
-    initializeMutationRate(mu_expt);
-    
-     if (DFE == "g"){
-        initializeMutationType("m1", 0.5, "f", 0.0);
-    	initializeMutationType("m2", 0.5, "g", -shape*scale, shape);
-    	initializeMutationType("m3", 0.5, "g", shape*scale, shape);
-    	initializeGenomicElementType("g1", c(m1, m2, m3), c(0.33, 1.0, mut_ratio));
-    }
-    
-    if (DFE == "n"){
-        initializeMutationType("m1", 0.5, "f", 0.0);
-    	initializeMutationType("m2", 0.5, "n", mean_alpha, var_alpha);
-	initializeGenomicElementType("g1", c(m1, m2), c(0.33, 1.0));
+{
+	initializeSLiMModelType("WF");
+	initializeTreeSeq();
+	initializeMutationRate(mu_expt);
+	
+	if (DFE == "g"){
+		initializeMutationType("m1", 0.5, "f", 0.0);
+		initializeMutationType("m2", 0.5, "g", -shape*scale, shape);
+		initializeMutationType("m3", 0.5, "g", shape*scale, shape);
+		initializeGenomicElementType("g1", c(m1, m2, m3), c(0.33, 1.0, mut_ratio));
 	}
+	
+	if (DFE == "n"){
+		initializeMutationType("m1", 0.5, "f", 0.0);
+		initializeMutationType("m2", 0.5, "n", mean_alpha, var_alpha);
+		initializeGenomicElementType("g1", c(m1, m2), c(0.33, 1.0));
+	}
+	
+	initializeGenomicElement(g1, 0, sequence_length-1);
+	initializeRecombinationRate(r);
 
-    initializeGenomicElement(g1, 0, sequence_length-1);
-    initializeRecombinationRate(r);
-    
 }
 
 mutationEffect(m2) { return 1.0; }  // Ensures no selection by default, unless fitness effects are specified manually
@@ -27,50 +27,62 @@ mutationEffect(m3) { return 1.0; }
 
 
 1 late(){
-
-	// If no burnin (end_gen==2) reaf from the "..._output_history.trees" file
-	// Otherwise (for sims with burnin) read from the "_output_parents.txt" file, which is the output after recapitulating neutral mutations and (optionally) flipping selection coefficients)
-
-	 if(end_gen==2){ 
-			sim.readFromPopulationFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history.trees"); 
-	 }else{sim.readFromPopulationFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_parents.txt");}	
-    
-    sim.treeSeqRememberIndividuals(p0.individuals);
-    catn(sim.cycle + " (parents' generation)");
-
+	
+	// Read from the "..._output_history.trees" file
+	
+	sim.readFromPopulationFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_with_neutral.trees");
+	
+	sim.treeSeqRememberIndividuals(p0.individuals);
+	catn(sim.cycle + " (parents' generation)");
+	
+	// if(flip_sel_coef==1) load metadata to load the changes in selection coefficients made manualy in 1_History.slim
+	// These changes are not recorded automatically in the .trees file
+	// Must be retrieved from the user generated metadata Dictionary() 
+	
+	if(flip_sel_coef==1){
+	
+		sel_coef = treeSeqMetadata(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_with_neutral.trees");
+		
+		// Apply these changed selection coefficients
+		
+		muts = sim.mutations;
+		
+		for (mut in muts){
+		
+			mut.setSelectionCoeff(sel_coef.getValue(asString(mut.id)));
+		}
+	}
 }
 
 
-
-
 1:150000 late() { //15000 is just a random large number that is higher than all the generations of interest
-	 
 	
-	 // Experiment (and therefore selection) starts from end_gen + 1
-
-         if (sim.cycle>end_gen){ // Since this is a late() event, its effects will only be applied *after* progeny production in end_gen + 1 (hence no selection in end_gen + 1, ie F1 generation)
-				 // But selection will be applied according to fitnesses defined below starting from (end_gen + 2), ie F2 generation
-
-	 	inds = sim.subpopulations.individuals; // Vector of all individuals
-
-	 	if(DFE == "g"){
-				phenotypes = inds.sumOfMutationsOfType(m2) + inds.sumOfMutationsOfType(m3) + rnorm(length(inds), 0, 1); // Sum of all the selection coefficients (both m2 and m3) in each individuals genomes
-				}
-
-		if (DFE == "n"){
-				phenotypes = inds.sumOfMutationsOfType(m2) + rnorm(length(inds), 0, 1); // Sum of all the selection coefficients (of type m2) in each individuals genomes
-				}
+	
+	// Experiment (and therefore selection) starts from end_gen + 1
+	
+	if (sim.cycle>end_gen){ // Since this is a late() event, its effects will only be applied *after* progeny production in end_gen + 1 (hence no selection in end_gen + 1, ie F1 generation)
+		// But selection will be applied according to fitnesses defined below starting from (end_gen + 2), ie F2 generation
 		
-	 	inds.fitnessScaling = exp(phenotypes); // Calculate absolute fitness
-	 	sim.outputFull(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_cage" + cage + "_output_experiment_" + sim.cycle + ".txt");
-	 	catn(sim.cycle);
-	 	}	
-
-
-        // Stop the experiment (last generation)
-
-        if (sim.cycle == (end_gen + 1 + ngen_expt)){
-        catn("Done.");
-        sim.simulationFinished();
-        }
+		inds = sim.subpopulations.individuals; // Vector of all individuals
+		
+		if(DFE == "g"){
+			phenotypes = inds.sumOfMutationsOfType(m2) + inds.sumOfMutationsOfType(m3) + rnorm(length(inds), 0, 1); // Sum of all the selection coefficients (both m2 and m3) in each individuals genomes
+		}
+		
+		if (DFE == "n"){
+			phenotypes = inds.sumOfMutationsOfType(m2) + rnorm(length(inds), 0, 1); // Sum of all the selection coefficients (of type m2) in each individuals genomes
+		}
+		
+		inds.fitnessScaling = exp(phenotypes); // Calculate absolute fitness
+		sim.outputFull(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_cage" + cage + "_output_experiment_" + sim.cycle + ".txt");
+		catn(sim.cycle);
+	}
+	
+	
+	// Stop the experiment (last generation)
+	
+	if (sim.cycle == (end_gen + 1 + ngen_expt)){
+		catn("Done.");
+		sim.simulationFinished();
+	}
 }

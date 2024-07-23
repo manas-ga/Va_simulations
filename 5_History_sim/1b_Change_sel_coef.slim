@@ -28,16 +28,27 @@ initialize()
 	sim.readFromPopulationFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_with_neutral.trees");
 	sim.treeSeqRememberIndividuals(p0.individuals);
 	
+	// The .trees output "forgets" changes to selection coefficients by default
+	// These can be recorded by creating a dectionary of slim_IDs and selection coefficients
+	// This dictionary can then be passed to sim.treeSeqOutput() as metadata
+	// This metadata dictionary can be recovered from the saved file using the treeSeqMetadata() function.
+	
+	sel_coef = Dictionary();		
+
 	if(flip_sel_coef==1){
-		cat("Flipping selection coefficients ant randomly selected sites...");
+		
 		muts = sim.mutations;
 		for(mut in muts){
 			mut.setSelectionCoeff(sample(c(-1,1), 1)*mut.selectionCoeff);
+			// Populate the dictionary of metadata
+			sel_coef.setValue(asString(mut.id), mut.selectionCoeff);
 		}
+		catn("Flipped selection coefficients at randomly selected sites...");
 	}
 	
+	sim.treeSeqOutput(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_with_neutral.trees", metadata = sel_coef);
 	sim.outputFull(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_parents.txt");
-	catn("Generation " + sim.cycle + ": parents' output saved as a .txt file");
+	catn("Generation " + sim.cycle + ": parents' output saved as a .trees file and as a .txt file");
 
 }
 
