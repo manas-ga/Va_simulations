@@ -157,7 +157,7 @@ if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
 output_freq = 1000                     # The frequency with which SLiM outputs are to be generated for the analysis of history 
 ngen_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 3, (as.numeric(commandArgs(trailingOnly = TRUE)[6])))                          # How many generations should allele frequency changes be calculated over in the experiment
-flip_sel_coef = 0 # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
+flip_sel_coef = as.numeric(commandArgs(trailingOnly = TRUE)[8]) # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
 
 ###########################################
 ########### Pop gen parameters ############
@@ -231,7 +231,7 @@ if(pdelta_method=="manual"){
 
 # How should bdelta[1] (intercept) and bdelta[2] (slope of (p-q)) be estimated
 
-bdelta_method = "fixed" # Can be "fixed" or "estimate"
+bdelta_method = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", "fixed", commandArgs(trailingOnly = TRUE)[7])  # Can be "fixed" or "estimate"
 
 if(bdelta_method=="estimate"){
   bdelta = c(NA, NA)
