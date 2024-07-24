@@ -110,6 +110,8 @@ system(paste("mkdir -p", paste(file_storage_path, "/b_Interim_files/SLiM_outputs
 ######### Packages #################
 ####################################
 
+if(Sys.info()["nodename"]=="bigyin"){stop("Bigyin cannot run asreml-r. Use a different code.")}
+
 library(MCMCglmm)
 library(asreml)
 library(Matrix)
@@ -147,7 +149,7 @@ simulate = TRUE                        # To run the simulation or not
 analyse = TRUE                         # To perform the analysis on simulated data or not
 record = TRUE                          # Should the data of the simulations be appended to "data.csv" 
 
-nsims = 1                              # Number of simulations (change scale in each simulation)
+nsims = 1                              # Number of simulations (change scale in each simulation) - MUST be 1 if running on a cluster
 
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
@@ -157,7 +159,7 @@ if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
 output_freq = 1000                     # The frequency with which SLiM outputs are to be generated for the analysis of history 
 ngen_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 3, (as.numeric(commandArgs(trailingOnly = TRUE)[6])))                          # How many generations should allele frequency changes be calculated over in the experiment
-flip_sel_coef = as.numeric(commandArgs(trailingOnly = TRUE)[8]) # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
+flip_sel_coef = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 0, as.numeric(commandArgs(trailingOnly = TRUE)[8])) # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
 
 ###########################################
 ########### Pop gen parameters ############
@@ -169,13 +171,19 @@ n_ind_exp = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1000, (as.numeric(c
 n_sample = n_ind_exp                   # Number of individuals to be sampled to construct the c matrix  (This is just because c matrices become awfully large). Typically should be the same as n_ind_exp 
 
 sequence_length = 1e+06                # Just have a single continuous chromosome that is simulated
-r = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1.4, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))/sequence_length                            # Recombination rate (per site per generation) during the forward simulation of history
-r_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1.4, (as.numeric(commandArgs(trailingOnly = TRUE)[3])))/sequence_length                       # Recombination rate to be used during during the experiment (Drosophila melanogaster ~ 1.4e-08)
+
+map_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1.4, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))
+map_length_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1.4, (as.numeric(commandArgs(trailingOnly = TRUE)[3])))
+
+r = map_length/sequence_length             # Recombination rate (per site per generation) during the forward simulation of history
+r_expt = map_length_expt/sequence_length   # Recombination rate to be used during during the experiment (Drosophila melanogaster ~ 1.4e-08)
 r_msp = r/532                          # Recombination rate for the initial msprime simulation
+
 AtleastOneRecomb = FALSE               # Whether there has to be at least one recombination event
 
-#mu = 1.3e-06                          # Mutation rate of non_neutral mutations during the forward simulation of the history
-if(Sys.info()["nodename"]=="SCE-BIO-C06645"){mu_list=seq(3e-8, 2e-7, length = nsims)}else{mu_list=seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw # (1.5-6.0 e-06 works splendidly)
+## Mutation rate of non_neutral mutations during the forward simulation of the history
+if(Sys.info()["nodename"]=="SCE-BIO-C06645"){mu_list=seq(3e-8, 2e-7, length = nsims)}else{mu_list=seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
+
 mu_expt = 0                             # Mutation rate during the experiment
 
 # mu_msp and mu_neutral are specified within the loop over sims
@@ -251,15 +259,13 @@ Set_ID = gsub(" ", "_", Set_ID)
 
 ## Only attach command line parameters to the set id if not running on the PC
 if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
-  Set_ID = paste(Set_ID, commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[2], commandArgs(trailingOnly = TRUE)[3], commandArgs(trailingOnly = TRUE)[4], commandArgs(trailingOnly = TRUE)[5], commandArgs(trailingOnly = TRUE)[6], sep = "_")
+  Set_ID = paste(Set_ID, commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[2], commandArgs(trailingOnly = TRUE)[3], commandArgs(trailingOnly = TRUE)[4], commandArgs(trailingOnly = TRUE)[5], commandArgs(trailingOnly = TRUE)[6], commandArgs(trailingOnly = TRUE)[7], commandArgs(trailingOnly = TRUE)[8], sep = "_")
 }
 
 if(!file.exists(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""))){
-  col_names = as.matrix(t(c("Set_ID","Time","end_gen", "ngen_expt", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "proj", "LDdelta", "pa", "Vs", "randomise", "pdelta_method", "bdelta_method", "va_true", "vA_true", "vA_est", "vA_left", "vA_alpha_emp", "pdelta_emp", "bdelta_intercept_emp", "bdelta_slope_emp", "sigma2delta_emp", "pdelta_est", "pdelta_var_est", "bdelta_intercept_est", "bdelta_slope_est", "bdelta_var_est", "sigma2delta_est", "seg_sites", "seg_sites_neu", "seg_sites_ben", "seg_sites_del", "s_pmq")))
+  col_names = as.matrix(t(c("Set_ID","Time","end_gen", "ngen_expt", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "flip_sel_coef", "proj", "LDdelta", "pa", "Vs", "randomise", "pdelta_method", "bdelta_method", "va_true", "vA_true", "vA_est", "vA_left", "vA_alpha_emp", "pdelta_emp", "bdelta_intercept_emp", "bdelta_slope_emp", "sigma2delta_emp", "pdelta_est", "pdelta_var_est", "bdelta_intercept_est", "bdelta_slope_est", "bdelta_var_est", "sigma2delta_est", "seg_sites", "seg_sites_neu", "seg_sites_ben", "seg_sites_del", "s_pmq")))
   write.table(col_names, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
 }
-
-
 
 
 ####################################################################################################################################################
@@ -278,7 +284,6 @@ if(!flip_sel_coef%in%c(0, 1)){stop("flip_sel_coef must be one of 0 or 1")}
 if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig", "c1", "c2", "c3", "c4", "c5", "c6")|grepl("ecdf.ed.ac.uk", Sys.info()["nodename"])){
   if(nsims!=1){stop("nsims must be 1 when running on a cluster")}
 }
-
 
 ####################################################################################################################################################
 
@@ -921,7 +926,7 @@ for (sim in 1:nsims){
   
   if(record == TRUE){
   dat = read.csv(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""), header=FALSE)
-  dat = rbind(dat, c(Set_ID, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, proj, LDdelta, pa, Vs, randomise, pdelta_method, bdelta_method, va_true[sim], vA_true[sim], vA_est[sim], vA_left[sim], vA_alpha_emp[sim], pdelta_emp[sim], bdelta_intercept_emp[sim], bdelta_slope_emp[sim], sigma2delta_emp[sim], pdelta_est[sim], pdelta_var_est[sim], bdelta_intercept_est[sim], bdelta_slope_est[sim], bdelta_var_est[sim], sigma2delta_est[sim], seg_sites[sim], seg_sites_neu[sim], seg_sites_ben[sim], seg_sites_del[sim], s_pmq[sim]))
+  dat = rbind(dat, c(Set_ID, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, flip_sel_coef, proj, LDdelta, pa, Vs, randomise, pdelta_method, bdelta_method, va_true[sim], vA_true[sim], vA_est[sim], vA_left[sim], vA_alpha_emp[sim], pdelta_emp[sim], bdelta_intercept_emp[sim], bdelta_slope_emp[sim], sigma2delta_emp[sim], pdelta_est[sim], pdelta_var_est[sim], bdelta_intercept_est[sim], bdelta_slope_est[sim], bdelta_var_est[sim], sigma2delta_est[sim], seg_sites[sim], seg_sites_neu[sim], seg_sites_ben[sim], seg_sites_del[sim], s_pmq[sim]))
   write.table(dat, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
   }
   
