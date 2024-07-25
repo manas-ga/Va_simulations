@@ -27,7 +27,7 @@ This function reads the SLiM output produced in the simulation, extracts the use
 
 extract_slim_data = function(Set_ID,                # The unique ID of the set of simulations that are controlled by a single R script
                              sim = 1,               # Each set can have multiple sims, but - on the cluster sim must always 1
-                             slim_output_path,      # The directory where the SLiM outputs (for parents and experimental replicates) are stored
+                             slim_output_path,      # The directory where the SLiM outputs (for parents and experimental replicates) are stored (as .txt files)
                              extract_genomes_path,  # The path to the python script that extracts genomes and mutations from SLim outputs
                              extract_mut_path,      # The path to the python script that extracts mutations from SLim outputs
                              mutations_path,        # The directory where extracted mutations are to be stored (temp files)
