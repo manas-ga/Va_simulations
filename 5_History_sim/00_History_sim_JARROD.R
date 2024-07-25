@@ -649,10 +649,10 @@ for (sim in 1:nsims){
           # If present, record the frequency in freq, otherwise add either 0 or 1 to freq using the round() function
           
           for(mutation in mutations_0$Permanent_ID){
-            if(mutation %in% mut$Permanent_ID){freq = rbind(freq, (mut[which(mut$Permanent_ID==mutation),]$Number)/(2*n_ind_exp))
+            if(mutation %in% mut$Permanent_ID){freq = c(freq, (mut[which(mut$Permanent_ID==mutation),]$Number)/(2*n_ind_exp))
             }else{
-              freq = rbind(freq, round(P[which(mutations_0$Permanent_ID==mutation), gen - end_gen]))
-              #print(round(P[which(mutations_1$Permanent_ID==mutation), gen -1]))
+              freq = c(freq, round(P[which(mutations_0$Permanent_ID==mutation), gen - end_gen]))
+              
             }
           }
           
@@ -889,35 +889,39 @@ for (sim in 1:nsims){
       rm(list = c("c_ind", "NRF")) # Remove memory-heavy objects before the next simulation starts 
       # Garbage collection
       gc(verbose = FALSE)
+      
+      
+      
+      ########################################################
+      ##### Store empirical pdelta and bdelta for the sim ####
+      ########################################################
+      
+      
+      alpha_properties = alpha_distribution(alpha = list_alpha, p = p_parents)
+      
+      pdelta_emp[sim] = alpha_properties$pdelta
+      bdelta_intercept_emp[sim] = alpha_properties$bdelta_int
+      bdelta_slope_emp[sim] = alpha_properties$bdelta_slope
+      sigma2delta_emp[sim] = alpha_properties$sigma2delta
+      
+      # Calculate vA from these empirical properties of alpha
+      
+      bdelta_emp = c(bdelta_intercept_emp[sim], bdelta_slope_emp[sim])
+      
+      if(LDdelta){
+        TrV<-sum((m1$DL)^(2*(pdelta_emp[sim]+1)))*sigma2delta_emp[sim]
+        aLa<-t((m1$X)%*%bdelta_emp)%*%L%*%(m1$X)%*%bdelta_emp-sum(diag(t(m1$X)%*%L%*%(m1$X)%*%(m1$S)))
+      }else{
+        TrV<-sum(diag(L%*%diag(diag(L)^pdelta_emp[sim])))*sigma2delta_emp[sim]
+        aLa<-sum(diag(L)*((m1$X)%*%bdelta_emp)^2)-sum(diag(t(m1$X)%*%diag(diag(L))%*%(m1$X)%*%(m1$S)))
+      }
+      
+      vA_alpha_emp[sim]<-TrV+aLa
+      
   
   }
   
-  ########################################################
-  ##### Store empirical pdelta and bdelta for the sim ####
-  ########################################################
   
-  
-   alpha_properties = alpha_distribution(alpha = list_alpha, p = p_parents)
-   
-   pdelta_emp[sim] = alpha_properties$pdelta
-   bdelta_intercept_emp[sim] = alpha_properties$bdelta_int
-   bdelta_slope_emp[sim] = alpha_properties$bdelta_slope
-   sigma2delta_emp[sim] = alpha_properties$sigma2delta
-   
-   # Calculate vA from these empirical properties of alpha
-   
-   bdelta_emp = c(bdelta_intercept_emp[sim], bdelta_slope_emp[sim])
-   
-   if(LDdelta){
-     TrV<-sum((m1$DL)^(2*(pdelta_emp[sim]+1)))*sigma2delta_emp[sim]
-     aLa<-t((m1$X)%*%bdelta_emp)%*%L%*%(m1$X)%*%bdelta_emp-sum(diag(t(m1$X)%*%L%*%(m1$X)%*%(m1$S)))
-   }else{
-     TrV<-sum(diag(L%*%diag(diag(L)^pdelta_emp[sim])))*sigma2delta_emp[sim]
-     aLa<-sum(diag(L)*((m1$X)%*%bdelta_emp)^2)-sum(diag(t(m1$X)%*%diag(diag(L))%*%(m1$X)%*%(m1$S)))
-   }
-   
-   vA_alpha_emp[sim]<-TrV+aLa
-   
    
   
   ########################################################

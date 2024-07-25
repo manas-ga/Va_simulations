@@ -77,35 +77,23 @@ library(bigalgebra)
 #### Load Jarrod's functions ####
 #################################
 
-functions_only=TRUE ## Read only the functions
-
-rmarkdown::render(file.path(Vw_path))
 
 #### Enter the Set_ID of the simulations to be analysed ###
 
-Set_ID = "bigfoot_2024-07-15_143524.574984_1.38e-06_1.4_1.4_1000_10_3"
+Set_ID = "biggar_2024-07-24_163712.932582_1.2e-6_1.4_1.4_1000_10_3_estimate_1"
 
 ### Analyse ###
 
-analysis_data = read_analyse_simdata(Set_ID = Set_ID,
-                                     slim_output_path = slim_output_path, 
-                                     extract_genomes_path = extract_genomes_path, 
-                                     extract_mut_path = extract_mut_path,
-                                     mutations_path = mutations_path, 
-                                     c_matrix_path = c_matrix_path, 
-                                     output_path = output_path, 
-                                     n_ind_exp = 1000, 
-                                     n_sample = 1000,
-                                     n_cages = 10,
-                                     ngen_expt = 3,
-                                     end_gen = 20000,
-                                     r_expt = 1.4e-6,
-                                     proj="BLoM", # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
-                                     LDdelta = FALSE,
-                                     pa = 1,
-                                     pdelta = NA,
-                                     bdelta = c(0, 0),
-                                     pdelta_method = "optim",
-                                     Vs = "LoNL",
-                                     method = "REML",
-                                     randomise = TRUE)
+sim_data = extract_slim_data(Set_ID = Set_ID,
+                             sim = 1,
+                             slim_output_path = slim_output_path, 
+                             extract_genomes_path = extract_genomes_path, 
+                             extract_mut_path = extract_mut_path,
+                             mutations_path = mutations_path, 
+                             c_matrix_path = c_matrix_path, 
+                             n_ind_exp = 1000, 
+                             n_sample = 1000,
+                             n_cages = 10,
+                             ngen_expt = 3,
+                             end_gen = 20000,
+                             randomise = TRUE)

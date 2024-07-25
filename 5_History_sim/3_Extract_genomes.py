@@ -44,7 +44,7 @@ def extract_mutations_genomes(slim_output_path, # Path of the .txt file containi
     # Create an empty file to write the mutations in
     f_mutation = open(mutations_path, "w")
     # sys.arg are by default strings. The int(float(sys.argv[5])) is meant to take care of this.
-    # Just int(sts.argv[5]) does not work for scientific notation (eg 1e+05)
+    # Just int(sys.argv[5]) does not work for scientific notation (eg 1e+05)
 
     # Create dicts that will be filled with line numbers and the corresponding text on those lines
     dict_1m = {}
