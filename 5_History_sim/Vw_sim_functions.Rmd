@@ -18,10 +18,11 @@ This function reads the SLiM output produced in the simulation, extracts the use
 
 1. c0 matrix in the parents' generation (c0)
 2. Vector of alphas in the parents generation (list_alpha)
-3. Vector of positions of mutations (list_pos)
+3. Vector of positions of mutations (SNPs)
 4. pbar1 
 5. pbar2
 
+It depends on the python scripts 3_Extract_genomes.py and 2_Extract_mutations.py
 
 ```{r extract_slim_data}
 
@@ -102,7 +103,7 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
     mutations_0 = mutations_0[retained_loci,]
     
     list_alpha = 2*(mutations_0$s)   # Vector of alphas
-    list_pos = mutations_0$Position # Vector of positions of mutations in the parents
+    SNPs = mutations_0$Position      # Vector of positions of mutations in the parents
     
     ############################################################################
     ############################################################################
@@ -267,9 +268,80 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
     
   }
  
-  return(list(c0=c_ind/2, list_alpha=list_alpha, list_pos=list_pos, pbar1=pbar1, pbar2=pbar2))
+  return(list(c0=c_ind/2, list_alpha=list_alpha, SNPs=SNPs, pbar1=pbar1, pbar2=pbar2))
     
 }
+```
+
+### Function to analyse the parents' generation
+
+This function uses data from the parents' generation to calculate:
+(a) Two matrices (L and nR)
+(b) A host of scalar parameters of interest in the parents' generation (eg. true vA, true va, number of segregating sites for each type of mutations, properties of the distribution of alphas, etc.)
+
+It depends on form_nR() and alpha_distribution().
+
+```{r analyse_parents}
+
+analyse_parents = function(c0,  
+                           list_alpha,             # Vector of alphas
+                           LDdelta=F,               # Whether L or diag(L) should be used to model vA using alpha distribution
+                           SNPs,                   # Vector of positions of SNPs
+                           RecombRate,             # Recombination rate between adjacent sites
+                           HapLength,              # Genome size
+                           AtleastOneRecomb=FALSE){ # Should there be at least one cross-over per meiosis?)
+  
+  ########################
+  ## Calculate L and nR ##
+  ########################
+  
+  n_individuals = nrow(c0)
+  message("Calculating L...")
+  L = L = cov(c0)*(n_individuals-1)/(n_individuals) 
+  
+  message("Calculating nR..")
+  nR = form_nR(SNPs, RecombRate, HapLength, AtleastOneRecomb)
+  
+  # Segregating sites
+  
+  seg_sites = length(list_alpha)
+  seg_sites_neu = sum(list_alpha==0)
+  seg_sites_ben = sum(list_alpha>0)
+  seg_sites_ben = sum(list_alpha<0)
+  
+  ##############################################
+  ## True additive genic and genetic variance ##
+  ##############################################
+  
+  pbar0 = colMeans(c0) 
+  diversity = pbar0*(1 - pbar0)/2
+  
+  va_true = sum(diversity*list_alpha*list_alpha) # additive genic variance
+  vA_true = t(list_alpha)%*%L%*%list_alpha       # Additive genetic variance
+  
+  ###################################################################
+  ##### Calculate empirical properties of distribution of alphas ####
+  ###################################################################
+  message("Calculating properties of the empirical distribution of alphas...")
+  alpha_properties = alpha_distribution(alpha = list_alpha, p = pbar0)
+  
+  pdelta_emp = alpha_properties$pdelta
+  bdelta_intercept_emp = alpha_properties$bdelta_int
+  bdelta_slope_emp = alpha_properties$bdelta_slope
+  sigma2delta_emp = alpha_properties$sigma2delta
+  
+  
+  return(list(L=L, nR=nR, seg_sites=seg_sites, seg_sites_neu=seg_sites_neu, seg_sites_ben=seg_sites_ben, va_true=vA_true, vA_true=vA_true, pdelta_emp=pdelta_emp, bdelta_intercept_emp=bdelta_intercept_emp, bdelta_slope_emp=bdelta_slope_emp))
+
+}
+  
+                           
+                               
+                             
+  
+   
+                                                   
+ 
 ```
 
 
