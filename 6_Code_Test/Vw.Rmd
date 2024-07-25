@@ -760,7 +760,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
   if(is.na(pdelta)){
     message("Estimating pdelta...")
-    pdelta<-optim(0, fit.model, bdelta=bdelta, LDdelta = LDdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, N=N, Ne_factor=Ne_factor, Vs=Vs, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1), hessian=TRUE)
+    pdelta<-optim(0, fit.model, bdelta=bdelta, LDdelta = LDdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, N=N, Ne_factor=Ne_factor, Vs=Vs, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1, factr = 1e+11), hessian=TRUE)
 
     pdelta_var<--1/pdelta$hessian
     pdelta<-pdelta$par

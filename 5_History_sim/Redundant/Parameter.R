@@ -8,9 +8,11 @@
 # Col 4 = n_ind_exp
 # Col 5 = n_cages
 # Col 6 = ngen_expt
+# Col 7 = bdelta_method
+# Col 8 = flip_sel_coef
 
-nsims = 10 # number of simulations for each set
-mu_list = seq(5.56e-07, 5.56e-06, length = nsims)
+nsims = 30 # number of simulations for each set
+mu_list = seq(3.45e-07, 3.45e-06, length = nsims)
 test = TRUE # If TRUE, only selects parameters for the "standard" simulation set
 
 param_matrix = matrix(NA, nrow = 9, ncol  = 5)

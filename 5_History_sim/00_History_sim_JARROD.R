@@ -196,7 +196,7 @@ DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal)
 
 # If DFE is "g"
 shape = 0.3                                  # Shape of the gamma DFE ##### mean = shape*scale
-scale_list = seq(0.033, 0.033, length = nsims)  # Vector of Scale of the gamma DFE
+scale_list = seq(0.05, 0.05, length = nsims)  # Vector of Scale of the gamma DFE
 mut_ratio = 0                          # The ratio of beneficial:deleterious mutations in msprime
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
@@ -330,7 +330,7 @@ for (sim in 1:nsims){
       
       mu = mu_list[sim]
       mu_msp = ifelse(end_gen==2, mu/5320, mu/5320)
-      mu_neutral = ifelse(end_gen==2, mu_msp/3, mu/2000)
+      mu_neutral = 0 #ifelse(end_gen==2, mu_msp/3, mu/2000)
       
       message(paste("Simulation", sim, "in progress..."))
     
