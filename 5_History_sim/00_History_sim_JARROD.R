@@ -196,8 +196,8 @@ DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal)
 
 # If DFE is "g"
 shape = 0.3                                  # Shape of the gamma DFE ##### mean = shape*scale
-scale_list = seq(0.05, 0.05, length = nsims)  # Vector of Scale of the gamma DFE
-mut_ratio = 0                          # The ratio of beneficial:deleterious mutations in msprime
+scale_list = seq(0.033, 0.033, length = nsims)  # Vector of Scale of the gamma DFE
+mut_ratio = 0.0002                          # The ratio of beneficial:deleterious mutations in msprime
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
