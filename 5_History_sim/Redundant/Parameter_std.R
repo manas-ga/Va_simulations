@@ -11,7 +11,7 @@
 # Col 7 = bdelta_method
 # Col 8 = flip_sel_coef
 
-nsims = 30 # number of simulations for each set
+nsims = 10 # number of simulations for each set
 mu_list = seq(3.45e-07, 3.45e-06, length = nsims)
 
 param_matrix = data.frame(matrix(NA, nrow = nsims, ncol  = 8))
@@ -20,7 +20,7 @@ param_matrix[,1] = mu_list
 param_matrix[,2] = 1.4
 param_matrix[,3] = 1.4
 param_matrix[,4] = 1000
-param_matrix[,5] = 20
+param_matrix[,5] = 10
 param_matrix[,6] = 3
 param_matrix[,7] = "estimate"
 param_matrix[,8] = 0
