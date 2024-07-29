@@ -375,7 +375,9 @@ alpha_distribution<-function(alpha, p, tproj=NULL){
   result<-list(pdelta=pdelta, 
                 bdelta_int=coef(m1)["(Intercept)"], 
                 bdelta_slope=coef(m1)["pmq"],
-                sigma2delta=summary(m1)$sigma^2)
+                sigma2delta=summary(m1)$sigma^2,
+                X=model.matrix(m1),
+                S=summary(m1)$cov.unscaled*summary(m1)$sigma^2)
   return(result)
 }
 
