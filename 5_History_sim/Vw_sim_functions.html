@@ -368,13 +368,15 @@ reference alleles, and returns -</p>
 <ol style="list-style-type: decimal">
 <li>c0 matrix in the parents’ generation (c0)</li>
 <li>Vector of alphas in the parents generation (list_alpha)</li>
-<li>Vector of positions of mutations (list_pos)</li>
+<li>Vector of positions of mutations (SNPs)</li>
 <li>pbar1</li>
 <li>pbar2</li>
 </ol>
+<p>It depends on the python scripts 3_Extract_genomes.py and
+2_Extract_mutations.py</p>
 <pre class="r"><code>extract_slim_data = function(Set_ID,                # The unique ID of the set of simulations that are controlled by a single R script
                              sim = 1,               # Each set can have multiple sims, but - on the cluster sim must always 1
-                             slim_output_path,      # The directory where the SLiM outputs (for parents and experimental replicates) are stored
+                             slim_output_path,      # The directory where the SLiM outputs (for parents and experimental replicates) are stored (as .txt files)
                              extract_genomes_path,  # The path to the python script that extracts genomes and mutations from SLim outputs
                              extract_mut_path,      # The path to the python script that extracts mutations from SLim outputs
                              mutations_path,        # The directory where extracted mutations are to be stored (temp files)
@@ -384,7 +386,8 @@ reference alleles, and returns -</p>
                              n_cages,               # Number of replicates in the experiment
                              ngen_expt,             # Number of generations over which allele frequency changes are calculated
                              end_gen = 20000,       # The generation number of the parents&#39; generation
-                             randomise = TRUE){     # Optionally the reference allele can be randomised
+                             randomise = TRUE,      # Optionally the reference allele can be randomised
+                             delete_temp_files = TRUE){     
   
   
   # If n_sample is not provided extract the genomes of all individuals in the parents&#39; genration
@@ -406,7 +409,7 @@ reference alleles, and returns -</p>
     c_genome = read.csv(paste(c_matrix_path,  &quot;/&quot;, Set_ID, &quot;_sim&quot;, sim, &quot;_c_matrix_parents.csv&quot;, sep =&quot;&quot;), header=F) # as.integer done to avoid scientific notation
     
     # Delete the .csv file
-    system(paste(&quot;rm&quot;, paste(c_matrix_path,  &quot;/&quot;, Set_ID, &quot;_sim&quot;, sim, &quot;_c_matrix_parents.csv&quot;, sep =&quot;&quot;), sep = &quot; &quot;))
+    if(delete_temp_files){system(paste(&quot;rm&quot;, paste(c_matrix_path,  &quot;/&quot;, Set_ID, &quot;_sim&quot;, sim, &quot;_c_matrix_parents.csv&quot;, sep =&quot;&quot;), sep = &quot; &quot;))}
     
     c_genome = as.matrix(c_genome)
     
@@ -440,6 +443,9 @@ reference alleles, and returns -</p>
     
     mutations_0 = read.table(paste(mutations_path, &quot;/&quot;, Set_ID, &quot;_sim&quot;, sim, &quot;_mutations_parents.txt&quot;, sep = &quot;&quot;), header=T, sep = &quot; &quot;)
     
+    # Delete the .txt file
+    if(delete_temp_files){system(paste(&quot;rm&quot;, paste(mutations_path, &quot;/&quot;, Set_ID, &quot;_sim&quot;, sim, &quot;_mutations_parents.txt&quot;, sep = &quot;&quot;), sep = &quot; &quot;))}
+    
     # Sort mutations based on the Temp_ID, so that the order of loci matches the order in c_ind
     
     mutations_0 = mutations_0[order(mutations_0$Temp_ID),]
@@ -449,7 +455,7 @@ reference alleles, and returns -</p>
     mutations_0 = mutations_0[retained_loci,]
     
     list_alpha = 2*(mutations_0$s)   # Vector of alphas
-    list_pos = mutations_0$Position # Vector of positions of mutations in the parents
+    SNPs = mutations_0$Position      # Vector of positions of mutations in the parents
     
     ############################################################################
     ############################################################################
@@ -507,6 +513,9 @@ reference alleles, and returns -</p>
         
         # Read the file storing mutation information
         mut = read.csv(paste(mutations_path, &quot;/&quot;, Set_ID, &quot;_sim&quot;, sim, &quot;_cage&quot;, cage, &quot;_mutations_&quot;, as.integer(gen), &quot;.txt&quot;, sep = &quot;&quot;), sep = &quot; &quot;) # as.integer gets rid of scientific notation
+        
+        # Delete the .txt file
+        if(delete_temp_files){system(paste(&quot;rm&quot;, paste(mutations_path, &quot;/&quot;, Set_ID, &quot;_sim&quot;, sim, &quot;_cage&quot;, cage, &quot;_mutations_&quot;, as.integer(gen), &quot;.txt&quot;, sep = &quot;&quot;)), sep = &quot; &quot;)}
         
         # Sort mutations based on the Temp_ID, so that the order of loci matches the order in the C and L matrices
         
@@ -611,12 +620,76 @@ reference alleles, and returns -</p>
       
       pbar1 = abs(pbar1 + ran_matrix_pbar)
       pbar2 = abs(pbar2 + ran_matrix_pbar)
+      
+      
+      ## Load 
     
   }
  
-  return(list(c0=c_ind/2, list_alpha=list_alpha, list_pos=list_pos, pbar1=pbar1, pbar2=pbar2))
+  return(list(c0=c_ind/2, list_alpha=list_alpha, SNPs=SNPs, pbar1=pbar1, pbar2=pbar2))
     
 }</code></pre>
+<div id="function-to-analyse-the-parents-generation" class="section level3">
+<h3>Function to analyse the parents’ generation</h3>
+<p>This function uses data from the parents’ generation to calculate:
+(a) Two matrices (L and nR) (b) A host of scalar parameters of interest
+in the parents’ generation (eg. true vA, true va, number of segregating
+sites for each type of mutations, properties of the distribution of
+alphas, etc.)</p>
+<p>It depends on form_nR() and alpha_distribution().</p>
+<pre class="r"><code>analyse_parents = function(c0,  
+                           list_alpha,             # Vector of alphas
+                           LDdelta=F,               # Whether L or diag(L) should be used to model vA using alpha distribution
+                           SNPs,                   # Vector of positions of SNPs
+                           RecombRate,             # Recombination rate between adjacent sites
+                           HapLength,              # Genome size
+                           AtleastOneRecomb=FALSE){ # Should there be at least one cross-over per meiosis?)
+  
+  ########################
+  ## Calculate L and nR ##
+  ########################
+  
+  n_individuals = nrow(c0)
+  message(&quot;Calculating L...&quot;)
+  L = L = cov(c0)*(n_individuals-1)/(n_individuals) 
+  
+  message(&quot;Calculating nR..&quot;)
+  nR = form_nR(SNPs, RecombRate, HapLength, AtleastOneRecomb)
+  
+  # Segregating sites
+  
+  seg_sites = length(list_alpha)
+  seg_sites_neu = sum(list_alpha==0)
+  seg_sites_ben = sum(list_alpha&gt;0)
+  seg_sites_ben = sum(list_alpha&lt;0)
+  
+  ##############################################
+  ## True additive genic and genetic variance ##
+  ##############################################
+  
+  pbar0 = colMeans(c0) 
+  diversity = pbar0*(1 - pbar0)/2
+  message(&quot;Calculating the true additive genetic and genic variances...&quot;)
+  va_true = sum(diversity*list_alpha*list_alpha) # additive genic variance
+  vA_true = t(list_alpha)%*%L%*%list_alpha       # Additive genetic variance
+  
+  ###################################################################
+  ##### Calculate empirical properties of distribution of alphas ####
+  ###################################################################
+  
+  message(&quot;Calculating properties of the empirical distribution of alphas...&quot;)
+  alpha_properties = alpha_distribution(alpha = list_alpha, p = pbar0)
+  
+  pdelta_emp = alpha_properties$pdelta
+  bdelta_intercept_emp = alpha_properties$bdelta_int
+  bdelta_slope_emp = alpha_properties$bdelta_slope
+  sigma2delta_emp = alpha_properties$sigma2delta
+  
+  
+  return(list(L=L, nR=nR, seg_sites=seg_sites, seg_sites_neu=seg_sites_neu, seg_sites_ben=seg_sites_ben, va_true=vA_true, vA_true=vA_true, pdelta_emp=pdelta_emp, bdelta_intercept_emp=bdelta_intercept_emp, bdelta_slope_emp=bdelta_slope_emp))
+
+}</code></pre>
+</div>
 </div>
 </div>
 
