@@ -197,7 +197,7 @@ DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal)
 # If DFE is "g"
 shape = 0.3                                  # Shape of the gamma DFE ##### mean = shape*scale
 scale_list = seq(0.033, 0.033, length = nsims)  # Vector of Scale of the gamma DFE
-mut_ratio = 0.0002                          # The ratio of beneficial:deleterious mutations in msprime
+mut_ratio = 0.0000                          # The ratio of beneficial:deleterious mutations in msprime
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
@@ -263,7 +263,7 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
 }
 
 if(!file.exists(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""))){
-  col_names = as.matrix(t(c("Set_ID","Time","end_gen", "ngen_expt", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "flip_sel_coef", "proj", "LDdelta", "pa", "Vs", "randomise", "pdelta_method", "bdelta_method", "va_true", "vA_true", "vA_est", "vA_left", "vA_alpha_emp", "pdelta_emp", "bdelta_intercept_emp", "bdelta_slope_emp", "sigma2delta_emp", "pdelta_est", "pdelta_var_est", "bdelta_intercept_est", "bdelta_slope_est", "bdelta_var_est", "sigma2delta_est", "seg_sites", "seg_sites_neu", "seg_sites_ben", "seg_sites_del", "s_pmq")))
+  col_names = as.matrix(t(c("Set_ID","Time","end_gen", "ngen_expt", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "flip_sel_coef", "proj", "LDdelta", "pa", "Vs", "randomise", "pdelta_method", "bdelta_method", "va_true", "vA_true", "vA_est", "vA_left", "vA_alpha_emp", "pdelta_emp", "bdelta_intercept_emp", "bdelta_slope_emp", "sigma2delta_emp", "pdelta_est", "pdelta_var_est", "bdelta_intercept_est", "bdelta_slope_est", "bdelta_var_est", "sigma2delta_est", "seg_sites", "seg_sites_neu", "seg_sites_ben", "seg_sites_del", "mean_diversity")))
   write.table(col_names, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
 }
 
@@ -314,6 +314,7 @@ seg_sites = rep(NA, nsims) # Number of segregating sites in the parents' generat
 seg_sites_neu = rep(NA, nsims) # Number of neutral segregating sites
 seg_sites_ben = rep(NA, nsims) # Number of segregating sites where the derived allele is beneficial
 seg_sites_del = rep(NA, nsims) # Number of segregating sites where the derived allele is deleterious
+mean_diversity = rep(NA, nsims) # Mean pq/2 in the parents' generation
 
 mem = c() # Create an empty vector to track memory, to investigate crashes
 
@@ -538,6 +539,7 @@ for (sim in 1:nsims){
       list_alpha = 2*(mutations_0$s)
       p_parents = colMeans(c_ind/2) # Allele frequencies in parents
       diversity = (p_parents)*(1 - p_parents)/2
+      mean_diversity[sim] = mean(diversity)
       va_true[sim] = sum(diversity*list_alpha*list_alpha)     # Additive genic variance
       message(paste("The true Va in the parents' generation is", va_true[sim]))
       
@@ -910,10 +912,10 @@ for (sim in 1:nsims){
       
       if(LDdelta){
         TrV<-sum((m1$DL)^(2*(pdelta_emp[sim]+1)))*sigma2delta_emp[sim]
-        aLa<-t((m1$X)%*%bdelta_emp)%*%L%*%(m1$X)%*%bdelta_emp-sum(diag(t(m1$X)%*%L%*%(m1$X)%*%(m1$S)))
+        aLa<-t((alpha_properties$X)%*%bdelta_emp)%*%L%*%(alpha_properties$X)%*%bdelta_emp-sum(diag(t(alpha_properties$X)%*%L%*%(alpha_properties$X)%*%(alpha_properties$S)))
       }else{
         TrV<-sum(diag(L%*%diag(diag(L)^pdelta_emp[sim])))*sigma2delta_emp[sim]
-        aLa<-sum(diag(L)*((m1$X)%*%bdelta_emp)^2)-sum(diag(t(m1$X)%*%diag(diag(L))%*%(m1$X)%*%(m1$S)))
+        aLa<-sum(diag(L)*((alpha_properties$X)%*%bdelta_emp)^2)-sum(diag(t(alpha_properties$X)%*%diag(diag(L))%*%(alpha_properties$X)%*%(alpha_properties$S)))
       }
       
       vA_alpha_emp[sim]<-TrV+aLa
@@ -930,7 +932,7 @@ for (sim in 1:nsims){
   
   if(record == TRUE){
   dat = read.csv(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""), header=FALSE)
-  dat = rbind(dat, c(Set_ID, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, flip_sel_coef, proj, LDdelta, pa, Vs, randomise, pdelta_method, bdelta_method, va_true[sim], vA_true[sim], vA_est[sim], vA_left[sim], vA_alpha_emp[sim], pdelta_emp[sim], bdelta_intercept_emp[sim], bdelta_slope_emp[sim], sigma2delta_emp[sim], pdelta_est[sim], pdelta_var_est[sim], bdelta_intercept_est[sim], bdelta_slope_est[sim], bdelta_var_est[sim], sigma2delta_est[sim], seg_sites[sim], seg_sites_neu[sim], seg_sites_ben[sim], seg_sites_del[sim], s_pmq[sim]))
+  dat = rbind(dat, c(Set_ID, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, flip_sel_coef, proj, LDdelta, pa, Vs, randomise, pdelta_method, bdelta_method, va_true[sim], vA_true[sim], vA_est[sim], vA_left[sim], vA_alpha_emp[sim], pdelta_emp[sim], bdelta_intercept_emp[sim], bdelta_slope_emp[sim], sigma2delta_emp[sim], pdelta_est[sim], pdelta_var_est[sim], bdelta_intercept_est[sim], bdelta_slope_est[sim], bdelta_var_est[sim], sigma2delta_est[sim], seg_sites[sim], seg_sites_neu[sim], seg_sites_ben[sim], seg_sites_del[sim], mean_diversity[sim]))
   write.table(dat, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
   }
   
