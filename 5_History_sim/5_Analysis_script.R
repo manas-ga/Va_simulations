@@ -1,3 +1,6 @@
+
+# source("/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim/5_Analysis_script.R")
+
 ##############################################################
 ########## Read, process, and analyse SLiM outputs ###########
 ##############################################################
@@ -77,23 +80,37 @@ library(bigalgebra)
 #### Load Jarrod's functions ####
 #################################
 
+functions_only=TRUE ## Read only the functions
+
+rmarkdown::render(file.path(Vw_path))
+
+##############################
+### Load Manas's functions ###
+##############################
+
+rmarkdown::render(file.path(base_path, "Vw_sim_functions.Rmd"))
 
 #### Enter the Set_ID of the simulations to be analysed ###
 
-Set_ID = "biggar_2024-07-24_163712.932582_1.2e-6_1.4_1.4_1000_10_3_estimate_1"
+Set_ID = "SCE-BIO-C06645_2024-07-30_17:37:42.53745"
 
-### Analyse ###
+### Extract sim data ###
 
 sim_data = extract_slim_data(Set_ID = Set_ID,
                              sim = 1,
                              slim_output_path = slim_output_path, 
+                             sim_param_path = output_path,
                              extract_genomes_path = extract_genomes_path, 
                              extract_mut_path = extract_mut_path,
                              mutations_path = mutations_path, 
                              c_matrix_path = c_matrix_path, 
-                             n_ind_exp = 1000, 
-                             n_sample = 1000,
-                             n_cages = 10,
-                             ngen_expt = 3,
-                             end_gen = 20000,
                              randomise = TRUE)
+### Analyse ###
+
+parents_info = analyse_parents(c0 = sim_data$c0,  
+                               list_alpha = sim_data$list_alpha,             
+                               LDdelta=FALSE,         
+                               SNPs = sim_data$SNPs,                   
+                               RecombRate = sim_data$sim_params$r_expt,             
+                               HapLength = sim_data$sim_params$sequence_length,              
+                               AtleastOneRecomb=FALSE)
