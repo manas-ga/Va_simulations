@@ -124,7 +124,7 @@ library(RhpcBLASctl)
 # This create issue while running things on the cluster
 # Restrict the number of cores during matrix manipulations ##
 
-blas_set_num_threads(15)
+blas_set_num_threads(1)
 
 #################################
 #### Load Jarrod's functions ####
@@ -146,7 +146,7 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
 
 
 simulate = TRUE                        # To run the simulation or not
-analyse = TRUE                         # To perform the analysis on simulated data or not
+analyse = FALSE                         # To perform the analysis on simulated data or not
 record = TRUE                          # Should the data of the simulations be appended to "data.csv" 
 
 nsims = 1                              # Number of simulations (change scale in each simulation) - MUST be 1 if running on a cluster
@@ -197,7 +197,7 @@ DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal)
 # If DFE is "g"
 shape = 0.3                                  # Shape of the gamma DFE ##### mean = shape*scale
 scale_list = seq(0.033, 0.033, length = nsims)  # Vector of Scale of the gamma DFE
-mut_ratio = 0.0000                          # The ratio of beneficial:deleterious mutations in msprime
+mut_ratio = 0                          # The ratio of beneficial:deleterious mutations in msprime
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
@@ -449,6 +449,18 @@ for (sim in 1:nsims){
         
         system(paste("slim", expt_arg1, expt_arg2, expt_arg3, expt_arg4, expt_arg5, expt_arg6, expt_arg7, expt_arg8, expt_arg9, expt_arg10, expt_arg11, expt_arg12, expt_arg13, expt_arg14, expt_arg15, expt_arg16, slim_expt_path))
         
+      }
+      
+      ########################################################
+      ######### Save simulation data in a spreadsheet ########
+      ########################################################
+      
+      # If analyses are not to be performed record simulation data here
+      
+      if(record == TRUE&analyse==FALSE){
+        dat = read.csv(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""), header=FALSE)
+        dat = rbind(dat, c(Set_ID, sim, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, flip_sel_coef, proj, LDdelta, pa, Vs, randomise, pdelta_method, bdelta_method, va_true[sim], vA_true[sim], vA_est[sim], vA_left[sim], vA_alpha_emp[sim], pdelta_emp[sim], bdelta_intercept_emp[sim], bdelta_slope_emp[sim], sigma2delta_emp[sim], pdelta_est[sim], pdelta_var_est[sim], bdelta_intercept_est[sim], bdelta_slope_est[sim], bdelta_var_est[sim], sigma2delta_est[sim], seg_sites[sim], seg_sites_neu[sim], seg_sites_ben[sim], seg_sites_del[sim], mean_diversity[sim]))
+        write.table(dat, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
       }
     
   }

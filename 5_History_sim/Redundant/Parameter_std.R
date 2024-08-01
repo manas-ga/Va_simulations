@@ -1,3 +1,6 @@
+
+# Rscript /mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim/Redundant/Parameter_std.R
+
 ########################################################################
 ##### Script to write a text file containing the grid of parameters ####
 ########################################################################
@@ -12,7 +15,7 @@
 # Col 8 = flip_sel_coef
 
 nsims = 10 # number of simulations for each set
-mu_list = seq(3.45e-07, 3.45e-06, length = nsims)
+mu_list = seq(5.56e-07, 5.56e-06, length = nsims)
 
 param_matrix = data.frame(matrix(NA, nrow = nsims, ncol  = 8))
 
