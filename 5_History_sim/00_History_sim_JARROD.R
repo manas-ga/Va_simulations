@@ -124,7 +124,7 @@ library(RhpcBLASctl)
 # This create issue while running things on the cluster
 # Restrict the number of cores during matrix manipulations ##
 
-blas_set_num_threads(1)
+blas_set_num_threads(15)
 
 #################################
 #### Load Jarrod's functions ####
@@ -146,7 +146,7 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
 
 
 simulate = TRUE                        # To run the simulation or not
-analyse = FALSE                         # To perform the analysis on simulated data or not
+analyse = TRUE                         # To perform the analysis on simulated data or not
 record = TRUE                          # Should the data of the simulations be appended to "data.csv" 
 
 nsims = 1                              # Number of simulations (change scale in each simulation) - MUST be 1 if running on a cluster
@@ -197,7 +197,7 @@ DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal)
 # If DFE is "g"
 shape = 0.3                                  # Shape of the gamma DFE ##### mean = shape*scale
 scale_list = seq(0.033, 0.033, length = nsims)  # Vector of Scale of the gamma DFE
-mut_ratio = 0                          # The ratio of beneficial:deleterious mutations in msprime
+mut_ratio = 0.0002                          # The ratio of beneficial:deleterious mutations in msprime
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
