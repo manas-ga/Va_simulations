@@ -80,6 +80,21 @@ extract_mut_path = file.path(base_path, "2_Extract_mutations.py")               
 slim_output_path = "/mnt/u/Datastore/CSCE/biology/groups/hadfield/Va_simulations/sim_files/SLiM_outputs"                                 ## Path where SLiM and msprime output files are stored
 slim_param_path = "/mnt/u/Datastore/CSCE/biology/groups/hadfield/Va_simulations/sim_files/sim_params"
 temp_files_path = paste(file_storage_path, "/temp_files", sep = "")  
+
+####################################
+######### Packages #################
+####################################
+
+if(Sys.info()["nodename"]=="bigyin"){stop("Bigyin cannot run asreml-r. Use a different code.")}
+
+library(MCMCglmm)
+library(asreml)
+library(Matrix)
+library(rmutil)
+library(pryr) ## For tracking memory usage using mem_used()
+library(bigalgebra)
+library(RhpcBLASctl)
+
   
 #################################
 #### Load Jarrod's functions ####
