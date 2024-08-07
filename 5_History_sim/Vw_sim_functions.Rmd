@@ -320,7 +320,7 @@ analyse_parents = function(c0,
   message("Calculating L...")
   L = L = cov(c0)*(n_individuals-1)/(n_individuals) 
   
-  message("Calculating nR..")
+  message("Calculating the matrix of non-recombinant fractions...")
   nR = form_nR(SNPs, RecombRate, HapLength, AtleastOneRecomb)
   
   # Segregating sites
