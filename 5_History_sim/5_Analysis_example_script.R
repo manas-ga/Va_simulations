@@ -112,7 +112,7 @@ rmarkdown::render(file.path(base_path, "Vw_sim_functions.Rmd"))
 
 #### Enter the Set_ID of the simulations to be analysed ###
 
-Set_ID = "bigfoot_2024-08-01_13:03:32.727659_9.64489795918367e-07_1.4_1.4_1000_10_3_estimate_0"
+Set_ID = "bigfoot_2024-08-01_13_03_32.727659_9.64489795918367e-07_1.4_1.4_1000_10_3_estimate_0"
 
 ### Extract sim data ###
 
