@@ -115,12 +115,11 @@ if(Sys.info()["nodename"]=="bigyin"){stop("Bigyin cannot run asreml-r. Use a dif
 library(MCMCglmm)
 library(asreml)
 library(Matrix)
-library(rmutil)
 library(pryr) ## For tracking memory usage using mem_used()
 library(bigalgebra)
 library(RhpcBLASctl)
 
-# BLAS - which performs - matricx operations in R occupies all availale cores by default
+# BLAS - which performs - matrix operations in R occupies all available cores by default
 # This create issue while running things on the cluster
 # Restrict the number of cores during matrix manipulations ##
 
@@ -256,6 +255,7 @@ if(bdelta_method=="estimate"){
 
 Set_ID = as.character(paste(Sys.info()["nodename"], Sys.time()))
 Set_ID = gsub(" ", "_", Set_ID)
+Set_ID = gsub(":", "_", Set_ID)
 
 ## Only attach command line parameters to the set id if not running on the PC
 if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
