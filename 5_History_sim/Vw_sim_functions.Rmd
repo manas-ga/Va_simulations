@@ -321,7 +321,8 @@ analyse_parents = function(c0,
   L = cov(c0)*(n_individuals-1)/(n_individuals) 
   
   if(LDdelta){
-    svdC<-svd(scale(sqrt(1/n_individuals)*C0, nu = 0))
+    message("Performing SVD on c0...")
+    svdC<-svd(scale(sqrt(1/n_individuals)*C0), nu = 0)
     retain<-sum(svdC$d>tol)
     #UL<-svdC$v[,1:retain]
     DL<-diag(svdC$d[1:retain])

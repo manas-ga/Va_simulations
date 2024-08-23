@@ -129,7 +129,7 @@ sim_data = extract_slim_data(Set_ID = Set_ID,
 
 parents_info = analyse_parents(c0 = sim_data$c0,  
                                list_alpha = sim_data$list_alpha,             
-                               LDdelta=FALSE,         
+                               LDdelta=TRUE,         
                                SNPs = sim_data$SNPs,                   
                                RecombRate = sim_data$sim_params$r_expt,             
                                HapLength = sim_data$sim_params$sequence_length,              

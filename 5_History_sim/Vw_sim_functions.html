@@ -663,7 +663,14 @@ alphas, etc.)</p>
   
   n_individuals = nrow(c0)
   message(&quot;Calculating L...&quot;)
-  L = L = cov(c0)*(n_individuals-1)/(n_individuals) 
+  L = cov(c0)*(n_individuals-1)/(n_individuals) 
+  
+  if(LDdelta){
+    svdC&lt;-svd(scale(sqrt(1/n_individuals)*C0, nu = 0))
+    retain&lt;-sum(svdC$d&gt;tol)
+    #UL&lt;-svdC$v[,1:retain]
+    DL&lt;-diag(svdC$d[1:retain])
+  }
   
   message(&quot;Calculating the matrix of non-recombinant fractions...&quot;)
   nR = form_nR(SNPs, RecombRate, HapLength, AtleastOneRecomb)
@@ -702,7 +709,7 @@ alphas, etc.)</p>
   bdelta_emp = c(bdelta_intercept_emp, bdelta_slope_emp)
   
   if(LDdelta){
-    TrV&lt;-sum((m1$DL)^(2*(pdelta_emp+1)))*sigma2delta_emp
+    TrV&lt;-sum((DL)^(2*(pdelta_emp+1)))*sigma2delta_emp
     aLa&lt;-t((alpha_properties$X)%*%bdelta_emp)%*%L%*%(alpha_properties$X)%*%bdelta_emp-sum(diag(t(alpha_properties$X)%*%L%*%(alpha_properties$X)%*%(alpha_properties$S)))
   }else{
     TrV&lt;-sum(diag(L%*%diag(diag(L)^pdelta_emp)))*sigma2delta_emp
