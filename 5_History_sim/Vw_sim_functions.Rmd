@@ -310,6 +310,7 @@ analyse_parents = function(c0,
                            SNPs,                   # Vector of positions of SNPs
                            RecombRate,             # Recombination rate between adjacent sites
                            HapLength,              # Genome size
+                           tol=sqrt(.Machine$double.eps),
                            AtleastOneRecomb=FALSE){ # Should there be at least one cross-over per meiosis?)
   
   ########################

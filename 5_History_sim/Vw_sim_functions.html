@@ -655,6 +655,7 @@ alphas, etc.)</p>
                            SNPs,                   # Vector of positions of SNPs
                            RecombRate,             # Recombination rate between adjacent sites
                            HapLength,              # Genome size
+                           tol=sqrt(.Machine$double.eps),
                            AtleastOneRecomb=FALSE){ # Should there be at least one cross-over per meiosis?)
   
   ########################
@@ -667,7 +668,7 @@ alphas, etc.)</p>
   
   if(LDdelta){
     message(&quot;Performing SVD on c0...&quot;)
-    svdC&lt;-svd(scale(sqrt(1/n_individuals)*C0), nu = 0)
+    svdC&lt;-svd(scale(sqrt(1/n_individuals)*c0), nu = 0)
     retain&lt;-sum(svdC$d&gt;tol)
     #UL&lt;-svdC$v[,1:retain]
     DL&lt;-diag(svdC$d[1:retain])
