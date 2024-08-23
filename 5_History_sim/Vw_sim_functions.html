@@ -666,7 +666,8 @@ alphas, etc.)</p>
   L = cov(c0)*(n_individuals-1)/(n_individuals) 
   
   if(LDdelta){
-    svdC&lt;-svd(scale(sqrt(1/n_individuals)*C0, nu = 0))
+    message(&quot;Performing SVD on c0...&quot;)
+    svdC&lt;-svd(scale(sqrt(1/n_individuals)*C0), nu = 0)
     retain&lt;-sum(svdC$d&gt;tol)
     #UL&lt;-svdC$v[,1:retain]
     DL&lt;-diag(svdC$d[1:retain])
