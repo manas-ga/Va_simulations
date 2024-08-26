@@ -11,7 +11,7 @@
 # Col 7 = bdelta_method
 # Col 8 = flip_sel_coef
 
-nsims = 30 # number of simulations for each set
+nsims = 10 # number of simulations for each set
 mu_list = seq(5.56e-07, 5.56e-06, length = nsims)
 test = TRUE # If TRUE, only selects parameters for the "standard" simulation set
 

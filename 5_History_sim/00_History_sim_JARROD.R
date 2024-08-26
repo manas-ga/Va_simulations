@@ -194,9 +194,11 @@ mu_expt = 0                             # Mutation rate during the experiment
 DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal) 
 
 # If DFE is "g"
-shape = 0.3                                  # Shape of the gamma DFE ##### mean = shape*scale
+shape = 0.3                                     # Shape of the gamma DFE ##### mean = shape*scale
 scale_list = seq(0.033, 0.033, length = nsims)  # Vector of Scale of the gamma DFE
-mut_ratio = 0.0002                          # The ratio of beneficial:deleterious mutations in msprime
+
+# The ratio of beneficial:deleterious mutations 
+if(Sys.info()["nodename"]=="SCE-BIO-C06645"){mut_ratio=0}else{mut_ratio = as.numeric(commandArgs(trailingOnly = TRUE)[9])}
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
@@ -217,7 +219,7 @@ bigalgebra = FALSE # Should bigalgebra be used for eigendecomposition?
 # How is pdelta to be estimated? 
 # Can be "optim" (using the function optim()), or "fixed" or "manual"(estimated by manually scanning a range of pdelta values)
 
-pdelta_method = "optim" # "optim" or "manual" or "fixed" or "no_analysis". If this is "no_analysis", the estimate of Vw is not calculated, but the rest of the code still runs.
+pdelta_method = "no_analysis" # "optim" or "manual" or "fixed" or "no_analysis". If this is "no_analysis", the estimate of Vw is not calculated, but the rest of the code still runs.
 
 if(pdelta_method=="fixed"){
   pdelta = 0 # Can be specified to any value
@@ -259,7 +261,7 @@ Set_ID = gsub(":", "_", Set_ID)
 
 ## Only attach command line parameters to the set id if not running on the PC
 if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
-  Set_ID = paste(Set_ID, commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[2], commandArgs(trailingOnly = TRUE)[3], commandArgs(trailingOnly = TRUE)[4], commandArgs(trailingOnly = TRUE)[5], commandArgs(trailingOnly = TRUE)[6], commandArgs(trailingOnly = TRUE)[7], commandArgs(trailingOnly = TRUE)[8], sep = "_")
+  Set_ID = paste(Set_ID, commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[2], commandArgs(trailingOnly = TRUE)[3], commandArgs(trailingOnly = TRUE)[4], commandArgs(trailingOnly = TRUE)[5], commandArgs(trailingOnly = TRUE)[6], commandArgs(trailingOnly = TRUE)[7], commandArgs(trailingOnly = TRUE)[8], commandArgs(trailingOnly = TRUE)[9], sep = "_")
 }
 
 if(!file.exists(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""))){
