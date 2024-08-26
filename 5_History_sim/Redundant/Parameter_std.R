@@ -28,7 +28,7 @@ param_matrix[,5] = 10
 param_matrix[,6] = 3
 param_matrix[,7] = "estimate"
 param_matrix[,8] = 0
-param_matrix[,0] = 0.0002
+param_matrix[,9] = 0.0002
 
 
 write.table(noquote(param_matrix), file = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_History_sim/000_parameter_grid.txt", sep = " ", col.names = FALSE, row.names = FALSE, quote = FALSE)
