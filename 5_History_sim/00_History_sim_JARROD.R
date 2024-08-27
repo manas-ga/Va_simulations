@@ -123,7 +123,7 @@ library(RhpcBLASctl)
 # This create issue while running things on the cluster
 # Restrict the number of cores during matrix manipulations ##
 
-blas_set_num_threads(15)
+blas_set_num_threads(1)
 
 #################################
 #### Load Jarrod's functions ####
@@ -132,6 +132,22 @@ blas_set_num_threads(15)
 functions_only=TRUE ## Read only the functions
 
 rmarkdown::render(file.path(Vw_path))
+
+
+###################################################
+#### Command line arguments fed to this script ####
+###################################################
+
+# The ith command line arguments can be retrieved with commandArgs(trailingOnly = TRUE)[i]
+
+# Arg 1 = mu
+# Arg 2 = r*sequence_length
+# Arg 3 = r_expt*sequence_length
+# Arg 4 = n_ind_exp
+# Arg 5 = n_cages
+# Arg 6 = ngen_expt
+# Arg 7 = flip_sel_coef
+# Arg 8 = mut_ratio
 
 #####################################################
 ############ Simulation Parameters ##################
@@ -145,10 +161,10 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
 
 
 simulate = TRUE                        # To run the simulation or not
-analyse = TRUE                         # To perform the analysis on simulated data or not
-record = TRUE                          # Should the data of the simulations be appended to "data.csv" 
+analyse = TRUE                        # To perform the analysis on simulated data or not
+record = TRUE                          # Should the data of the simulations be recorded in a .csv file 
 
-nsims = 1                              # Number of simulations (change scale in each simulation) - MUST be 1 if running on a cluster
+nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
 
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
@@ -158,7 +174,7 @@ if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
 output_freq = 1000                     # The frequency with which SLiM outputs are to be generated for the analysis of history 
 ngen_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 3, (as.numeric(commandArgs(trailingOnly = TRUE)[6])))                          # How many generations should allele frequency changes be calculated over in the experiment
-flip_sel_coef = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 0, as.numeric(commandArgs(trailingOnly = TRUE)[8])) # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
+flip_sel_coef = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 0, as.numeric(commandArgs(trailingOnly = TRUE)[7])) # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
 
 ###########################################
 ########### Pop gen parameters ############
@@ -198,7 +214,7 @@ shape = 0.3                                     # Shape of the gamma DFE ##### m
 scale_list = seq(0.033, 0.033, length = nsims)  # Vector of Scale of the gamma DFE
 
 # The ratio of beneficial:deleterious mutations 
-if(Sys.info()["nodename"]=="SCE-BIO-C06645"){mut_ratio=0}else{mut_ratio = as.numeric(commandArgs(trailingOnly = TRUE)[9])}
+if(Sys.info()["nodename"]=="SCE-BIO-C06645"){mut_ratio=0}else{mut_ratio = as.numeric(commandArgs(trailingOnly = TRUE)[8])}
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
@@ -240,7 +256,7 @@ if(pdelta_method=="manual"){
 
 # How should bdelta[1] (intercept) and bdelta[2] (slope of (p-q)) be estimated
 
-bdelta_method = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", "fixed", commandArgs(trailingOnly = TRUE)[7])  # Can be "fixed" or "estimate"
+bdelta_method = "estimate"  # Can be "fixed" or "estimate"
 
 if(bdelta_method=="estimate"){
   bdelta = c(NA, NA)
@@ -261,7 +277,7 @@ Set_ID = gsub(":", "_", Set_ID)
 
 ## Only attach command line parameters to the set id if not running on the PC
 if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
-  Set_ID = paste(Set_ID, commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[2], commandArgs(trailingOnly = TRUE)[3], commandArgs(trailingOnly = TRUE)[4], commandArgs(trailingOnly = TRUE)[5], commandArgs(trailingOnly = TRUE)[6], commandArgs(trailingOnly = TRUE)[7], commandArgs(trailingOnly = TRUE)[8], commandArgs(trailingOnly = TRUE)[9], sep = "_")
+  Set_ID = paste(Set_ID, commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[2], commandArgs(trailingOnly = TRUE)[3], commandArgs(trailingOnly = TRUE)[4], commandArgs(trailingOnly = TRUE)[5], commandArgs(trailingOnly = TRUE)[6], commandArgs(trailingOnly = TRUE)[7], commandArgs(trailingOnly = TRUE)[8], sep = "_")
 }
 
 if(!file.exists(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""))){
@@ -271,6 +287,8 @@ if(!file.exists(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""))){
 
 
 ####################################################################################################################################################
+
+# Warnings and checks
 
 if(!DFE%in%c("n", "g")){stop("DFE must be one of 'g', 'n'")}
 if(!pdelta_method%in%c("optim", "fixed", "manual", "no_analysis")){stop("pdelta_method must be one of 'optim', 'fixed', 'manual', 'no_analysis'")}
@@ -333,7 +351,7 @@ for (sim in 1:nsims){
       
       mu = mu_list[sim]
       mu_msp = ifelse(end_gen==2, mu/5320, mu/5320)
-      mu_neutral = 0 #ifelse(end_gen==2, mu_msp/3, mu/2000)
+      mu_neutral = ifelse(end_gen==2, mu_msp/3, mu/2000)
       
       message(paste("Simulation", sim, "in progress..."))
     
@@ -934,22 +952,20 @@ for (sim in 1:nsims){
       
       vA_alpha_emp[sim]<-TrV+aLa
       
+      
+      ########################################################
+      ######### Save simulation data in a spreadsheet ########
+      ########################################################
+      
+      # Save simulation parameters as well as outputs from the analyses
+      
+      if(record == TRUE){
+        dat = read.csv(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""), header=FALSE)
+        dat = rbind(dat, c(Set_ID, sim, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, flip_sel_coef, proj, LDdelta, pa, Vs, randomise, pdelta_method, bdelta_method, va_true[sim], vA_true[sim], vA_est[sim], vA_left[sim], vA_alpha_emp[sim], pdelta_emp[sim], bdelta_intercept_emp[sim], bdelta_slope_emp[sim], sigma2delta_emp[sim], pdelta_est[sim], pdelta_var_est[sim], bdelta_intercept_est[sim], bdelta_slope_est[sim], bdelta_var_est[sim], sigma2delta_est[sim], seg_sites[sim], seg_sites_neu[sim], seg_sites_ben[sim], seg_sites_del[sim], mean_diversity[sim]))
+        write.table(dat, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
+      }
   
   }
-  
-  
-   
-  
-  ########################################################
-  ######### Save simulation data in a spreadsheet ########
-  ########################################################
-  
-  if(record == TRUE){
-  dat = read.csv(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""), header=FALSE)
-  dat = rbind(dat, c(Set_ID, sim, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, flip_sel_coef, proj, LDdelta, pa, Vs, randomise, pdelta_method, bdelta_method, va_true[sim], vA_true[sim], vA_est[sim], vA_left[sim], vA_alpha_emp[sim], pdelta_emp[sim], bdelta_intercept_emp[sim], bdelta_slope_emp[sim], sigma2delta_emp[sim], pdelta_est[sim], pdelta_var_est[sim], bdelta_intercept_est[sim], bdelta_slope_est[sim], bdelta_var_est[sim], sigma2delta_est[sim], seg_sites[sim], seg_sites_neu[sim], seg_sites_ben[sim], seg_sites_del[sim], mean_diversity[sim]))
-  write.table(dat, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
-  }
-  
   
 }
 
