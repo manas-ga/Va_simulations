@@ -938,7 +938,7 @@ for (sim in 1:nsims){
       bdelta_slope_emp[sim] = alpha_properties$bdelta_slope
       sigma2delta_emp[sim] = alpha_properties$sigma2delta
       
-      if (analyse){
+      if(pdelta_method!="no_analysis"){
         
         # Calculate vA from these empirical properties of alpha
         
