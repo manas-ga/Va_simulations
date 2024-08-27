@@ -938,20 +938,25 @@ for (sim in 1:nsims){
       bdelta_slope_emp[sim] = alpha_properties$bdelta_slope
       sigma2delta_emp[sim] = alpha_properties$sigma2delta
       
-      # Calculate vA from these empirical properties of alpha
-      
-      bdelta_emp = c(bdelta_intercept_emp[sim], bdelta_slope_emp[sim])
-      
-      if(LDdelta){
-        TrV<-sum((m1$DL)^(2*(pdelta_emp[sim]+1)))*sigma2delta_emp[sim]
-        aLa<-t((alpha_properties$X)%*%bdelta_emp)%*%L%*%(alpha_properties$X)%*%bdelta_emp-sum(diag(t(alpha_properties$X)%*%L%*%(alpha_properties$X)%*%(alpha_properties$S)))
-      }else{
-        TrV<-sum(diag(L%*%diag(diag(L)^pdelta_emp[sim])))*sigma2delta_emp[sim]
-        aLa<-sum(diag(L)*((alpha_properties$X)%*%bdelta_emp)^2)-sum(diag(t(alpha_properties$X)%*%diag(diag(L))%*%(alpha_properties$X)%*%(alpha_properties$S)))
+      if (analyse){
+        
+        # Calculate vA from these empirical properties of alpha
+        
+        bdelta_emp = c(bdelta_intercept_emp[sim], bdelta_slope_emp[sim])
+        
+        if(LDdelta){
+          TrV<-sum((m1$DL)^(2*(pdelta_emp[sim]+1)))*sigma2delta_emp[sim]
+          aLa<-t((alpha_properties$X)%*%bdelta_emp)%*%L%*%(alpha_properties$X)%*%bdelta_emp-sum(diag(t(alpha_properties$X)%*%L%*%(alpha_properties$X)%*%(alpha_properties$S)))
+        }else{
+          TrV<-sum(diag(L%*%diag(diag(L)^pdelta_emp[sim])))*sigma2delta_emp[sim]
+          aLa<-sum(diag(L)*((alpha_properties$X)%*%bdelta_emp)^2)-sum(diag(t(alpha_properties$X)%*%diag(diag(L))%*%(alpha_properties$X)%*%(alpha_properties$S)))
+        }
+        
+        vA_alpha_emp[sim]<-TrV+aLa
+        
       }
       
-      vA_alpha_emp[sim]<-TrV+aLa
-      
+
       
       ########################################################
       ######### Save simulation data in a spreadsheet ########
