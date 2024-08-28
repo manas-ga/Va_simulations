@@ -351,7 +351,7 @@ for (sim in 1:nsims){
       
       mu = mu_list[sim]
       mu_msp = ifelse(end_gen==2, mu/5320, mu/5320)
-      mu_neutral = ifelse(end_gen==2, mu_msp/3, mu/2000)
+      mu_neutral = ifelse(end_gen==2, mu_msp/3, mu/20)
       
       message(paste("Simulation", sim, "in progress..."))
     

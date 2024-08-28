@@ -294,7 +294,7 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
 }
 ```
 
-### Function to analyse the parents' generation
+## Function to analyse the parents' generation
 
 This function uses data from the parents' generation to calculate:
 (a) Two matrices (L and nR)
@@ -382,4 +382,38 @@ analyse_parents = function(c0,
  
 ```
 
+## Function to peform analyses on SLiM outputs
+
+This function takes in Set_ID of the SLiM simulation and a host of analysis parameters as the input, and performs the following steps -
+
+(a) Extract simulation data using extract_slim_data()
+(b) Extract useful information about the parents' generation using analyse_parents()
+(c) Fit models and perform analyses using Vw_model()
+
+```{r analyse_sim}
+
+analyse_sim = function(Set_ID,                # The unique ID of the set of simulations that are controlled by a single R script
+                       sim = 1,               # Each set can have multiple sims, but - on the cluster sim must always 1
+                       slim_output_path,      # The directory where the SLiM outputs (for parents and experimental replicates) are stored (as .txt files)
+                       sim_param_path,        # The path to the directory where the .csv file containing simulation parameters is stored
+                       extract_genomes_path,  # The path to the python script that extracts genomes and mutations from SLim outputs
+                       extract_mut_path,      # The path to the python script that extracts mutations from SLim outputs
+                       mutations_path,        # The directory where extracted mutations are to be stored (temp files)
+                       c_matrix_path,         # The directory where extracted genomes are to be stored (temp files)
+                       n_sample=NULL,         # Number of individuals sampled from the parents' generation (useful if n_ind_exp is large)
+                       randomise = TRUE,      # Optionally the reference allele can be randomised
+                       delete_temp_files = TRUE,
+                       proj = "BLoM",           # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
+                       LDdelta = FALSE,       # Should L or diag(L) be considered while modelling distribution of alphas
+                       pa = 1,
+                       Vs = "LoNL",           # "L" or "LoNL"
+                       method="REML",         # Can be "REML" or "MCMC"
+                       bigalgebra = FALSE,    # Should bigalgebra be used for eigendecomposition?
+                       pdelta = NA,           # If NA pdelta is estimated using optim()
+                       bdelta = c(NA, NA)     # If c(NA,NA) both bedelta intercept and slope are estimated
+                       ){
+  
+}
+
+```
 
