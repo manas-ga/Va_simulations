@@ -480,7 +480,7 @@ for (sim in 1:nsims){
       if(record == TRUE&analyse==FALSE){
         dat = read.csv(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""), header=FALSE)
         dat = rbind(dat, c(Set_ID, sim, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, flip_sel_coef, proj, LDdelta, pa, Vs, randomise, pdelta_method, bdelta_method, va_true[sim], vA_true[sim], vA_est[sim], vA_left[sim], vA_alpha_emp[sim], pdelta_emp[sim], bdelta_intercept_emp[sim], bdelta_slope_emp[sim], sigma2delta_emp[sim], pdelta_est[sim], pdelta_var_est[sim], bdelta_intercept_est[sim], bdelta_slope_est[sim], bdelta_var_est[sim], sigma2delta_est[sim], seg_sites[sim], seg_sites_neu[sim], seg_sites_ben[sim], seg_sites_del[sim], mean_diversity[sim]))
-        write.table(dat, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
+        write.table(dat[,1:19], file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
       }
     
   }

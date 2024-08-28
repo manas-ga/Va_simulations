@@ -8,11 +8,11 @@ date: "2024-07-24"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Overview
+## Overview
 
 Here we describe the functions that can be used to extract useful data from the outputs of SLiM simulations and then analyse it to obtain estimates of Vw. 
 
-## Function to extract SLiM data
+### Function to extract SLiM data
 
 This function reads the SLiM output produced in the simulation, extracts the useful bits from those files, optionally randomises reference alleles, and returns -
 
@@ -294,7 +294,7 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
 }
 ```
 
-## Function to analyse the parents' generation
+### Function to analyse the parents' generation
 
 This function uses data from the parents' generation to calculate:
 (a) Two matrices (L and nR)
@@ -383,7 +383,7 @@ analyse_parents = function(c0,
  
 ```
 
-## Function to peform analyses on SLiM outputs
+### Function to peform analyses on SLiM outputs
 
 This function takes in Set_ID of the SLiM simulation and a host of analysis parameters as the input, and performs the following steps -
 

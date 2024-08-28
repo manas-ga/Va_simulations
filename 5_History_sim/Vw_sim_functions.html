@@ -355,13 +355,13 @@ display: none;
 </div>
 
 
-<div id="overview" class="section level1">
-<h1>Overview</h1>
+<div id="overview" class="section level2">
+<h2>Overview</h2>
 <p>Here we describe the functions that can be used to extract useful
 data from the outputs of SLiM simulations and then analyse it to obtain
 estimates of Vw.</p>
-<div id="function-to-extract-slim-data" class="section level2">
-<h2>Function to extract SLiM data</h2>
+<div id="function-to-extract-slim-data" class="section level3">
+<h3>Function to extract SLiM data</h3>
 <p>This function reads the SLiM output produced in the simulation,
 extracts the useful bits from those files, optionally randomises
 reference alleles, and returns -</p>
@@ -641,6 +641,7 @@ reference alleles, and returns -</p>
   return(list(c0=c_ind/2, list_alpha=list_alpha, SNPs=SNPs, pbar1=pbar1, pbar2=pbar2, sim_params=sim_params[,1:19]))
     
 }</code></pre>
+</div>
 <div id="function-to-analyse-the-parents-generation" class="section level3">
 <h3>Function to analyse the parents’ generation</h3>
 <p>This function uses data from the parents’ generation to calculate:
@@ -690,6 +691,7 @@ alphas, etc.)</p>
   
   pbar0 = colMeans(c0) 
   diversity = pbar0*(1 - pbar0)/2
+  mean_diversity = mean(diversity)
   message(&quot;Calculating the true additive genetic and genic variances...&quot;)
   va_true = sum(diversity*list_alpha*list_alpha) # additive genic variance
   vA_true = t(list_alpha)%*%L%*%list_alpha       # Additive genetic variance
@@ -720,10 +722,104 @@ alphas, etc.)</p>
   
   vA_alpha_emp&lt;-TrV+aLa
   
-  return(list(L=L, nR=nR, seg_sites=seg_sites, seg_sites_neu=seg_sites_neu, seg_sites_ben=seg_sites_ben, va_true=vA_true, vA_true=vA_true, vA_alpha_emp=vA_alpha_emp, pdelta_emp=pdelta_emp, bdelta_intercept_emp=bdelta_intercept_emp, bdelta_slope_emp=bdelta_slope_emp))
+  return(list(L=L, nR=nR, seg_sites=seg_sites, seg_sites_neu=seg_sites_neu, seg_sites_ben=seg_sites_ben, mean_diversity=mean_diversity, va_true=va_true, vA_true=vA_true, vA_alpha_emp=vA_alpha_emp, pdelta_emp=pdelta_emp, bdelta_intercept_emp=bdelta_intercept_emp, bdelta_slope_emp=bdelta_slope_emp))
 
 }</code></pre>
 </div>
+<div id="function-to-peform-analyses-on-slim-outputs" class="section level3">
+<h3>Function to peform analyses on SLiM outputs</h3>
+<p>This function takes in Set_ID of the SLiM simulation and a host of
+analysis parameters as the input, and performs the following steps -</p>
+<ol style="list-style-type: lower-alpha">
+<li>Extract simulation data using extract_slim_data()</li>
+<li>Extract useful information about the parents’ generation using
+analyse_parents()</li>
+<li>Fit models and perform analyses using Vw_model()</li>
+</ol>
+<pre class="r"><code>analyse_sim = function(Set_ID,                # The unique ID of the set of simulations that are controlled by a single R script
+                       sim = 1,               # Each set can have multiple sims, but - on the cluster sim must always 1
+                       slim_output_path,      # The directory where the SLiM outputs (for parents and experimental replicates) are stored (as .txt files)
+                       sim_param_path,        # The path to the directory where the .csv file containing simulation parameters is stored
+                       extract_genomes_path,  # The path to the python script that extracts genomes and mutations from SLim outputs
+                       extract_mut_path,      # The path to the python script that extracts mutations from SLim outputs
+                       mutations_path,        # The directory where extracted mutations are to be stored (temp files)
+                       c_matrix_path,         # The directory where extracted genomes are to be stored (temp files)
+                       n_sample=NULL,         # Number of individuals sampled from the parents&#39; generation (useful if n_ind_exp is large)
+                       randomise = TRUE,      # Optionally the reference allele can be randomised
+                       delete_temp_files = TRUE,
+                       proj = &quot;BLoM&quot;,           # projection type for allele frequencies: &quot;LoM&quot;, &quot;BLoM&quot;, &quot;L&quot; or &quot;N&quot;
+                       LDdelta = FALSE,       # Should L or diag(L) be considered while modelling distribution of alphas
+                       pa = 1,
+                       Vs = &quot;LoNL&quot;,           # &quot;L&quot; or &quot;LoNL&quot;
+                       method=&quot;REML&quot;,         # Can be &quot;REML&quot; or &quot;MCMC&quot;
+                       bigalgebra = FALSE,    # Should bigalgebra be used for eigendecomposition?
+                       pdelta = NA,           # If NA pdelta is estimated using optim()
+                       bdelta = c(NA, NA),    # If c(NA,NA) both bedelta intercept and slope are estimated
+                       AtleastOneRecomb=FALSE
+                       ){
+  
+### Extract sim data ###
+
+sim_data = extract_slim_data(Set_ID = Set_ID,
+                             sim = sim,
+                             slim_output_path = slim_output_path, 
+                             sim_param_path = slim_param_path,
+                             extract_genomes_path = extract_genomes_path, 
+                             extract_mut_path = extract_mut_path,
+                             mutations_path = mutations_path, 
+                             c_matrix_path = c_matrix_path, 
+                             randomise = randomise)
+### Analyse parents ###
+
+parents_info = analyse_parents(c0 = sim_data$c0,  
+                               list_alpha = sim_data$list_alpha,             
+                               LDdelta=LDdelta,         
+                               SNPs = sim_data$SNPs,                   
+                               RecombRate = sim_data$sim_params$r_expt,             
+                               HapLength = sim_data$sim_params$sequence_length,              
+                               AtleastOneRecomb=AtleastOneRecomb)
+
+### Fit model ###
+
+m1&lt;-Vw_model(C0 = sim_data$c0,          
+             nR = parents_info$nR,        
+             pbar1 = sim_data$pbar1,      
+             ngen1=1,     
+             pbar2 = sim_data$pbar2,       
+             ngen2 = (sim_data$sim_params$ngen_expt) + 1,       
+             nind = sim_data$sim_params$n_ind_exp,        
+             proj=proj,
+             LDdelta = LDdelta,
+             pa = pa,
+             pdelta = pdelta,
+             bdelta = bdelta,
+             Vs = Vs,
+             method = method,
+             L = parents_info$L,    # list with elements UL and DL
+             svdL = NULL,           # list with elements UL and DL
+             bigalgebra = bigalgebra, 
+             tol = sqrt(.Machine$double.eps))
+
+
+vA_est = m1$Vw_est 
+pdelta_est = m1$pdelta 
+pdelta_var_est = m1$pdelta_var
+bdelta_intercept_est = m1$bdelta[1]
+bdelta_slope_est = m1$bdelta[2]
+bdelta_var_est = paste(m1$bdelta_var[1,1], m1$bdelta_var[2,2], m1$bdelta_var[1,2], sep = &quot;_&quot;)
+sigma2delta_est = summary(m1$model)$varcomp[1,1]
+  
+### Save file ###
+
+sim_data = extract_slim_data$sim_params
+
+analysis_data = dara.frame(&quot;proj&quot;=proj, &quot;LDdelta&quot;=LDdelta, &quot;pa&quot;=pa, &quot;Vs&quot;=Vs, &quot;randomise&quot;=randomise, &quot;pdelta_method&quot;=pdelta_method, &quot;bdelta_method&quot;=bdelta_method, &quot;va_true&quot;=parents_info$va_true, &quot;vA_true&quot;=parents_info$vA_true, &quot;vA_est&quot;=vA_est, vA_left, &quot;vA_alpha_emp&quot;=parents_info$vA_alpha_emp, &quot;pdelta_emp&quot;=parents_info$pdelta_emp, &quot;bdelta_intercept_emp&quot;=parents_info$bdelta_intercept_emp, &quot;bdelta_slope_emp&quot;=parents_info$bdelta_slope_emp, &quot;sigma2delta_emp&quot;=parents_info$sigma2delta_emp, &quot;pdelta_est&quot;=pdelta_est, &quot;pdelta_var_est&quot;=pdelta_var_est, &quot;bdelta_intercept_est&quot;=bdelta_intercept_est, &quot;bdelta_slope_est&quot;=bdelta_slope_est, &quot;bdelta_var_est&quot;=bdelta_var_est, &quot;sigma2delta_est&quot;=sigma2delta_est, &quot;seg_sites&quot;=parents_info$seg_sites, &quot;seg_sites_neu&quot;=parents_info$seg_sites_neu, &quot;seg_sites_ben&quot;=parents_info$seg_sites_ben, &quot;seg_sites_del&quot;=parents_info$seg_sites_del, &quot;mean_diversity&quot;=parents_info$mean_diversity)
+
+analysis_data = cbind(sim_data, analysis_data)
+
+write.table(analysis_data, file = paste(sim_param_path, &quot;/&quot;, Set_ID, &quot;_Data_analysis.csv&quot;, sep = &quot;&quot;),col.names = FALSE, row.names = FALSE, sep = &quot;,&quot;)
+
+}</code></pre>
 </div>
 </div>
 
