@@ -14,7 +14,7 @@
 # Col 7 = flip_sel_coef
 # Col 8 = mut_ratio
 
-nsims = 3 # number of simulations for each set
+nsims = 100 # number of simulations for each set
 mu_list = seq(5.56e-07, 5.56e-06, length = nsims)
 test = FALSE # If TRUE, only selects parameters for the "standard" simulation set
 
