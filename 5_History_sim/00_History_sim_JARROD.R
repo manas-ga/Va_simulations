@@ -161,7 +161,7 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
 
 
 simulate = TRUE                        # To run the simulation or not
-analyse = TRUE                        # To perform the analysis on simulated data or not
+analyse = FALSE                        # To perform the analysis on simulated data or not
 record = TRUE                          # Should the data of the simulations be recorded in a .csv file 
 
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster

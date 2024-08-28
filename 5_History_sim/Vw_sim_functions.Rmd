@@ -345,6 +345,7 @@ analyse_parents = function(c0,
   
   pbar0 = colMeans(c0) 
   diversity = pbar0*(1 - pbar0)/2
+  mean_diversity = mean(diversity)
   message("Calculating the true additive genetic and genic variances...")
   va_true = sum(diversity*list_alpha*list_alpha) # additive genic variance
   vA_true = t(list_alpha)%*%L%*%list_alpha       # Additive genetic variance
@@ -375,7 +376,7 @@ analyse_parents = function(c0,
   
   vA_alpha_emp<-TrV+aLa
   
-  return(list(L=L, nR=nR, seg_sites=seg_sites, seg_sites_neu=seg_sites_neu, seg_sites_ben=seg_sites_ben, va_true=vA_true, vA_true=vA_true, vA_alpha_emp=vA_alpha_emp, pdelta_emp=pdelta_emp, bdelta_intercept_emp=bdelta_intercept_emp, bdelta_slope_emp=bdelta_slope_emp))
+  return(list(L=L, nR=nR, seg_sites=seg_sites, seg_sites_neu=seg_sites_neu, seg_sites_ben=seg_sites_ben, mean_diversity=mean_diversity, va_true=va_true, vA_true=vA_true, vA_alpha_emp=vA_alpha_emp, pdelta_emp=pdelta_emp, bdelta_intercept_emp=bdelta_intercept_emp, bdelta_slope_emp=bdelta_slope_emp))
 
 }
 
@@ -410,9 +411,71 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                        method="REML",         # Can be "REML" or "MCMC"
                        bigalgebra = FALSE,    # Should bigalgebra be used for eigendecomposition?
                        pdelta = NA,           # If NA pdelta is estimated using optim()
-                       bdelta = c(NA, NA)     # If c(NA,NA) both bedelta intercept and slope are estimated
+                       bdelta = c(NA, NA),    # If c(NA,NA) both bedelta intercept and slope are estimated
+                       AtleastOneRecomb=FALSE
                        ){
   
+### Extract sim data ###
+
+sim_data = extract_slim_data(Set_ID = Set_ID,
+                             sim = sim,
+                             slim_output_path = slim_output_path, 
+                             sim_param_path = slim_param_path,
+                             extract_genomes_path = extract_genomes_path, 
+                             extract_mut_path = extract_mut_path,
+                             mutations_path = mutations_path, 
+                             c_matrix_path = c_matrix_path, 
+                             randomise = randomise)
+### Analyse parents ###
+
+parents_info = analyse_parents(c0 = sim_data$c0,  
+                               list_alpha = sim_data$list_alpha,             
+                               LDdelta=LDdelta,         
+                               SNPs = sim_data$SNPs,                   
+                               RecombRate = sim_data$sim_params$r_expt,             
+                               HapLength = sim_data$sim_params$sequence_length,              
+                               AtleastOneRecomb=AtleastOneRecomb)
+
+### Fit model ###
+
+m1<-Vw_model(C0 = sim_data$c0,          
+             nR = parents_info$nR,        
+             pbar1 = sim_data$pbar1,      
+             ngen1=1,     
+             pbar2 = sim_data$pbar2,       
+             ngen2 = (sim_data$sim_params$ngen_expt) + 1,       
+             nind = sim_data$sim_params$n_ind_exp,        
+             proj=proj,
+             LDdelta = LDdelta,
+             pa = pa,
+             pdelta = pdelta,
+             bdelta = bdelta,
+             Vs = Vs,
+             method = method,
+             L = parents_info$L,    # list with elements UL and DL
+             svdL = NULL,           # list with elements UL and DL
+             bigalgebra = bigalgebra, 
+             tol = sqrt(.Machine$double.eps))
+
+
+vA_est = m1$Vw_est 
+pdelta_est = m1$pdelta 
+pdelta_var_est = m1$pdelta_var
+bdelta_intercept_est = m1$bdelta[1]
+bdelta_slope_est = m1$bdelta[2]
+bdelta_var_est = paste(m1$bdelta_var[1,1], m1$bdelta_var[2,2], m1$bdelta_var[1,2], sep = "_")
+sigma2delta_est = summary(m1$model)$varcomp[1,1]
+  
+### Save file ###
+
+sim_data = extract_slim_data$sim_params
+
+analysis_data = dara.frame("proj"=proj, "LDdelta"=LDdelta, "pa"=pa, "Vs"=Vs, "randomise"=randomise, "pdelta_method"=pdelta_method, "bdelta_method"=bdelta_method, "va_true"=parents_info$va_true, "vA_true"=parents_info$vA_true, "vA_est"=vA_est, vA_left, "vA_alpha_emp"=parents_info$vA_alpha_emp, "pdelta_emp"=parents_info$pdelta_emp, "bdelta_intercept_emp"=parents_info$bdelta_intercept_emp, "bdelta_slope_emp"=parents_info$bdelta_slope_emp, "sigma2delta_emp"=parents_info$sigma2delta_emp, "pdelta_est"=pdelta_est, "pdelta_var_est"=pdelta_var_est, "bdelta_intercept_est"=bdelta_intercept_est, "bdelta_slope_est"=bdelta_slope_est, "bdelta_var_est"=bdelta_var_est, "sigma2delta_est"=sigma2delta_est, "seg_sites"=parents_info$seg_sites, "seg_sites_neu"=parents_info$seg_sites_neu, "seg_sites_ben"=parents_info$seg_sites_ben, "seg_sites_del"=parents_info$seg_sites_del, "mean_diversity"=parents_info$mean_diversity)
+
+analysis_data = cbind(sim_data, analysis_data)
+
+write.table(analysis_data, file = paste(sim_param_path, "/", Set_ID, "_Data_analysis.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
+
 }
 
 ```
