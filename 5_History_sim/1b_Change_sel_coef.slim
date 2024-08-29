@@ -48,7 +48,7 @@ initialize()
 	
 	sim.treeSeqOutput(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_with_neutral.trees", metadata = sel_coef);
 	sim.outputFull(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_parents.txt");
-	catn("Generation " + sim.cycle + ": parents' output saved as a .trees file and as a .txt file");
+	catn("Generation " + sim.cycle + ": parents' output saved as a .trees file and as a .txt file"); // Saving a .txt output in the parents' generation is essential for downstream analyses
 
 }
 

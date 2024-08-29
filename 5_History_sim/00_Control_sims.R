@@ -127,12 +127,14 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
 
 
 record = TRUE                          # Should the data of the simulations be recorded in a .csv file 
+trim_exp_files = TRUE                  # Should the SLiM output files for the experiment be trimmed ti include just the information on mutations to save space.
+del_files = TRUE                       # Should the .trees files be deleted at the end to save space?
 
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
 
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
-end_gen = 20000                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+end_gen = 2                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
 
 if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
@@ -358,6 +360,19 @@ for (sim in 1:nsims){
         
         system(paste("slim", expt_arg1, expt_arg2, expt_arg3, expt_arg4, expt_arg5, expt_arg6, expt_arg7, expt_arg8, expt_arg9, expt_arg10, expt_arg11, expt_arg12, expt_arg13, expt_arg14, expt_arg15, expt_arg16, slim_expt_path))
         
+        ### Trim the SLim outputs for the experiment to just include the information on mutations to make them smaller
+        
+        if (trim_exp_files==TRUE){
+          message("Trimming output files for the experiment...")
+          for (gen in (end_gen + 1):(end_gen + 1 + ngen_expt)){
+            filename = paste(slim_output_path, "/", Set_ID, "_sim", sim, "_cage", cage, "_output_experiment_", gen, ".txt", sep = "")
+            temp_filename = paste(slim_output_path, "/", Set_ID, "_tempfile.txt", sep = "")
+            system(paste("sed -n '/Mutations:/, /Individuals:/p'", filename, ">", temp_filename, sep = " ")) # Save the trimmed text to temp_file
+            system(paste("mv", temp_filename, filename))                                                     # Rename the temp_file as the original file 
+            
+          }
+        }
+        
       }
       
       ########################################################
@@ -370,6 +385,17 @@ for (sim in 1:nsims){
         dat = read.csv(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""), header=FALSE)
         dat = rbind(dat, c(Set_ID, sim, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, flip_sel_coef))
         write.table(dat, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
+      }
+      
+      ###########################
+      ### Remove .trees files ###
+      ###########################
+      
+      if(del_files){
+        neutral_burnin_file = paste(slim_output_path, "/", Set_ID, "_sim", sim, "_neutral_burnin.trees", sep = "")
+        output_history_file = paste(slim_output_path, "/", Set_ID, "_sim", sim, "_output_history.trees", sep = "")
+        output_history_neutral_file = paste(slim_output_path, "/", Set_ID, "_sim", sim, "_output_history_with_neutral.trees", sep = "")
+        system(paste("rm -rf", neutral_burnin_file, output_history_file, output_history_neutral_file))
       }
   
 }
