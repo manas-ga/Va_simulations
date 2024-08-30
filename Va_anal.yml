@@ -1,0 +1,7 @@
+name: Va_anal
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11.5
+  - numpy=1.26.0
