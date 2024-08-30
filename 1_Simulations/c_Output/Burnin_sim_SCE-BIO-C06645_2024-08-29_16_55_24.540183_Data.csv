@@ -1,0 +1,2 @@
+"Set_ID","sim","Time","end_gen","ngen_expt","Ne","n_ind_exp","n_cages","sequence_length","r_msp","r","r_expt","mu_msp","mu","mu_neutral","shape","scale","mut_ratio","flip_sel_coef"
+"Burnin_sim_SCE-BIO-C06645_2024-08-29_16_55_24.540183","1","2024-08-29 17:00:51.166711","2","3","1330000","1000","10","1e+06","2.63157894736842e-09","1.4e-06","1.4e-06","5.6390977443609e-12","3e-08","1.8796992481203e-12","0.3","0.033","0","0"

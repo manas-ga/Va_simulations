@@ -1,0 +1,2 @@
+Temp_ID Permanent_ID Mutation_type Position s h Subpop Tick Number
+0 9986 m2 218451 0.00550387008 0.5 p0 20000 2

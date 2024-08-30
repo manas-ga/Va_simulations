@@ -1,0 +1,24 @@
+## Details of files contained within this directory
+
+### 6_Exploration.Rmd
+An example workflow of how to extract useful information from SLiM outputs and perform analyses.
+
+### Create_parameter_grid.R
+A script that generates a grid of parameters that can be used to run 00_Control_sim.R on AC3 or Eddie.
+
+### Create_parameter_grid_std.R
+Creates a grid of "standard" parameters doe twesting.
+
+### Scratch_pad.txt
+Miscellaneous useful commands.
+
+### Custom
+Script for improving formatting while rendering .Rmd files
+
+### hideOutput
+Script for improving formatting while rendering .Rmd files
+
+### Parameters_info.txt
+
+Contains notes on simulation parameters
+  

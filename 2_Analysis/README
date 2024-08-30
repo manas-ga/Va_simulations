@@ -1,0 +1,28 @@
+# Details of files contained within this directory
+
+### Vw.Rmd
+
+Contains functions to perform simulations in R and perform analyses on simulated data.
+
+### 2_Extract_mutations.py 
+
+A python script that reads a SLiM output file (provided as the 1st command line argument) and extracts the information on mutations storing it as a .txt file in a directory specified as the 2nd command line argument.
+
+### 3_Extract_genomes.py 
+
+A python script that reads a SLiM output file (provided as the 1st command line argument) and extracts the information on mutations (storing it as a .txt file in a directory specified using the 2nd command line argument). Also extracts a matrix of proportions of reference alleles for genomes (as a .csv file stored in a directory specified using the 3rd command line argument) using a random sample (size specified by the 4th command line argument) of the population.
+
+### Vw_sim_functions.R
+
+Contains various R functions that extract useful data from SLiM outputs and run analyses.
+
+
+### 6_Exploration.Rmd
+An example workflow of how to extract useful information from SLiM outputs and perform analyses.
+
+### Custom
+Script for improving formatting while rendering .Rmd files
+
+
+### hideOutput
+Script for improving formatting while rendering .Rmd files
