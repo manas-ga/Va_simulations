@@ -122,15 +122,17 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
 
 
 record = TRUE                          # Should the data of the simulations be recorded in a .csv file 
-trim_exp_files = TRUE                  # Should the SLiM output files for the experiment be trimmed ti include just the information on mutations to save space.
-del_files = TRUE                       # Should the .trees files be deleted at the end to save space?
-Job_ID = "trial_sim"                   # Job ID will be frefixed to Set_IDs so that output files can be more easily parsed
+trim_exp_files = FALSE                 # Should the SLiM output files for the experiment be trimmed ti include just the information on mutations to save space.
+del_files = FALSE                      # Should the .trees files be deleted at the end to save space?
+compress_files = TRUE                  # Should .txt and .trees files be compressed using gzip
+
+Job_ID = "burnin_del"                  # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
 
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
 
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
-end_gen = 2                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+end_gen = 200000                       # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
 
 if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
@@ -388,12 +390,24 @@ for (sim in 1:nsims){
       ###########################
       
       if(del_files){
+        message("Deleting .trees files...")
         neutral_burnin_file = paste(slim_output_path, "/", Set_ID, "_sim", sim, "_neutral_burnin.trees", sep = "")
         output_history_file = paste(slim_output_path, "/", Set_ID, "_sim", sim, "_output_history.trees", sep = "")
         output_history_neutral_file = paste(slim_output_path, "/", Set_ID, "_sim", sim, "_output_history_with_neutral.trees", sep = "")
         system(paste("rm -rf", neutral_burnin_file, output_history_file, output_history_neutral_file))
       }
-  message(paste("Simulation", sim, "of set", Set_ID, "completed...")) 
+      
+      #########################################
+      ### Compress .txt and/or .trees files ###
+      #########################################
+      
+      if(compress_files){
+        message("Compressing files...")
+        system(paste("gzip ", slim_output_path, "/*.txt", sep = ""))
+        system(paste("gzip ", slim_output_path, "/*.trees", sep = ""))
+      }
+      
+      message(paste("Simulation", sim, "of set", Set_ID, "completed...")) 
        
 }
 
