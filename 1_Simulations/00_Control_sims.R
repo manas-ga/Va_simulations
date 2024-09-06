@@ -28,7 +28,7 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"){message("WARNING: Command line argu
 
 if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig", "c1", "c2", "c3", "c4", "c5", "c6")){
   
-  base_path = "/ceph/users/marun/Va_simulations/5_History_sim" # Path to all the scripts except "Vw.Rmd"
+  base_path = "/ceph/users/marun/Va_simulations/1_Simulations" # Path to all the scripts except "Vw.Rmd"
   file_storage_path = "/data/obbard/Va_simulations/analyses" # File storage path is the designated storage space on AC3 instead of the /home directory on qm
   
 }
