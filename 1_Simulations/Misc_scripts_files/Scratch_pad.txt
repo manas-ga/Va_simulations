@@ -302,3 +302,7 @@ pandoc error
 pandoc: Vw.knit.md: withBinaryFile: does not exist (No such file or directory)
 Error: pandoc document conversion failed with error 1
 Execution halted
+
+### Eqw error on AC3 ###
+1. path for std_out is incorrect
+2. the bash script was touched on windows
