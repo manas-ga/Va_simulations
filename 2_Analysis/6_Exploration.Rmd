@@ -21,13 +21,13 @@ $(document).ready(function() {
 </script>
 
 ```{r setup_exploration, include=FALSE}
-
-rm(list = ls())
-
 knitr::opts_chunk$set(echo = TRUE)
-run_model<-FALSE
 
-#rmarkdown::render("/Users/jhadfiel/Work/Va_simulations/5_History_sim/6_Exploration.Rmd")
+run_get_data<-FALSE
+run_analyse_data<-FALSE
+run_model<-TRUE
+
+#rmarkdown::render("/Users/jhadfiel/Work/Va_simulations/2_ANalysis/6_Exploration.Rmd")
 
 ```
 
@@ -131,13 +131,13 @@ library(RhpcBLASctl)
 
 functions_only=TRUE ## Read only the functions
 
-rmarkdown::render(file.path(analysis_path, "Vw.Rmd"))
+rmarkdown::render(file.path(analysis_path, "Vw.Rmd"), quiet=TRUE)
 
 ##############################
 ### Load Manas's functions ###
 ##############################
 
-rmarkdown::render(file.path(analysis_path, "Vw_sim_functions.Rmd"))
+rmarkdown::render(file.path(analysis_path, "Vw_sim_functions.Rmd"), quiet=TRUE)
 ```
 
 # Get data
@@ -150,7 +150,7 @@ Set_ID = "bigfoot_2024-08-01_13_03_32.727659_9.64489795918367e-07_1.4_1.4_1000_1
 
 and then extract data
 
-```{r get_data}
+```{r get_data, eval=run_get_data}
 
 sim_data = extract_slim_data(Set_ID = Set_ID,
                              sim = 1,
@@ -160,21 +160,36 @@ sim_data = extract_slim_data(Set_ID = Set_ID,
                              extract_mut_path = extract_mut_path,
                              mutations_path = temp_files_path, 
                              c_matrix_path = temp_files_path, 
-                             randomise = TRUE)
+                             randomise = TRUE,
+                             verbose=FALSE)
 ```
 
 # Analyse data
 
-```{r analyse_data}
+
+
+```{r analyse_data, eval=run_analyse_data}
 parents_info = analyse_parents(c0 = sim_data$c0,  
                                list_alpha = sim_data$list_alpha,             
                                LDdelta=FALSE,         
                                SNPs = sim_data$SNPs,                   
                                RecombRate = sim_data$sim_params$r_expt,             
                                HapLength = sim_data$sim_params$sequence_length,              
-                               AtleastOneRecomb=FALSE)
+                               AtleastOneRecomb=FALSE,
+                               calc_nR=TRUE,
+                               verbose=FALSE)
 ```
 
+```{r }
+plot_alpha_distribution(alpha = sim_data$list_alpha, p = colMeans(sim_data$c0), parameters=parents_info$parameters, pch=16, cex=0.3)
+```
+
+```{r }
+
+ parameters.logit<-alpha_distribution(alpha=sim_data$list_alpha, p=colMeans(sim_data$c0), logit=TRUE)
+
+ plot_alpha_distribution(alpha = sim_data$list_alpha, p=colMeans(sim_data$c0), parameters=parents_info$parameters, parameters2=parameters.logit, pch=16, cex=0.3)
+```
 # Model parameters
 
 ```{r model_parameters}
@@ -185,7 +200,6 @@ pa = 1
 Vs = "LoNL" # "L" or "LoNL"
 method="REML" # Can be "REML" or "MCMC"
 randomise = TRUE # Should the reference allele be randomised for analysis?
-bigalgebra = FALSE # Should bigalgebra be used for eigendecomposition?
 
 # How is pdelta to be estimated? 
 # Can be "optim" (using the function optim()), or "fixed" or "manual"(estimated by manually scanning a range of pdelta values)
@@ -238,9 +252,10 @@ m1<-Vw_model(C0 = sim_data$c0,          # parental genotypes (rows individuals, 
              Vs = Vs,
              method = method,
              L = parents_info$L,    # list with elements UL and DL
-             svdL = NULL,    # list with elements UL and DL
-             bigalgebra = bigalgebra, 
-             tol = sqrt(.Machine$double.eps))
+             svdL = parents_info$svdL,    # list with elements UL and DL
+             tol = sqrt(.Machine$double.eps),
+             save_tprojp=TRUE,
+             verbose=FALSE)
 ```
 
 # Extract estimates
@@ -255,4 +270,10 @@ bdelta_var_est = paste(m1$bdelta_var[1,1], m1$bdelta_var[2,2], m1$bdelta_var[1,2
 sigma2delta_est = summary(m1$model)$varcomp[1,1]
 ```
 
+Lok at alpha-estimates under projected allele frequencies
+```{r }
+ parameters.linear<-alpha_distribution(alpha=sim_data$list_alpha, p=colMeans(sim_data$c0), tproj=tproj$m1$tproj)
+ parameters.logit<-alpha_distribution(alpha=sim_data$list_alpha, p=colMeans(sim_data$c0), tproj=tproj$m1$tproj, logit=TRUE)
 
+ plot_alpha_distribution(alpha = sim_data$list_alpha, p=colMeans(sim_data$c0), tproj=tproj$m1$tproj, parameters=parameters.linear, parameters2=parameters.logit, pch=16, cex=0.3)
+```

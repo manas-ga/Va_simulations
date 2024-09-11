@@ -37,7 +37,8 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
                              c_matrix_path,         # The directory where extracted genomes are to be stored (temp files)
                              n_sample=NULL,         # Number of individuals sampled from the parents' generation (useful if n_ind_exp is large)
                              randomise = TRUE,      # Optionally the reference allele can be randomised
-                             delete_temp_files = TRUE){     
+                             delete_temp_files = TRUE, 
+                             verbose=TRUE){     
   
   ################################
   ## Read simulation parameters ##
@@ -60,9 +61,11 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
   if(is.null(n_sample)){n_sample = n_ind_exp}
   if(n_sample>n_ind_exp){stop("n_sample cannot be greater than n_ind_exp")}
   
-  message("Reading the state of the population in the parent's generation...")
-  message("Extracting mutations and genomes from the parents' generation...")
-      
+  if(verbose){
+    message("Reading the state of the population in the parent's generation...")
+    message("Extracting mutations and genomes from the parents' generation...")
+  }
+
   system(paste("python", 
                extract_genomes_path,                        # Path of the python script (3_Extract_genomes.py)
                paste(slim_output_path, "/", Set_ID, "_sim", sim, "_output_parents.txt", sep = ""),  # Path of the .txt file containing the SLiM output for the parent's generation 
@@ -81,8 +84,10 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
     # Convert genome data into individual data (rows are individuals and columns are allele counts {0,1 or 2} at various sites). 
     # Note that genome 1 and genome 2 are from individual 1; 3 and 4 are from individual 2, and so on
     
-    message("Calculating C0...")
-    
+    if(verbose){
+      message("Calculating C0...")
+    }
+
     n_individuals = nrow(c_genome)/2
     n_sites = ncol(c_genome)
     
@@ -147,9 +152,10 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
       
       # There are two command line arguments (1. Path of the SLiM output file, 2. Path where mutations are to be written) 
       
-      
-      message(paste("Extracting mutations and storing allele frequencies in cage ", cage, " of simulation ", sim, "...", sep = ""))
-      
+      if(verbose){
+        message(paste("Extracting mutations and storing allele frequencies in cage ", cage, " of simulation ", sim, "...", sep = ""))
+      }
+
       for (gen in (end_gen + 1):(end_gen + 1 + ngen_expt)){
         #message(paste((gen-end_gen)*100/5, "% extracted..."))
         system(paste("python", 
@@ -239,7 +245,10 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
       # Then take a mod
       # Remember c_ind is a matrix of 0s 1s and 2s
       
-      message("Randomising reference alleles in c_ind...")
+      if(verbose){
+        message("Randomising reference alleles in c_ind...")
+      }
+        
       # Generate a random vector of 0s (for no change) and -1s (for loci where the reference allele is to be switched)
       ran_vect = sample(c(0, -1), ncol(c_ind),  replace = T) 
       
@@ -257,8 +266,10 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
       ######## Randomise the reference allele in L and list_alpha ########
       ####################################################################
       
-      message("Randomising reference alleles in list_alpha...")
-      
+      if(verbose){
+        message("Randomising reference alleles in list_alpha...")
+      }
+
       # Create a new vector of -1s (wherever ran_vect has -1) and 1s (wherever ran_vect has 0)
       ran_vect_alpha = ifelse(ran_vect==-1, -1, 1)
       
@@ -274,8 +285,10 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
       # Add 0s to the frequencies of those alleles that stay the same, and -1 to those alleles that are to be switched
       # Then take a mod
       
+      if(verbose){
+        message("Randomising reference alleles in pbar1 and pbar2...")
+      }
 
-      message("Randomising reference alleles in pbar1 and pbar2...")
       # Create a matrix with with as many rows as pbar1. Each row of this matrix should be made up of ran_vect (computed while randomising c_ind). 
       # Because the same changes need to be applied to each cage
       
@@ -311,27 +324,41 @@ analyse_parents = function(c0,
                            RecombRate,             # Recombination rate between adjacent sites
                            HapLength,              # Genome size
                            tol=sqrt(.Machine$double.eps),
-                           AtleastOneRecomb=FALSE){ # Should there be at least one cross-over per meiosis?)
+                           AtleastOneRecomb=FALSE,
+                           calc_nR=TRUE, 
+                           verbose=TRUE){ # Should there be at least one cross-over per meiosis?)
   
   ########################
   ## Calculate L and nR ##
   ########################
   
   n_individuals = nrow(c0)
-  message("Calculating L...")
+
+  if(verbose){
+    message("Calculating L...")
+  }
   L = cov(c0)*(n_individuals-1)/(n_individuals) 
   
   if(LDdelta){
-    message("Performing SVD on c0...")
+    if(verbose){
+      message("Performing SVD on c0...")
+    }  
     svdC<-svd(scale(sqrt(1/n_individuals)*c0), nu = 0)
     retain<-sum(svdC$d>tol)
-    #UL<-svdC$v[,1:retain]
-    DL<-diag(svdC$d[1:retain])
+    UL<-svdC$v[,1:retain]
+    DL<-svdC$d[1:retain]
   }
   
-  message("Calculating the matrix of non-recombinant fractions...")
-  nR = form_nR(SNPs, RecombRate, HapLength, AtleastOneRecomb)
-  
+  if(verbose){
+    message("Calculating the matrix of non-recombinant fractions...")
+  }
+
+  if(calc_nR){
+    nR = form_nR(SNPs, RecombRate, HapLength, AtleastOneRecomb)
+  }else{
+    nR = NULL
+  }
+
   # Segregating sites
   
   seg_sites = length(list_alpha)
@@ -346,7 +373,10 @@ analyse_parents = function(c0,
   pbar0 = colMeans(c0) 
   diversity = pbar0*(1 - pbar0)/2
   mean_diversity = mean(diversity)
-  message("Calculating the true additive genetic and genic variances...")
+
+  if(verbose){
+    message("Calculating the true additive genetic and genic variances...")
+  }  
   va_true = sum(diversity*list_alpha*list_alpha) # additive genic variance
   vA_true = t(list_alpha)%*%L%*%list_alpha       # Additive genetic variance
   
@@ -354,12 +384,14 @@ analyse_parents = function(c0,
   ##### Calculate empirical properties of distribution of alphas ####
   ###################################################################
   
-  message("Calculating properties of the empirical distribution of alphas...")
+  if(verbose){
+    message("Calculating properties of the empirical distribution of alphas...")
+  }  
   alpha_properties = alpha_distribution(alpha = list_alpha, p = pbar0)
   
   pdelta_emp = alpha_properties$pdelta
-  bdelta_intercept_emp = alpha_properties$bdelta_int
-  bdelta_slope_emp = alpha_properties$bdelta_slope
+  bdelta_intercept_emp = alpha_properties$bdelta_0
+  bdelta_slope_emp = alpha_properties$bdelta_1
   sigma2delta_emp = alpha_properties$sigma2delta
 
   # Calculate vA from these empirical properties of alpha
@@ -367,16 +399,16 @@ analyse_parents = function(c0,
   bdelta_emp = c(bdelta_intercept_emp, bdelta_slope_emp)
   
   if(LDdelta){
-    TrV<-sum((DL)^(2*(pdelta_emp+1)))*sigma2delta_emp
+    TrV<-sum(DL^(2*(pdelta_emp+1)))*sigma2delta_emp
     aLa<-t((alpha_properties$X)%*%bdelta_emp)%*%L%*%(alpha_properties$X)%*%bdelta_emp-sum(diag(t(alpha_properties$X)%*%L%*%(alpha_properties$X)%*%(alpha_properties$S)))
   }else{
-    TrV<-sum(diag(L%*%diag(diag(L)^pdelta_emp)))*sigma2delta_emp
-    aLa<-sum(diag(L)*((alpha_properties$X)%*%bdelta_emp)^2)-sum(diag(t(alpha_properties$X)%*%diag(diag(L))%*%(alpha_properties$X)%*%(alpha_properties$S)))
+    TrV<-sum(diag(L)^(pdelta_emp+1))*sigma2delta_emp
+    aLa<-t((alpha_properties$X)%*%bdelta_emp)%*%L%*%(alpha_properties$X)%*%bdelta_emp-sum(diag(t(alpha_properties$X)%*%L%*%(alpha_properties$X)%*%(alpha_properties$S)))
   }
   
   vA_alpha_emp<-TrV+aLa
   
-  return(list(L=L, nR=nR, seg_sites=seg_sites, seg_sites_neu=seg_sites_neu, seg_sites_ben=seg_sites_ben, mean_diversity=mean_diversity, va_true=va_true, vA_true=vA_true, vA_alpha_emp=vA_alpha_emp, pdelta_emp=pdelta_emp, bdelta_intercept_emp=bdelta_intercept_emp, bdelta_slope_emp=bdelta_slope_emp))
+  return(list(L=L, nR=nR, svdL=if(LDdelta){list(UL=UL, DL=DL)}else{NULL}, seg_sites=seg_sites, seg_sites_neu=seg_sites_neu, seg_sites_ben=seg_sites_ben, mean_diversity=mean_diversity, va_true=va_true, vA_true=vA_true, vA_alpha_emp=vA_alpha_emp, parameters=alpha_properties[1:5]))
 
 }
 
@@ -409,72 +441,70 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                        pa = 1,
                        Vs = "LoNL",           # "L" or "LoNL"
                        method="REML",         # Can be "REML" or "MCMC"
-                       bigalgebra = FALSE,    # Should bigalgebra be used for eigendecomposition?
                        pdelta = NA,           # If NA pdelta is estimated using optim()
                        bdelta = c(NA, NA),    # If c(NA,NA) both bedelta intercept and slope are estimated
                        AtleastOneRecomb=FALSE
                        ){
   
-### Extract sim data ###
+  ### Extract sim data ###
 
-sim_data = extract_slim_data(Set_ID = Set_ID,
-                             sim = sim,
-                             slim_output_path = slim_output_path, 
-                             sim_param_path = slim_param_path,
-                             extract_genomes_path = extract_genomes_path, 
-                             extract_mut_path = extract_mut_path,
-                             mutations_path = mutations_path, 
-                             c_matrix_path = c_matrix_path, 
-                             randomise = randomise)
-### Analyse parents ###
+  sim_data = extract_slim_data(Set_ID = Set_ID,
+                               sim = sim,
+                               slim_output_path = slim_output_path, 
+                               sim_param_path = slim_param_path,
+                               extract_genomes_path = extract_genomes_path, 
+                               extract_mut_path = extract_mut_path,
+                               mutations_path = mutations_path, 
+                               c_matrix_path = c_matrix_path, 
+                               randomise = randomise)
+  ### Analyse parents ###
 
-parents_info = analyse_parents(c0 = sim_data$c0,  
-                               list_alpha = sim_data$list_alpha,             
-                               LDdelta=LDdelta,         
-                               SNPs = sim_data$SNPs,                   
-                               RecombRate = sim_data$sim_params$r_expt,             
-                               HapLength = sim_data$sim_params$sequence_length,              
-                               AtleastOneRecomb=AtleastOneRecomb)
+  parents_info = analyse_parents(c0 = sim_data$c0,  
+                                 list_alpha = sim_data$list_alpha,             
+                                 LDdelta=LDdelta,         
+                                 SNPs = sim_data$SNPs,                   
+                                 RecombRate = sim_data$sim_params$r_expt,             
+                                 HapLength = sim_data$sim_params$sequence_length,              
+                                 AtleastOneRecomb=AtleastOneRecomb)
 
-### Fit model ###
+  ### Fit model ###
 
-m1<-Vw_model(C0 = sim_data$c0,          
-             nR = parents_info$nR,        
-             pbar1 = sim_data$pbar1,      
-             ngen1=1,     
-             pbar2 = sim_data$pbar2,       
-             ngen2 = (sim_data$sim_params$ngen_expt) + 1,       
-             nind = sim_data$sim_params$n_ind_exp,        
-             proj=proj,
-             LDdelta = LDdelta,
-             pa = pa,
-             pdelta = pdelta,
-             bdelta = bdelta,
-             Vs = Vs,
-             method = method,
-             L = parents_info$L,    # list with elements UL and DL
-             svdL = NULL,           # list with elements UL and DL
-             bigalgebra = bigalgebra, 
-             tol = sqrt(.Machine$double.eps))
+  m1<-Vw_model(C0 = sim_data$c0,          
+               nR = parents_info$nR,             
+               pbar1 = sim_data$pbar1,      
+               ngen1=1,     
+               pbar2 = sim_data$pbar2,       
+               ngen2 = (sim_data$sim_params$ngen_expt) + 1,       
+               nind = sim_data$sim_params$n_ind_exp,        
+               proj=proj,
+               LDdelta = LDdelta,
+               pa = pa,
+               pdelta = pdelta,
+               bdelta = bdelta,
+               Vs = Vs,
+               method = method,
+               L = parents_info$L,    
+               svdL = parents_info$svdL,           # list with elements UL and DL
+               tol = sqrt(.Machine$double.eps))
 
 
-vA_est = m1$Vw_est 
-pdelta_est = m1$pdelta 
-pdelta_var_est = m1$pdelta_var
-bdelta_intercept_est = m1$bdelta[1]
-bdelta_slope_est = m1$bdelta[2]
-bdelta_var_est = paste(m1$bdelta_var[1,1], m1$bdelta_var[2,2], m1$bdelta_var[1,2], sep = "_")
-sigma2delta_est = summary(m1$model)$varcomp[1,1]
-  
-### Save file ###
+  vA_est = m1$Vw_est 
+  pdelta_est = m1$pdelta 
+  pdelta_var_est = m1$pdelta_var
+  bdelta_intercept_est = m1$bdelta[1]
+  bdelta_slope_est = m1$bdelta[2]
+  bdelta_var_est = paste(m1$bdelta_var[1,1], m1$bdelta_var[2,2], m1$bdelta_var[1,2], sep = "_")
+  sigma2delta_est = summary(m1$model)$varcomp[1,1]
+    
+  ### Save file ###
 
-sim_data = extract_slim_data$sim_params
+  sim_data = extract_slim_data$sim_params
 
-analysis_data = dara.frame("proj"=proj, "LDdelta"=LDdelta, "pa"=pa, "Vs"=Vs, "randomise"=randomise, "pdelta_method"=pdelta_method, "bdelta_method"=bdelta_method, "va_true"=parents_info$va_true, "vA_true"=parents_info$vA_true, "vA_est"=vA_est, vA_left, "vA_alpha_emp"=parents_info$vA_alpha_emp, "pdelta_emp"=parents_info$pdelta_emp, "bdelta_intercept_emp"=parents_info$bdelta_intercept_emp, "bdelta_slope_emp"=parents_info$bdelta_slope_emp, "sigma2delta_emp"=parents_info$sigma2delta_emp, "pdelta_est"=pdelta_est, "pdelta_var_est"=pdelta_var_est, "bdelta_intercept_est"=bdelta_intercept_est, "bdelta_slope_est"=bdelta_slope_est, "bdelta_var_est"=bdelta_var_est, "sigma2delta_est"=sigma2delta_est, "seg_sites"=parents_info$seg_sites, "seg_sites_neu"=parents_info$seg_sites_neu, "seg_sites_ben"=parents_info$seg_sites_ben, "seg_sites_del"=parents_info$seg_sites_del, "mean_diversity"=parents_info$mean_diversity)
+  analysis_data = dara.frame("proj"=proj, "LDdelta"=LDdelta, "pa"=pa, "Vs"=Vs, "randomise"=randomise, "pdelta_method"=pdelta_method, "bdelta_method"=bdelta_method, "va_true"=parents_info$va_true, "vA_true"=parents_info$vA_true, "vA_est"=vA_est, vA_left, "vA_alpha_emp"=parents_info$vA_alpha_emp, "pdelta_emp"=parents_info$pdelta_emp, "bdelta_intercept_emp"=parents_info$bdelta_intercept_emp, "bdelta_slope_emp"=parents_info$bdelta_slope_emp, "sigma2delta_emp"=parents_info$sigma2delta_emp, "pdelta_est"=pdelta_est, "pdelta_var_est"=pdelta_var_est, "bdelta_intercept_est"=bdelta_intercept_est, "bdelta_slope_est"=bdelta_slope_est, "bdelta_var_est"=bdelta_var_est, "sigma2delta_est"=sigma2delta_est, "seg_sites"=parents_info$seg_sites, "seg_sites_neu"=parents_info$seg_sites_neu, "seg_sites_ben"=parents_info$seg_sites_ben, "seg_sites_del"=parents_info$seg_sites_del, "mean_diversity"=parents_info$mean_diversity)
 
-analysis_data = cbind(sim_data, analysis_data)
+  analysis_data = cbind(sim_data, analysis_data)
 
-write.table(analysis_data, file = paste(sim_param_path, "/", Set_ID, "_Data_analysis.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
+  write.table(analysis_data, file = paste(sim_param_path, "/", Set_ID, "_Data_analysis.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
 
 }
 
