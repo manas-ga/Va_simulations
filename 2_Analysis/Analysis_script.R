@@ -73,6 +73,7 @@ sim_param_path = file.path(slim_path, "sim_params")
 # Path to SLiM simulation parameters
 
 temp_files_path = file.path(file_storage_path, "temp_files")  
+output_path = paste(file_storage_path, "/c_Output", sep = "")                                                     ## Path where .csv file(s) containing final data are to be stored 
 
 
 # Load packages and functions
@@ -82,10 +83,12 @@ if(Sys.info()["nodename"]=="bigyin"){stop("Bigyin cannot run asreml-r. Use a dif
 library(MCMCglmm)
 library(asreml)
 library(Matrix)
-#library(rmutil)
 library(pryr) ## For tracking memory usage using mem_used()
 library(bigalgebra)
 library(RhpcBLASctl)
+
+# Control the number of BLAS threads if running on a cluster
+if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(10)}
 
 
 #################################
@@ -106,10 +109,11 @@ rmarkdown::render(file.path(analysis_path, "Vw_sim_functions.Rmd"))
 ### Perform analyses ###
 ########################
 
-Set_ID = "test_unflipped_SCE-BIO-C06645_2024-09-11_13_24_45.087551"
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "test_unflipped_SCE-BIO-C06645_2024-09-11_13_24_45.087551", as.numeric(commandArgs(trailingOnly = TRUE)[1]))
+sim = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[1]))
 
 analysed_data = analyse_sim(Set_ID = Set_ID,                            # The unique ID of the set of simulations that are controlled by a single R script
-                            sim = 1,                                    # Each set can have multiple sims, but - on the cluster sim must always 1
+                            sim = sim,                                    # Each set can have multiple sims, but - on the cluster sim must always 1
                             unzip = TRUE,                              # Should the SLiM output file be unzipped, read, and then zipped back?
                             slim_output_path = slim_output_path,        # The directory where the SLiM outputs (for parents and experimental replicates) are stored (as .txt files)
                             sim_param_path = sim_param_path,            # The path to the directory where the .csv file containing simulation parameters is stored
@@ -117,7 +121,7 @@ analysed_data = analyse_sim(Set_ID = Set_ID,                            # The un
                             extract_mut_path = extract_mut_path,        # The path to the python script that extracts mutations from SLim outputs
                             mutations_path = temp_files_path,           # The directory where extracted mutations are to be stored (temp files)
                             c_matrix_path = temp_files_path,            # The directory where extracted genomes are to be stored (temp files)
-                            output_path = temp_files_path,              # The path where the final data file is to be stored
+                            output_path = output_path,                  # The path where the final data file is to be stored
                             n_sample=NULL,                              # Number of individuals sampled from the parents' generation (useful if n_ind_exp is large)
                             randomise = TRUE,                           # Optionally the reference allele can be randomised
                             delete_temp_files = TRUE,
