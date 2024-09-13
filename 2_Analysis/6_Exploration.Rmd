@@ -23,8 +23,8 @@ $(document).ready(function() {
 ```{r setup_exploration, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-run_get_data<-FALSE
-run_analyse_data<-FALSE
+run_get_data<-TRUE
+run_analyse_data<-TRUE
 run_model<-TRUE
 
 #rmarkdown::render("/Users/jhadfiel/Work/Va_simulations/2_ANalysis/6_Exploration.Rmd")

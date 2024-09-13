@@ -541,7 +541,7 @@ fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, ngen2, ngen1, nin
       covp<-UL%*%diag(DL^(2*pdelta))%*%t(UL)
     }  
   }else{
-    covp<-diag(diag(L)^pdelta)
+    covp<-diag(L)^pdelta
   }
 
   rm(list = c("UL", "DL"))
@@ -569,9 +569,19 @@ fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, ngen2, ngen1, nin
   }
 
   L<-t(tprojp)%*%L
-  SC<-L%*%covp
-  SC<-SC%*%t(L)
-  # computing COV(\Delta p_m, \Delta p_n)on the projected scale.
+
+  if(LDdelta){
+    SC<-L%*%covp
+
+    rm("covp")
+    gc(verbose = FALSE)
+
+    SC<-SC%*%t(L)
+    # computing COV(\Delta p_m, \Delta p_n) on the projected scale.
+  }else{
+    SC<-L%*%(t(L)*covp)
+    # if LDdelta=F, covp is diagonal and this is more efficient. 
+  }
 
   rm("L")
   gc(verbose = FALSE)
@@ -631,7 +641,7 @@ fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, ngen2, ngen1, nin
 
     if(LLonly){stop("method = MCMC specified so can't return log-likelihood with LLony=TRUE")}
 
-    invSC<-solve(t(tprojp)%*%covp%*%tprojp)
+    invSC<-solve(SC)
     invSC <- as(invSC, "sparseMatrix") 
     attr(invSC, "rowNames") <- 1:retain
     attr(invSC, "colNames") <- 1:retain
