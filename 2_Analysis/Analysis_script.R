@@ -109,7 +109,7 @@ rmarkdown::render(file.path(analysis_path, "Vw_sim_functions.Rmd"))
 ### Perform analyses ###
 ########################
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "test_unflipped_SCE-BIO-C06645_2024-09-11_13_24_45.087551", as.numeric(commandArgs(trailingOnly = TRUE)[1]))
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "test_unflipped_SCE-BIO-C06645_2024-09-11_13_24_45.087551", commandArgs(trailingOnly = TRUE)[1])
 sim = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[1]))
 
 analysed_data = analyse_sim(Set_ID = Set_ID,                            # The unique ID of the set of simulations that are controlled by a single R script
