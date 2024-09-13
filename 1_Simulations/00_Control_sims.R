@@ -123,10 +123,10 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
 
 record = TRUE                          # Should the data of the simulations be recorded in a .csv file 
 trim_exp_files = FALSE                 # Should the SLiM output files for the experiment be trimmed ti include just the information on mutations to save space.
-del_files = FALSE                      # Should the .trees files be deleted at the end to save space?
+del_files = TRUE                       # Should the .trees files be deleted at the end to save space?
 compress_files = TRUE                  # Should .txt and .trees files be compressed using gzip
 
-Job_ID = "test_unflipped"                  # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
+Job_ID = "test_flip_burnin"            # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
 
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
 
