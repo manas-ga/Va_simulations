@@ -1,34 +1,29 @@
 
 # Rscript /mnt/c/Users/msamant/Documents/GitHub/Va_simulations/2_Analysis/Analysis_script.R
 
-# File Paths
+##################
+### File Paths ###
+##################
 
 if(Sys.info()["nodename"]!="SCE-BIO-C06645"){message("WARNING: Command line arguments required!!!")}
 
 ### On AC3 ###
 
 if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig", "c1", "c2", "c3", "c4", "c5", "c6")){
-  
-  base_path = "/ceph/users/marun/Va_simulations/1_Simulations" 
   analysis_path = "/ceph/users/marun/Va_simulations/2_Analysis"
   file_storage_path = "/data/obbard/Va_simulations/analyses" # File storage path is the designated storage space on AC3 instead of the /home directory on qm
-  
 }
 
 ### On Vera ###
 
 if(Sys.info()["nodename"]=="vera.bio.ed.ac.uk"){
-  
-  base_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/1_Simulations" 
   analysis_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/2_Analysis"  
-  file_storage_path = base_path
-  
+  file_storage_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/1_Simulations"
 }
 
 ### On Eddie ###
 
 if(grepl("ecdf.ed.ac.uk", Sys.info()["nodename"])){
-  base_path = "/home/msamant/Va_simulations/1_Simulations"
   analysis_path = "/home/msamant/Va_simulations/2_Analysis"
   file_storage_path = "/exports/eddie/scratch/msamant"
 }
@@ -39,15 +34,14 @@ if(Sys.info()["nodename"]=="SCE-BIO-C06645"){
   
   if(Sys.info()["sysname"]=="Linux"){   ## Local Wsl
     
-    base_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations"
     analysis_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/2_Analysis" 
-    file_storage_path = base_path
+    file_storage_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations"
+    slim_path = "/mnt/u/Datastore/CSCE/biology/groups/hadfield/Va_simulations/sim_files"
     
   }else{                                ## Local windows
     
-    base_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations" 
     analysis_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/2_Analysis" 
-    file_storage_path = base_path
+    file_storage_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations"
   }
   
 }
@@ -55,26 +49,44 @@ if(Sys.info()["nodename"]=="SCE-BIO-C06645"){
 ### On Jarrod's PC ###
 
 if(Sys.info()["nodename"]=="sce-bio-c04553"){  
-  base_path="~/Work/Va_simulations/1_Simulations"
   analysis_path = "~/Work/Va_simulations/2_Analysis"
-  file_storage_path = base_path
+  file_storage_path = "~/Work/Va_simulations/1_Simulations"
   slim_path = "/Volumes/hadfield/Va_simulations/sim_files"
-}else{
-  slim_path = "/mnt/u/Datastore/CSCE/biology/groups/hadfield/Va_simulations/sim_files"
 }
 
+####################
+### Script paths ###
+####################
 
 extract_genomes_path = file.path(analysis_path, "3_Extract_genomes.py")                                           ## Python script extracting mutations and genomes from the SLiM output file 
 extract_mut_path = file.path(analysis_path, "2_Extract_mutations.py")                                             ## Python script extracting mutations from the SliM output file
 
-slim_output_path = file.path(slim_path, "SLiM_outputs")
-# Path to SLiM output              
-sim_param_path = file.path(slim_path, "sim_params") 
-# Path to SLiM simulation parameters
-
-temp_files_path = file.path(file_storage_path, "temp_files")  
+temp_files_path = file.path(file_storage_path, "b_Interim_files")  
 output_path = paste(file_storage_path, "/c_Output", sep = "")                                                     ## Path where .csv file(s) containing final data are to be stored 
 
+###########################
+### Path to SLiM output ###
+###########################
+
+if(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553"){
+  slim_output_path = file.path(slim_path, "SLiM_outputs")
+}
+
+if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig", "c1", "c2", "c3", "c4", "c5", "c6")){
+  slim_output_path = file.path(file_storage_path, "b_Interim_files/SLiM_outputs")
+}
+
+##########################################
+### Path to SLiM simulation parameters ###
+##########################################
+
+if(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553"){
+  sim_param_path = file.path(slim_path, "sim_params")   
+}
+
+if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig", "c1", "c2", "c3", "c4", "c5", "c6")){
+  sim_param_path = file.path(file_storage_path, "c_Output")
+}
 
 # Load packages and functions
 
