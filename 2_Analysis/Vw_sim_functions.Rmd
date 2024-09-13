@@ -377,12 +377,13 @@ analyse_parents = function(c0,
     UL<-svdC$v[,1:retain]
     DL<-svdC$d[1:retain]
   }
-  
-  if(verbose){
-    message("Calculating the matrix of non-recombinant fractions...")
-  }
 
   if(calc_nR){
+  
+    if(verbose){
+      message("Calculating the matrix of non-recombinant fractions...")
+    }
+
     nR = form_nR(SNPs, RecombRate, HapLength, AtleastOneRecomb)
   }else{
     nR = NULL
@@ -406,7 +407,7 @@ analyse_parents = function(c0,
   if(verbose){
     message("Calculating the true additive genetic and genic variances...")
   }  
-  va_true = sum(diversity*list_alpha*list_alpha) # additive genic variance
+  va_true = sum(diversity*list_alpha^2)          # additive genic variance
   vA_true = t(list_alpha)%*%L%*%list_alpha       # Additive genetic variance
   
   ###################################################################
@@ -440,8 +441,6 @@ analyse_parents = function(c0,
   return(list(L=L, nR=nR, svdL=if(LDdelta){list(UL=UL, DL=DL)}else{NULL}, seg_sites=seg_sites, seg_sites_neu=seg_sites_neu, seg_sites_ben=seg_sites_ben, seg_sites_del=seg_sites_del, mean_diversity=mean_diversity, va_true=va_true, vA_true=vA_true, vA_alpha_emp=vA_alpha_emp, parameters=alpha_properties[1:5]))
 
 }
-
- 
 ```
 
 ### Function to peform analyses on SLiM outputs

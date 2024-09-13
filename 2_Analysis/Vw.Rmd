@@ -561,8 +561,6 @@ fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, ngen2, ngen1, nin
     message("Computing covp over ngen2 - ngen1 generations...")
   }
 
-  covp<-L%*%covp
-  covp<-covp%*%L
   pmq<-L%*%pmq
   int<-L%*%rep(1, nsnps)
 
@@ -570,7 +568,13 @@ fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, ngen2, ngen1, nin
     message("Computing SC...")
   }
 
-  SC<-t(tprojp)%*%covp%*%tprojp
+  L<-t(tprojp)%*%L
+  SC<-L%*%covp
+  SC<-SC%*%t(L)
+  # computing COV(\Delta p_m, \Delta p_n)on the projected scale.
+
+  rm("L")
+  gc(verbose = FALSE)
 
   attr(SC, "INVERSE")<-FALSE
   dimnames(SC) <- list(1:nrow(SC),1:nrow(SC))  # used for full-form matrices
