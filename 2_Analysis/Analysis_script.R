@@ -125,8 +125,8 @@ Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=
 sim = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
 
 analysed_data = analyse_sim(Set_ID = Set_ID,                            # The unique ID of the set of simulations that are controlled by a single R script
-                            sim = sim,                                    # Each set can have multiple sims, but - on the cluster sim must always 1
-                            unzip = TRUE,                              # Should the SLiM output file be unzipped, read, and then zipped back?
+                            sim = sim,                                  # Each set can have multiple sims, but - on the cluster sim must always 1
+                            unzip = FALSE,                               # Should the SLiM output file be unzipped, read, and then zipped back?
                             slim_output_path = slim_output_path,        # The directory where the SLiM outputs (for parents and experimental replicates) are stored (as .txt files)
                             sim_param_path = sim_param_path,            # The path to the directory where the .csv file containing simulation parameters is stored
                             extract_genomes_path = extract_genomes_path,# The path to the python script that extracts genomes and mutations from SLim outputs
