@@ -100,7 +100,7 @@ library(bigalgebra)
 library(RhpcBLASctl)
 
 # Control the number of BLAS threads if running on a cluster
-if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(10)}
+if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(16)}
 
 
 #################################
@@ -121,8 +121,7 @@ rmarkdown::render(file.path(analysis_path, "Vw_sim_functions.Rmd"))
 ### Perform analyses ###
 ########################
 
-Set_ID = commandArgs(trailingOnly = TRUE)[1]
-# Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "test_unflipped_SCE-BIO-C06645_2024-09-11_13_24_45.087551", commandArgs(trailingOnly = TRUE)[1])
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "test_unflipped_SCE-BIO-C06645_2024-09-11_13_24_45.087551", commandArgs(trailingOnly = TRUE)[1])
 sim = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
 
 message(paste("Analysing simulation", sim, "of set", Set_ID, "..."))
