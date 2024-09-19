@@ -124,6 +124,8 @@ rmarkdown::render(file.path(analysis_path, "Vw_sim_functions.Rmd"))
 Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "test_unflipped_SCE-BIO-C06645_2024-09-11_13_24_45.087551", commandArgs(trailingOnly = TRUE)[1])
 sim = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
 
+message(paste("Analysing simulation", sim, "of set", Set_ID, "..."))
+
 analysed_data = analyse_sim(Set_ID = Set_ID,                            # The unique ID of the set of simulations that are controlled by a single R script
                             sim = sim,                                  # Each set can have multiple sims, but - on the cluster sim must always 1
                             unzip = FALSE,                               # Should the SLiM output file be unzipped, read, and then zipped back?
@@ -134,7 +136,6 @@ analysed_data = analyse_sim(Set_ID = Set_ID,                            # The un
                             mutations_path = temp_files_path,           # The directory where extracted mutations are to be stored (temp files)
                             c_matrix_path = temp_files_path,            # The directory where extracted genomes are to be stored (temp files)
                             output_path = output_path,                  # The path where the final data file is to be stored
-                            n_sample=NULL,                              # Number of individuals sampled from the parents' generation (useful if n_ind_exp is large)
                             randomise = TRUE,                           # Optionally the reference allele can be randomised
                             delete_temp_files = TRUE,
                             proj = "BLoM",                              # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
