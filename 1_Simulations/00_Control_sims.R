@@ -126,7 +126,7 @@ trim_exp_files = FALSE                 # Should the SLiM output files for the ex
 del_files = TRUE                       # Should the .trees files be deleted at the end to save space?
 compress_files = FALSE                 # Should .txt and .trees files be compressed using gzip
 
-Job_ID = "no_neutral_flip_burnin"            # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
+Job_ID = "no_neutral_flip_burnin_set2"            # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
 
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
 
