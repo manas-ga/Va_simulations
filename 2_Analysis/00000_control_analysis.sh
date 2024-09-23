@@ -3,8 +3,8 @@
 #$ -V
 #$ -cwd
 #$ -N Analyse_sim
-#$ -t 1-60
-#$ -tc 5
+#$ -t 1-140
+#$ -tc 14
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g,h=!bigyin
 #$ -pe smp64 16
 #$ -j y
