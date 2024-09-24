@@ -38,6 +38,7 @@ if(Sys.info()["nodename"]=="SCE-BIO-C06645"){
     file_storage_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations"
     slim_path = "/mnt/u/Datastore/CSCE/biology/groups/hadfield/Va_simulations/sim_files"
     
+    
   }else{                                ## Local windows
     
     analysis_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/2_Analysis" 
@@ -121,7 +122,7 @@ rmarkdown::render(file.path(analysis_path, "Vw_sim_functions.Rmd"))
 ### Perform analyses ###
 ########################
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "test_unflipped_SCE-BIO-C06645_2024-09-11_13_24_45.087551", commandArgs(trailingOnly = TRUE)[1])
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "no_burin_SCE-BIO-C06645_2024-09-23_19_04_50.513342", commandArgs(trailingOnly = TRUE)[1])
 sim = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
 
 message(paste("Analysing simulation", sim, "of set", Set_ID, "..."))
