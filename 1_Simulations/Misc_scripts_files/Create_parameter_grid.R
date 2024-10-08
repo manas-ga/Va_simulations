@@ -14,7 +14,7 @@
 # Col 7 = flip_sel_coef
 # Col 8 = mut_ratio
 
-nsims = 50 # number of simulations for each set
+nsims = 70 # number of simulations for each set
 mu_list = seq(5.56e-07, 5.56e-06, length = nsims)
 test = TRUE # If TRUE, only selects parameters for the "standard" simulation set
 
@@ -74,4 +74,9 @@ if(test){
   param_matrix_full = param_matrix_full[seq(1, 9*nsims, 9),] ## TEMP trial selection (TO BE DELETED !!!!!)
 }
 
-write.table(param_matrix_full, file = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/000_parameter_grid.txt", sep = " ", col.names = FALSE, row.names = FALSE)
+# Create param_matrix_full for flipped selection coefficients
+
+param_matrix_full_1 = param_matrix_full
+param_matrix_full_1[,7] = 1
+
+write.table(rbind(param_matrix_full, param_matrix_full_1), file = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/000_parameter_grid.txt", sep = " ", col.names = FALSE, row.names = FALSE)
