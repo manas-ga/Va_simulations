@@ -379,120 +379,147 @@ for(i in 2:20){
 }
 ```
 
-Given a set of $\alpha$'s and allele frequencies $p$ the function `alpha_distribution` estimates  $\beta^{(0)}_{\alpha}$,  $\beta^{(1)}_{\alpha}$ and $p_\alpha$ for the original model (`logit=FALSE`) or the second model (`logit=TRUE`). An optional transposed projection matrix (`tproj`) can also be given which transforms the allele frequencies and $\alpha$'s prior to model fitting. 
+Given a set of $\alpha$'s and allele frequencies $p$ the function `alpha_distribution` estimates  $\beta^{(0)}_{\alpha}$,  $\beta^{(1)}_{\alpha}$ and $p_\alpha$ for the original model (`logit=FALSE`) or the second model (`logit=TRUE`). An optional transposed projection matrix (`tprojp`) can also be given which transforms the allele frequencies and $\alpha$'s prior to model fitting. 
 
 
 ```{r alpha_distribution}
-alpha_distribution<-function(alpha, p, tproj=NULL, logit=FALSE){
-
-  if(!is.null(tproj)){
-    p<-p%*%tproj
-    alpha<-alpha%*%tproj
-  }
+alpha_distribution<-function(alpha, p, tprojp=NULL, logit=FALSE, save_model=FALSE){
 
   pmq<-2*p-1
   pq<-p*(1-p)/2
 
-  pdelta_fit<-function(pdelta, alpha, pmq, pq){
-       -logLik(lm(alpha~pmq, weights=1/(pq^pdelta)))
+  pdelta_fit<-function(pdelta, alpha, pmq, pq, tprojp){
+
+       if(!is.null(tprojp)){
+          alpha<-t(alpha%*%tprojp)
+          pmq<-t(pmq%*%tprojp)
+          pq<-diag(t(tprojp)%*%(tprojp*pq^pdelta))
+       }else{
+          pq<-pq^pdelta
+       }
+
+       -logLik(lm(alpha~pmq, weights=1/pq))
   }
 
-  logit_fit<-function(par, alpha, pmq, pq){
-     bdelta_0<-par[1]
-     pdelta<-par[2]
-     -logLik(lm(alpha~pmq_trans(pmq, bdelta_0), weights=1/(pq^pdelta)))
+  logit_fit<-function(par, alpha, pmq, pq,  tprojp){
+
+        bdelta_0<-par[1]
+        pdelta<-par[2]
+
+        pmq<-pmq_trans(pmq, bdelta_0)
+
+        if(!is.null(tprojp)){
+          alpha<-t(alpha%*%tprojp)
+          pmq<-t(pmq%*%tprojp)
+          pq<-diag(t(tprojp)%*%(tprojp*pq^pdelta))
+        }else{
+          pq<-pq^pdelta
+        }
+        -logLik(lm(alpha~pmq-1, weights=1/pq))
   }
 
   if(logit){
-    pdelta<-optim(c(1, 1), logit_fit, alpha=alpha, pmq=pmq, pq=pq)$par
+    pdelta<-optim(c(1, 1), logit_fit, alpha=alpha, pmq=pmq, pq=pq, tprojp=tprojp)$par
+
     bdelta_0<-pdelta[1]
     pdelta<-pdelta[2]
-    pred<-pmq_trans(pmq, bdelta_0)
-    m1<-lm(alpha~pred-1, weights=1/(pq^pdelta))
+  
+    pmq<-pmq_trans(pmq, bdelta_0)
+
+    if(!is.null(tprojp)){
+      alpha<-t(alpha%*%tprojp)
+      pmq<-t(pmq%*%tprojp)
+      pq<-diag(t(tprojp)%*%(tprojp*pq^pdelta))
+    }else{
+      pq<-pq^pdelta
+    }
+
+    m1<-lm(alpha~pmq-1, weights=1/pq)
   }else{
-    pdelta<-optim(0, pdelta_fit, alpha=alpha, pmq=pmq, pq=pq, method="Brent", lower=-5, upper=5)$par
-    pred<-pmq
-    m1<-lm(alpha~pred, weights=1/(pq^pdelta))
+    pdelta<-optim(0, pdelta_fit, alpha=alpha, pmq=pmq, pq=pq, tprojp=tprojp, method="Brent", lower=-5, upper=5)$par
+
+    if(!is.null(tprojp)){
+      alpha<-t(alpha%*%tprojp)
+      pmq<-t(pmq%*%tprojp)
+      pq<-diag(t(tprojp)%*%(tprojp*pq^pdelta))
+    }else{
+      pq<-pq^pdelta
+    }
+
+    m1<-lm(alpha~pmq, weights=1/pq)
   }  
 
   
   result<-list(pdelta=pdelta, 
-                bdelta_0=if(logit){bdelta_0}else{coef(m1)["(Intercept)"]}, 
-                bdelta_1=coef(m1)["pred"],
-                sigma2delta=summary(m1)$sigma^2,
-                logit=logit,
-                X=model.matrix(m1),
-                S=summary(m1)$cov.unscaled*summary(m1)$sigma^2)
+               bdelta_0=if(logit){bdelta_0}else{coef(m1)["(Intercept)"]}, 
+               bdelta_1=coef(m1)["pmq"],
+               sigma2delta=summary(m1)$sigma^2,
+               logit=logit,
+               model=if(save_model){m1}else{NULL},
+               X=model.matrix(m1),
+               S=summary(m1)$cov.unscaled*summary(m1)$sigma^2)
 
   return(result)
 }
 ```
 
-The function `plot_alpha_distribution` plots the $\alpha$'s against $p-q$ and overlays the expected $\alpha$ and its upper/lower 2.5\% quantiles given the parameters of a model fit. The argument `parameters` must be a list containing elements, `pdelta`, `bdelta_0`, `bdelta_1`, `sigma2delta` and logit. The output from `alpha_distribution` can be passed directly to the argument `parameters`. A second set of parameters (`parameters2`) can also be passed and the the expected $\alpha$ and upper/lower 2.5\% quantiles of this sceond fit are overlaid in blue.
+The function `plot_alpha_distribution` plots the $\alpha$'s against $p-q$ and overlays the expected $\alpha$ and its upper/lower 2.5\% quantiles given the parameters of a model fit. The argument `parameters` must be a list containing elements, `pdelta`, `bdelta_0`, `bdelta_1`, `sigma2delta` and logit. The output from `alpha_distribution` can be passed directly to the argument `parameters`. 
 
 ```{r plot_alpha_distribution}
-plot_alpha_distribution<-function(alpha=NULL, p=NULL, tproj=NULL, parameters, parameters2=NULL, ...){
+plot_alpha_distribution<-function(alpha=NULL, p=NULL, tprojp=NULL, parameters, ...){
 
-  if(!is.null(tproj)){
-    p<-p%*%tproj
-    alpha<-alpha%*%tproj
-  }
-
-  pmq.x<-seq(-0.9999,0.9999, length=1000)
-  pq.x = (pmq.x+1)*(1-pmq.x)/8
+  pmq<-2*p-1
+  pq<-p*(1-p)/2
 
   if(parameters$logit){
-    pred.x<-pmq_trans(pmq.x, parameters$bdelta_0)
+    pred<-pmq_trans(pmq, parameters$bdelta_0)
     intercept<-0
   }else{
-    pred.x<-pmq.x
+    pred<-pmq
     intercept<-parameters$bdelta_0
   }
   slope<-parameters$bdelta_1
 
-  sd.x<-sqrt(parameters$sigma2delta*pq.x^parameters$pdelta)
+  pdelta<-parameters$pdelta
+  var<-pq^pdelta
 
+  if(is.null(tprojp)){
 
-  u.x<-qnorm(0.975, intercept+slope*pred.x, sd.x)
-  m.x<-intercept+slope*pred.x
-  l.x<-qnorm(0.025, intercept+slope*pred.x, sd.x)
+    pmq.x<-seq(min(pmq),max(pmq), length=1000)
+    pq.x = (pmq.x+1)*(1-pmq.x)/8
+    sd.x<-parameters$sigma2delta*sqrt(pq.x^pdelta)
 
-  if(is.null(alpha) | is.null(p)){
-    plot(1, ylab="alpha", xlab="p-q", type="n", xlim=c(-1,1), ylim=c(0.9*min(l.x), max(u.x)*1.1), ...)
-  }else{
-    pmq<-2*p-1
-    plot(alpha~pmq, ylab="alpha", xlab="p-q", , xlim=c(-1,1), ...)
-  }
-  lines(m.x~pmq.x, col="red")
-  lines(u.x~pmq.x, col="red", lty=2)
-  lines(l.x~pmq.x, col="red", lty=2)
+    plot(alpha~pmq, ylab="alpha", xlab="p-q", ...)
 
-  if(!is.null(parameters2)){
-
-    if(parameters2$logit){
-      pred.x<-pmq_trans(pmq.x, parameters2$bdelta_0)
+    if(parameters$logit){
+      pred.x<-pmq_trans(pmq.x, parameters$bdelta_0)
     }else{
       pred.x<-pmq.x
-    }
+    } 
 
-    sd.x<-sqrt(parameters2$sigma2delta*pq.x^parameters2$pdelta)
-
-    if(parameters2$logit){
-      intercept<-0
-    }else{
-      intercept<-parameters2$bdelta_0
-    }
-    slope<-parameters2$bdelta_1
-
-    u.x<-qnorm(0.975, intercept+slope*pred.x, sd.x)
     m.x<-intercept+slope*pred.x
+    u.x<-qnorm(0.975, intercept+slope*pred.x, sd.x)
     l.x<-qnorm(0.025, intercept+slope*pred.x, sd.x)
 
-    lines(m.x~pmq.x, col="blue")
-    lines(u.x~pmq.x, col="blue", lty=2)
-    lines(l.x~pmq.x, col="blue", lty=2)
+    lines(m.x~pmq.x, col="red")
+    lines(u.x~pmq.x, col="red", lty=2)
+    lines(l.x~pmq.x, col="red", lty=2)
+  
+  }else{  
+
+    alpha<-t(alpha%*%tprojp)
+    pred<-t(pred%*%tprojp)
+    var<-diag(t(tprojp)%*%(tprojp*pq^pdelta))
+
+    plot(alpha~pred, ylab="projected alpha", xlab="projected predictor", ...)
+
+    pred.x<-seq(min(pred),max(pred), length=1000)
+
+    m.x<-intercept+slope*pred.x
+    lines(m.x~pred.x, col="red")
+
   }
-}
+}  
 
 # and check yo make sure OK
 n<-1000
@@ -708,7 +735,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   if(ncol(pbar1)!=nsnps){stop("pbar1 should have as many columns as the number of columns in Co (the number of SNPs)")}
   if(ncol(pbar2)!=nsnps){stop("pbar2 should have as many columns as the number of columns in Co (the number of SNPs)")}
 
-  if(nrow(pbar1)!=nrow(pbar2)){stop("pbar1 and pbar2 should have the same of rows (the number of replicates)")}
+  if(nrow(pbar1)!=nrow(pbar2)){stop("pbar1 and pbar2 should have the same number of rows (the number of replicates)")}
 
   if(proj=="L" | proj=="BLoM" | LDdelta){
 
@@ -1212,6 +1239,59 @@ no<-sample(1:n, size=2*n, prob=exp(w), replace=TRUE)
 
 var(table(factor(no, levels=1:n)))
 4*(exp(v)-1+exp(-v/2))
+```
+
+Comparing our method with that of Buffalo and Coop. The define ${\bf Q}$ as a matrix of covariances in allele frequency change over one generation between all pairs of generations, scaled by the average genetic diversity (Equation 16 Buffalo and Coop).  In our context this would be equivalent to covariances in allele frequency change across pairs of replicates, had each replicate been allowed to evolve for one generation:
+
+```{r }
+Q<-function(pbar1, pbar2){
+
+   if(any(pbar2==0) | any(pbar2==1)){
+     pbar2[which(pbar2==0 | pbar2==1)]<-NA
+   }
+   if(any(pbar1==0) | any(pbar1==1)){
+     pbar1[which(pbar1==0 | pbar1==1)]<-NA
+   }
+   Q<-cov(t(pbar2-pbar1), use="pairwise.complete.obs")
+   d<-rowMeans(pbar1*(1-pbar1), na.rm=TRUE)
+   Q<-Q/outer(d,d)
+   return(Q)
+}
+``` 
+
+The elements of the expected covariance matrix, denoted ${\bm \Sigma}$, are given in Equations 10 (off-diagonals) and 12 (diagonals). However, we replace $\mathcal{A}(r,t,s)$ with the empirical version presented in Equation 55 of B\&C which they use assuming the recombination map is known and it is not possible to distinguish between selected and neutral loci.
+
+```{r }
+Sigma<-function(L,nR, N=Inf, nrep){
+
+  n<-nrow(L)
+
+  s<-(sum(abs(cov2cor(L))*nR)-n)/(n*(n-1))
+
+  Sigma<-matrix(s, nrep, nrep)
+  diag(Sigma)<-1+1/N
+
+  return(Sigma)
+
+}
+```
+
+The function `est_Va_bc` gives an estimate of Va according to the method of Buffalo and Coop assuming allele frequencies are known perfectly, which they are. 
+
+
+```{r }
+est_Va_bc<-function(pbar1, pbar2, L, nR, nrep){
+
+  Q<-Q(pbar1, pbar2)
+  Sigma<-Sigma(L, nR, nrep=nrep)
+
+  q<-Q[upper.tri(Q, diag=TRUE)]
+  a<-Sigma[upper.tri(Sigma, diag=TRUE)]
+  b<-diag(nrow(Q))[upper.tri(Q, diag=TRUE)]
+
+  coef(lm(q~a+b-1))["a"]
+
+}
 ```
 
 ```{r results="hide"}

@@ -21,23 +21,91 @@ $(document).ready(function() {
 </script>
 
 ```{r setup_exploration, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
-run_get_data<-TRUE
-run_analyse_data<-TRUE
-run_model<-TRUE
+run_get_data<-FALSE
+run_analyse_data<-FALSE
+run_model<-FALSE
+run_alpha<-FALSE
+run_bc<-FALSE
 
 #rmarkdown::render("/Users/jhadfiel/Work/Va_simulations/2_ANalysis/6_Exploration.Rmd")
 
 ```
 
-The following script is best ran in a conda environment with dependencies python=3.11.5 and numpy=1.26.0 (conda activate Va_anal).
+The following script is best ran in a conda environment with dependencies python=3.11.5 and numpy=1.26.0 (conda activate Va_anal). 
+
+# Patterns
+
+First we assess how well we can estimate $V_a$ from simulated data where there is no burn-in phase. In these simulations, average effects are simply assigned to alleles at random with respect to their frequency. The main experimental set-up consists of 10 replicate populations each of 1000 individuals that evolve over 3 generations with the recombination rate during the experiment being $1.4\times10^{-6}$. Simulations were also ran where one of the parameter was changed: either 3 or 5 replicates, 100 or 500 individuals, 1 or 5 generations and a recombination rate of $1.4\times10^{-7}$ or $1.4\times10^{-8}$. We plot the estimates against the true values on the log-log scale, with the best linear fit for each set of simulation parameters plotted as a dashed line (the solid black line is the 1:1 line). In the legend we give the average proportional difference between the estimate and true value (a value of 1 would be unbiased, a value under one indicates downwardly bias) with a star indicating significant bias at a 5\% significance threshold. The degree of bias may not be constant with respect to the true value of $V_a$. The deviation of the slope from one, on the log-log scale, we call the trend. When the trend is zero the proportional bias, if any, is constant with respect to $V_a$ (i.e. $\widehat{V_a}/V_a$ is constant). If the trend is positive it indicates that as $V_a$ increases $\widehat{V_a}/V_a$ becomes larger and if trend is negative it indicates that as $V_a$ increases $\widehat{V_a}/V_a$ gets smaller. A star indicates that the trend is significantly different from zero at a 5\% significance threshold.
+
+
+<div class="fold s">
+```{r }
+dat<-read.csv("/Volumes/hadfield/Va_simulations/RESULTS_and_ANALYSES/No_burnin/Scale_0.033/Data_no_burnin.csv")
+
+
+plot_res<-function(predictor=NULL){
+
+  pred_names<-c("ngen_expt", "n_ind_exp", "n_cages", "r")
+  real_names<-c("number of generations", "number of individuals", "number of replicates", "recombination rate")
+
+  if(!predictor%in%pred_names){stop("predictor should be one of ngen_expt, n_ind_exp, n_cages or r")}
+
+  delete<-rep(1, nrow(dat))
+
+  if(predictor!="ngen_expt"){
+    delete[dat$ngen_expt!=3]<-0
+  }  
+  if(predictor!="n_ind_exp"){
+    delete[dat$n_ind_exp!=1000]<-0
+  }  
+  if(predictor!="n_cages"){
+    delete[dat$n_cages!=10]<-0
+  }  
+  if(predictor!="r"){
+    delete[dat$r!=1.4e-06]<-0
+  }  
+  delete[dat$vA_est>0.5]<-0
+
+
+  dat.sub<-subset(dat, delete==1)
+  colnames(dat.sub)[which(colnames(dat.sub)==predictor)]<-"p"
+  model.sub1<-lm(log(vA_est)~as.factor(p)-1+offset(log(vA_true)), dat.sub)
+
+  model.sub2<-lm(log(vA_est)~as.factor(p)-1+log(vA_true):as.factor(p)+offset(log(vA_true)), dat.sub)
+
+ nlevels<-nlevels(as.factor(dat.sub$p))
+
+
+ legend.names<-paste0(levels(as.factor(dat.sub$p)), ": average=", round(exp(coef(model.sub1)),2), c("", "*")[1+(coef(summary(model.sub1))[,4]<0.05)], ", trend=", round(coef(model.sub2)[nlevels+1:nlevels],2), c("", "*")[1+(coef(summary(model.sub2))[nlevels+1:nlevels,4]<0.05)])
+
+
+  plot(log(vA_est)~log(vA_true), col=as.factor(p), data=dat.sub)
+  abline(0,1)
+  abline(coef(model.sub2)[1],1+coef(model.sub2)[4], lty=2, col=1)                   
+  abline(coef(model.sub2)[2],1+coef(model.sub2)[5], lty=2, col=2)        
+  abline(coef(model.sub2)[3],1+coef(model.sub2)[6], lty=2, col=3)
+
+  legend("bottomright", fill=1:3, legend=legend.names, title=real_names[match(predictor, pred_names)])
+
+}
+
+plot_res("ngen_expt")
+plot_res("n_ind_exp")
+plot_res("n_cages")
+plot_res("r")
+```
+</div>
+
+The general pattern seems to be that there is downward bias as the amount of information decreases, either because the within-replicate variance increases because there is more drift (number of individuals per replicate is low) or the between replicate variance decreases because allele-frequencies change over a shorter amount of time (number of generations is low) or because the number of replicates is low. The proportional bias seems relatively constant, although there does seem to be some evidence that the downward bias is reduced as $V_a$ becomes larger (if bias is measured on the log (i.e. proportional) scale. 
 
 
 # File Paths
 
-Paths to various scripts that are used for running the simulations and extracting information from SLiM outputs. `base_path` specifies the path to all the scripts used for running simulations using SLiM and msprime - typically the "1_Simulations" folder in "Va_simulations". `analysis_path` specifies the path to the directory containing all scripts usefulf for analysing SLiM outputs: "Vw.Rmd", "Vw_sim_functions.Rmd", "2_Extract_mutations.py", and "3_Extract_genomes.py". `file_storage_path` is where the ?XXX files are stored? `slim_path` specifies the path to the folder of SLiM output.
+Paths to various scripts that are used for running the simulations and extracting information from SLiM outputs. `base_path` specifies the path to all the scripts used for running simulations using SLiM and msprime - typically the "1_Simulations" folder in "Va_simulations". `analysis_path` specifies the path to the directory containing all scripts useful for analysing SLiM outputs: "Vw.Rmd", "Vw_sim_functions.Rmd", "2_Extract_mutations.py", and "3_Extract_genomes.py". `file_storage_path` is where the ?XXX files are stored? `slim_path` specifies the path to the folder of SLiM output.
 
+<div class="fold s">
 ```{r }
 if(Sys.info()["nodename"]!="SCE-BIO-C06645"){message("WARNING: Command line arguments required!!!")}
 
@@ -110,6 +178,7 @@ slim_param_path = file.path(slim_path, "sim_params")
 
 temp_files_path = file.path(file_storage_path, "temp_files")  
 ```
+</div>
 
 # Load packages and functions
 
@@ -180,15 +249,15 @@ parents_info = analyse_parents(c0 = sim_data$c0,
                                verbose=FALSE)
 ```
 
-```{r }
+```{r plot_alpha}
 plot_alpha_distribution(alpha = sim_data$list_alpha, p = colMeans(sim_data$c0), parameters=parents_info$parameters, pch=16, cex=0.3)
 ```
 
-```{r }
+```{r plot_logit_alpha}
 
  parameters.logit<-alpha_distribution(alpha=sim_data$list_alpha, p=colMeans(sim_data$c0), logit=TRUE)
 
- plot_alpha_distribution(alpha = sim_data$list_alpha, p=colMeans(sim_data$c0), parameters=parents_info$parameters, parameters2=parameters.logit, pch=16, cex=0.3)
+ plot_alpha_distribution(alpha = sim_data$list_alpha, p=colMeans(sim_data$c0), parameters=parameters.logit, pch=16, cex=0.3)
 ```
 # Model parameters
 
@@ -270,10 +339,22 @@ bdelta_var_est = paste(m1$bdelta_var[1,1], m1$bdelta_var[2,2], m1$bdelta_var[1,2
 sigma2delta_est = summary(m1$model)$varcomp[1,1]
 ```
 
-Lok at alpha-estimates under projected allele frequencies
-```{r }
- parameters.linear<-alpha_distribution(alpha=sim_data$list_alpha, p=colMeans(sim_data$c0), tproj=tproj$m1$tproj)
- parameters.logit<-alpha_distribution(alpha=sim_data$list_alpha, p=colMeans(sim_data$c0), tproj=tproj$m1$tproj, logit=TRUE)
+Look at alpha-estimates under projected allele frequencies
 
- plot_alpha_distribution(alpha = sim_data$list_alpha, p=colMeans(sim_data$c0), tproj=tproj$m1$tproj, parameters=parameters.linear, parameters2=parameters.logit, pch=16, cex=0.3)
+```{r alpha_distribution)fits, eval=run_alpha}
+ parameters.linear<-alpha_distribution(alpha=sim_data$list_alpha, p=colMeans(sim_data$c0), tprojp=m1$tprojp, save_model=TRUE)
+ parameters.logit<-alpha_distribution(alpha=sim_data$list_alpha, p=colMeans(sim_data$c0), tprojp=m1$tprojp, logit=TRUE, save_model=TRUE)
 ```
+
+```{r projected_plots}
+plot_alpha_distribution(alpha = sim_data$list_alpha, p=colMeans(sim_data$c0), tprojp=m1$tproj, parameters=parameters.linear, pch=16, cex=0.3)
+
+plot_alpha_distribution(alpha = sim_data$list_alpha, p=colMeans(sim_data$c0), tprojp=m1$tproj, parameters=parameters.logit, pch=16, cex=0.3)
+```
+
+Compare to Buffalo and Coop's method
+
+```{r eval=run_bc}
+est_Va_bc(sim_data$pbar1, sim_data$pbar2, parents_info$L, parents_info$nR, nrep=10)
+```
+
