@@ -49,11 +49,15 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
   # Restrict the data to current sim if the data frame has data from multiple sims
   if("sim"%in%colnames(sim_params)){sim_params = sim_params[sim_params$sim==sim,]}
   
+  if(nrow(sim_params)==0){stop("No data found!")}
+  
   # Load sim parameters
   
   n_ind_exp = sim_params$n_ind_exp     # Number of individuals in the experiment
   n_cages = sim_params$n_cages         # Number of replicates in the experiment
-  ngen_expt = sim_params$ngen_expt     # Number of generations over which allele frequency changes are calculated
+  if("ngen1"%in%colnames(sim_params)){ngen1 = sim_params$ngen1}else{ngen1 = 1}
+  if("ngen2"%in%colnames(sim_params)){ngen2 = sim_params$ngen2}else{ngen2 = sim_params$ngen_expt + 1}
+  ngen_expt = ngen2 - ngen1     # Number of generations over which allele frequency changes are calculated
   end_gen = sim_params$end_gen         # The generation number of the parents' generation
 
   
@@ -172,7 +176,7 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
       message(paste("Extracting mutations and storing allele frequencies in cage ", cage, " of simulation ", sim, "...", sep = ""))
     }
 
-    for (gen in (end_gen + 1):(end_gen + 1 + ngen_expt)){
+    for (gen in (end_gen + 1):(end_gen + ngen2)){
       
       # Unzip SLiM output files
       
@@ -209,7 +213,7 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
     
     ### Loop through the generations of the experiment identifying mutations that were present in the parents' generation (using permanent IDs) and recording their frequencies
     
-    for (gen in (end_gen+1):(end_gen+ngen_expt+1)){
+    for (gen in (end_gen+1):(end_gen+ngen2)){
       
       # Read the file storing mutation information
       mut = read.csv(paste(mutations_path, "/", Set_ID, "_sim", sim, "_cage", cage, "_mutations_", as.integer(gen), ".txt", sep = ""), sep = " ") # as.integer gets rid of scientific notation
@@ -253,11 +257,11 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
   pbar1 = matrix(NA, nrow = n_cages, ncol = n_sites)
   pbar2 = matrix(NA, nrow = n_cages, ncol = n_sites)
   for (i in 1:n_cages){
-    pbar1[i,] = P_matrix[((i-1)*n_sites + 1):((i-1)*n_sites + n_sites),2] ## Matrix of frequencies at the start of the experiment (ie F1 generation)
+    pbar1[i,] = P_matrix[((i-1)*n_sites + 1):((i-1)*n_sites + n_sites), (ngen1 + 1)] ## Matrix of frequencies at the start of the experiment (ie F1 generation)
   }
   
   for (i in 1:n_cages){
-    pbar2[i,] = P_matrix[((i-1)*n_sites + 1):((i-1)*n_sites + n_sites),ngen_expt + 2] ## Matrix of frequencies at the end of the experiment
+    pbar2[i,] = P_matrix[((i-1)*n_sites + 1):((i-1)*n_sites + n_sites), (ngen2 + 1)] ## Matrix of frequencies at the end of the experiment
     
     
   }
@@ -331,7 +335,7 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
     
   }
  
-  return(list(c0=c_ind/2, list_alpha=list_alpha, SNPs=SNPs, pbar1=pbar1, pbar2=pbar2, sim_params=sim_params[,1:19]))
+  return(list(c0=c_ind/2, list_alpha=list_alpha, SNPs=SNPs, ngen1=ngen1, ngen2=ngen2, pbar1=pbar1, pbar2=pbar2, sim_params=sim_params[,1:20]))
     
 }
 ```
@@ -512,9 +516,9 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
   m1<-Vw_model(C0 = sim_data$c0,          
                nR = parents_info$nR,             
                pbar1 = sim_data$pbar1,      
-               ngen1=1,     
+               ngen1=sim_data$ngen1,     
                pbar2 = sim_data$pbar2,       
-               ngen2 = (sim_data$sim_params$ngen_expt) + 1,       
+               ngen2 = sim_data$ngen2,       
                nind = sim_data$sim_params$n_ind_exp,        
                proj=proj,
                LDdelta = LDdelta,

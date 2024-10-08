@@ -40,7 +40,7 @@ mutationEffect(m3) { return 1.0; }
 	// Must be retrieved from the user generated metadata Dictionary() 
 	
 	if(flip_sel_coef==1){
-	
+		
 		sel_coef = treeSeqMetadata(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_with_neutral.trees");
 		
 		// Apply these changed selection coefficients
@@ -48,7 +48,7 @@ mutationEffect(m3) { return 1.0; }
 		muts = sim.mutations;
 		
 		for (mut in muts){
-		
+			
 			mut.setSelectionCoeff(sel_coef.getValue(asString(mut.id)));
 		}
 	}
@@ -58,10 +58,10 @@ mutationEffect(m3) { return 1.0; }
 1:150000 late() { //15000 is just a random large number that is higher than all the generations of interest
 	
 	
-	// Experiment (and therefore selection) starts from end_gen + 1
+	// Experiment (and therefore selection) starts from end_gen + ngen1 + 1
 	
-	if (sim.cycle>end_gen){ // Since this is a late() event, its effects will only be applied *after* progeny production in end_gen + 1 (hence no selection in end_gen + 1, ie F1 generation)
-		// But selection will be applied according to fitnesses defined below starting from (end_gen + 2), ie F2 generation
+	if (sim.cycle>=(end_gen+ngen1)){ // Since this is a late() event, its effects will only be applied *after* progeny production in end_gen + 1 (hence no selection in end_gen + 1 to end_gen + ngen1 generations)
+		// But selection will be applied according to fitnesses defined below starting from gen (end_gen + gen1 + 1) 
 		
 		inds = sim.subpopulations.individuals; // Vector of all individuals
 		
@@ -74,15 +74,23 @@ mutationEffect(m3) { return 1.0; }
 		}
 		
 		inds.fitnessScaling = exp(phenotypes); // Calculate absolute fitness
-		sim.outputFull(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_cage" + cage + "_output_experiment_" + sim.cycle + ".txt");
+	
+	}
+	
+	sim.outputFull(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_cage" + cage + "_output_experiment_" + sim.cycle + ".txt");
+	
+	if(sim.cycle > end_gen){
 		catn(sim.cycle);
 	}
 	
-	
+	if(sim.cycle == (end_gen + ngen1)){
+		catn("Experiment starts...");
+	}
+		
 	// Stop the experiment (last generation)
 	
-	if (sim.cycle == (end_gen + 1 + ngen_expt)){
-		catn("Done.");
+	if (sim.cycle == (end_gen + ngen2)){
+		catn("Experiment ends.");
 		sim.simulationFinished();
 	}
 }

@@ -3,6 +3,7 @@ rm(list = ls())
 # source("C:/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/00_Control_sims.R")               ## Local windows
 
 # source("/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/00_Control_sims.R")           ## Local Wsl
+# Rscript /mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/00_Control_sims.R
 
 # source("/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/1_Simulations/00_Control_sims.R")  ## ON VERA
 
@@ -132,12 +133,13 @@ nsims = 1                              # Number of simulations - MUST be 1 if ru
 
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
-end_gen = 20000                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+end_gen = 2                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
 
 if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
 output_freq = 1000                     # The frequency with which SLiM outputs are to be generated for the analysis of history 
-ngen_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 3, (as.numeric(commandArgs(trailingOnly = TRUE)[6])))                          # How many generations should allele frequency changes be calculated over in the experiment
+ngen1 = 1                              # How many generations between the 1st expt generatio and the parents
+ngen2 = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 4, (as.numeric(commandArgs(trailingOnly = TRUE)[6])))       # How many generations between the last expt generatio and the parents                        # How many generations should allele frequency changes be calculated over in the experiment
 flip_sel_coef = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 0, as.numeric(commandArgs(trailingOnly = TRUE)[7])) # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
 
 ###########################################
@@ -203,7 +205,7 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
 }
 
 if(!file.exists(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""))){
-  col_names = as.matrix(t(c("Set_ID","sim", "Time","end_gen", "ngen_expt", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "flip_sel_coef")))
+  col_names = as.matrix(t(c("Set_ID","sim", "Time","end_gen", "ngen1", "ngen2", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "flip_sel_coef")))
   write.table(col_names, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
 }
 
@@ -351,13 +353,14 @@ for (sim in 1:nsims){
         expt_arg9 = paste("-d ", shQuote(paste("DFE=", "'", DFE, "'", sep = "")), sep = "")
         expt_arg10 = paste("-d mean_alpha=", mean_alpha, sep = "")
         expt_arg11 = paste("-d var_alpha=", var_alpha, sep = "")
-        expt_arg12 = paste("-d ngen_expt=", ngen_expt, sep = "")
+        expt_arg12a = paste("-d ngen1=", ngen1, sep = "")
+        expt_arg12b = paste("-d ngen2=", ngen2, sep = "")
         expt_arg13 = paste("-d ", shQuote(paste("Set_ID=", "'", Set_ID, "'", sep = "")), sep = "")
         expt_arg14 = paste("-d simulation=", sim, sep = "")
         expt_arg15 = paste("-d cage=", cage, sep = "")
         expt_arg16 = paste("-d flip_sel_coef=", flip_sel_coef, sep = "")
         
-        system(paste("slim", expt_arg1, expt_arg2, expt_arg3, expt_arg4, expt_arg5, expt_arg6, expt_arg7, expt_arg8, expt_arg9, expt_arg10, expt_arg11, expt_arg12, expt_arg13, expt_arg14, expt_arg15, expt_arg16, slim_expt_path))
+        system(paste("slim", expt_arg1, expt_arg2, expt_arg3, expt_arg4, expt_arg5, expt_arg6, expt_arg7, expt_arg8, expt_arg9, expt_arg10, expt_arg11, expt_arg12a, expt_arg12b, expt_arg13, expt_arg14, expt_arg15, expt_arg16, slim_expt_path))
         
         ### Trim the SLim outputs for the experiment to just include the information on mutations to make them smaller
         
@@ -382,7 +385,7 @@ for (sim in 1:nsims){
       
       if(record == TRUE){
         dat = read.csv(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""), header=FALSE)
-        dat = rbind(dat, c(Set_ID, sim, as.character(Sys.time()), end_gen, ngen_expt, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, flip_sel_coef))
+        dat = rbind(dat, c(Set_ID, sim, as.character(Sys.time()), end_gen, ngen1, ngen2, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, flip_sel_coef))
         write.table(dat, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
       }
       

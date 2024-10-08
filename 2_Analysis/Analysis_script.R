@@ -122,29 +122,39 @@ rmarkdown::render(file.path(analysis_path, "Vw_sim_functions.Rmd"))
 ### Perform analyses ###
 ########################
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "no_burin_SCE-BIO-C06645_2024-09-23_19_04_50.513342", commandArgs(trailingOnly = TRUE)[1])
-sim = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
 
-message(paste("Analysing simulation", sim, "of set", Set_ID, "..."))
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "no_neutral_flip_burnin_set2_SCE-BIO-C06645_2024-10-08_17_26_53.44521", commandArgs(trailingOnly = TRUE)[1])
+nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 10, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
 
-analysed_data = analyse_sim(Set_ID = Set_ID,                            # The unique ID of the set of simulations that are controlled by a single R script
-                            sim = sim,                                  # Each set can have multiple sims, but - on the cluster sim must always 1
-                            unzip = FALSE,                               # Should the SLiM output file be unzipped, read, and then zipped back?
-                            slim_output_path = slim_output_path,        # The directory where the SLiM outputs (for parents and experimental replicates) are stored (as .txt files)
-                            sim_param_path = sim_param_path,            # The path to the directory where the .csv file containing simulation parameters is stored
-                            extract_genomes_path = extract_genomes_path,# The path to the python script that extracts genomes and mutations from SLim outputs
-                            extract_mut_path = extract_mut_path,        # The path to the python script that extracts mutations from SLim outputs
-                            mutations_path = temp_files_path,           # The directory where extracted mutations are to be stored (temp files)
-                            c_matrix_path = temp_files_path,            # The directory where extracted genomes are to be stored (temp files)
-                            output_path = output_path,                  # The path where the final data file is to be stored
-                            randomise = TRUE,                           # Optionally the reference allele can be randomised
-                            delete_temp_files = TRUE,
-                            proj = "BLoM",                              # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
-                            LDdelta = FALSE,                            # Should L or diag(L) be considered while modelling distribution of alphas
-                            pa = 1,
-                            Vs = "LoNL",                                # "L" or "LoNL"
-                            method="REML",                              # Can be "REML" or "MCMC"
-                            pdelta = NA,                                # If NA pdelta is estimated using optim()
-                            bdelta = c(NA, NA),                         # If c(NA,NA) both bedelta intercept and slope are estimated
-                            AtleastOneRecomb=FALSE,
-                            verbose = TRUE)
+
+if(Sys.info()["nodename"]=="SCE-BIO-C06645"){
+  message("Setting temperary paths for testing...")
+  slim_output_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/b_Interim_files/SLiM_outputs"
+  sim_param_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/c_Output"
+}
+
+for(sim in 1:nsims){
+  message(paste("Analysing simulation", sim, "of set", Set_ID, "..."))
+  analysed_data = analyse_sim(Set_ID = Set_ID,                            # The unique ID of the set of simulations that are controlled by a single R script
+                              sim =sim,                                  # Each set can have multiple sims, but - on the cluster sim must always 1
+                              unzip = FALSE,                               # Should the SLiM output file be unzipped, read, and then zipped back?
+                              slim_output_path = slim_output_path,        # The directory where the SLiM outputs (for parents and experimental replicates) are stored (as .txt files)
+                              sim_param_path = sim_param_path,            # The path to the directory where the .csv file containing simulation parameters is stored
+                              extract_genomes_path = extract_genomes_path,# The path to the python script that extracts genomes and mutations from SLim outputs
+                              extract_mut_path = extract_mut_path,        # The path to the python script that extracts mutations from SLim outputs
+                              mutations_path = temp_files_path,           # The directory where extracted mutations are to be stored (temp files)
+                              c_matrix_path = temp_files_path,            # The directory where extracted genomes are to be stored (temp files)
+                              output_path = output_path,                  # The path where the final data file is to be stored
+                              randomise = TRUE,                           # Optionally the reference allele can be randomised
+                              delete_temp_files = TRUE,
+                              proj = "BLoM",                              # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
+                              LDdelta = FALSE,                            # Should L or diag(L) be considered while modelling distribution of alphas
+                              pa = 1,
+                              Vs = "LoNL",                                # "L" or "LoNL"
+                              method="REML",                              # Can be "REML" or "MCMC"
+                              pdelta = NA,                                # If NA pdelta is estimated using optim()
+                              bdelta = c(NA, NA),                         # If c(NA,NA) both bedelta intercept and slope are estimated
+                              AtleastOneRecomb=FALSE,
+                              verbose = TRUE)
+
+}
