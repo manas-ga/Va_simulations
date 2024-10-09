@@ -295,9 +295,9 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
       
       c_ind = abs(c_ind + ran_matrix)
       
-      ####################################################################
-      ######## Randomise the reference allele in L and list_alpha ########
-      ####################################################################
+      ##############################################################
+      ######## Randomise the reference allele in list_alpha ########
+      ##############################################################
       
       if(verbose){
         message("Randomising reference alleles in list_alpha...")
@@ -309,9 +309,9 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
       list_alpha = list_alpha*ran_vect_alpha
       
       
-      ###########################################################################
-      ######## Randomise the reference allele in p_parents, pbar1 and pbar2 #####
-      ###########################################################################
+      ################################################################
+      ######## Randomise the reference allele in pbar1 and pbar2 #####
+      ################################################################
       
       # Randomly change the reference allele
       # This can be done as follows:
