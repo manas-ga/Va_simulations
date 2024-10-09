@@ -24,7 +24,7 @@ param_matrix[,2] = 1.4
 param_matrix[,3] = 1.4
 param_matrix[,4] = 1000
 param_matrix[,5] = 10
-param_matrix[,6] = 2
+param_matrix[,6] = 3
 param_matrix[,7] = 0
 param_matrix[,8] = 0
 

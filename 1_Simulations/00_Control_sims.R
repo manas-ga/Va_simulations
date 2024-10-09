@@ -138,7 +138,7 @@ end_gen = 2                        # How many generations should the SLiM simula
 if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
 output_freq = 1000                     # The frequency with which SLiM outputs are to be generated for the analysis of history 
-ngen1 = 1                              # How many generations between the 1st expt generatio and the parents
+ngen1 = 0                              # How many generations between the 1st expt generatio and the parents
 ngen2 = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 4, (as.numeric(commandArgs(trailingOnly = TRUE)[6])))       # How many generations between the last expt generatio and the parents                        # How many generations should allele frequency changes be calculated over in the experiment
 flip_sel_coef = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 0, as.numeric(commandArgs(trailingOnly = TRUE)[7])) # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
 
