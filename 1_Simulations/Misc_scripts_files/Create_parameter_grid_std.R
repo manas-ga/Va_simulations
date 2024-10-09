@@ -10,7 +10,7 @@
 # Col 3 = r_expt*sequence_length
 # Col 4 = n_ind_exp
 # Col 5 = n_cages
-# Col 6 = ngen1
+# Col 6 = ngen2
 # Col 7 = flip_sel_coef
 # Col 8 = mut_ratio
 
@@ -24,7 +24,7 @@ param_matrix[,2] = 1.4
 param_matrix[,3] = 1.4
 param_matrix[,4] = 1000
 param_matrix[,5] = 10
-param_matrix[,6] = 4
+param_matrix[,6] = 2
 param_matrix[,7] = 0
 param_matrix[,8] = 0
 
