@@ -101,7 +101,7 @@ library(bigalgebra)
 library(RhpcBLASctl)
 
 # Control the number of BLAS threads if running on a cluster
-if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(16)}
+if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(5)}
 
 
 #################################
@@ -136,7 +136,7 @@ if(Sys.info()["nodename"]=="SCE-BIO-C06645"){
 for(sim in 1:nsims){
   message(paste("Analysing simulation", sim, "of set", Set_ID, "..."))
   analysed_data = analyse_sim(Set_ID = Set_ID,                            # The unique ID of the set of simulations that are controlled by a single R script
-                              sim =sim,                                  # Each set can have multiple sims, but - on the cluster sim must always 1
+                              sim = sim,                                  # Each set can have multiple sims, but - on the cluster sim must always 1
                               unzip = FALSE,                               # Should the SLiM output file be unzipped, read, and then zipped back?
                               slim_output_path = slim_output_path,        # The directory where the SLiM outputs (for parents and experimental replicates) are stored (as .txt files)
                               sim_param_path = sim_param_path,            # The path to the directory where the .csv file containing simulation parameters is stored
