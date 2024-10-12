@@ -37,6 +37,7 @@ library(lme4)
 library(MCMCglmm)
 library(asreml)
 library(reticulate)
+library(pointr)
 
 if(Sys.info()["nodename"]=="sce-bio-c04553"){  
   base_path="~/Work/Va_simulations"
@@ -123,12 +124,12 @@ Vw_sim<-function(nind,                   # Number of parental flies
                  EVw,                    # Target additive genetic variance in fitness
                  EVe,                    # Environmental variance in fitness
                  palpha,                 # power for the average effect covariance matrix
-                 balpha,                  # regression parameters for average effect on p-q.
+                 balpha,                 # regression parameters for average effect on p-q.
                  LDalpha,                # if false average effect covariance matrix is diagonal
                  tol=sqrt(.Machine$double.eps),
-                 save.L,                  # Should L be saved?
-                 save.svdL,                 # Should the singular value decomposition of L be saved?
-                 python_path                # File path to python
+                 save.L,                 # Should L be saved?
+                 save.svdL,              # Should the singular value decomposition of L be saved?
+                 python_path             # File path to python
                  ){
 
 
@@ -256,11 +257,11 @@ Vw_sim<-function(nind,                   # Number of parental flies
 
 ### Method for projecting allele frequencies onto a new vector space 
 
-The allele frequencies can be analysed as is (`proj="N"`) or they can be projected onto a new vector space. We consider three vector spaces. In each case we consider a projection of the form ${\bf U}{\bf D}^{-p_{a}}$ where ${\bf U}$ is matrix of orthogonal vectors, ${\bf D}$ is a diagonal matrix of square-rooted eigenvalues from the eigendecomposition of some covariance matrix and $p_{a}$ is specified (`pa`).  When `proj="L"`, ${\bf U}$ and ${\bf D}$ are the eigenvectors and eigenvalues of ${\bf L}$ and when `proj="LoM"`, ${\bf U}$ and ${\bf D}$ are the eigenvectors and eigenvalues of ${\bf L}\circ {\bf M}$. When `proj="BLoM"` ${\bf U}={\bf U}_{\bf L}^{\top}{\bf U}_2$ where ${\bf U}_{\bf L}$ are the eigenvectors of ${\bf L}$ and ${\bf U}_2$ and ${\bf D}$ are the eigenvalues/vectors of ${\bf U}_{\bf L}^{\top}({\bf L}\circ {\bf M}){\bf U}_{\bf L}$. `proj="BLoM"` is similar to the `proj="LoM"` projection, but is restricted to the non-zero subspace defined by ${\bf L}$. 
+The allele frequencies can be analysed as is (`proj="N"`) or they can be projected onto a new vector space. We consider three vector spaces. In each case we consider a projection of the form ${\bf U}{\bf D}^{-p_{a}}$ where ${\bf U}$ is matrix of orthogonal vectors, ${\bf D}$ is a diagonal matrix of square-rooted eigenvalues from the eigendecomposition of some covariance matrix and $p_{a}$ is specified (`pa`).  When `proj="L"`, ${\bf U}$ and ${\bf D}$ are the eigenvectors and eigenvalues of $\tilde{\bf L}$ where $\tilde{\bf L}$ is weighted sum of the gametic and nongametic disequilbria,  ${\bf L}^{'}$ and ${\bf L}^{''}$ respectively, where ${\bf L}={\bf L}^{'}+{\bf L}^{''}$. When `proj="LoM"`, ${\bf U}$ and ${\bf D}$ are the eigenvectors and eigenvalues of $\tilde{\bf L}\circ {\bf M}$. When `proj="BLoM"` ${\bf U}={\bf U}_{\bf L}^{\top}{\bf U}_2$ where ${\bf U}_{\bf L}$ are the eigenvectors of ${\bf L}$ and ${\bf U}_2$ and ${\bf D}$ are the eigenvalues/vectors of ${\bf U}_{\bf L}^{\top}(\tilde{\bf L}\circ {\bf M}){\bf U}_{\bf L}$. `proj="BLoM"` is similar to the `proj="LoM"` projection, but is restricted to the non-zero subspace defined by ${\bf L}$. 
 
 Rather than retain all vectors we only retain those eigenvectors whose square-rooted eigenvalues exceed `tol`.  For `proj="L"` and `proj="BLoM"` the maximum number of retained vector is equal to the number of individuals or the number of segregating sites, which ever is smaller. Since ${\bf L}\circ {\bf M}$ is typically full-rank the `proj="LoM"` projection may have substantially more retained eigenvectors but here we restrict the maximum retained to be the minimum of the number of individuals or the number of segregating sites, which ever is smaller.
 
-These projections generate i.i.d projected allele frequency changes when the covariance of allele frequency change is proportional to  ${\bf L}^{p_{a}}$ (`proj="L"`) or $({\bf L}\circ {\bf M})^{p_{a}}$ (`proj="LoM"` or `proj="BLoM"`) respectively. Theoretically we expect the residuals to be i.i.d when `proj="LoM"` or  `proj="BLoM"` and $p_a=1$ (we also expect them to have unit variance when the environmental variance in fitness is zero since then the census and effective population size is equal (presumably the selection terms pick up the change in allele frequency caused by genetic variance in fitness, and so we only have to worry about the impact of the environmental variance on $N_e$). When the the environmental variance in fitness is non-zero we expect the effective population size to be smaller than the census population size by a factor `4/(3+exp(EVe))` and this can be specified through the term `Ne_factor`.
+These projections generate i.i.d projected allele frequency changes when the covariance of allele frequency change is proportional to  $\tilde{\bf L}^{p_{a}}$ (`proj="L"`) or $(\tilde{\bf L}\circ {\bf M})^{p_{a}}$ (`proj="LoM"` or `proj="BLoM"`) respectively. Theoretically we expect the residuals to be i.i.d when `proj="LoM"` or  `proj="BLoM"` and $p_a=1$ (we also expect them to have unit variance when the environmental variance in fitness is zero since then the census and effective population size is equal (presumably the selection terms pick up the change in allele frequency caused by genetic variance in fitness, and so we only have to worry about the impact of the environmental variance on $N_e$). When the the environmental variance in fitness is non-zero we expect the effective population size to be smaller than the census population size by a factor `4/(3+exp(EVe))` and this can be specified through the term `Ne_factor`.
 
 ```{r analysis_parameters, eval=!functions_only} 
 proj<-"BLoM"
@@ -270,7 +271,7 @@ Ne_factor<-1 #4/(3+exp(EVe))
 
 ### Distributional assumptions about the change in allele frequency across loci.
 
-The global mean allele frequency change *due to selection*, $E[E[\Delta {\bf p}]]$, is assumed to be equal to $n_g{\bf L}\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf {q})\right)$ (`Vs="L"`) or ${\bf L}\circ {\bf N}\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf {q})\right)$ or (`Vs="LoNL"`) where $n_g$ is the number of generations and $\beta^{(0)}_\Delta$ and $\beta^{(1)}_\Delta$ can be specified (`bdelta`).  The (co)variance $VAR[E[\Delta {\bf p}]]$, is assumed to be proportional to $(n_g{\bf L}){\bf L}^{p_{\Delta}}({\bf L}n_g)$ (`Vs="L"`) or $({\bf L}\circ {\bf N}){\bf L}^{p_{\Delta}}({\bf L}\circ {\bf N})$ (`Vs="LoNL"`) where $p_{\Delta}$  can be specified (`pdelta`). Theoretically, we expect allele frequency change *due to selection* to have mean ${\bf L}\circ {\bf N}\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf {q})\right)$ and covariance structure proportional to $({\bf L}\circ {\bf N}){\bf L}^{p_{\alpha}}({\bf L}\circ {\bf N})$, although `Vs="L"` with $p_{\Delta}=p_{\alpha}$ might serve as a good approximation. It is also possible to ignore LD when defining ${\bf L}^{p_{\Delta}}$ above using `LDdelta=FALSE`. If `pdelta` is NA then `Vw_model` will estimate it using calls to `optim`. If either the intercept (`bdelta[1]`) or slope (`bdelta[2]` ) are `NA` then they will be estimated.  
+The global mean allele frequency change *due to selection*, $E[E[\Delta {\bf p}]]$, is assumed to be equal to $n_g\tilde{\bf L}\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf {q})\right)$ (`Vs="L"`) or $\left(\tilde{\bf L}\right)\circ {\bf N}\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf {q})\right)$ or (`Vs="LoNL"`) where $n_g$ is the number of generations and $\beta^{(0)}_\Delta$ and $\beta^{(1)}_\Delta$ can be specified (`bdelta`).  The (co)variance $VAR[E[\Delta {\bf p}]]$, is assumed to be proportional to $(n_g\tilde{\bf L}){\bf L}^{p_{\Delta}}(\tilde{\bf L}n_g)$ (`Vs="L"`) or $(\tilde{\bf L}\circ {\bf N}){\bf L}^{p_{\Delta}}(\tilde{\bf L}\circ {\bf N})$ (`Vs="LoNL"`) where $p_{\Delta}$  can be specified (`pdelta`). Theoretically, we expect allele frequency change *due to selection* to have mean $\left(\tilde{\bf L}\circ {\bf N}\right)\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf {q})\right)$ and covariance structure proportional to $\left(\tilde{\bf L}\circ {\bf N}\right){\bf L}^{p_{\alpha}}\left(\tilde{\bf L}\circ {\bf N}\right)$, although `Vs="L"` with $p_{\Delta}=p_{\alpha}$ might serve as a good approximation. It is also possible to ignore LD when defining ${\bf L}^{p_{\Delta}}$ above using `LDdelta=FALSE`.  If `pdelta` is NA then `Vw_model` will estimate it using calls to `optim`. If either the intercept (`bdelta[1]`) or slope (`bdelta[2]` ) are `NA` then they will be estimated.   In addition, $\tilde{\bf L}$ requires separating LD into gametic and non-gametic components, which may not feasible in practice. If `Ltilde=NULL` then it is assumed that $\tilde{\bf L}={\bf L}$ throughout. 
 
 ```{r eval=!functions_only}
 Vs<-"LoNL"
@@ -552,11 +553,16 @@ plot_alpha_distribution(alpha, p, parameters=parameters)
 ```{r analysis_function}
 
 
-fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, tprojp, pbar0, pbar1, pbar2, nrep, N, Ne_factor=1, Vs, LLonly=FALSE, method = "REML", verbose=TRUE){
+fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, Ltilde=NULL, ngen2, ngen1, nind, tprojp, pbar0, pbar1, pbar2, nrep, N, Ne_factor=1, Vs, LLonly=FALSE, method = "REML", verbose=TRUE){
   
   if(verbose){
     message("Computing the covariance structure of locus effects...")
     message("Computing covp over 1 generation...")
+  }
+
+  if(is.null(Ltilde)){
+    Ltilde<-L
+#    pointr::ptr("Ltilde", "L")
   }
 
   if(!Vs%in%c("LoNL", "L")){stop("Vs must be `LoNL` or `L`")}
@@ -576,37 +582,37 @@ fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, ngen2, ngen1, nin
   pmq<-2*pbar0-1
 
   if(Vs=="LoNL"){
-     L<-L*N
+     Ltilde<-Ltilde*N   
      rm("N")
      gc(verbose = FALSE)
   }   
   if(Vs=="L"){
-    L<-L*(ngen2 - ngen1)
+    Ltilde<-Ltilde*(ngen2 - ngen1)
   }
 
   if(verbose){
     message("Computing covp over ngen2 - ngen1 generations...")
   }
 
-  pmq<-L%*%pmq
-  int<-L%*%rep(1, nsnps)
+  pmq<-Ltilde%*%pmq
+  int<-Ltilde%*%rep(1, nsnps)
 
   if(verbose){
     message("Computing SC...")
   }
 
-  L<-t(tprojp)%*%L
+  Ltilde<-t(tprojp)%*%Ltilde
 
   if(LDdelta){
-    SC<-L%*%covp
+    SC<-Ltilde%*%covp
 
     rm("covp")
     gc(verbose = FALSE)
 
-    SC<-SC%*%t(L)
+    SC<-SC%*%t(Ltilde)
     # computing COV(\Delta p_m, \Delta p_n) on the projected scale.
   }else{
-    SC<-L%*%(t(L)*covp)
+    SC<-Ltilde%*%(t(Ltilde)*covp)
     # if LDdelta=F, covp is diagonal and this is more efficient. 
   }
 
@@ -704,6 +710,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
                    Vs,
                    method,
                    L=NULL,      # L
+                   Ltilde=NULL,
                    svdL=NULL,   # list with elements UL and DL,
                    Ne_factor=1,
                    tol=sqrt(.Machine$double.eps),
@@ -718,6 +725,14 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
       message("Computing L in the parents' generation...")
     }
     L<-cov(C0)*(nind-1)/(nind)
+  }
+
+  if(is.null(Ltilde)){
+    Ltilde.missing<-TRUE
+    Ltilde<-L
+ #   pointr::ptr("Ltilde", "L")
+  }else{
+    Ltilde.missing<-FALSE
   }
 
   if(!proj%in%c("LoM", "BLoM", "L", "N")){stop("proj must be one of 'LoM', 'L', 'N'")}
@@ -737,7 +752,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
 
   if(nrow(pbar1)!=nrow(pbar2)){stop("pbar1 and pbar2 should have the same number of rows (the number of replicates)")}
 
-  if(proj=="L" | proj=="BLoM" | LDdelta){
+  if(proj=="BLoM" | LDdelta){  # singular vectors of L required 
 
      if(is.null(svdL)){
 
@@ -749,19 +764,17 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
         
        svdC<-svd(C0, nu = 0)
        retain<-sum(svdC$d>tol)
-       U<-svdC$v[,1:retain]
-       D<-svdC$d[1:retain]
+       UL<-svdC$v[,1:retain]
+       DL<-svdC$d[1:retain]
        rm("svdC")
        gc(verbose = FALSE)
           
      }else{
-        U<-svdL$UL
-        D<-svdL$DL
-        retain<-ncol(U)
-     }
-     if(LDdelta){
-        DL<-c(D)
-        UL<-U
+        UL<-svdL$UL
+        DL<-svdL$DL
+        rm("svdL")
+        gc(verbose = FALSE)
+        retain<-ncol(UL)
      }
   }
 
@@ -807,7 +820,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
           message("Performing eigendecomposition of L*M...")
         }
 
-        sdLoM<-RSpectra::eigs(L*M, min(nind, nsnps))
+        sdLoM<-RSpectra::eigs(Ltilde*M, min(nind, nsnps))
         retain<-sum(sqrt(sdLoM$values)>tol)
         U<-sdLoM$vectors[,1:retain]
         D<-sqrt(sdLoM$values[1:retain])
@@ -822,9 +835,9 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
           message("Performing eigendecomposition of t(U)%*%(L*M)%*%U...")
         }
 
-        sdLoM<-RSpectra::eigs(t(U)%*%(L*M)%*%U, ncol(U))
+        sdLoM<-RSpectra::eigs(t(UL)%*%(Ltilde*M)%*%UL, retain)
         retain<-sum(sqrt(sdLoM$values)>tol)
-        U<-U%*%sdLoM$vectors[,1:retain]
+        U<-UL%*%sdLoM$vectors[,1:retain]
         D<-sqrt(sdLoM$values[1:retain])
         rm("sdLoM")
         # Garbage collection
@@ -862,7 +875,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
       message("Estimating pdelta...")
     }
 
-    pdelta<-optim(0, fit.model, bdelta=bdelta, LDdelta = LDdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, N=N, Ne_factor=Ne_factor, Vs=Vs, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1, factr = 1e+11), hessian=TRUE)
+    pdelta<-optim(0, fit.model, bdelta=bdelta, LDdelta = LDdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, Ltilde=if(Ltilde.missing){NULL}else{Ltilde},  ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, N=N, Ne_factor=Ne_factor, Vs=Vs, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1, factr = 1e+11), hessian=TRUE)
 
     pdelta_var<--1/pdelta$hessian
     pdelta<-pdelta$par
@@ -875,7 +888,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
     message("Fitting the final model...")
   }
 
-  output<-fit.model(pdelta=pdelta, bdelta=bdelta, LDdelta = LDdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, N=N, Ne_factor=Ne_factor, Vs=Vs)
+  output<-fit.model(pdelta=pdelta, bdelta=bdelta, LDdelta = LDdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, Ltilde=if(Ltilde.missing){NULL}else{Ltilde}, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, N=N, Ne_factor=Ne_factor, Vs=Vs)
 
   if(verbose){
     message("Calculating the estimate of Vw...")

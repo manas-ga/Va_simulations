@@ -385,11 +385,15 @@ reference alleles, and returns -</p>
   # Restrict the data to current sim if the data frame has data from multiple sims
   if(&quot;sim&quot;%in%colnames(sim_params)){sim_params = sim_params[sim_params$sim==sim,]}
   
+  if(nrow(sim_params)==0){stop(&quot;No data found!&quot;)}
+  
   # Load sim parameters
   
   n_ind_exp = sim_params$n_ind_exp     # Number of individuals in the experiment
   n_cages = sim_params$n_cages         # Number of replicates in the experiment
-  ngen_expt = sim_params$ngen_expt     # Number of generations over which allele frequency changes are calculated
+  if(&quot;ngen1&quot;%in%colnames(sim_params)){ngen1 = sim_params$ngen1}else{ngen1 = 1}
+  if(&quot;ngen2&quot;%in%colnames(sim_params)){ngen2 = sim_params$ngen2}else{ngen2 = sim_params$ngen_expt + 1}
+  ngen_expt = ngen2 - ngen1     # Number of generations over which allele frequency changes are calculated
   end_gen = sim_params$end_gen         # The generation number of the parents&#39; generation
 
   
@@ -508,7 +512,7 @@ reference alleles, and returns -</p>
       message(paste(&quot;Extracting mutations and storing allele frequencies in cage &quot;, cage, &quot; of simulation &quot;, sim, &quot;...&quot;, sep = &quot;&quot;))
     }
 
-    for (gen in (end_gen + 1):(end_gen + 1 + ngen_expt)){
+    for (gen in (end_gen + 1):(end_gen + ngen2)){
       
       # Unzip SLiM output files
       
@@ -545,7 +549,7 @@ reference alleles, and returns -</p>
     
     ### Loop through the generations of the experiment identifying mutations that were present in the parents&#39; generation (using permanent IDs) and recording their frequencies
     
-    for (gen in (end_gen+1):(end_gen+ngen_expt+1)){
+    for (gen in (end_gen+1):(end_gen+ngen2)){
       
       # Read the file storing mutation information
       mut = read.csv(paste(mutations_path, &quot;/&quot;, Set_ID, &quot;_sim&quot;, sim, &quot;_cage&quot;, cage, &quot;_mutations_&quot;, as.integer(gen), &quot;.txt&quot;, sep = &quot;&quot;), sep = &quot; &quot;) # as.integer gets rid of scientific notation
@@ -589,11 +593,11 @@ reference alleles, and returns -</p>
   pbar1 = matrix(NA, nrow = n_cages, ncol = n_sites)
   pbar2 = matrix(NA, nrow = n_cages, ncol = n_sites)
   for (i in 1:n_cages){
-    pbar1[i,] = P_matrix[((i-1)*n_sites + 1):((i-1)*n_sites + n_sites),2] ## Matrix of frequencies at the start of the experiment (ie F1 generation)
+    pbar1[i,] = P_matrix[((i-1)*n_sites + 1):((i-1)*n_sites + n_sites), (ngen1 + 1)] ## Matrix of frequencies at the start of the experiment (ie F1 generation)
   }
   
   for (i in 1:n_cages){
-    pbar2[i,] = P_matrix[((i-1)*n_sites + 1):((i-1)*n_sites + n_sites),ngen_expt + 2] ## Matrix of frequencies at the end of the experiment
+    pbar2[i,] = P_matrix[((i-1)*n_sites + 1):((i-1)*n_sites + n_sites), (ngen2 + 1)] ## Matrix of frequencies at the end of the experiment
     
     
   }
@@ -627,9 +631,9 @@ reference alleles, and returns -</p>
       
       c_ind = abs(c_ind + ran_matrix)
       
-      ####################################################################
-      ######## Randomise the reference allele in L and list_alpha ########
-      ####################################################################
+      ##############################################################
+      ######## Randomise the reference allele in list_alpha ########
+      ##############################################################
       
       if(verbose){
         message(&quot;Randomising reference alleles in list_alpha...&quot;)
@@ -641,9 +645,9 @@ reference alleles, and returns -</p>
       list_alpha = list_alpha*ran_vect_alpha
       
       
-      ###########################################################################
-      ######## Randomise the reference allele in p_parents, pbar1 and pbar2 #####
-      ###########################################################################
+      ################################################################
+      ######## Randomise the reference allele in pbar1 and pbar2 #####
+      ################################################################
       
       # Randomly change the reference allele
       # This can be done as follows:
@@ -667,7 +671,7 @@ reference alleles, and returns -</p>
     
   }
  
-  return(list(c0=c_ind/2, list_alpha=list_alpha, SNPs=SNPs, pbar1=pbar1, pbar2=pbar2, sim_params=sim_params[,1:19]))
+  return(list(c0=c_ind/2, list_alpha=list_alpha, SNPs=SNPs, ngen1=ngen1, ngen2=ngen2, pbar1=pbar1, pbar2=pbar2, sim_params=sim_params[,1:20]))
     
 }</code></pre>
 </div>
@@ -846,9 +850,9 @@ analyses as a .csv file</li>
   m1&lt;-Vw_model(C0 = sim_data$c0,          
                nR = parents_info$nR,             
                pbar1 = sim_data$pbar1,      
-               ngen1=1,     
+               ngen1=sim_data$ngen1,     
                pbar2 = sim_data$pbar2,       
-               ngen2 = (sim_data$sim_params$ngen_expt) + 1,       
+               ngen2 = sim_data$ngen2,       
                nind = sim_data$sim_params$n_ind_exp,        
                proj=proj,
                LDdelta = LDdelta,
