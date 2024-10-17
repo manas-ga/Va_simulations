@@ -553,19 +553,12 @@ plot_alpha_distribution(alpha, p, parameters=parameters)
 ```{r analysis_function}
 
 
-fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, Ltilde=NULL, ngen2, ngen1, nind, tprojp, pbar0, pbar1, pbar2, nrep, N, Ne_factor=1, Vs, LLonly=FALSE, method = "REML", verbose=TRUE){
+fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, tprojp, pbar0, pbar1, pbar2, nrep, Selec, Ne_factor=1, LLonly=FALSE, method = "REML", verbose=TRUE){
   
   if(verbose){
     message("Computing the covariance structure of locus effects...")
     message("Computing covp over 1 generation...")
   }
-
-  if(is.null(Ltilde)){
-    Ltilde<-L
-#    pointr::ptr("Ltilde", "L")
-  }
-
-  if(!Vs%in%c("LoNL", "L")){stop("Vs must be `LoNL` or `L`")}
 
   if(LDdelta){
     if(pdelta==0){
@@ -581,38 +574,25 @@ fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, Ltilde=NULL, ngen
   gc(verbose = FALSE)
   pmq<-2*pbar0-1
 
-  if(Vs=="LoNL"){
-     Ltilde<-Ltilde*N   
-     rm("N")
-     gc(verbose = FALSE)
-  }   
-  if(Vs=="L"){
-    Ltilde<-Ltilde*(ngen2 - ngen1)
-  }
-
-  if(verbose){
-    message("Computing covp over ngen2 - ngen1 generations...")
-  }
-
-  pmq<-Ltilde%*%pmq
-  int<-Ltilde%*%rep(1, nsnps)
+  pmq<-Selec%*%pmq
+  int<-Selec%*%rep(1, nsnps)
 
   if(verbose){
     message("Computing SC...")
   }
 
-  Ltilde<-t(tprojp)%*%Ltilde
+  Selec<-t(tprojp)%*%Selec
 
   if(LDdelta){
-    SC<-Ltilde%*%covp
+    SC<-Selec%*%covp
 
     rm("covp")
     gc(verbose = FALSE)
 
-    SC<-SC%*%t(Ltilde)
+    SC<-SC%*%t(Selec)
     # computing COV(\Delta p_m, \Delta p_n) on the projected scale.
   }else{
-    SC<-Ltilde%*%(t(Ltilde)*covp)
+    SC<-Selec%*%(t(Selec)*covp)
     # if LDdelta=F, covp is diagonal and this is more efficient. 
   }
 
@@ -784,43 +764,74 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
        message("Computing M...")
      }
 
-     # Calculate the summation in two steps to save memory: (1) Write down the first term, (2) add the remaining terms only if ngen2 - ngen1 >1  
+     # Calculate the summation in two steps to save memory: (1) Write down the first term, (2) add the remaining terms only if ngen2 - ngen1 >1  Note this works even if ngen1=0, at least when Ne is constant.
+
      M = ((1-1/(2*nind*Ne_factor))^(ngen1))*(1/(nind*Ne_factor))*nR^(1+ngen1)
      
      # Only perform further summations if (ngen2-ngen1 > 1)
      
      if((ngen2 - ngen1) > 1){
-       
        for (x in (ngen1 + 2):(ngen2)){
         M = M + ((1-1/(2*nind*Ne_factor))^(x-1))*(1/(nind*Ne_factor))*nR^x
-      }
-       
+      }       
      }
-          
+
+     Drift<-Ltilde*M
+     rm("M")
+     # Garbage collection
+     gc(verbose = FALSE)
+   }
+
+   if(Vs=="LoNL"){ 
+
      if(verbose){
        message("Computing N...")
      }
 
-     # Calculate the summation in two steps to save memory: (1) Write down the first term, (2) add the remaining terms only if ngen2 - ngen1 >1  
-     N = {((1-1/(2*nind*Ne_factor))^(ngen1))*nR^(ngen1)}
-     
+     # Calculate the summation in two steps to save memory: (1) Write down the first term, (2) add the remaining terms only if ngen2 - ngen1 >1
+
+     if(ngen1!=0){  
+       N = {((1-1/(2*nind*Ne_factor))^(ngen1))*nR^(ngen1)}
+     }else{
+       if(ngen2>1){
+         N = matrix(0, ncol(nR), ncol(nR))
+       }
+     }
+
      # Only perform further summations if (ngen2-ngen1 > 1)
      
      if((ngen2 - ngen1) > 1){
      
-       for (y in (ngen1 + 2):(ngen2)){
-         N = N + {((1-1/(2*nind*Ne_factor))^(y-1))*nR^(y-1)}
+       for (x in (ngen1 + 2):(ngen2)){
+         N = N + {((1-1/(2*nind*Ne_factor))^(x-1))*nR^(x-1)}
        }
 
      }
-     
+    
+     if(ngen1==0){
+       Selec<-L
+       if(ngen2>1){
+         Selec<-Selec+Ltilde*N
+         rm("N")
+         gc(verbose = FALSE)   
+       }
+     }else{
+       Selec<-Ltilde*N
+       rm("N")
+       gc(verbose = FALSE)   
+     }
+
+   }else{
+    Selec<-L*(ngen2-ngen1)
+   }  
+
     if(proj=="LoM"){
 
         if(verbose){
           message("Performing eigendecomposition of L*M...")
         }
 
-        sdLoM<-RSpectra::eigs(Ltilde*M, min(nind, nsnps))
+        sdLoM<-RSpectra::eigs(Drift, min(nind, nsnps))
         retain<-sum(sqrt(sdLoM$values)>tol)
         U<-sdLoM$vectors[,1:retain]
         D<-sqrt(sdLoM$values[1:retain])
@@ -835,7 +846,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
           message("Performing eigendecomposition of t(U)%*%(L*M)%*%U...")
         }
 
-        sdLoM<-RSpectra::eigs(t(UL)%*%(Ltilde*M)%*%UL, retain)
+        sdLoM<-RSpectra::eigs(t(UL)%*%Drift%*%UL, retain)
         retain<-sum(sqrt(sdLoM$values)>tol)
         U<-UL%*%sdLoM$vectors[,1:retain]
         D<-sqrt(sdLoM$values[1:retain])
@@ -845,9 +856,6 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
               
     }   
   } 
-  rm("M")
-  # Garbage collection
-  gc(verbose = FALSE)
   
   if(verbose){
     message("Computing the projection matrix...")
@@ -875,7 +883,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
       message("Estimating pdelta...")
     }
 
-    pdelta<-optim(0, fit.model, bdelta=bdelta, LDdelta = LDdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, Ltilde=if(Ltilde.missing){NULL}else{Ltilde},  ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, N=N, Ne_factor=Ne_factor, Vs=Vs, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1, factr = 1e+11), hessian=TRUE)
+    pdelta<-optim(0, fit.model, bdelta=bdelta, LDdelta = LDdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, Selec=Selec, Ne_factor=Ne_factor,  method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1, factr = 1e+11), hessian=TRUE)
 
     pdelta_var<--1/pdelta$hessian
     pdelta<-pdelta$par
@@ -888,7 +896,7 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
     message("Fitting the final model...")
   }
 
-  output<-fit.model(pdelta=pdelta, bdelta=bdelta, LDdelta = LDdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, Ltilde=if(Ltilde.missing){NULL}else{Ltilde}, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, N=N, Ne_factor=Ne_factor, Vs=Vs)
+  output<-fit.model(pdelta=pdelta, bdelta=bdelta, LDdelta = LDdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, Selec=Selec, Ne_factor=Ne_factor)
 
   if(verbose){
     message("Calculating the estimate of Vw...")
