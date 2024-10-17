@@ -153,8 +153,8 @@ for(sim in 1:nsims){
                               pa = 1,
                               Vs = "LoNL",                                # "L" or "LoNL"
                               method="REML",                              # Can be "REML" or "MCMC"
-                              pdelta = 0,                                # If NA pdelta is estimated using optim()
-                              bdelta = c(0, 0),                         # If c(NA,NA) both bedelta intercept and slope are estimated
+                              pdelta = NA,                                # If NA pdelta is estimated using optim()
+                              bdelta = c(NA, NA),                         # If c(NA,NA) both bedelta intercept and slope are estimated
                               AtleastOneRecomb=FALSE,
                               verbose = TRUE)
 
