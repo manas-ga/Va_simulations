@@ -23,8 +23,8 @@ $(document).ready(function() {
 ```{r setup_exploration, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
-run_get_data<-FALSE
-run_analyse_data<-FALSE
+run_get_data<-TRUE
+run_analyse_data<-TRUE
 run_model<-TRUE
 run_alpha<-FALSE
 run_bc<-FALSE
@@ -200,9 +200,9 @@ library(RhpcBLASctl)
 
 functions_only=TRUE ## Read only the functions
 
-#rmarkdown::render(file.path(analysis_path, "Vw.Rmd"), quiet=TRUE)
+rmarkdown::render(file.path(analysis_path, "Vw.Rmd"), quiet=TRUE)
 
-rmarkdown::render("~/Desktop/tmp/Vw.Rmd", quiet=TRUE)
+#rmarkdown::render("~/Desktop/tmp/Vw.Rmd", quiet=TRUE)
 
 ##############################
 ### Load Manas's functions ###
@@ -210,7 +210,6 @@ rmarkdown::render("~/Desktop/tmp/Vw.Rmd", quiet=TRUE)
 
 rmarkdown::render(file.path(analysis_path, "Vw_sim_functions.Rmd"), quiet=TRUE)
 
-set.seed(1)
 ```
 
 # Get data
@@ -242,9 +241,10 @@ sim_data = extract_slim_data(Set_ID = Set_ID,
 
 
 ```{r analyse_data, eval=run_analyse_data}
-parents_info = analyse_parents(c0 = sim_data$c0,  
+parents_info = analyse_parents(c_genome = sim_data$c_genome,  
                                list_alpha = sim_data$list_alpha,             
-                               LDdelta=FALSE,         
+                               LDdelta=FALSE,
+                               compute_svdL=TRUE,         
                                SNPs = sim_data$SNPs,                   
                                RecombRate = sim_data$sim_params$r_expt,             
                                HapLength = sim_data$sim_params$sequence_length,              
@@ -254,14 +254,14 @@ parents_info = analyse_parents(c0 = sim_data$c0,
 ```
 
 ```{r plot_alpha}
-plot_alpha_distribution(alpha = sim_data$list_alpha, p = colMeans(sim_data$c0), parameters=parents_info$parameters, pch=16, cex=0.3)
+plot_alpha_distribution(alpha = sim_data$list_alpha, p = sim_data$pbar0, parameters=parents_info$parameters, pch=16, cex=0.3)
 ```
 
 ```{r plot_logit_alpha}
 
- parameters.logit<-alpha_distribution(alpha=sim_data$list_alpha, p=colMeans(sim_data$c0), logit=TRUE)
+ parameters.logit<-alpha_distribution(alpha=sim_data$list_alpha, p=sim_data$pbar0, logit=TRUE)
 
- plot_alpha_distribution(alpha = sim_data$list_alpha, p=colMeans(sim_data$c0), parameters=parameters.logit, pch=16, cex=0.3)
+ plot_alpha_distribution(alpha = sim_data$list_alpha, p=sim_data$pbar0, parameters=parameters.logit, pch=16, cex=0.3)
 ```
 # Model parameters
 
@@ -306,12 +306,15 @@ if(bdelta_method=="estimate"){
   bdelta = c(0, 0) # This only estimates the intercept while keeping the slope fixed at 0
 }
 ```
-Fit model
+Fit model assuming no non-gametic phase disequilibrium
 
-```{r fit_model, eval=run_model}
+```{r fit_model_a, eval=run_model}
 
-m1<-Vw_model(C0 = sim_data$c0,          # parental genotypes (rows individuals, columns loci, coded as 0, 1/2 or 1) 
+pointr::ptr("Ltilde", "parents_info$L")
+
+m1<-Vw_model(c_genome = NULL,              # gametes genotypes 
              nR = parents_info$nR,         # matrix of non-recombinant probabilities between loci
+             pbar0 = sim_data$pbar0,       # vector of allele frequencies at time-point 1
              pbar1 = sim_data$pbar1,       # vector of allele frequencies at time-point 1
              ngen1= sim_data$ngen1,    # number of generations between parents and time-point 1
              pbar2 = sim_data$pbar2,       # vector of allele frequencies at time-point 2
@@ -325,6 +328,34 @@ m1<-Vw_model(C0 = sim_data$c0,          # parental genotypes (rows individuals, 
              Vs = Vs,
              method = method,
              L = parents_info$L,    # list with elements UL and DL
+             Ltilde = Ltilde,    # list with elements UL and DL
+             svdL = parents_info$svdL,    # list with elements UL and DL
+             tol = sqrt(.Machine$double.eps),
+             save_tprojp=TRUE,
+             verbose=FALSE)
+```
+
+and then again with `Ltilde` taking into account the gametic phase disequilibrium
+
+```{r fit_model_b, eval=run_model}
+
+m1_b<-Vw_model(c_genome = NULL,              # gametes genotypes 
+             nR = parents_info$nR,         # matrix of non-recombinant probabilities between loci
+             pbar0 = sim_data$pbar0,       # vector of allele frequencies at time-point 1
+             pbar1 = sim_data$pbar1,       # vector of allele frequencies at time-point 1
+             ngen1= sim_data$ngen1,    # number of generations between parents and time-point 1
+             pbar2 = sim_data$pbar2,       # vector of allele frequencies at time-point 2
+             ngen2 = sim_data$ngen2,       # number of generations between parents and time-point 2
+             nind = sim_data$sim_params$n_ind_exp,        # population size in each replicate
+             proj=proj, # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
+             LDdelta = LDdelta,
+             pa = pa,
+             pdelta = pdelta,
+             bdelta = bdelta,
+             Vs = Vs,
+             method = method,
+             L = parents_info$L,    # list with elements UL and DL
+             Ltilde = parents_info$Ltilde,    # list with elements UL and DL
              svdL = parents_info$svdL,    # list with elements UL and DL
              tol = sqrt(.Machine$double.eps),
              save_tprojp=TRUE,
@@ -334,8 +365,8 @@ m1<-Vw_model(C0 = sim_data$c0,          # parental genotypes (rows individuals, 
 # Extract estimates
 
 ```{r extract_estimates, eval=run_model}
-vA_est = m1$Vw_est # Store the estimate from the model with the highest log likelihood
-pdelta_est = m1$pdelta # The sample() functions ensures that only one value is selected in case there are multiple points with the highest LL
+vA_est = m1$Vw_est 
+pdelta_est = m1$pdelta 
 pdelta_var_est = m1$pdelta_var
 bdelta_intercept_est = m1$bdelta[1]
 bdelta_slope_est = m1$bdelta[2]
@@ -346,14 +377,14 @@ sigma2delta_est = summary(m1$model)$varcomp[1,1]
 Look at alpha-estimates under projected allele frequencies
 
 ```{r alpha_distribution)fits, eval=run_alpha}
- parameters.linear<-alpha_distribution(alpha=sim_data$list_alpha, p=colMeans(sim_data$c0), tprojp=m1$tprojp, save_model=TRUE)
- parameters.logit<-alpha_distribution(alpha=sim_data$list_alpha, p=colMeans(sim_data$c0), tprojp=m1$tprojp, logit=TRUE, save_model=TRUE)
+ parameters.linear<-alpha_distribution(alpha=sim_data$list_alpha, p=sim_data$pbar0, tprojp=m1$tprojp, save_model=TRUE)
+ parameters.logit<-alpha_distribution(alpha=sim_data$list_alpha, p=sim_data$pbar0, tprojp=m1$tprojp, logit=TRUE, save_model=TRUE)
 ```
 
 ```{r projected_plots}
-plot_alpha_distribution(alpha = sim_data$list_alpha, p=colMeans(sim_data$c0), tprojp=m1$tproj, parameters=parameters.linear, pch=16, cex=0.3)
+plot_alpha_distribution(alpha = sim_data$list_alpha, p=sim_data$pbar0, tprojp=m1$tproj, parameters=parameters.linear, pch=16, cex=0.3)
 
-plot_alpha_distribution(alpha = sim_data$list_alpha, p=colMeans(sim_data$c0), tprojp=m1$tproj, parameters=parameters.logit, pch=16, cex=0.3)
+plot_alpha_distribution(alpha = sim_data$list_alpha, p=sim_data$pbar0, tprojp=m1$tproj, parameters=parameters.logit, pch=16, cex=0.3)
 ```
 
 Compare to Buffalo and Coop's method

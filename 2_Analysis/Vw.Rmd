@@ -39,7 +39,7 @@ library(asreml)
 library(reticulate)
 library(pointr)
 
-if(Sys.info()["nodename"]=="sce-bio-c04553"){  
+if(Sys.info()["nodenamermarkdown::render("/Users/jhadfiel/Work/Va_simulations/2_ANalysis/6_Exploration.Rmd")"]=="sce-bio-c04553"){  
   base_path="~/Work/Va_simulations"
   python_path="~/miniconda3/envs/msprime-env/bin/"
 }else{
@@ -271,7 +271,7 @@ Ne_factor<-1 #4/(3+exp(EVe))
 
 ### Distributional assumptions about the change in allele frequency across loci.
 
-The global mean allele frequency change *due to selection*, $E[E[\Delta {\bf p}]]$, is assumed to be equal to $n_g\tilde{\bf L}\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf {q})\right)$ (`Vs="L"`) or $\left(\tilde{\bf L}\right)\circ {\bf N}\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf {q})\right)$ or (`Vs="LoNL"`) where $n_g$ is the number of generations and $\beta^{(0)}_\Delta$ and $\beta^{(1)}_\Delta$ can be specified (`bdelta`).  The (co)variance $VAR[E[\Delta {\bf p}]]$, is assumed to be proportional to $(n_g\tilde{\bf L}){\bf L}^{p_{\Delta}}(\tilde{\bf L}n_g)$ (`Vs="L"`) or $(\tilde{\bf L}\circ {\bf N}){\bf L}^{p_{\Delta}}(\tilde{\bf L}\circ {\bf N})$ (`Vs="LoNL"`) where $p_{\Delta}$  can be specified (`pdelta`). Theoretically, we expect allele frequency change *due to selection* to have mean $\left(\tilde{\bf L}\circ {\bf N}\right)\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf {q})\right)$ and covariance structure proportional to $\left(\tilde{\bf L}\circ {\bf N}\right){\bf L}^{p_{\alpha}}\left(\tilde{\bf L}\circ {\bf N}\right)$, although `Vs="L"` with $p_{\Delta}=p_{\alpha}$ might serve as a good approximation. It is also possible to ignore LD when defining ${\bf L}^{p_{\Delta}}$ above using `LDdelta=FALSE`.  If `pdelta` is NA then `Vw_model` will estimate it using calls to `optim`. If either the intercept (`bdelta[1]`) or slope (`bdelta[2]` ) are `NA` then they will be estimated.   In addition, $\tilde{\bf L}$ requires separating LD into gametic and non-gametic components, which may not feasible in practice. If `Ltilde=NULL` then it is assumed that $\tilde{\bf L}={\bf L}$ throughout. 
+The global mean allele frequency change *due to selection*, $E[E[\Delta {\bf p}]]$, is assumed to be equal to $n_g\tilde{\bf L}\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf {q})\right)$ (`Vs="L"`) or $\left(\tilde{\bf L}\right)\circ {\bf N}\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf {q})\right)$ or (`Vs="LoNL"`) where $n_g$ is the number of generations and $\beta^{(0)}_\Delta$ and $\beta^{(1)}_\Delta$ can be specified (`bdelta`).  The (co)variance $VAR[E[\Delta {\bf p}]]$, is assumed to be proportional to $(n_g\tilde{\bf L}){\bf L}^{p_{\Delta}}(\tilde{\bf L}n_g)$ (`Vs="L"`) or $(\tilde{\bf L}\circ {\bf N}){\bf L}^{p_{\Delta}}(\tilde{\bf L}\circ {\bf N})$ (`Vs="LoNL"`) where $p_{\Delta}$  can be specified (`pdelta`). Theoretically, we expect allele frequency change *due to selection* to have mean $\left(\tilde{\bf L}\circ {\bf N}\right)\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf {q})\right)$ and covariance structure proportional to $\left(\tilde{\bf L}\circ {\bf N}\right){\bf L}^{p_{\alpha}}\left(\tilde{\bf L}\circ {\bf N}\right)$, although `Vs="L"` with $p_{\Delta}=p_{\alpha}$ might serve as a good approximation. It is also possible to ignore LD when defining ${\bf L}^{p_{\Delta}}$ above using `LDdelta=FALSE`.  If `pdelta` is NA then `Vw_model` will estimate it using calls to `optim`. If either the intercept (`bdelta[1]`) or slope (`bdelta[2]` ) are `NA` then they will be estimated.
 
 ```{r eval=!functions_only}
 Vs<-"LoNL"
@@ -544,9 +544,6 @@ parameters[1:4]
 plot_alpha_distribution(alpha, p, parameters=parameters)
 ```
 
-
-
-
 ### Function for model fitting
 
 
@@ -581,23 +578,23 @@ fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, ngen2, ngen1, nin
     message("Computing SC...")
   }
 
-  Selec<-t(tprojp)%*%Selec
+  projpSelec<-t(tprojp)%*%Selec
+
+  rm("Selec")
+  gc(verbose = FALSE)
 
   if(LDdelta){
-    SC<-Selec%*%covp
+    SC<-projpSelec%*%covp
 
     rm("covp")
     gc(verbose = FALSE)
 
-    SC<-SC%*%t(Selec)
+    SC<-SC%*%t(projpSelec)
     # computing COV(\Delta p_m, \Delta p_n) on the projected scale.
   }else{
-    SC<-Selec%*%(t(Selec)*covp)
+    SC<-projpSelec%*%(t(projpSelec)*covp)
     # if LDdelta=F, covp is diagonal and this is more efficient. 
   }
-
-  rm("L")
-  gc(verbose = FALSE)
 
   attr(SC, "INVERSE")<-FALSE
   dimnames(SC) <- list(1:nrow(SC),1:nrow(SC))  # used for full-form matrices
@@ -675,8 +672,9 @@ fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, ngen2, ngen1, nin
 
 
 
-Vw_model<-function(C0,          # parental genotypes (rows individuals, columns loci, coded as 0, 1/2 or 1) 
+Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 individual 1, rows 3 & 4 individual 2 ...., columns loci) 
                    nR,          # matrix of non-recombinant probabilities between loci
+                   pbar0,       # vector of allele frequencies at time-point 0
                    pbar1,       # vector of allele frequencies at time-point 1
                    ngen1=1,     # number of generations between parents and time-point 1
                    pbar2,       # vector of allele frequencies at time-point 2
@@ -689,8 +687,8 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
                    bdelta,
                    Vs,
                    method,
-                   L=NULL,      # L
-                   Ltilde=NULL,
+                   L,           # between individual covariance in allele proportion
+                   Ltilde,      # between gamete covariance in half allele proportion
                    svdL=NULL,   # list with elements UL and DL,
                    Ne_factor=1,
                    tol=sqrt(.Machine$double.eps),
@@ -700,20 +698,37 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   
   asreml.options(Cfixed = TRUE)
 
-  if(is.null(L)){
-    if(verbose){
-      message("Computing L in the parents' generation...")
+  if(is.null(L) | is.null(Ltilde) | (is.null(svdL) & (proj=="BLoM" | LDdelta))){
+
+    if(is.null(c_genome)){
+      stop("c_genome is required if L, Ltilde or svdL are NULL")
     }
-    L<-cov(C0)*(nind-1)/(nind)
+
+    n0_individuals<-nrow(c_genome)/2
+
+    if(is.null(L) | (is.null(svdL) & (proj=="BLoM" | LDdelta))){
+
+      paternal<-seq(1, 2*n0_individuals, 2)
+      maternal<-paternal+1
+
+      c0<-(c_genome[paternal,]+c_genome[maternal,])/2
+
+      if(is.null(L)){ 
+        if(verbose){
+          message("Computing L in the parents' generation...")
+        }
+        L<-cov(c0)*(n0_individuals-1)/n0_individuals
+      }  
+    }
+
+    if(is.null(Ltilde)){
+      Lgp<-(cov(c_genome[paternal,])+cov(c_genome[maternal,]))*(n0_individuals-1)/(4*n0_individuals) 
+      Ltilde<-Lgp+(1-nR)*(L-Lgp)/nR
+      rm("Lgp")
+    }
   }
 
-  if(is.null(Ltilde)){
-    Ltilde.missing<-TRUE
-    Ltilde<-L
- #   pointr::ptr("Ltilde", "L")
-  }else{
-    Ltilde.missing<-FALSE
-  }
+
 
   if(!proj%in%c("LoM", "BLoM", "L", "N")){stop("proj must be one of 'LoM', 'L', 'N'")}
   if(!Vs%in%c("LoNL", "L")){stop("Vs must be either 'LoNL' or 'L'")}
@@ -722,10 +737,8 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   #################################
   # calculate projection matrices #
   #################################
-  nsnps<-ncol(C0)
+  nsnps<-ncol(pbar1)
   nrep<-nrow(pbar1)
-
-  pbar0<-colMeans(C0)
 
   if(ncol(pbar1)!=nsnps){stop("pbar1 should have as many columns as the number of columns in Co (the number of SNPs)")}
   if(ncol(pbar2)!=nsnps){stop("pbar2 should have as many columns as the number of columns in Co (the number of SNPs)")}
@@ -739,10 +752,10 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
        if(verbose){
          message("Performing SVD on C0...")
        }
-         
-       C0=scale(sqrt(1/nind)*C0, scale=FALSE)
+       
+       c0=scale(sqrt(1/nind)*c0, scale=FALSE)
         
-       svdC<-svd(C0, nu = 0)
+       svdC<-svd(c0, nu = 0)
        retain<-sum(svdC$d>tol)
        UL<-svdC$v[,1:retain]
        DL<-svdC$d[1:retain]
@@ -825,38 +838,37 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
     Selec<-L*(ngen2-ngen1)
    }  
 
-    if(proj=="LoM"){
+  if(proj=="LoM"){
 
-        if(verbose){
-          message("Performing eigendecomposition of L*M...")
-        }
-
-        sdLoM<-RSpectra::eigs(Drift, min(nind, nsnps))
-        retain<-sum(sqrt(sdLoM$values)>tol)
-        U<-sdLoM$vectors[,1:retain]
-        D<-sqrt(sdLoM$values[1:retain])
-        rm("sdLoM")
-        # Garbage collection
-        gc(verbose = FALSE)
+    if(verbose){
+      message("Performing eigendecomposition of L*M...")
     }
 
-    if(proj=="BLoM"){ 
+    sdLoM<-RSpectra::eigs(Drift, min(nind, nsnps))
+    retain<-sum(sqrt(sdLoM$values)>tol)
+    U<-sdLoM$vectors[,1:retain]
+    D<-sqrt(sdLoM$values[1:retain])
+    rm("sdLoM")
+    # Garbage collection
+    gc(verbose = FALSE)
+  }
 
-        if(verbose){
-          message("Performing eigendecomposition of t(U)%*%(L*M)%*%U...")
-        }
+  if(proj=="BLoM"){ 
 
-        sdLoM<-RSpectra::eigs(t(UL)%*%Drift%*%UL, retain)
-        retain<-sum(sqrt(sdLoM$values)>tol)
-        U<-UL%*%sdLoM$vectors[,1:retain]
-        D<-sqrt(sdLoM$values[1:retain])
-        rm("sdLoM")
-        # Garbage collection
-        gc(verbose = FALSE)
-              
-    }   
-  } 
-  
+    if(verbose){
+      message("Performing eigendecomposition of t(U)%*%(L*M)%*%U...")
+    }
+
+    sdLoM<-RSpectra::eigs(t(UL)%*%Drift%*%UL, retain)
+    retain<-sum(sqrt(sdLoM$values)>tol)
+    U<-UL%*%sdLoM$vectors[,1:retain]
+    D<-sqrt(sdLoM$values[1:retain])
+    rm("sdLoM")
+    # Garbage collection
+    gc(verbose = FALSE)
+            
+  }   
+
   if(verbose){
     message("Computing the projection matrix...")
   }
@@ -940,208 +952,6 @@ Vw_model<-function(C0,          # parental genotypes (rows individuals, columns 
   return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, pdelta=output$pdelta, bdelta=bdelta, pdelta_var=pdelta_var, bdelta_var=S, tprojp=if(save_tprojp){tprojp}else{NULL}, S=S, X=X, DL=ifelse(exists("DL"), DL, NA)))
 
 }
-```
-
-## Run the simulations
-
-```{r run_simulations, results="hide", eval=!functions_only} 
-
-Vw0<-Vw2<-Vw_est<-pdelta_est<-1:nsim
-bdelta_est<-matrix(NA, nsim,2)
-
-for(i in 1:nsim){
-
-  print(paste("starting simulation", i))
-
-  sim<-Vw_sim(nind=nind,                 
-              HapLength=HapLength[i], 
-              RecombRate.msprime=RecombRate.msprime, 
-              MutationRate.msprime=MutationRate.msprime,
-              RecombRate.experiment=RecombRate.msprime, 
-              AtleastOneRecomb=AtleastOneRecomb,  
-              Ne=Ne, 
-              nrep=nrep,      
-              ngen=ngen,
-              EVw=EVw[i], 
-              EVe=EVe,
-              palpha=palpha,
-              balpha=balpha,        
-              LDalpha=LDalpha,
-              save.L=TRUE,
-              save.svdL=TRUE, 
-              python_path=python_path)
-
-  Vw0[i]<-sim$Vw0
-  Vw2[i]<-sim$Vw2
-
-  nR<-form_nR(sim$SNPs,                  
-              RecombRate=RecombRate.experiment,            
-              HapLength=HapLength[i],              
-              AtleastOneRecomb=AtleastOneRecomb)
-
-
-  mod<-Vw_model(C0=sim$C0, 
-                nR=nR, 
-                pbar1=sim$pbar1,  
-                ngen1=1,  
-                pbar2=sim$pbar2,      
-                ngen2=1+ngen,   
-                nind=nind,   
-                proj=proj,
-                LDdelta=LDdelta,
-                pa=pa,
-                pdelta=pdelta,
-                bdelta=bdelta,
-                Vs=Vs,
-                method=method,
-                L=sim$L,
-                svdL=sim$svdL,   
-                Ne_factor=Ne_factor,
-                tol=sqrt(.Machine$double.eps))
-
-  Vw_est[i]<-mod$Vw_est
-  pdelta_est[i]<-mod$pdelta
-  bdelta_est[i,]<-mod$bdelta
-
-  print(paste(i, " Vw=", round(Vw0[i],4), " Vw_est=",  round(Vw_est[i],4), sep=""))
-}
-
-
-
-if(save){
-  res<-list(HapLength=HapLength, RecombRate.msprime=RecombRate.msprime,   MutationRate.msprime=MutationRate.msprime, RecombRate.experiment=RecombRate.experiment, AtleastOneRecomb=AtleastOneRecomb, Ne=Ne, nind=nind, nrep=nrep, ngen=ngen, EVe=EVe, EVw=EVw, proj=proj, pdelta=pdelta, pa=pa, palpha=palpha, LDalpha=LDalpha, LDdelta=LDdelta, method=method, Vw0=Vw0, Vw2=Vw2, Vw_est=Vw_est, pdelta_est=pdelta_est,                 Ne_factor=Ne_factor)
-  save(res, file=paste0(file.path(base_path, "2_Analysis/tmp"), "/res_", format(Sys.time(), "%H%M_%d_%m_%Y"), ".Rdata"))
-}
-
-plot(mod$data$delta~as.numeric(mod$data$locus), ylab="delta", xlab="locus", main="Change in (projected) allele frequency")
-
-
-par(mfrow=c(1,2))
-plot(Vw_est~Vw0, ylab="Estimate of Vw", xlab="True value of Vw in base population")
-abline(0,1)
-
-plot(Vw_est~Vw2, ylab="Estimate of Vw", xlab="True value of Vw in final generation")
-abline(0,1)
-
-if(is.na(pdelta)){
-  par(mfrow=c(1,1))
-  plot(pdelta_est, ylab="Estimate of pdelta")
-  abline(h=palpha)
-}
-
-if(any(is.na(bdelta))){
-  par(mfrow=c(1,2))
-  plot(bdelta_est[,1], ylab="Estimate of bdelta[1]")
-  abline(h=balpha[1])
-  plot(bdelta_est[,2], ylab="Estimate of bdelta[2]")
-  abline(h=balpha[2])
-}
-
-par(mfrow=c(1,1))
-plot(I(Vw_est-Vw0)~HapLength, ylab="Deviation of estimate of Vw from true value", xlab="Genome size")
-abline(h=0)
-
-drift.v<-EVe*ngen/nind
-
-
-``` 
-
-```{r results="hide", eval=FALSE} 
-
-N<-100
-# haplotype frequecies 00 10 01 11
-
-nsim<-1000
-nrep<-100
-
-res<-matrix(NA, nsim, 8)
-colnames(res)<-c("var1", "var2", "cov12", "p1", "p2", "p3", "p4", "c")
-
-for(i in 1:nsim){
-
-  p<-runif(4)
-  p<-p/sum(p)
-  c<-runif(1)
-
-  pmeans<-matrix(NA, nrep, 4)
-
-  for(j in 1:nrep){
-
-    H1<-sample(1:4, N, TRUE,p)
-    H2<-sample(1:4, N, TRUE,p)
-
-    L1<-cbind(as.integer(H1==2 | H1==4), as.integer(H2==2 | H2==4))
-    L2<-cbind(as.integer(H1==3 | H1==4), as.integer(H2==3 | H2==4))
-
-    parent1<-sample(1:N, N, replace=TRUE)
-    parent2<-sample(1:N, N, replace=TRUE)
-
-    allele1.1<-sample(1:2, N, replace=TRUE)
-    allele1.2<-sample(1:2, N, replace=TRUE)
-
-    allele2.1<-allele1.1
-    allele2.2<-allele1.2
-
-    recomb<-rbinom(N, 1, c)
-    if(sum(recomb)!=0){
-      allele2.1[which(recomb==1)]<-abs(2-allele2.1[which(recomb==1)])+1
-    }
-    recomb<-rbinom(N, 1, c)
-    if(sum(recomb)!=0){
-      allele2.2[which(recomb==1)]<-abs(2-allele2.2[which(recomb==1)])+1
-    }
-
-    L1o<-cbind(mapply(function(x,y){L1[x,y]}, parent1, allele1.1), mapply(function(x,y){L1[x,y]}, parent2, allele1.2))
-    L2o<-cbind(mapply(function(x,y){L2[x,y]}, parent1, allele2.1), mapply(function(x,y){L2[x,y]}, parent2, allele2.2))
-
-    pmeans[j,]<-c(mean(L1), mean(L2), mean(L1o), mean(L2o))
-  }
-
-  res[i,]<-c(var(pmeans[,3]-pmeans[,1]), var(pmeans[,4]-pmeans[,2]), cov(pmeans[,3]-pmeans[,1], pmeans[,4]-pmeans[,2]), p, c)
-
-}
-p1<-res[,"p2"]+res[,"p4"]
-p2<-res[,"p3"]+res[,"p4"]
-d12<-res[,"p4"]-p1*p2
-
-p.dvar1<-p1*(1-p1)*(1/(2*N))
-p.dvar2<-p2*(1-p2)*(1/(2*N))
-p.dcov12<-(1-res[,"c"])*d12*(1/(2*N))
-
-plot(res[,"var1"]~p.dvar1)
-coef(summary(lm(res[,"var1"]~p.dvar1)))
-abline(0,1)
-plot(res[,"var2"]~p.dvar2)
-coef(summary(lm(res[,"var2"]~p.dvar2)))
-abline(0,1)
-plot(res[,"cov12"]~p.dcov12)
-coef(summary(lm(res[,"cov12"]~p.dcov12)))
-abline(0,1)
-
-```
-
-
-```{r results="hide", eval=FALSE} 
-
-
-pdf("~/Work/Vw/Tex/sim_res.pdf")
-load("~/Work/Vw/Data/Intermediate/res_1919_06_12_2020.Rdata")
-plot(res$Vw_est~res$Vw, ylab="Estimate of Vw", xlab="True value of Vw", cex.lab=1.7, bty="l")
-load("~/Work/Vw/Data/Intermediate/res_1813_03_12_2020.Rdata")
-points(res$Vw_est~res$Vw, col="red")
-abline(0,1)
-dev.off()
-
-
-pdf("~/Work/Vw/Tex/sim_res2.pdf")
-load("~/Work/Vw/Data/Intermediate/res_1000_11_12_2020.Rdata")
-options("scipen"=100, "digits"=4)
-plot(I(res$Vw_est-res$Vw)~res$HapLength, ylab="Deviation of estimate of Vw from true value", xlab="Genome size", cex.lab=1.7, bty="l")
-abline(h=0)
-dev.off()
-options("scipen"=0, "digits"=7)
-
-
 ```
 
 ## Recombinant Reads
