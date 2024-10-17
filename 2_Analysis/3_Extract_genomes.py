@@ -29,6 +29,7 @@
 
 import numpy as np
 import sys
+import random
 
 
 def extract_mutations_genomes(slim_output_path, # Path of the .txt file containing the SLiM output
@@ -132,7 +133,6 @@ def extract_mutations_genomes(slim_output_path, # Path of the .txt file containi
     genome_list_sample = []
 
 
-    import random
     # no. of individuals is 0.5 * number of genomes
     # Note that the genomes in the SLiM output are such that genomes 2*i and 2*i - 1 belong to individual i
 

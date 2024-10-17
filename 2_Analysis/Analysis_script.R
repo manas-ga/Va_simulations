@@ -123,11 +123,12 @@ rmarkdown::render(file.path(analysis_path, "Vw_sim_functions.Rmd"))
 ########################
 
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "no_neutral_flip_burnin_set2_SCE-BIO-C06645_2024-10-08_17_26_53.44521", commandArgs(trailingOnly = TRUE)[1])
-nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 10, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "zero_test_bigyin_2024-10-09_16_53_28.860706_1.8969696969697e-07_1.4_1.4_1000_10_1_0_1", commandArgs(trailingOnly = TRUE)[1])
+nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
 
+test = FALSE
 
-if(Sys.info()["nodename"]=="SCE-BIO-C06645"){
+if(Sys.info()["nodename"]=="SCE-BIO-C06645"&test){
   message("Setting temperary paths for testing...")
   slim_output_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/b_Interim_files/SLiM_outputs"
   sim_param_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/c_Output"
@@ -152,8 +153,8 @@ for(sim in 1:nsims){
                               pa = 1,
                               Vs = "LoNL",                                # "L" or "LoNL"
                               method="REML",                              # Can be "REML" or "MCMC"
-                              pdelta = NA,                                # If NA pdelta is estimated using optim()
-                              bdelta = c(NA, NA),                         # If c(NA,NA) both bedelta intercept and slope are estimated
+                              pdelta = 0,                                # If NA pdelta is estimated using optim()
+                              bdelta = c(0, 0),                         # If c(NA,NA) both bedelta intercept and slope are estimated
                               AtleastOneRecomb=FALSE,
                               verbose = TRUE)
 
