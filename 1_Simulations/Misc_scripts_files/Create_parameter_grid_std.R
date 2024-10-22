@@ -15,18 +15,18 @@
 # Col 8 = mut_ratio
 
 nsims = 50 # number of simulations for each set
-mu_list = seq(3e-8, 2e-7, length = nsims)
+mu_list = seq(5.56e-7, 5.56e-6, length = nsims)
 
 param_matrix = data.frame(matrix(NA, nrow = nsims, ncol  = 8))
 
 param_matrix[,1] = mu_list
 param_matrix[,2] = 1.4
-param_matrix[,3] = 1.4
+param_matrix[,3] = 14
 param_matrix[,4] = 1000
 param_matrix[,5] = 10
 param_matrix[,6] = 4
 param_matrix[,7] = 0
-param_matrix[,8] = 1
+param_matrix[,8] = 0
 
 
 write.table(noquote(param_matrix), file = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/000_parameter_grid.txt", sep = " ", col.names = FALSE, row.names = FALSE, quote = FALSE)

@@ -133,7 +133,7 @@ nsims = 1                              # Number of simulations - MUST be 1 if ru
 
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
-end_gen = 2                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+end_gen = 20000                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
 
 if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
@@ -243,7 +243,7 @@ for (sim in 1:nsims){
       mu = mu_list[sim]
       mu_msp = ifelse(end_gen==2, mu/5320, mu/5320)
       # mu_neutral = ifelse(end_gen==2, mu_msp/3, mu/20)
-      mu_neutral = mu_msp/3
+      mu_neutral = 0
       
       message(paste("Simulation", sim, "in progress..."))
     
