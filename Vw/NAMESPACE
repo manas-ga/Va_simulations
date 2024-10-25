@@ -1,0 +1,5 @@
+export("alpha_distribution", "analyse_parents", "analyse_sim",
+       "est_Va_bc", "extract_slim_data", "fit.model", "form_nR",
+       "logit", "plot_alpha_distribution", "pmq_trans", "predict_Ne",
+       "prob_novelA", "prob_novelB", "Q", "sample_gamete", "Sigma",
+       "sim_exp", "summaryG", "Vw_model")

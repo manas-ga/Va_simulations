@@ -249,7 +249,7 @@ sim_data = extract_slim_data(Set_ID = Set_ID,
 ```{r analyse_data, eval=run_analyse_data}
 parents_info = analyse_parents(c_genome = sim_data$c_genome,  
                                list_alpha = sim_data$list_alpha,             
-                               LDdelta=FALSE,
+                               LDalpha=FALSE,
                                compute_svdL=TRUE,         
                                SNPs = sim_data$SNPs,                   
                                RecombRate = sim_data$sim_params$r_expt,             
@@ -274,7 +274,7 @@ plot_alpha_distribution(alpha = sim_data$list_alpha, p = sim_data$pbar0, paramet
 ```{r model_parameters}
 # Analysis parameters
 proj="BLoM" # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
-LDdelta = FALSE
+LDalpha = FALSE
 pa = 1
 Vs = "LoNL" # "L" or "LoNL"
 method="REML" # Can be "REML" or "MCMC"
@@ -326,7 +326,7 @@ m1<-Vw_model(c_genome = NULL,              # gametes genotypes
              ngen2 = sim_data$ngen2,       # number of generations between parents and time-point 2
              nind = sim_data$sim_params$n_ind_exp,        # population size in each replicate
              proj=proj, # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
-             LDdelta = LDdelta,
+             LDalpha = LDalpha,
              pa = pa,
              palpha = palpha,
              balpha = balpha,
@@ -417,7 +417,7 @@ for(i in 1:nsim){
 
   parents_tmp = analyse_parents(c_genome = data_tmp$c_genome,  
                                  list_alpha = data_tmp$list_alpha,             
-                                 LDdelta=FALSE,
+                                 LDalpha=FALSE,
                                  compute_svdL=TRUE,         
                                  SNPs = data_tmp$SNPs,                   
                                  RecombRate = data_tmp$sim_params$r_expt,             
@@ -438,7 +438,7 @@ for(i in 1:nsim){
                ngen2 = data_tmp$ngen2,       # number of generations between parents and time-point 2
                nind = data_tmp$sim_params$n_ind_exp,        # population size in each replicate
                proj=proj, # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
-               LDdelta = LDdelta,
+               LDalpha = LDalpha,
                pa = pa,
                palpha = 0,
                balpha = c(0,0),
@@ -463,7 +463,7 @@ for(i in 1:nsim){
                ngen2 = data_tmp$ngen2,       # number of generations between parents and time-point 2
                nind = data_tmp$sim_params$n_ind_exp,        # population size in each replicate
                proj=proj, # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
-               LDdelta = LDdelta,
+               LDalpha = LDalpha,
                pa = pa,
                palpha = 0,
                balpha = c(0,0),
@@ -530,7 +530,7 @@ if(!exists("data_tmp")){
 
   parents_tmp = analyse_parents(c_genome = data_tmp$c_genome,  
                                  list_alpha = data_tmp$list_alpha,             
-                                 LDdelta=FALSE,
+                                 LDalpha=FALSE,
                                  compute_svdL=TRUE,         
                                  SNPs = data_tmp$SNPs,                   
                                  RecombRate = data_tmp$sim_params$r_expt,             
@@ -557,7 +557,7 @@ for(i in 1:100){
                ngen2 = data_tmp$ngen2,       # number of generations between parents and time-point 2
                nind = data_tmp$sim_params$n_ind_exp,        # population size in each replicate
                proj=proj, # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
-               LDdelta = LDdelta,
+               LDalpha = LDalpha,
                pa = pa,
                palpha = 0,
                balpha = c(0,0),
