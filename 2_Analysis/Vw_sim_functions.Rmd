@@ -344,8 +344,8 @@ It depends on form_nR() and alpha_distribution().
 
 analyse_parents = function(c_genome,  
                            list_alpha,             # Vector of alphas
-                           compute_svdL=FALSE,     # Should SVD of L be computed (overridden if LDdelta=TRUE)
-                           LDdelta=FALSE,          # 
+                           compute_svdL=FALSE,     # Should SVD of L be computed (overridden if LDalpha=TRUE)
+                           LDalpha=FALSE,          # 
                            SNPs,                   # Vector of positions of SNPs
                            RecombRate,             # Recombination rate between adjacent sites
                            HapLength,              # Genome size
@@ -371,7 +371,7 @@ analyse_parents = function(c_genome,
 
   L<-cov(c0)*(n0_individuals-1)/n0_individuals 
 
-  if(compute_svdL | LDdelta){
+  if(compute_svdL | LDalpha){
     if(verbose){
       message("Performing SVD on c0...")
     }  
@@ -430,26 +430,26 @@ analyse_parents = function(c_genome,
   }  
   alpha_properties = alpha_distribution(alpha = list_alpha, p = pbar0)
   
-  pdelta_emp = alpha_properties$pdelta
-  bdelta_intercept_emp = alpha_properties$bdelta_0
-  bdelta_slope_emp = alpha_properties$bdelta_1
-  sigma2delta_emp = alpha_properties$sigma2delta
+  palpha_emp = alpha_properties$palpha
+  balpha_intercept_emp = alpha_properties$balpha_0
+  balpha_slope_emp = alpha_properties$balpha_1
+  sigma2alpha_emp = alpha_properties$sigma2alpha
 
   # Calculate vA from these empirical properties of alpha
       
-  bdelta_emp = c(bdelta_intercept_emp, bdelta_slope_emp)
+  balpha_emp = c(balpha_intercept_emp, balpha_slope_emp)
   
-  if(LDdelta){
-    TrV<-sum(DL^(2*(pdelta_emp+1)))*sigma2delta_emp
-    aLa<-t((alpha_properties$X)%*%bdelta_emp)%*%L%*%(alpha_properties$X)%*%bdelta_emp-sum(diag(t(alpha_properties$X)%*%L%*%(alpha_properties$X)%*%(alpha_properties$S)))
+  if(LDalpha){
+    TrV<-sum(DL^(2*(palpha_emp+1)))*sigma2alpha_emp
+    aLa<-t((alpha_properties$X)%*%balpha_emp)%*%L%*%(alpha_properties$X)%*%balpha_emp-sum(diag(t(alpha_properties$X)%*%L%*%(alpha_properties$X)%*%(alpha_properties$S)))
   }else{
-    TrV<-sum(diag(L)^(pdelta_emp+1))*sigma2delta_emp
-    aLa<-t((alpha_properties$X)%*%bdelta_emp)%*%L%*%(alpha_properties$X)%*%bdelta_emp-sum(diag(t(alpha_properties$X)%*%L%*%(alpha_properties$X)%*%(alpha_properties$S)))
+    TrV<-sum(diag(L)^(palpha_emp+1))*sigma2alpha_emp
+    aLa<-t((alpha_properties$X)%*%balpha_emp)%*%L%*%(alpha_properties$X)%*%balpha_emp-sum(diag(t(alpha_properties$X)%*%L%*%(alpha_properties$X)%*%(alpha_properties$S)))
   }
   
   vA_alpha_emp<-TrV+aLa
   
-  return(list(L=L, Ltilde=Ltilde, nR=nR, svdL=if(compute_svdL | LDdelta){list(UL=UL, DL=DL)}else{NULL}, seg_sites=seg_sites, seg_sites_neu=seg_sites_neu, seg_sites_ben=seg_sites_ben, seg_sites_del=seg_sites_del, mean_diversity=mean_diversity, va_true=va_true, vA_true=vA_true, vA_alpha_emp=vA_alpha_emp, parameters=alpha_properties[1:5]))
+  return(list(L=L, Ltilde=Ltilde, nR=nR, svdL=if(compute_svdL | LDalpha){list(UL=UL, DL=DL)}else{NULL}, seg_sites=seg_sites, seg_sites_neu=seg_sites_neu, seg_sites_ben=seg_sites_ben, seg_sites_del=seg_sites_del, mean_diversity=mean_diversity, va_true=va_true, vA_true=vA_true, vA_alpha_emp=vA_alpha_emp, parameters=alpha_properties[1:5]))
 
 }
 ```
@@ -480,12 +480,12 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                        randomise = TRUE,      # Optionally the reference allele can be randomised
                        delete_temp_files = TRUE,
                        proj = "BLoM",           # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
-                       LDdelta = FALSE,       # Should L or diag(L) be considered while modelling distribution of alphas
+                       LDalpha = FALSE,       # Should L or diag(L) be considered while modelling distribution of alphas
                        pa = 1,
                        Vs = "LoNL",           # "L" or "LoNL"
                        method="REML",         # Can be "REML" or "MCMC"
-                       pdelta = NA,           # If NA pdelta is estimated using optim()
-                       bdelta = c(NA, NA),    # If c(NA,NA) both bedelta intercept and slope are estimated
+                       palpha = NA,           # If NA palpha is estimated using optim()
+                       balpha = c(NA, NA),    # If c(NA,NA) both bedelta intercept and slope are estimated
                        AtleastOneRecomb=FALSE, 
                        all.gp = FALSE,        # Ltilde = L'+L''(r/(1-r)) if all.gp=T L'' is assumed 0 and L'=L. 
                        verbose = TRUE
@@ -512,7 +512,7 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
   parents_info = analyse_parents(c_genome = sim_data$c_genome,  
                                  list_alpha = sim_data$list_alpha,     
                                  compute_svdL=TRUE,        
-                                 LDdelta=LDdelta,   
+                                 LDalpha=LDalpha,   
                                  SNPs = sim_data$SNPs,                   
                                  RecombRate = sim_data$sim_params$r_expt,             
                                  HapLength = sim_data$sim_params$sequence_length,              
@@ -531,10 +531,10 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                ngen2 = sim_data$ngen2,       
                nind = sim_data$sim_params$n_ind_exp,        
                proj=proj,
-               LDdelta = LDdelta,
+               LDalpha = LDalpha,
                pa = pa,
-               pdelta = pdelta,
-               bdelta = bdelta,
+               palpha = palpha,
+               balpha = balpha,
                Vs = Vs,
                method = method,
                L = parents_info$L,
@@ -544,12 +544,12 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
 
 
   vA_est = m1$Vw_est 
-  pdelta_est = m1$pdelta 
-  pdelta_var_est = m1$pdelta_var
-  bdelta_intercept_est = m1$bdelta[1]
-  bdelta_slope_est = m1$bdelta[2]
-  bdelta_var_est = paste(m1$bdelta_var[1,1], m1$bdelta_var[2,2], m1$bdelta_var[1,2], sep = "_")
-  sigma2delta_est = summary(m1$model)$varcomp[1,1]
+  palpha_est = m1$palpha 
+  palpha_var_est = m1$palpha_var
+  balpha_intercept_est = m1$balpha[1]
+  balpha_slope_est = m1$balpha[2]
+  balpha_var_est = paste(m1$balpha_var[1,1], m1$balpha_var[2,2], m1$balpha_var[1,2], sep = "_")
+  sigma2alpha_est = summary(m1$model)$varcomp[1,1]
     
   ### Save file ###
   
@@ -557,7 +557,7 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
  
   sim_params = sim_data$sim_params
 
-  analysis_data = data.frame("proj"=proj, "LDdelta"=LDdelta, "pa"=pa, "Vs"=Vs, "randomise"=randomise, "pdelta_method"=pdelta, "bdelta_method"=paste(bdelta[1], bdelta[2], sep="_"), "va_true"=parents_info$va_true, "vA_true"=parents_info$vA_true, "vA_est"=vA_est, "vA_alpha_emp"=parents_info$vA_alpha_emp, "pdelta_emp"=parents_info$parameters$pdelta, "bdelta_intercept_emp"=parents_info$parameters$bdelta_0, "bdelta_slope_emp"=parents_info$parameters$bdelta_1, "sigma2delta_emp"=parents_info$parameters$sigma2delta, "pdelta_est"=pdelta_est, "pdelta_var_est"=pdelta_var_est, "bdelta_intercept_est"=bdelta_intercept_est, "bdelta_slope_est"=bdelta_slope_est, "bdelta_var_est"=bdelta_var_est, "sigma2delta_est"=sigma2delta_est, "seg_sites"=parents_info$seg_sites, "seg_sites_neu"=parents_info$seg_sites_neu, "seg_sites_ben"=parents_info$seg_sites_ben, "seg_sites_del"=parents_info$seg_sites_del, "mean_diversity"=parents_info$mean_diversity, "all.gp" = all.gp)
+  analysis_data = data.frame("proj"=proj, "LDalpha"=LDalpha, "pa"=pa, "Vs"=Vs, "randomise"=randomise, "palpha_method"=palpha, "balpha_method"=paste(balpha[1], balpha[2], sep="_"), "va_true"=parents_info$va_true, "vA_true"=parents_info$vA_true, "vA_est"=vA_est, "vA_alpha_emp"=parents_info$vA_alpha_emp, "palpha_emp"=parents_info$parameters$palpha, "balpha_intercept_emp"=parents_info$parameters$balpha_0, "balpha_slope_emp"=parents_info$parameters$balpha_1, "sigma2alpha_emp"=parents_info$parameters$sigma2alpha, "palpha_est"=palpha_est, "palpha_var_est"=palpha_var_est, "balpha_intercept_est"=balpha_intercept_est, "balpha_slope_est"=balpha_slope_est, "balpha_var_est"=balpha_var_est, "sigma2alpha_est"=sigma2alpha_est, "seg_sites"=parents_info$seg_sites, "seg_sites_neu"=parents_info$seg_sites_neu, "seg_sites_ben"=parents_info$seg_sites_ben, "seg_sites_del"=parents_info$seg_sites_del, "mean_diversity"=parents_info$mean_diversity, "all.gp" = all.gp)
 
   analysis_data = cbind(sim_params, analysis_data)
   write.table(rbind(names(analysis_data), analysis_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_Data_analysis.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")

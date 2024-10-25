@@ -23,13 +23,23 @@ $(document).ready(function() {
 ```{r setup_exploration, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
-run_get_data<-TRUE
-run_analyse_data<-TRUE
-run_model<-TRUE
+run_get_data<-FALSE
+run_analyse_data<-FALSE
+run_model<-FALSE
 run_alpha<-FALSE
 run_bc<-FALSE
+run_tests<-FALSE
 
-#rmarkdown::render("/Users/jhadfiel/Work/Va_simulations/2_ANalysis/6_Exploration.Rmd")
+
+
+if(Sys.info()["nodename"]=="sce-bio-c04553"){  
+  code_path="~/Work/Va_simulations"
+}else{
+  print("Manas - you need to change this!")
+  code_path=""
+}
+
+#rmarkdown::render(file.path(code_path, "2_ANalysis/6_Exploration.Rmd"))
 
 ```
 
@@ -202,8 +212,6 @@ functions_only=TRUE ## Read only the functions
 
 rmarkdown::render(file.path(analysis_path, "Vw.Rmd"), quiet=TRUE)
 
-#rmarkdown::render("~/Desktop/tmp/Vw.Rmd", quiet=TRUE)
-
 ##############################
 ### Load Manas's functions ###
 ##############################
@@ -237,8 +245,6 @@ sim_data = extract_slim_data(Set_ID = Set_ID,
 ```
 
 # Analyse data
-
-
 
 ```{r analyse_data, eval=run_analyse_data}
 parents_info = analyse_parents(c_genome = sim_data$c_genome,  
@@ -274,47 +280,46 @@ Vs = "LoNL" # "L" or "LoNL"
 method="REML" # Can be "REML" or "MCMC"
 randomise = TRUE # Should the reference allele be randomised for analysis?
 
-# How is pdelta to be estimated? 
-# Can be "optim" (using the function optim()), or "fixed" or "manual"(estimated by manually scanning a range of pdelta values)
+# How is palpha to be estimated? 
+# Can be "optim" (using the function optim()), or "fixed" or "manual"(estimated by manually scanning a range of palpha values)
 
-pdelta_method = "optim" # "optim" or "manual" or "fixed" or "no_analysis". If this is "no_analysis", the estimate of Vw is not calculated, but the rest of the code still runs.
+palpha_method = "optim" # "optim" or "manual" or "fixed" or "no_analysis". If this is "no_analysis", the estimate of Vw is not calculated, but the rest of the code still runs.
 
-if(pdelta_method=="fixed"){
-  pdelta = 0 # Can be specified to any value
+if(palpha_method=="fixed"){
+  palpha = 0 # Can be specified to any value
 }
 
-if(pdelta_method=="optim"){
-  pdelta = NA # This triggers the use of optim() inside the function Vw_model()
+if(palpha_method=="optim"){
+  palpha = NA # This triggers the use of optim() inside the function Vw_model()
 }
 
-if(pdelta_method=="manual"){
+if(palpha_method=="manual"){
   
-  nseq<-20 # The number of times pdelta is to be varied 
-  pdelta_l = -1 # Lower limit of pdelta
-  pdelta_u = 1 # Upper limit of pdelta
-  pdelta<-seq(pdelta_l, pdelta_u, length=nseq)
+  nseq<-20 # The number of times palpha is to be varied 
+  palpha_l = -1 # Lower limit of palpha
+  palpha_u = 1 # Upper limit of palpha
+  palpha<-seq(palpha_l, palpha_u, length=nseq)
   
 }
 
-# How should bdelta[1] (intercept) and bdelta[2] (slope of (p-q)) be estimated
+# How should balpha[1] (intercept) and balpha[2] (slope of (p-q)) be estimated
 
-bdelta_method = "estimate"  # Can be "fixed" or "estimate"
+balpha_method = "estimate"  # Can be "fixed" or "estimate"
 
-if(bdelta_method=="estimate"){
-  bdelta = c(NA, NA)
+if(balpha_method=="estimate"){
+  balpha = c(NA, NA)
 }else{
-  bdelta = c(0, 0) # This only estimates the intercept while keeping the slope fixed at 0
+  balpha = c(0, 0) # This only estimates the intercept while keeping the slope fixed at 0
 }
 ```
-Fit model assuming no non-gametic phase disequilibrium
 
-```{r fit_model_a, eval=run_model}
+Fit model
 
-pointr::ptr("Ltilde", "parents_info$L")
+```{r fit_model, eval=run_model}
 
 m1<-Vw_model(c_genome = NULL,              # gametes genotypes 
              nR = parents_info$nR,         # matrix of non-recombinant probabilities between loci
-             pbar0 = sim_data$pbar0,       # vector of allele frequencies at time-point 1
+             pbar0 = sim_data$pbar0,       # vector of allele frequencies at time-point 0
              pbar1 = sim_data$pbar1,       # vector of allele frequencies at time-point 1
              ngen1= sim_data$ngen1,    # number of generations between parents and time-point 1
              pbar2 = sim_data$pbar2,       # vector of allele frequencies at time-point 2
@@ -323,35 +328,8 @@ m1<-Vw_model(c_genome = NULL,              # gametes genotypes
              proj=proj, # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
              LDdelta = LDdelta,
              pa = pa,
-             pdelta = pdelta,
-             bdelta = bdelta,
-             Vs = Vs,
-             method = method,
-             L = parents_info$L,    # list with elements UL and DL
-             Ltilde = Ltilde,    # list with elements UL and DL
-             svdL = parents_info$svdL,    # list with elements UL and DL
-             tol = sqrt(.Machine$double.eps),
-             save_tprojp=TRUE,
-             verbose=FALSE)
-```
-
-and then again with `Ltilde` taking into account the gametic phase disequilibrium
-
-```{r fit_model_b, eval=run_model}
-
-m1_b<-Vw_model(c_genome = NULL,              # gametes genotypes 
-             nR = parents_info$nR,         # matrix of non-recombinant probabilities between loci
-             pbar0 = sim_data$pbar0,       # vector of allele frequencies at time-point 1
-             pbar1 = sim_data$pbar1,       # vector of allele frequencies at time-point 1
-             ngen1= sim_data$ngen1,    # number of generations between parents and time-point 1
-             pbar2 = sim_data$pbar2,       # vector of allele frequencies at time-point 2
-             ngen2 = sim_data$ngen2,       # number of generations between parents and time-point 2
-             nind = sim_data$sim_params$n_ind_exp,        # population size in each replicate
-             proj=proj, # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
-             LDdelta = LDdelta,
-             pa = pa,
-             pdelta = pdelta,
-             bdelta = bdelta,
+             palpha = palpha,
+             balpha = balpha,
              Vs = Vs,
              method = method,
              L = parents_info$L,    # list with elements UL and DL
@@ -362,16 +340,33 @@ m1_b<-Vw_model(c_genome = NULL,              # gametes genotypes
              verbose=FALSE)
 ```
 
+```{r compare}
+Ecov<-(t(m1$tprojp)%*%parents_info$L%*%parents_info$L%*%m1$tprojp)*var(sim_data$list_alpha)
+# Expected covariance structure on projected space
+
+Ocov<-cov((sim_data$pbar2-sim_data$pbar1)%*%m1$tprojp)
+# Observed covariance structure on projected space
+
+plot(Tri2M(Ocov, diag=FALSE)~Tri2M(Ecov, diag=FALSE))
+summary(lm(Tri2M(Ocov, diag=FALSE)~Tri2M(Ecov, diag=FALSE)))
+# Off-diagonals
+
+plot(diag(Ocov)~diag(Ecov))
+summary(lm(diag(Ocov)~diag(Ecov)))
+# Diagonals
+```
+
+
 # Extract estimates
 
 ```{r extract_estimates, eval=run_model}
 vA_est = m1$Vw_est 
-pdelta_est = m1$pdelta 
-pdelta_var_est = m1$pdelta_var
-bdelta_intercept_est = m1$bdelta[1]
-bdelta_slope_est = m1$bdelta[2]
-bdelta_var_est = paste(m1$bdelta_var[1,1], m1$bdelta_var[2,2], m1$bdelta_var[1,2], sep = "_")
-sigma2delta_est = summary(m1$model)$varcomp[1,1]
+palpha_est = m1$palpha 
+palpha_var_est = m1$palpha_var
+balpha_intercept_est = m1$balpha[1]
+balpha_slope_est = m1$balpha[2]
+balpha_var_est = paste(m1$balpha_var[1,1], m1$balpha_var[2,2], m1$balpha_var[1,2], sep = "_")
+sigma2alpha_est = summary(m1$model)$varcomp[1,1]
 ```
 
 Look at alpha-estimates under projected allele frequencies
@@ -392,4 +387,210 @@ Compare to Buffalo and Coop's method
 ```{r eval=run_bc}
 est_Va_bc(sim_data$pbar1, sim_data$pbar2, parents_info$L, parents_info$nR, nrep=10)
 ```
+
+Below we obtain the starting genotypes from all SLiM simulations without a burn-in phase and which have ngen1=0 and ngen2=1. We then simulate the experiment using `sim_exp` to test what influences the bias. The main result is that the method gives unbiased estimates of $Va$ in the absence of environmental variation, but in the presence of environmental variation $Va$ is overestimated and the residual variation is estimated to be less than one even though the appropriate `Ne_factor` is used.
+
+```{r diagnostics, eval=run_tests}
+
+dat<-read.csv(file.path(code_path, "2_Analysis/zero_test_analysis_new_code.csv"))
+dat<-dat[which(dat$ngen1==0 & dat$ngen2==1 & dat$palpha_est==0),]
+
+nsim<-2*nrow(dat)
+
+res<-matrix(NA, nsim, 6)
+colnames(res)<-c("vA_true", "vE_true", "vA_exp", "res_exp","vA_I","res_I")
+
+for(i in 1:nsim){
+
+  if(i%%2){Ve<-1}else{Ve<-0}
+
+  data_tmp = extract_slim_data(Set_ID = dat$Set_ID[ceiling(i/2)],
+                               sim = 1,
+                               slim_output_path = slim_output_path, 
+                               sim_param_path = slim_param_path,
+                               extract_genomes_path = extract_genomes_path, 
+                               extract_mut_path = extract_mut_path,
+                               mutations_path = temp_files_path, 
+                               c_matrix_path = temp_files_path, 
+                               randomise = TRUE,
+                               verbose=FALSE)
+
+  parents_tmp = analyse_parents(c_genome = data_tmp$c_genome,  
+                                 list_alpha = data_tmp$list_alpha,             
+                                 LDdelta=FALSE,
+                                 compute_svdL=TRUE,         
+                                 SNPs = data_tmp$SNPs,                   
+                                 RecombRate = data_tmp$sim_params$r_expt,             
+                                 HapLength = data_tmp$sim_params$sequence_length,              
+                                 AtleastOneRecomb=FALSE,
+                                 calc_nR=TRUE,
+                                 verbose=FALSE)
+
+
+  pbar2<-sim_exp(c_genome=data_tmp$c_genome, nind=data_tmp$sim_params$n_ind_exp, r=data_tmp$sim_params$r_expt, position=data_tmp$SNPs, alpha=data_tmp$list_alpha, nrep=data_tmp$sim_params$n_cages, Ve=Ve)
+
+  m1_tmp<-Vw_model(c_genome = NULL,        # gametes genotypes 
+               nR = parents_tmp$nR,         # matrix of non-recombinant probabilities between loci
+               pbar0 = data_tmp$pbar0,       # vector of allele frequencies at time-point 0
+               pbar1 = data_tmp$pbar1,       # vector of allele frequencies at time-point 1
+               ngen1= data_tmp$ngen1,    # number of generations between parents and time-point 1
+               pbar2 = pbar2,       # vector of allele frequencies at time-point 2
+               ngen2 = data_tmp$ngen2,       # number of generations between parents and time-point 2
+               nind = data_tmp$sim_params$n_ind_exp,        # population size in each replicate
+               proj=proj, # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
+               LDdelta = LDdelta,
+               pa = pa,
+               palpha = 0,
+               balpha = c(0,0),
+               Vs = Vs,
+               method = method,
+               L = parents_tmp$L,    # list with elements UL and DL
+               Ltilde = parents_tmp$Ltilde,    # list with elements UL and DL
+               svdL = parents_tmp$svdL,    # list with elements UL and DL
+               Ne_factor = predict_Ne(Ve,1),
+               tol = sqrt(.Machine$double.eps),
+               save_tprojp=TRUE,
+               verbose=FALSE)
+
+  pbar2<-sim_exp(c_genome=data_tmp$c_genome, nind=data_tmp$sim_params$n_ind_exp, r=data_tmp$sim_params$r_expt, position=data_tmp$SNPs, alpha=data_tmp$list_alpha, nrep=data_tmp$sim_params$n_cages, fitness_model="I", Ve=Ve)
+
+  m2_tmp<-Vw_model(c_genome = NULL,        # gametes genotypes 
+               nR = parents_tmp$nR,         # matrix of non-recombinant probabilities between loci
+               pbar0 = data_tmp$pbar0,       # vector of allele frequencies at time-point 0
+               pbar1 = data_tmp$pbar1,       # vector of allele frequencies at time-point 1
+               ngen1= data_tmp$ngen1,    # number of generations between parents and time-point 1
+               pbar2 = pbar2,       # vector of allele frequencies at time-point 2
+               ngen2 = data_tmp$ngen2,       # number of generations between parents and time-point 2
+               nind = data_tmp$sim_params$n_ind_exp,        # population size in each replicate
+               proj=proj, # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
+               LDdelta = LDdelta,
+               pa = pa,
+               palpha = 0,
+               balpha = c(0,0),
+               Vs = Vs,
+               method = method,
+               L = parents_tmp$L,    # list with elements UL and DL
+               Ltilde = parents_tmp$Ltilde,    # list with elements UL and DL
+               svdL = parents_tmp$svdL,    # list with elements UL and DL
+               Ne_factor = predict_Ne(Ve,1, fitness_model="I"),
+               tol = sqrt(.Machine$double.eps),
+               save_tprojp=TRUE,
+               verbose=FALSE)
+
+  res[i,"vA_true"]<-parents_tmp$vA_true
+  res[i,"vE_true"]<-Ve
+  res[i,"vA_exp"]<-m1_tmp$Vw_est
+  res[i,"vA_I"]<-m2_tmp$Vw_est
+  res[i,"res_exp"]<-summary(m1_tmp$model)$varcomp[2,1]
+  res[i,"res_I"]<-summary(m2_tmp$model)$varcomp[2,1]
+  print(i)
+}
+res<-as.data.frame(res)
+```
+
+```{r include=FALSE}
+if(run_tests){
+  write.csv(res, file=file.path(code_path, "2_Analysis/test_Ve.csv"), quote=FALSE, row.names=FALSE)
+}else{
+  res<-read.csv(file.path(code_path, "2_Analysis/test_Ve.csv"))
+}
+```
+
+```{r plot_diagnostics}
+par(mfrow=c(2,2))
+plot(vA_exp~vA_true, ylab="Estimated Va", xlab="True Va", data=subset(res, vE_true==0), main="Ve=0, fitness_model=Exp")
+abline(0,1)
+plot(vA_I~vA_true,  ylab="Estimated Va", xlab="True Va", data=subset(res, vE_true==0), main="Ve=0, fitness_model=I")
+abline(0,1)
+plot(vA_exp~vA_true,  ylab="Estimated Va", xlab="True Va", data=subset(res, vE_true==1), main="Ve=1, fitness_model=Exp")
+abline(0,1)
+plot(vA_I~vA_true,  ylab="Estimated Va", xlab="True Va", data=subset(res, vE_true==1), main="Ve=1, fitness_model=I")
+abline(0,1)
+```
+
+When the genetic variation in fitness is zero, we can also ask whether the residual variance is estimated to be 1 when $Ve=1$ and the correct correction factor is used.
+
+```{r diagnostics_2, eval=run_tests}
+
+if(!exists("data_tmp")){
+
+  dat<-read.csv(file.path(code_path, "2_Analysis/zero_test_analysis_new_code.csv"))
+  dat<-dat[which(dat$ngen1==0 & dat$ngen2==1 & dat$palpha_est==0),]
+
+  data_tmp = extract_slim_data(Set_ID = dat$Set_ID[nrow(dat)],
+                               sim = 1,
+                               slim_output_path = slim_output_path, 
+                               sim_param_path = slim_param_path,
+                               extract_genomes_path = extract_genomes_path, 
+                               extract_mut_path = extract_mut_path,
+                               mutations_path = temp_files_path, 
+                               c_matrix_path = temp_files_path, 
+                               randomise = TRUE,
+                               verbose=FALSE)
+
+  parents_tmp = analyse_parents(c_genome = data_tmp$c_genome,  
+                                 list_alpha = data_tmp$list_alpha,             
+                                 LDdelta=FALSE,
+                                 compute_svdL=TRUE,         
+                                 SNPs = data_tmp$SNPs,                   
+                                 RecombRate = data_tmp$sim_params$r_expt,             
+                                 HapLength = data_tmp$sim_params$sequence_length,              
+                                 AtleastOneRecomb=FALSE,
+                                 calc_nR=TRUE,
+                                 verbose=FALSE)
+
+}
+
+mini_res<-matrix(NA, 100,3)
+colnames(mini_res)<-c("vA_exp", "res_exp", "res_obs")
+
+for(i in 1:100){
+
+ pbar2<-sim_exp(c_genome=data_tmp$c_genome, nind=data_tmp$sim_params$n_ind_exp, r=data_tmp$sim_params$r_expt, position=data_tmp$SNPs, alpha=NULL, nrep=data_tmp$sim_params$n_cages, Ve=1)
+
+  m1_tmp<-Vw_model(c_genome = NULL,        # gametes genotypes 
+               nR = parents_tmp$nR,         # matrix of non-recombinant probabilities between loci
+               pbar0 = data_tmp$pbar0,       # vector of allele frequencies at time-point 0
+               pbar1 = data_tmp$pbar1,       # vector of allele frequencies at time-point 1
+               ngen1= data_tmp$ngen1,    # number of generations between parents and time-point 1
+               pbar2 = pbar2,       # vector of allele frequencies at time-point 2
+               ngen2 = data_tmp$ngen2,       # number of generations between parents and time-point 2
+               nind = data_tmp$sim_params$n_ind_exp,        # population size in each replicate
+               proj=proj, # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
+               LDdelta = LDdelta,
+               pa = pa,
+               palpha = 0,
+               balpha = c(0,0),
+               Vs = Vs,
+               method = method,
+               L = parents_tmp$L,    # list with elements UL and DL
+               Ltilde = parents_tmp$Ltilde,    # list with elements UL and DL
+               svdL = parents_tmp$svdL,    # list with elements UL and DL
+               Ne_factor = predict_Ne(1,1),
+               tol = sqrt(.Machine$double.eps),
+               save_tprojp=TRUE,
+               verbose=FALSE)
+
+  mini_res[i,"vA_exp"]<-m1_tmp$Vw_est
+  mini_res[i,"res_exp"]<-summary(m1_tmp$model)$varcomp[2,1]
+  mini_res[i,"res_obs"]<-var(c((pbar2-data_tmp$pbar1)%*%m1_tmp$tprojp))
+}
+```
+
+```{r include=FALSE}
+if(run_tests){
+  write.csv(mini_res, file=file.path(code_path, "2_Analysis/test_Ve_noVa.csv"), quote=FALSE, row.names=FALSE)
+}else{
+  mini_res<-read.csv(file.path(code_path, "2_Analysis/test_Ve_noVa.csv"))
+}
+
+```{r plot_diagnostics2}
+hist(mini_res[,"vA_exp"],  xlab="Estimated Va (should be zero)", main="")
+abline(v=0, col="red")
+hist(mini_res[,"res_exp"], lab="Estimated residual variance (should be one)", main="")
+abline(v=0, col="red")
+abline(v=1, col="red")
+```
+
+
 

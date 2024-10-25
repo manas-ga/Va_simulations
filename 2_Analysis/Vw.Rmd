@@ -21,16 +21,18 @@ $(document).ready(function() {
 </script>
 
 
-```{r }
+```{r include=FALSE}
 if(!exists("functions_only")){
   functions_only=FALSE
 }
+
+rerun_drift_covariance_sim<-TRUE
 
 #rmarkdown::render(file.path(if(Sys.info()["nodename"]=="sce-bio-c04553"){"~/Work/Va_simulations"}else{""} , "2_Analysis/Vw.Rmd"))
 
 ```
 
-```{r eval=!functions_only}
+```{r eval=!functions_only, include=FALSE}
 rm(list=ls()[-which(ls()=="functions_only")])
 library(MASS)
 library(lme4)
@@ -39,7 +41,7 @@ library(asreml)
 library(reticulate)
 library(pointr)
 
-if(Sys.info()["nodenamermarkdown::render("/Users/jhadfiel/Work/Va_simulations/2_ANalysis/6_Exploration.Rmd")"]=="sce-bio-c04553"){  
+if(Sys.info()["nodename"]=="sce-bio-c04553"){  
   base_path="~/Work/Va_simulations"
   python_path="~/miniconda3/envs/msprime-env/bin/"
 }else{
@@ -47,211 +49,125 @@ if(Sys.info()["nodenamermarkdown::render("/Users/jhadfiel/Work/Va_simulations/2_
   base_path=""
   python_path=""
 }
-
-source(file.path(base_path, "2_Analysis/Recombination_from_msprime.R"))
-source(file.path(base_path, "2_Analysis/Neutral_Ancestry_msprime.R"))
-
 ```
 
-We generate the genotypes of a base-population under recombination-drift-mutation balance using MSprime, assign selection coefficients to the reference alleles and then run our experiment forward in time. In the first generation there is no selection and the replicates are set up with equal representation from the base individuals. The allele frequencies in the first generation of each replicate are measured. This is followed by a specified number of generations in which selection acts, after which allele frequencies are measured again. The allele frequency changes are analysed using mixed models where locus effects capture concordant selection-induced change in allele frequencies at a locus across replicates. From these analyses estimates of the additive genetic variance in fitness ($V_w$) are obtained. Various scenarios are considered for assigning selection coefficients to reference alleles, and various analytical methods are considered for analysing allele frequency change (either through alternate projections and/or assumptions about the between-locus covariance matrix).
+The genotypes of a base-population are simulated using a combination of MSprime and SLiM and these can be obtained using the function `extract_slim_data` from Vw_sim_functions.Rmd.  An experiment can then be simulated using SLiM or under specific scenarios using the R function `sim_exp`, as documented below. The simulation consists of initiating `nrep` replicate populations from the base population after a specified number `ngen1` generations (`ngen1=0` in `sim_exp`) of random mating without selection. The allele frequencies in the first generation of each replicate are measured. A further `ngen2-ngen1` generations are then simulated where selection operates (`ngen2-ngen1=0` in `sim_exp`) after which allele frequencies are measured again. The allele frequency changes are analysed using mixed models where locus effects capture concordant selection-induced change in allele frequencies at a locus across replicates. From these analyses estimates of the additive genetic variance in fitness ($V_w$) are obtained. Various analytical methods are considered for analysing allele frequency change, either through alternate projections and/or assumptions about the between-locus covariance matrix.
 
+## Simulate Experiment
 
-## Simulation Parameters
+The function `sim_exp` takes a matrix of base-population haplotypes `c_genome` with loci in columns and haplotypes in rows. The two haplotypes of an individual are found on consecutive rows (i.e. rows 1 and 2 of `c_genome` are the haplotypes of individual 1, rows 3 and 4 are the haplotypes of individual 2). Base-population individuals are cloned to form `nrep` replicate populations (i.e. `ngen1=0`). The cloned individuals in each replicate then produce `nind` offspring where the probability of individual $i$ being the parent of an offspring is proportional to either $g_i+e_i$ (`fitness_model="I"`) or $exp(g_i+e_i)$ (`fitness_model="Exp"`). $g_i$ is obtained through $g_i=\sum_jc_{ij}\alpha_j/2$ where $c_{ij}$ is the number of reference alleles present at locus $j$ in individual $i$ (from `c_genome`) and $\alpha_j$ is the average effect for fitness at that locus. A vector of $\alpha$'s is passed through the argument `alpha` together with their position, where the order of `alpha` and `position` is assumed the same as the columns of `c_genome`. If `alpha=NULL` all genotypes are assumed to have the same expected fitness. The $e$'s are sampled from a normal distribution with mean zero and variance equal to `Ve`. The genotypes of the offspring are generated from the parental genotypes assuming standard Mendelian inheritance without mutation. The per-base recombination rate is given by `r`.  The function returns a set of allele frequencies in the offspring generation (`gen2=1`) with replicates in rows and loci in columns.
 
-### Genome and Experiment Parameters
+```{r simulation_function}
 
-```{r Genome_and_Experiment_Parameters, eval=!functions_only} 
-###########################################
-#          Pop Gen Parameters             #
-# Based on D melanogaster (genome ~150MB) #
-###########################################
+sim_exp<-function(c_genome, nind, r, position, nrep, alpha=NULL, Ve=0, fitness_model="Exp"){
 
-RecombRate.msprime<-1.4e-8      
-MutationRate.msprime<-1.3e-9
+  if(ncol(c_genome)!=length(position)){stop("position should be the same length as number of columns in c_genome")}
 
-RecombRate.experiment<-1.4e-5      
-AtleastOneRecomb<-FALSE
-
-Ne=1e6
-
-nsim<-10            # number of simulations
-
-HapLength<-as.integer(seq(100000,100000,length=nsim))   # haplotype length
-
-nind<-1000             # number of starting individuals
- print("Jarrod: nind refers to the number of parental individuals and the number of individuals per replicate during the experiment - sort this out")
-
-nrep<-10               # number of replicate lines
-ngen<-3               # number of generations of selection
-
-save<-TRUE            # save results.
-```
-
-### Variances and distribution of allelic effects
-
-The environmental variance and the target additive genetic variance can be set:
-
-```{r allelic_effect_parameters, eval=!functions_only} 
-EVe<-1                              # Expected environmental variance for fitness 
-EVw<-seq(0.01, 0.1, length=nsim)    # Expected genetic variance for fitness
-```
-
-The possibility exists to give the allelic effects a specified mean (${\boldsymbol \mu}_\alpha$) and covariance structure (${\bf V}_\alpha$). For the mean this is restricted to ${\boldsymbol \mu}_\alpha=\beta_\alpha^{(0)}+\beta^{(1)}_\alpha(x_r-x_a)$ where $x_r$ is a property of the reference allele, and $x_a$ is the same property of the alternate allele. In what follows we will consider the scenario where $x_r=p$ and $x_a=q$. For the covariance structure we restrict the form to to ${\bf V}_\alpha=\sigma_\alpha^2{\bf L}^{p_{\alpha}}$ where $\sigma_\alpha$ (`sda`) and $p_{\alpha}$ (`palpha`) can be specified. $p_\alpha=0$ gives i.i.d allelic effects, $p_\alpha=-1$ gives linearly orthogonal directions in genotype space equal contribution to $V_w$ (either because sites with high genetic diversity have large effect sizes, or alleles in positive LD have opposing effects on fitness.) It is also possible to ignore LD when specifying the covariance structure of allelic effects with `LDalpha=FALSE` such that  ${\bf V}_\alpha=\sigma_\alpha^2\text{Diag}({\bf L})^{p_{\alpha}}$ where $\text{Diag}$ sets the off-diagonal elements of the matrix to zero.
-
-```{r , eval=!functions_only} 
-palpha<--1
-LDalpha<-TRUE
-```
-
-It is also to allow the difference in average effects between the two alleles to depend on the difference in there initial frequencies, with intercept and slope specified in the vector  `balpha`.
-
-```{r , eval=!functions_only} 
-balpha<-c(0,-0.01)
-```
-
-### Function for running simulations
-
-```{r simulation_function} 
-Vw_sim<-function(nind,                   # Number of parental flies
-                 HapLength,              # Genome Size
-                 RecombRate.msprime,     # Recombination rate between adjacent sites in MSprime
-                 MutationRate.msprime,   # Mutation rate in MSprime
-                 RecombRate.experiment,  # Recombination rate between adjacent sites in experiment
-                 AtleastOneRecomb,       # Should there be a minimum of one recombination event per meiosis in experiment?
-                 Ne,                     # Effective population size of population from which parental flies drawn.
-                 nrep,                   # Number of replicate populations in experiment
-                 ngen,                   # Allele frequencies sampled in generation 1 and generation ngen
-                 EVw,                    # Target additive genetic variance in fitness
-                 EVe,                    # Environmental variance in fitness
-                 palpha,                 # power for the average effect covariance matrix
-                 balpha,                 # regression parameters for average effect on p-q.
-                 LDalpha,                # if false average effect covariance matrix is diagonal
-                 tol=sqrt(.Machine$double.eps),
-                 save.L,                 # Should L be saved?
-                 save.svdL,              # Should the singular value decomposition of L be saved?
-                 python_path             # File path to python
-                 ){
-
-
-  
-    MSP_SimulatedBasePopulation<-sim_msprime_ancecstry(HapLength, 
-                                 Ne=Ne, 
-                                 mu_msp=MutationRate.msprime, 
-                                 r_msp=RecombRate.msprime, 
-                                 n_sample=nind,
-                                 python_path=python_path)
-  
-
-
-  # simulate genomes of parental population 
-
-
-#    MSP_SimulatedBasePopulation<-as.list(1:2)
-
-#    MSP_SimulatedBasePopulation$c<-matrix(sample(c(0,0.5,1), nind*2*100, replace=TRUE),  nind*2, 100)
-#    MSP_SimulatedBasePopulation$pos<-sort(sample(1:HapLength, 100))
-  
-
-  nsnps<-length(MSP_SimulatedBasePopulation$pos)
-  # number of polymorphic loci in parental population
-
-  C0<-(MSP_SimulatedBasePopulation$c[1:nind,,drop=FALSE]+MSP_SimulatedBasePopulation$c[nind+1:nind,,drop=FALSE])/2
-  # Allele counts per individual (row) per locus (columns) in the base population (G_0)
-  
-  pbar0<-colMeans(C0) # parental allele frequencies
-
-  ####################
-  # obtain LD matrix #
-  ####################
-  
-  if(palpha!=0 | save.L | save.svdL){
-
-    L<-cov(C0)*(nind-1)/(nind)
-
-    svdC<-svd(t(scale(sqrt(1/nind)*C0, scale=FALSE)))
-    retain<-sum(svdC$d>tol)
-    UL<-svdC$u[,1:retain]
-    DL<-diag(svdC$d[1:retain])
-    # eigen vectors/values of L
+  if(!is.null(alpha)){
+    if(ncol(c_genome)!=length(alpha)){stop("alpha should be the same length as number of columns in c_genome")}
   }
 
+  reordering<-order(position)
 
-  ############################
-  # generate allelic effects #
-  ############################
+  c_genome<-c_genome[,reordering]
+  position<-position[reordering]
 
-  Ea<-balpha[1]+balpha[2]*(2*pbar0-1)
+  # reorder SNPs according to map position
 
-  Evw_resid<-EVw-Ea%*%L%*%Ea
+  n0_individuals<-nrow(c_genome)/2
+  n_loci<-ncol(c_genome)
 
-  if(Evw_resid<0){
-    stop(paste("It is not possible to generate an EVw with these balpha parameters since they produce",  round(Ea%*%L%*%Ea,3), "variance"))
-  }
+  pbar<-matrix(NA, nrep, n_loci)
 
-  if(palpha==0){
-    
-    sda<-sqrt(Evw_resid/sum(diag(L)))
-
-    a<-rnorm(nsnps, 0, sda)
-
+  if(!is.null(alpha)){
+    alpha<-alpha[reordering]
+    genetic_fitness<-c_genome%*%alpha/2
+    genetic_fitness<-genetic_fitness[seq(1, 2*n0_individuals, 2)]+genetic_fitness[seq(2, 2*n0_individuals, 2)]
   }else{
+    genetic_fitness<-rep(0, n0_individuals)
+  }
 
-    if(LDalpha){
-      retain_alpha<-ncol(UL)
-      U_alpha<-UL
-      D_alpha<-DL
-    }else{
-      retain_alpha<-nsnps
-      U_alpha<-diag(retain_alpha)
-      D_alpha<-diag(sqrt(diag(L)))
-    }      
+  genetic_fitness<-1+genetic_fitness-mean(genetic_fitness)
+  # rescale to have mean of 1 (not necessary under the exp model)  
 
-    sda<-sqrt(Evw_resid/sum(diag(D_alpha)^(2*(palpha+1))))
+  if(any(genetic_fitness<0)){
+    warning(paste(sum(genetic_fitness<0), "genetic fitnesses negative - set to zero"))
+    genetic_fitness[which(genetic_fitness<0)]<-0
+  }
 
-    a<-rnorm(retain_alpha, 0, sda)
+  for(rep in 1:nrep){
 
-    if(palpha!=0){
-      a<-U_alpha%*%diag(diag(D_alpha)^palpha)%*%a
+    fitness<-genetic_fitness
+    if(Ve!=0){
+      if(fitness_model=="Exp"){
+          fitness<-fitness+rnorm(n0_individuals, 0, sqrt(Ve))
+      }
+      if(fitness_model=="I"){
+          m<-min(fitness)
+          fitness<-fitness+rgamma(n0_individuals, shape=(m^2)/Ve, scale=Ve/m)-m
+          # We wish to generate random environmental variables, X, with E[X]=0,  VAR(X)=Ve and min(X) = -min(genetic_fitness) =-m  so that fitness is non-negative 
+
+          # To do so we simulate Y from a gamma and generate X = Y-m to satisfy the constraint that X+G>0 where G is fitness based on genotype.
+
+          # Have a=shape and s=scale then E[X] = a*s-m and VAR(X) = a*s^2
+
+          # Since E[X]=0 then a*s = m and so VAR(X) = m*s and s=VAR(X)/m=Ve/m
+
+          # Since a*s = m then a*Ve/m = m and so a = (m^2)/Ve
+      }
     }
-  }
 
-  a<-Ea+a
+    if(fitness_model=="Exp"){
+      fitness<-exp(fitness)
+    }
+      
+    genomes<-matrix(0, nind, n_loci)
 
+    for(i in 1:nind){
 
-  ###############################
-  # forward simulate population #
-  ###############################
+      for(j in 1:2){  # sample gametes from both parents
 
-  pbar1<-matrix(NA, nrep, nsnps)
-  pbar2<-matrix(NA, nrep, nsnps)
-  # vector of starting (generation 1) and final (generation ngen) allele frequencies (columns) in each replicate (rows)
+        parent<-sample(1:n0_individuals, 1, prob=fitness)
+        # sample parent j of individual i
 
-  for(j in 1:nrep){
+        gamete<-rep(rbinom(1, prob=0.5, size=1), n_loci)
+        # sample grandparental gamete of parent j of individual i
 
+        r_event<-reda::simEventData(rho=r, end=max(position))
+        # simulate recombination events
 
-    Forward_SimulatedExperimentalPopulation<-simulate_forward_population(NGen=ngen,fitness_effects=a,HapLength=HapLength,starting_haps=MSP_SimulatedBasePopulation$c,vars=MSP_SimulatedBasePopulation$pos,RecombRate=RecombRate.experiment, AtleastOneRecomb=AtleastOneRecomb,sdwe=sqrt(EVe))
-    # note that fitness effects are divided by 2 because the predictors are 0,1,2 rather than 0, 1/2,1.
+        if(nrow(r_event)>0){
+          r_event<-r_event$time[which(r_event$event==1)]
+          for(k in 1:length(r_event)){
+            gamete[which(position>r_event[k])]<-abs(1-gamete[which(position>r_event[k])])
+          } 
+        }
+        # switch grandparental gamete when a recombination event happens and so grandparental gamete is a string of 0's and 1's 
 
-    pbar1[j,]<-colMeans(Forward_SimulatedExperimentalPopulation$FirstGeneration) # starting allele frequency
-  
-    pbar2[j,]<-colMeans(Forward_SimulatedExperimentalPopulation$LastGeneration) # finishing allele frequency
-  }
-  C<-(Forward_SimulatedExperimentalPopulation$LastGeneration[1:nind,]+Forward_SimulatedExperimentalPopulation$LastGeneration[nind+1:nind,])/2
-  # Allele counts per individual (row) per locus (columns) in the final population (generation ngen)
+        gam0<-which(gamete==0)
+        # which positions does individual i inherit from grandparental gamete 0 of parent j
 
-  #########################
-  # get genetic variances #
-  #########################
-
-  Vw0<-var(C0%*%a)     # Additive genetic variance in the base population             
-
-  Vw2<-var(C%*%a)      # Additive genetic variance at final generation
-
-  return(list(C0=C0, pbar1=pbar1, pbar2=pbar2, SNPs=MSP_SimulatedBasePopulation$pos, Vw0=Vw0, Vw2=Vw2, L=if(save.L){L}else{NULL}, svdL=if(save.svdL){list(UL=UL, DL=svdC$d[1:retain])}else{NULL}, a=a, sda=sda))
-
+        if(length(gam0)!=0){     
+          genomes[i,gam0]<-genomes[i,gam0]+c_genome[(parent-1)*2+1,gam0]
+          # add any reference alleles inherited from grandparental gamete 0 
+        }
+        if(length(gam0)!=n_loci){
+          if(length(gam0)!=0){
+            genomes[i,-gam0]<-genomes[i,-gam0]+c_genome[(parent-1)*2+2,-gam0]
+          }else{
+            genomes[i,]<-genomes[i,]+c_genome[(parent-1)*2+2,]
+          }  
+          # add any reference alleles inherited from grandparental gamete 1
+        }
+      }
+    }  
+    pbar[rep,]<-colMeans(genomes)/2
+  }  
+  pbar<-pbar[,order(reordering)]
+  return(pbar)
 }
-```
 
+```
 
 ## Analysis Parameters
 
@@ -261,23 +177,40 @@ The allele frequencies can be analysed as is (`proj="N"`) or they can be project
 
 Rather than retain all vectors we only retain those eigenvectors whose square-rooted eigenvalues exceed `tol`.  For `proj="L"` and `proj="BLoM"` the maximum number of retained vector is equal to the number of individuals or the number of segregating sites, which ever is smaller. Since ${\bf L}\circ {\bf M}$ is typically full-rank the `proj="LoM"` projection may have substantially more retained eigenvectors but here we restrict the maximum retained to be the minimum of the number of individuals or the number of segregating sites, which ever is smaller.
 
-These projections generate i.i.d projected allele frequency changes when the covariance of allele frequency change is proportional to  $\tilde{\bf L}^{p_{a}}$ (`proj="L"`) or $(\tilde{\bf L}\circ {\bf M})^{p_{a}}$ (`proj="LoM"` or `proj="BLoM"`) respectively. Theoretically we expect the residuals to be i.i.d when `proj="LoM"` or  `proj="BLoM"` and $p_a=1$ (we also expect them to have unit variance when the environmental variance in fitness is zero since then the census and effective population size is equal (presumably the selection terms pick up the change in allele frequency caused by genetic variance in fitness, and so we only have to worry about the impact of the environmental variance on $N_e$). When the the environmental variance in fitness is non-zero we expect the effective population size to be smaller than the census population size by a factor `4/(3+exp(EVe))` and this can be specified through the term `Ne_factor`.
+These projections generate i.i.d projected allele frequency changes when the covariance of allele frequency change is proportional to  $\tilde{\bf L}^{p_{a}}$ (`proj="L"`) or $(\tilde{\bf L}\circ {\bf M})^{p_{a}}$ (`proj="LoM"` or `proj="BLoM"`) respectively. Theoretically we expect the residuals to be i.i.d when `proj="LoM"` or  `proj="BLoM"` and $p_a=1$. We also expect them to have unit variance when the environmental variance in fitness is zero since then the census and the appropriate variance effective population size are equal - note the reduction in $Ne$ caused by linked selection appears in the between-locus rather than residual term (see below). When the the environmental variance in fitness is non-zero we expect the effective population size to be smaller than the census population. If the population size remains constant size then $Ne$ is smaller than $N$ by a factor $4/(2+Vo)$ where $Vo$ is variance in offspring number. This can be specified through the term `Ne_factor` and can be obtained by setting the census population size (`n`) to one in the function `predict_Ne` which also takes the variance in $e$ (`Ve`) and the `fitness_model`.
+
+```{r predict_Ne}
+predict_Ne<-function(Ve, n, fitness_model = "Exp"){
+
+  if(fitness_model == "Exp"){
+    # assuming meanlog=0
+    Vo<-4*exp(Ve)-2
+  }
+  if(fitness_model == "I"){
+    # assuming mean=1
+    Vo<-4*Ve+2
+  }
+  Ne<-4*n/(2+Vo)
+  return(Ne)
+}
+```
 
 ```{r analysis_parameters, eval=!functions_only} 
 proj<-"BLoM"
 pa<-1
-Ne_factor<-1 #4/(3+exp(EVe))
+Ne_factor<-predict_Ne(0,1)
 ```
 
 ### Distributional assumptions about the change in allele frequency across loci.
 
-The global mean allele frequency change *due to selection*, $E[E[\Delta {\bf p}]]$, is assumed to be equal to $n_g\tilde{\bf L}\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf {q})\right)$ (`Vs="L"`) or $\left(\tilde{\bf L}\right)\circ {\bf N}\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf {q})\right)$ or (`Vs="LoNL"`) where $n_g$ is the number of generations and $\beta^{(0)}_\Delta$ and $\beta^{(1)}_\Delta$ can be specified (`bdelta`).  The (co)variance $VAR[E[\Delta {\bf p}]]$, is assumed to be proportional to $(n_g\tilde{\bf L}){\bf L}^{p_{\Delta}}(\tilde{\bf L}n_g)$ (`Vs="L"`) or $(\tilde{\bf L}\circ {\bf N}){\bf L}^{p_{\Delta}}(\tilde{\bf L}\circ {\bf N})$ (`Vs="LoNL"`) where $p_{\Delta}$  can be specified (`pdelta`). Theoretically, we expect allele frequency change *due to selection* to have mean $\left(\tilde{\bf L}\circ {\bf N}\right)\left(\beta^{(0)}_\Delta+\beta^{(1)}_\Delta({\bf p}-\bf {q})\right)$ and covariance structure proportional to $\left(\tilde{\bf L}\circ {\bf N}\right){\bf L}^{p_{\alpha}}\left(\tilde{\bf L}\circ {\bf N}\right)$, although `Vs="L"` with $p_{\Delta}=p_{\alpha}$ might serve as a good approximation. It is also possible to ignore LD when defining ${\bf L}^{p_{\Delta}}$ above using `LDdelta=FALSE`.  If `pdelta` is NA then `Vw_model` will estimate it using calls to `optim`. If either the intercept (`bdelta[1]`) or slope (`bdelta[2]` ) are `NA` then they will be estimated.
+Given the allelic effects mean vector (${\boldsymbol \mu}_\alpha$) and covariance structure (${\bf V}_\alpha$) the global mean allele frequency change *due to selection*, $E[E[\Delta {\bf p}]]$, is assumed to be equal to $(\tilde{\bf L}\circ {\bf N}){\boldsymbol \mu}_\alpha$ (`Vs="LoNL"`) or $n_g\tilde{\bf L}{\boldsymbol \mu}_\alpha$ (`Vs="L"`). The (co)variance across loci in the frequency change due to selection, $VAR[E[\Delta {\bf p}]]$, is assumed to be proportional to $(\tilde{\bf L}\circ {\bf N}){\bf V}_\alpha(\tilde{\bf L}\circ {\bf N})$ (`Vs="LoNL"`) or $n_g^2\tilde{\bf L}{\bf V}_\alpha\tilde{\bf L}$ (`Vs="L"`). The mean function is restricted to the form ${\boldsymbol \mu}_\alpha=\beta_\alpha^{(0)}+\beta^{(1)}_\alpha(x_r-x_a)$ where $x_r$ is a property of the reference allele, and $x_a$ is the same property of the alternate allele. In what follows we will consider the scenario where $x_r=p$ and $x_a=q$. For the covariance structure we restrict the form to to ${\bf V}_\alpha=\sigma_\alpha^2{\bf L}^{p_{\alpha}}$. It is also possible to ignore LD when defining ${\bf L}^{p_{\alpha}}$ above using `LDalpha=FALSE`.  The function `Vw_model` fits this model to data on allele frequency changes.  $\sigma_\alpha$ is estimated and $p_{\alpha}$,  $\beta_\alpha^{(0)}$ and $\beta_\alpha^{(1)}$ can either be specified or estimated.  If `palpha` is NA then `Vw_model` will estimate it using calls to `optim`. If either the intercept (`balpha[1]`) or slope (`balpha[2]` ) are `NA` then they will be estimated.
+
 
 ```{r eval=!functions_only}
 Vs<-"LoNL"
-pdelta<-NA
-bdelta<-c(NA, NA)
-LDdelta<-LDalpha
+palpha<-NA
+balpha<-c(NA, NA)
+LDalpha<-FALSE
 ```
 
 ### Distributional assumptions about the change in *projected* allele frequency across loci.
@@ -352,219 +285,27 @@ form_nR<-function(SNPs,                   # SNP positions
 
 ```
 
-### Function for estimating the alpha distribution from actual values
-
-We initially considered a simple model where the expected $\alpha$ depends linearly on $p-q$ with intercept $\beta^{(0)}_{\alpha}$ and slope $\beta^{(1)}_{\alpha}$. The variance is assumed to be proportional to $(pq)^{p_\alpha}$ with $p_\alpha$ also estimated. However, after visually examining how well this model fits the joint distribution of $p$ and $\alpha$ obtained from simulations, we considered an alternative three-parameter model. In this model we rescale $\pm(p-q)^{\beta^{(0)}_{\alpha}}$ to lie between 0 and 1 (by adding 1 and dividing by 2), logit transform it, and then fit it as a predictor with estimated slope, $\beta^{(1)}_{\alpha}$ (the intercept, the expected value when $p=q$, is fixed at zero). The function `pmq_trans` computes the predictor for this second model given $p-q$ (`pmq`) and $\beta^{(0)}_{\alpha}$ (`bdelta_0`). As in the first model the variance is assumed to be proportional to $(pq)^{p_\alpha}$ with $p_\alpha$ also estimated. 
-
-```{r pmq_trans}
-logit<-function(x){
-  log(x)-log1p(-x)
-}
-
-pmq_trans<-function(pmq, bdelta_0){
-  x<-sign(pmq)*abs(pmq)^bdelta_0
-  logit((x+1)/2)
-}
-
-
-
-```
-
-Increasing the value of $\beta^{(0)}_{\alpha}$ causes the expected $\alpha$ to approach zero faster as it becomes less rare:
-
-```{r pmq_trans_plot}
-pmq<-seq(-1+1/1000, 1-1/1000, length=100)
-plot(pmq_trans(pmq, 1)~pmq, type="l", col=hcl.colors(20, alpha=1)[1])
-for(i in 2:20){
-  lines(pmq_trans(pmq, i)~pmq, col=hcl.colors(20, alpha=1)[i])
-}
-```
-
-Given a set of $\alpha$'s and allele frequencies $p$ the function `alpha_distribution` estimates  $\beta^{(0)}_{\alpha}$,  $\beta^{(1)}_{\alpha}$ and $p_\alpha$ for the original model (`logit=FALSE`) or the second model (`logit=TRUE`). An optional transposed projection matrix (`tprojp`) can also be given which transforms the allele frequencies and $\alpha$'s prior to model fitting. 
-
-
-```{r alpha_distribution}
-alpha_distribution<-function(alpha, p, tprojp=NULL, logit=FALSE, save_model=FALSE){
-
-  pmq<-2*p-1
-  pq<-p*(1-p)/2
-
-  pdelta_fit<-function(pdelta, alpha, pmq, pq, tprojp){
-
-       if(!is.null(tprojp)){
-          alpha<-t(alpha%*%tprojp)
-          pmq<-t(pmq%*%tprojp)
-          pq<-diag(t(tprojp)%*%(tprojp*pq^pdelta))
-       }else{
-          pq<-pq^pdelta
-       }
-
-       -logLik(lm(alpha~pmq, weights=1/pq))
-  }
-
-  logit_fit<-function(par, alpha, pmq, pq,  tprojp){
-
-        bdelta_0<-par[1]
-        pdelta<-par[2]
-
-        pmq<-pmq_trans(pmq, bdelta_0)
-
-        if(!is.null(tprojp)){
-          alpha<-t(alpha%*%tprojp)
-          pmq<-t(pmq%*%tprojp)
-          pq<-diag(t(tprojp)%*%(tprojp*pq^pdelta))
-        }else{
-          pq<-pq^pdelta
-        }
-        -logLik(lm(alpha~pmq-1, weights=1/pq))
-  }
-
-  if(logit){
-    pdelta<-optim(c(1, 1), logit_fit, alpha=alpha, pmq=pmq, pq=pq, tprojp=tprojp)$par
-
-    bdelta_0<-pdelta[1]
-    pdelta<-pdelta[2]
-  
-    pmq<-pmq_trans(pmq, bdelta_0)
-
-    if(!is.null(tprojp)){
-      alpha<-t(alpha%*%tprojp)
-      pmq<-t(pmq%*%tprojp)
-      pq<-diag(t(tprojp)%*%(tprojp*pq^pdelta))
-    }else{
-      pq<-pq^pdelta
-    }
-
-    m1<-lm(alpha~pmq-1, weights=1/pq)
-  }else{
-    pdelta<-optim(0, pdelta_fit, alpha=alpha, pmq=pmq, pq=pq, tprojp=tprojp, method="Brent", lower=-5, upper=5)$par
-
-    if(!is.null(tprojp)){
-      alpha<-t(alpha%*%tprojp)
-      pmq<-t(pmq%*%tprojp)
-      pq<-diag(t(tprojp)%*%(tprojp*pq^pdelta))
-    }else{
-      pq<-pq^pdelta
-    }
-
-    m1<-lm(alpha~pmq, weights=1/pq)
-  }  
-
-  
-  result<-list(pdelta=pdelta, 
-               bdelta_0=if(logit){bdelta_0}else{coef(m1)["(Intercept)"]}, 
-               bdelta_1=coef(m1)["pmq"],
-               sigma2delta=summary(m1)$sigma^2,
-               logit=logit,
-               model=if(save_model){m1}else{NULL},
-               X=model.matrix(m1),
-               S=summary(m1)$cov.unscaled*summary(m1)$sigma^2)
-
-  return(result)
-}
-```
-
-The function `plot_alpha_distribution` plots the $\alpha$'s against $p-q$ and overlays the expected $\alpha$ and its upper/lower 2.5\% quantiles given the parameters of a model fit. The argument `parameters` must be a list containing elements, `pdelta`, `bdelta_0`, `bdelta_1`, `sigma2delta` and logit. The output from `alpha_distribution` can be passed directly to the argument `parameters`. 
-
-```{r plot_alpha_distribution}
-plot_alpha_distribution<-function(alpha=NULL, p=NULL, tprojp=NULL, parameters, ...){
-
-  pmq<-2*p-1
-  pq<-p*(1-p)/2
-
-  if(parameters$logit){
-    pred<-pmq_trans(pmq, parameters$bdelta_0)
-    intercept<-0
-  }else{
-    pred<-pmq
-    intercept<-parameters$bdelta_0
-  }
-  slope<-parameters$bdelta_1
-
-  pdelta<-parameters$pdelta
-  var<-pq^pdelta
-
-  if(is.null(tprojp)){
-
-    pmq.x<-seq(min(pmq),max(pmq), length=1000)
-    pq.x = (pmq.x+1)*(1-pmq.x)/8
-    sd.x<-parameters$sigma2delta*sqrt(pq.x^pdelta)
-
-    plot(alpha~pmq, ylab="alpha", xlab="p-q", ...)
-
-    if(parameters$logit){
-      pred.x<-pmq_trans(pmq.x, parameters$bdelta_0)
-    }else{
-      pred.x<-pmq.x
-    } 
-
-    m.x<-intercept+slope*pred.x
-    u.x<-qnorm(0.975, intercept+slope*pred.x, sd.x)
-    l.x<-qnorm(0.025, intercept+slope*pred.x, sd.x)
-
-    lines(m.x~pmq.x, col="red")
-    lines(u.x~pmq.x, col="red", lty=2)
-    lines(l.x~pmq.x, col="red", lty=2)
-  
-  }else{  
-
-    alpha<-t(alpha%*%tprojp)
-    pred<-t(pred%*%tprojp)
-    var<-diag(t(tprojp)%*%(tprojp*pq^pdelta))
-
-    plot(alpha~pred, ylab="projected alpha", xlab="projected predictor", ...)
-
-    pred.x<-seq(min(pred),max(pred), length=1000)
-
-    m.x<-intercept+slope*pred.x
-    lines(m.x~pred.x, col="red")
-
-  }
-}  
-
-# and check yo make sure OK
-n<-1000
-
-p<-runif(n)
-
-bdelta_int<-0
-bdelta_slope<-0.2
-pdelta<--1
-sigma2delta<-0.1
-
-mu<-bdelta_int+bdelta_slope*(2*p-1)
-v<-sigma2delta*(p*(1-p)/2)^pdelta
-
-alpha<-rnorm(n, mu, sqrt(v))
-
-parameters<-alpha_distribution(alpha, p)
-parameters[1:4]
-# Good
-
-plot_alpha_distribution(alpha, p, parameters=parameters)
-```
-
 ### Function for model fitting
 
 
 ```{r analysis_function}
 
 
-fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, ngen2, ngen1, nind, tprojp, pbar0, pbar1, pbar2, nrep, Selec, Ne_factor=1, LLonly=FALSE, method = "REML", verbose=TRUE){
+fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, nind, tprojp, pbar0, pbar1, pbar2, nrep, Selec, Ne_factor=1, LLonly=FALSE, method = "REML", verbose=TRUE){
   
   if(verbose){
     message("Computing the covariance structure of locus effects...")
     message("Computing covp over 1 generation...")
   }
 
-  if(LDdelta){
-    if(pdelta==0){
+  if(LDalpha){
+    if(palpha==0){
       covp<-diag(nsnps)
     }else{
-      covp<-UL%*%diag(DL^(2*pdelta))%*%t(UL)
+      covp<-UL%*%diag(DL^(2*palpha))%*%t(UL)
     }  
   }else{
-    covp<-diag(L)^pdelta
+    covp<-diag(L)^palpha
   }
 
   rm(list = c("UL", "DL"))
@@ -583,7 +324,7 @@ fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, ngen2, ngen1, nin
   rm("Selec")
   gc(verbose = FALSE)
 
-  if(LDdelta){
+  if(LDalpha){
     SC<-projpSelec%*%covp
 
     rm("covp")
@@ -593,7 +334,7 @@ fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, ngen2, ngen1, nin
     # computing COV(\Delta p_m, \Delta p_n) on the projected scale.
   }else{
     SC<-projpSelec%*%(t(projpSelec)*covp)
-    # if LDdelta=F, covp is diagonal and this is more efficient. 
+    # if LDalpha=F, covp is diagonal and this is more efficient. 
   }
 
   attr(SC, "INVERSE")<-FALSE
@@ -611,11 +352,11 @@ fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, ngen2, ngen1, nin
   dat.gaussian<-data.frame(delta=c(pbar2_proj-pbar1_proj), locus=gl(ncol(pbar1_proj),nrep,ncol(pbar1_proj)*nrep), rep=gl(nrep,1,ncol(pbar1_proj)*nrep), pmq=c(pmq_proj), int=c(int_proj))
 
 
-  if(!is.na(bdelta[1])){
-     dat.gaussian$int<-dat.gaussian$int*bdelta[1]
+  if(!is.na(balpha[1])){
+     dat.gaussian$int<-dat.gaussian$int*balpha[1]
   }
-  if(!is.na(bdelta[2])){
-     dat.gaussian$pmq<-dat.gaussian$pmq*bdelta[2]
+  if(!is.na(balpha[2])){
+     dat.gaussian$pmq<-dat.gaussian$pmq*balpha[2]
   }
 
   ##############
@@ -632,17 +373,17 @@ fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, ngen2, ngen1, nin
   # force symmetry in case it is not exactly symmetric
 
   if(method=="REML"){
-    if(is.na(bdelta[1]) & is.na(bdelta[2])){
+    if(is.na(balpha[1]) & is.na(balpha[2])){
         m1<-asreml(delta~int+pmq-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
     }
-    if(is.na(bdelta[1]) & !is.na(bdelta[2])){
+    if(is.na(balpha[1]) & !is.na(balpha[2])){
         m1<-asreml(delta~int+offset(pmq)-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
     }
-    if(!is.na(bdelta[1]) & is.na(bdelta[2])){
+    if(!is.na(balpha[1]) & is.na(balpha[2])){
         m1<-asreml(delta~offset(int)+pmq-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
     }
-    if(!is.na(bdelta[1]) & !is.na(bdelta[2])){
-      warning("asreml doesn't allow models without fixed effects, so intercept fitted but replaced with bdelta[1]!")
+    if(!is.na(balpha[1]) & !is.na(balpha[2])){
+      warning("asreml doesn't allow models without fixed effects, so intercept fitted but replaced with balpha[1]!")
       m1<-asreml(delta~offset(pmq + int), random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
     } 
   }
@@ -656,9 +397,9 @@ fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, ngen2, ngen1, nin
     attr(invSC, "rowNames") <- 1:retain
     attr(invSC, "colNames") <- 1:retain
 
-    prior<-list(B=list(mu=bdelta, V=diag(2)*1e+10))
-    diag(prior$B$V)[which(!is.na(bdelta))]<-1e-10
-    prior$B$mu[which(is.na(bdelta))]<-0
+    prior<-list(B=list(mu=balpha, V=diag(2)*1e+10))
+    diag(prior$B$V)[which(!is.na(balpha))]<-1e-10
+    prior$B$mu[which(is.na(balpha))]<-0
 
     m1<-MCMCglmm(delta~pmq+int-1, random=~locus, data=dat.gaussian, ginverse=list(locus=invSC), family="gaussian", pr=TRUE, prior=prior)
   }
@@ -666,7 +407,7 @@ fit.model<-function(pdelta, bdelta, LDdelta, nsnps, UL, DL, L, ngen2, ngen1, nin
   if(LLonly){
     return(m1$loglik)
   }else{
-    return(list(data=dat.gaussian, model=m1, SC=SC, pdelta=pdelta))
+    return(list(data=dat.gaussian, model=m1, SC=SC, palpha=palpha))
   }
 }
 
@@ -681,10 +422,10 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
                    ngen2,       # number of generations between parents and time-point 2
                    nind,        # population size in each replicate
                    proj,        # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
-                   LDdelta,
+                   LDalpha,
                    pa,
-                   pdelta,
-                   bdelta,
+                   palpha,
+                   balpha,
                    Vs,
                    method,
                    L,           # between individual covariance in allele proportion
@@ -698,7 +439,7 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
   
   asreml.options(Cfixed = TRUE)
 
-  if(is.null(L) | is.null(Ltilde) | (is.null(svdL) & (proj=="BLoM" | LDdelta))){
+  if(is.null(L) | is.null(Ltilde) | (is.null(svdL) & (proj=="BLoM" | LDalpha))){
 
     if(is.null(c_genome)){
       stop("c_genome is required if L, Ltilde or svdL are NULL")
@@ -706,7 +447,7 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
 
     n0_individuals<-nrow(c_genome)/2
 
-    if(is.null(L) | (is.null(svdL) & (proj=="BLoM" | LDdelta))){
+    if(is.null(L) | (is.null(svdL) & (proj=="BLoM" | LDalpha))){
 
       paternal<-seq(1, 2*n0_individuals, 2)
       maternal<-paternal+1
@@ -745,7 +486,7 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
 
   if(nrow(pbar1)!=nrow(pbar2)){stop("pbar1 and pbar2 should have the same number of rows (the number of replicates)")}
 
-  if(proj=="BLoM" | LDdelta){  # singular vectors of L required 
+  if(proj=="BLoM" | LDalpha){  # singular vectors of L required 
 
      if(is.null(svdL)){
 
@@ -889,26 +630,26 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
   
   
 
-  if(is.na(pdelta)){
+  if(is.na(palpha)){
 
     if(verbose){
-      message("Estimating pdelta...")
+      message("Estimating palpha...")
     }
 
-    pdelta<-optim(0, fit.model, bdelta=bdelta, LDdelta = LDdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, Selec=Selec, Ne_factor=Ne_factor,  method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1, factr = 1e+11), hessian=TRUE)
+    palpha<-optim(0, fit.model, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, Selec=Selec, Ne_factor=Ne_factor, verbose=verbose, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1, factr = 1e+11), hessian=TRUE)
 
-    pdelta_var<--1/pdelta$hessian
-    pdelta<-pdelta$par
+    palpha_var<--1/palpha$hessian
+    palpha<-palpha$par
 
   }else{
-    pdelta_var<-0
+    palpha_var<-0
   }
 
   if(verbose){
     message("Fitting the final model...")
   }
 
-  output<-fit.model(pdelta=pdelta, bdelta=bdelta, LDdelta = LDdelta, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, Selec=Selec, Ne_factor=Ne_factor)
+  output<-fit.model(palpha=palpha, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, Selec=Selec, Ne_factor=Ne_factor, verbose=verbose)
 
   if(verbose){
     message("Calculating the estimate of Vw...")
@@ -916,43 +657,389 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
 
   if(method=="REML"){
     
-    sigma2delta<-summary(output$model)$varcomp[1,1]
+    sigma2alpha<-summary(output$model)$varcomp[1,1]
     S<-matrix(0,2,2)
 
-    if(is.na(bdelta[1]) & is.na(bdelta[2])){
-        bdelta<-summary(output$model, coef=TRUE)$coef.fixed[c("int", "pmq"),1]
+    if(is.na(balpha[1]) & is.na(balpha[2])){
+        balpha<-summary(output$model, coef=TRUE)$coef.fixed[c("int", "pmq"),1]
         S<-output$model$Cfixed[c("int", "pmq"),c("int", "pmq")]
     }
-    if(is.na(bdelta[1]) & !is.na(bdelta[2])){
-       bdelta[1]<-summary(output$model, coef=TRUE)$coef.fixed["int",1]
+    if(is.na(balpha[1]) & !is.na(balpha[2])){
+       balpha[1]<-summary(output$model, coef=TRUE)$coef.fixed["int",1]
        S["int","int"]<-output$model$Cfixed
     }
-    if(!is.na(bdelta[1]) & is.na(bdelta[2])){
-        bdelta[2]<-summary(output$model, coef=TRUE)$coef.fixed["pmq",1]
+    if(!is.na(balpha[1]) & is.na(balpha[2])){
+        balpha[2]<-summary(output$model, coef=TRUE)$coef.fixed["pmq",1]
         S["pmq","pmq"]<-output$model$Cfixed
     }
   }
   if(method=="MCMC"){
-    sigma2delta<-posterior.mode(output$model$VCV[,1])
-    bdelta<-colMeans(output$model$Sol[,c("int", "pmq")])
+    sigma2alpha<-posterior.mode(output$model$VCV[,1])
+    balpha<-colMeans(output$model$Sol[,c("int", "pmq")])
   }
 
   X<-cbind(rep(1, length(pbar0)), 2*pbar0-1)
 
-  if(LDdelta){
-    TrV<-sum(DL^(2*(output$pdelta+1)))*sigma2delta
-    aLa<-t(X%*%bdelta)%*%L%*%X%*%bdelta-sum(diag(t(X)%*%L%*%X%*%S))
+  if(LDalpha){
+    TrV<-sum(DL^(2*(output$palpha+1)))*sigma2alpha
+    aLa<-t(X%*%balpha)%*%L%*%X%*%balpha-sum(diag(t(X)%*%L%*%X%*%S))
   }else{
-    TrV<-sum(diag(L)^(output$pdelta+1))*sigma2delta
-    aLa<-t(X%*%bdelta)%*%L%*%X%*%bdelta-sum(diag(t(X)%*%L%*%X%*%S))
+    TrV<-sum(diag(L)^(output$palpha+1))*sigma2alpha
+    aLa<-t(X%*%balpha)%*%L%*%X%*%balpha-sum(diag(t(X)%*%L%*%X%*%S))
   }
 
   Vw_est<-TrV+aLa
 
-  return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, pdelta=output$pdelta, bdelta=bdelta, pdelta_var=pdelta_var, bdelta_var=S, tprojp=if(save_tprojp){tprojp}else{NULL}, S=S, X=X, DL=ifelse(exists("DL"), DL, NA)))
+  return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, palpha=output$palpha, balpha=balpha, palpha_var=palpha_var, balpha_var=S, tprojp=if(save_tprojp){tprojp}else{NULL}, S=S, X=X, DL=ifelse(exists("DL"), DL, NA)))
 
 }
 ```
+
+### Function for estimating the alpha distribution from actual values
+
+We initially considered a simple model where the expected $\alpha$ depends linearly on $p-q$ with intercept $\beta^{(0)}_{\alpha}$ and slope $\beta^{(1)}_{\alpha}$. The variance is assumed to be proportional to $(pq)^{p_\alpha}$ with $p_\alpha$ also estimated. However, after visually examining how well this model fits the joint distribution of $p$ and $\alpha$ obtained from simulations, we considered an alternative three-parameter model. In this model we rescale $\pm(p-q)^{\beta^{(0)}_{\alpha}}$ to lie between 0 and 1 (by adding 1 and dividing by 2), logit transform it, and then fit it as a predictor with estimated slope, $\beta^{(1)}_{\alpha}$ (the intercept, the expected value when $p=q$, is fixed at zero). The function `pmq_trans` computes the predictor for this second model given $p-q$ (`pmq`) and $\beta^{(0)}_{\alpha}$ (`balpha_0`). As in the first model the variance is assumed to be proportional to $(pq)^{p_\alpha}$ with $p_\alpha$ also estimated. 
+
+```{r pmq_trans}
+logit<-function(x){
+  log(x)-log1p(-x)
+}
+
+pmq_trans<-function(pmq, balpha_0){
+  x<-sign(pmq)*abs(pmq)^balpha_0
+  logit((x+1)/2)
+}
+
+
+
+```
+
+Increasing the value of $\beta^{(0)}_{\alpha}$ causes the expected $\alpha$ to approach zero faster as it becomes less rare:
+
+```{r pmq_trans_plot}
+pmq<-seq(-1+1/1000, 1-1/1000, length=100)
+plot(pmq_trans(pmq, 1)~pmq, type="l", col=hcl.colors(20, alpha=1)[1])
+for(i in 2:20){
+  lines(pmq_trans(pmq, i)~pmq, col=hcl.colors(20, alpha=1)[i])
+}
+```
+
+Given a set of $\alpha$'s and allele frequencies $p$ the function `alpha_distribution` estimates  $\beta^{(0)}_{\alpha}$,  $\beta^{(1)}_{\alpha}$ and $p_\alpha$ for the original model (`logit=FALSE`) or the second model (`logit=TRUE`). An optional transposed projection matrix (`tprojp`) can also be given which transforms the allele frequencies and $\alpha$'s prior to model fitting. 
+
+
+```{r alpha_distribution}
+alpha_distribution<-function(alpha, p, tprojp=NULL, logit=FALSE, save_model=FALSE){
+
+  pmq<-2*p-1
+  pq<-p*(1-p)/2
+
+  palpha_fit<-function(palpha, alpha, pmq, pq, tprojp){
+
+       if(!is.null(tprojp)){
+          alpha<-t(alpha%*%tprojp)
+          pmq<-t(pmq%*%tprojp)
+          pq<-diag(t(tprojp)%*%(tprojp*pq^palpha))
+       }else{
+          pq<-pq^palpha
+       }
+
+       -logLik(lm(alpha~pmq, weights=1/pq))
+  }
+
+  logit_fit<-function(par, alpha, pmq, pq,  tprojp){
+
+        balpha_0<-par[1]
+        palpha<-par[2]
+
+        pmq<-pmq_trans(pmq, balpha_0)
+
+        if(!is.null(tprojp)){
+          alpha<-t(alpha%*%tprojp)
+          pmq<-t(pmq%*%tprojp)
+          pq<-diag(t(tprojp)%*%(tprojp*pq^palpha))
+        }else{
+          pq<-pq^palpha
+        }
+        -logLik(lm(alpha~pmq-1, weights=1/pq))
+  }
+
+  if(logit){
+    palpha<-optim(c(1, 1), logit_fit, alpha=alpha, pmq=pmq, pq=pq, tprojp=tprojp)$par
+
+    balpha_0<-palpha[1]
+    palpha<-palpha[2]
+  
+    pmq<-pmq_trans(pmq, balpha_0)
+
+    if(!is.null(tprojp)){
+      alpha<-t(alpha%*%tprojp)
+      pmq<-t(pmq%*%tprojp)
+      pq<-diag(t(tprojp)%*%(tprojp*pq^palpha))
+    }else{
+      pq<-pq^palpha
+    }
+
+    m1<-lm(alpha~pmq-1, weights=1/pq)
+  }else{
+    palpha<-optim(0, palpha_fit, alpha=alpha, pmq=pmq, pq=pq, tprojp=tprojp, method="Brent", lower=-5, upper=5)$par
+
+    if(!is.null(tprojp)){
+      alpha<-t(alpha%*%tprojp)
+      pmq<-t(pmq%*%tprojp)
+      pq<-diag(t(tprojp)%*%(tprojp*pq^palpha))
+    }else{
+      pq<-pq^palpha
+    }
+
+    m1<-lm(alpha~pmq, weights=1/pq)
+  }  
+
+  
+  result<-list(palpha=palpha, 
+               balpha_0=if(logit){balpha_0}else{coef(m1)["(Intercept)"]}, 
+               balpha_1=coef(m1)["pmq"],
+               sigma2alpha=summary(m1)$sigma^2,
+               logit=logit,
+               model=if(save_model){m1}else{NULL},
+               X=model.matrix(m1),
+               S=summary(m1)$cov.unscaled*summary(m1)$sigma^2)
+
+  return(result)
+}
+```
+
+The function `plot_alpha_distribution` plots the $\alpha$'s against $p-q$ and overlays the expected $\alpha$ and its upper/lower 2.5\% quantiles given the parameters of a model fit. The argument `parameters` must be a list containing elements, `palpha`, `balpha_0`, `balpha_1`, `sigma2alpha` and logit. The output from `alpha_distribution` can be passed directly to the argument `parameters`. 
+
+```{r plot_alpha_distribution}
+plot_alpha_distribution<-function(alpha=NULL, p=NULL, tprojp=NULL, parameters, ...){
+
+  pmq<-2*p-1
+  pq<-p*(1-p)/2
+
+  if(parameters$logit){
+    pred<-pmq_trans(pmq, parameters$balpha_0)
+    intercept<-0
+  }else{
+    pred<-pmq
+    intercept<-parameters$balpha_0
+  }
+  slope<-parameters$balpha_1
+
+  palpha<-parameters$palpha
+  var<-pq^palpha
+
+  if(is.null(tprojp)){
+
+    pmq.x<-seq(min(pmq),max(pmq), length=1000)
+    pq.x = (pmq.x+1)*(1-pmq.x)/8
+    sd.x<-parameters$sigma2alpha*sqrt(pq.x^palpha)
+
+    plot(alpha~pmq, ylab="alpha", xlab="p-q", ...)
+
+    if(parameters$logit){
+      pred.x<-pmq_trans(pmq.x, parameters$balpha_0)
+    }else{
+      pred.x<-pmq.x
+    } 
+
+    m.x<-intercept+slope*pred.x
+    u.x<-qnorm(0.975, intercept+slope*pred.x, sd.x)
+    l.x<-qnorm(0.025, intercept+slope*pred.x, sd.x)
+
+    lines(m.x~pmq.x, col="red")
+    lines(u.x~pmq.x, col="red", lty=2)
+    lines(l.x~pmq.x, col="red", lty=2)
+  
+  }else{  
+
+    alpha<-t(alpha%*%tprojp)
+    pred<-t(pred%*%tprojp)
+    var<-diag(t(tprojp)%*%(tprojp*pq^palpha))
+
+    plot(alpha~pred, ylab="projected alpha", xlab="projected predictor", ...)
+
+    pred.x<-seq(min(pred),max(pred), length=1000)
+
+    m.x<-intercept+slope*pred.x
+    lines(m.x~pred.x, col="red")
+
+  }
+}  
+```
+
+We can check to make sure everything is as expected
+
+```{r eval=!functions_only} 
+n<-1000
+
+p<-runif(n)
+
+balpha_int<-0
+balpha_slope<-0.2
+palpha<--1
+sigma2alpha<-0.1
+
+mu<-balpha_int+balpha_slope*(2*p-1)
+v<-sigma2alpha*(p*(1-p)/2)^palpha
+
+alpha<-rnorm(n, mu, sqrt(v))
+
+parameters<-alpha_distribution(alpha, p)
+parameters[1:4]
+
+plot_alpha_distribution(alpha, p, parameters=parameters)
+```
+
+## Drift covariance
+
+In the MS we drive the drift covariance in allele frequency between generation $t$ and $t+1$ as the expected gametic-phase LD in generation $t+1$ given the gametic and non-gametic phase LD in generation $t$, scaled by $1/N_e$. Here we check whether these results hold for a 2-locus model. The function `summaryG` takes a 2-column matrix of haplotypes with elements equal to 1 (AB), 2 (Ab), 3 (aB) or 4 (ab). Each row corresponds to an individual with the two columns representing the maternal or paternal gamete contribution.  The allele frequencies (`pA` and `pB`), $L^{'}$ (`Lgp`) and $L^{''}$ (`Lngp`) are returned.
+
+```{r summaryG}
+summaryG<-function(x){
+
+  if(ncol(x)!=2 | any(!x%in%c(1:4))){
+    stop("x should be an nx2 matrix with integers 1:4 corresponding to haplotypes AB (1), Ab (2), aB (3) and ab (4)")
+  }
+
+  n_hap<-length(x)
+
+  pA<-sum(x==1 | x==2)/n_hap
+  pB<-sum(x==1 | x==3)/n_hap
+  # frequency of A and B alleles
+
+  Lgp<-sum(x==1)/n_hap
+  # frequency of AB haplotype
+
+  Lgp<-Lgp-pA*pB
+  # gametic phase LD
+
+  Lngp<-sum((x[,1]==1 | x[,1]==2) & (x[,2]==1 | x[,2]==3))
+  # number of individuals whose first haplotype contains an A and the second a B
+  Lngp<-Lngp+sum((x[,2]==1 | x[,2]==2) & (x[,1]==1 | x[,1]==3))
+  # add number of individuals whose first haplotype contains a B and the second an A
+  Lngp<-Lngp/n_hap
+  # frequency of individuals with A and B alleles on different haplotypes
+
+  Lngp<-Lngp-pA*pB
+  # non-gametic phase LD
+ 
+  return(list(pA=pA, pB=pB, Lgp=Lgp, Lngp=Lngp))
+}
+```
+The function `sample_gamete` takes a pair of haplotypes through the argument `xi` and the recombination probability between the two loci `r` and samples a gametic halpotype. 
+
+```{r sample_gamete}
+sample_gamete<-function(xi, r){
+   
+   r_event<-rbinom(1, size=1, prob=r)
+
+   if(r_event & all(c(1,4)%in%xi)){xi<-c(2,3)}
+   if(r_event & all(c(2,3)%in%xi)){xi<-c(1,4)}
+
+   h_event<-rbinom(1, size=1, prob=1/2)+1
+
+   return(xi[h_event])
+}
+```
+
+In order to calculate $Ne$ we need to know the variance in offspring number in the presence of environmental variance in fitness only.  When `fitness_model="Exp"`, parents are sampled from a multinomial of length $n$ and their non-normalised probabilities, $P$, are drawn from a log-normal with `meanlog`$=0$ and `sdlog`$=x$. The expected number of offspring for parent $i$ is $Np_i$ where $p_i$ is the normalised probability for individual $i$ and $N$ the total number of offspring to be drawn.  The variance in the number offspring for parent $i$ is $Np_i(1-p_i)$ and so from the law of total variance $Var(o) = (N^2)Var(p)+NE[p(1-p)]$.  If the $p$ are not too variable then $E[p(1-p)]$ is approximately $E[p](1-E[p])$ where $E[p] = 1/n$ and so $E[p(1-p)]$ is approximately $1/n$ if $n$ is large. Consequently, 
+
+$$Var(o) = (N^2)Var(p)+N/n$$
+
+From the properties of the log-normal (with `meanlog`=0) we know $E[P] = exp(x^2/2)$ and $Var(P) = exp(x^2)-1)exp(x^2)$. Since $p = P/(nE[P])$
+
+$$
+\begin{array}{rl}
+Var(p) =& (exp(x^2)-1)exp(x^2)/(nexp((x^2)/2))^2\\
+       =& (exp(x^2)-1)exp(x^2)/(exp(x^2)*n^2)\\
+       =& (exp(x^2)-1)/n^2\\
+\end{array}
+$$
+
+such that 
+
+$$Var(o) = (N^2/n^2)(exp(x^2)-1)+N/n$$
+
+If the population size is constant then $N=2n$ this simplifies to $Var(o) = 4exp(x^2)-2$ and so $x=\sqrt(log((Var(o)+2)/4)$.  When `fitness_model="I"` the $P$ are drawn from a distribution with a mean of 1 and standard deviation $\sigma$. Under the same conditions as above $Var(o) = 4\sigma^2+2$ and so $\sigma = \sqrt{(Var(o)+2)/4}$. The variance effective population size, $Ne$ is $4n/(2+Var(o))$. We can check the derivation:       
+
+
+```{r test_Vo, eval=!functions_only}
+
+  n<-100000
+  N<-2*n
+
+  Vo<-5.2
+  x<-sqrt(log((Vo+2)/4)) 
+
+  P<-rlnorm(n, 0, x)
+
+  p<-P/(n*mean(P))
+
+  var(rmultinom(1,prob=p, size=N))
+
+```
+
+Using the above results and functions we can simulate a pure drift scenario and look at the drift covariance. 
+
+```{r drift_covariance_sim, eval=!functions_only}
+
+nsim<-10000  # number of replicates
+n<-100       # census population size (assumed constant)
+r<-0.01      # recombination rate
+Vo<-2.6      # variance in offspring number
+
+hap.freq<-c(0.3, 0.2, 0.2, 0.3)
+# haplotype frequencies in the order AB, Ab, aB, ab
+
+Ne<-(4*n)/(2+Vo)            # variance effective population size
+logsd<-sqrt(log((Vo+2)/4))  # log-normal sd required to achieve Vo 
+
+ht<-matrix(sample(1:4, prob=hap.freq, replace=TRUE, size=2*n), n, 2)
+# sample initial set of haplotypes (rows individuals)
+
+Gt<-summaryG(ht)
+# calculate allele frequencies and linkage disequilibria at time t
+
+res<-matrix(NA, nsim,5)     
+colnames(res)<-c("pAt1", "pBt1", "Lgpt1", "Lngpt1", "Ne")
+# matrix for storing allele frequencies, linkage disequilibria at time t+1 and realised Ne
+
+for(i in 1:nsim){
+
+  prob<-exp(rnorm(n, 0, logsd))
+  # generate P's
+
+  parent<-sample(1:n, 2*n, prob=prob, replace=TRUE)
+  # sample parental identities
+
+  ht1<-matrix(apply(ht[parent,], 1, sample_gamete, r=r),n,2)
+  # generate offspring haplotypes
+
+  obs_Vo<-var(table(factor(parent, levels=1:n)))
+  # observed variance in offspring number
+ 
+  res[i,]<-c(unlist(summaryG(ht1)), (4*n)/(2+obs_Vo))
+  # store results
+}
+
+deltaA<-res[,"pAt1"]-Gt$pA
+deltaB<-res[,"pBt1"]-Gt$pB
+# changes in allele frequency
+
+par(mfrow=c(1,2))
+plot(sapply(10:nsim, function(x){cov(deltaA[1:x], deltaB[1:x])}), ylab="Drift Covariance", xlab="Number of simulations")
+# plot rolling covariance (to get an idea what it might asymptote to as nsim goes to infinity)
+
+abline(h=(Gt$Lgp*(1-r)+Gt$Lngp*r)/(2*n), col="green") # predicted drift covariance given n=n 
+abline(h=(Gt$Lgp*(1-r)+Gt$Lngp*r)/(2*Ne), col="red")  # predicted drift covariance given n=Ne 
+abline(h=(Gt$Lgp+Gt$Lngp)*(1-r)/(2*Ne), col="blue")   # approximate drift covariance given n=Ne assuming Lgp=L
+
+hist(res[,"Ne"], main="", xlab="Realised Ne")
+# histogram of realised Ne
+abline(v=Ne, col="red")                 # Expected Ne
+abline(v=mean(res[,"Ne"]), col="blue")  # Mean realised Ne
+
+``` 
+
 
 ## Recombinant Reads
 
@@ -1043,34 +1130,7 @@ ngen<-3.25
 sqrt((1+ngen)*ngen/(2*nhits))
 ```
 
-The variance in the number of offspring due to environmental variation.
-
-Assuming log-normal distribution with zero mean and variance $v$, the variance on the arithmetic scale is  $exp(v)(exp(v)-1)$. Drawing Poisson number of offspring adds variance equal to the mean which on the arithmetic scale is $exp(v/2)$ to give the total variance as $exp(v)(exp(v)-1)+exp(v/2)$
-
-However, since we sample with replacement the mean number of offspring is 2 and so the variance should be scaled by $\left(2/exp(v/2))\right)^2=4exp(-v)$ to give Consequently the variance in offspring number is 
-
-\begin{equation}
-4exp(-v)\left[exp(v)(exp(v)-1)+exp(v/2)\right] = 4(exp(v)-1+exp(-v/2))
-\end{equation}
-
-Somthing wrong here since if $v=0$ then the variance should be close to 2 but actually this formula returns 4!?
-
-```{r results="hide", eval=FALSE} 
-n<-100000
-v<-0
-w<-rnorm(n, 0 , sqrt(v))
-
-var(rpois(n, exp(w)))
-exp(v)*(exp(v)-1)+exp(v/2)
-
-mean(rpois(n, exp(w)))
-exp(v/2)
-
-no<-sample(1:n, size=2*n, prob=exp(w), replace=TRUE)
-
-var(table(factor(no, levels=1:n)))
-4*(exp(v)-1+exp(-v/2))
-```
+## Method of Buffalo and Coop
 
 Comparing our method with that of Buffalo and Coop. The define ${\bf Q}$ as a matrix of covariances in allele frequency change over one generation between all pairs of generations, scaled by the average genetic diversity (Equation 16 Buffalo and Coop).  In our context this would be equivalent to covariances in allele frequency change across pairs of replicates, had each replicate been allowed to evolve for one generation:
 

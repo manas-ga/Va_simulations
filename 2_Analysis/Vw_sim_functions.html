@@ -820,7 +820,8 @@ analyses as a .csv file</li>
                        method=&quot;REML&quot;,         # Can be &quot;REML&quot; or &quot;MCMC&quot;
                        pdelta = NA,           # If NA pdelta is estimated using optim()
                        bdelta = c(NA, NA),    # If c(NA,NA) both bedelta intercept and slope are estimated
-                       AtleastOneRecomb=FALSE,
+                       AtleastOneRecomb=FALSE, 
+                       all.gp = FALSE,        # Ltilde = L&#39;+L&#39;&#39;(r/(1-r)) if all.gp=T L&#39;&#39; is assumed 0 and L&#39;=L. 
                        verbose = TRUE
                        ){
   
@@ -843,8 +844,9 @@ analyses as a .csv file</li>
   if(verbose){message(&quot;Analysing the parents&#39; generation...&quot;)}
 
   parents_info = analyse_parents(c_genome = sim_data$c_genome,  
-                                 list_alpha = sim_data$list_alpha,             
-                                 LDdelta=LDdelta,         
+                                 list_alpha = sim_data$list_alpha,     
+                                 compute_svdL=TRUE,        
+                                 LDdelta=LDdelta,   
                                  SNPs = sim_data$SNPs,                   
                                  RecombRate = sim_data$sim_params$r_expt,             
                                  HapLength = sim_data$sim_params$sequence_length,              
@@ -854,7 +856,7 @@ analyses as a .csv file</li>
   
   if(verbose){message(&quot;Performing analyses...&quot;)}
 
-  m1&lt;-Vw_model(C0 = sim_data$c0,          
+  m1&lt;-Vw_model(c_genome = NULL,          
                nR = parents_info$nR,
                pbar0 = sim_data$pbar0,                   
                pbar1 = sim_data$pbar1,      
@@ -870,7 +872,7 @@ analyses as a .csv file</li>
                Vs = Vs,
                method = method,
                L = parents_info$L,
-               Ltilde = parents_info$Ltilde,      
+               Ltilde = if(all.gp){parents_info$L}else{parents_info$Ltilde},      
                svdL = parents_info$svdL,           # list with elements UL and DL
                tol = sqrt(.Machine$double.eps))
 
@@ -889,7 +891,7 @@ analyses as a .csv file</li>
  
   sim_params = sim_data$sim_params
 
-  analysis_data = data.frame(&quot;proj&quot;=proj, &quot;LDdelta&quot;=LDdelta, &quot;pa&quot;=pa, &quot;Vs&quot;=Vs, &quot;randomise&quot;=randomise, &quot;pdelta_method&quot;=pdelta, &quot;bdelta_method&quot;=paste(bdelta[1], bdelta[2], sep=&quot;_&quot;), &quot;va_true&quot;=parents_info$va_true, &quot;vA_true&quot;=parents_info$vA_true, &quot;vA_est&quot;=vA_est, &quot;vA_alpha_emp&quot;=parents_info$vA_alpha_emp, &quot;pdelta_emp&quot;=parents_info$parameters$pdelta, &quot;bdelta_intercept_emp&quot;=parents_info$parameters$bdelta_0, &quot;bdelta_slope_emp&quot;=parents_info$parameters$bdelta_1, &quot;sigma2delta_emp&quot;=parents_info$parameters$sigma2delta, &quot;pdelta_est&quot;=pdelta_est, &quot;pdelta_var_est&quot;=pdelta_var_est, &quot;bdelta_intercept_est&quot;=bdelta_intercept_est, &quot;bdelta_slope_est&quot;=bdelta_slope_est, &quot;bdelta_var_est&quot;=bdelta_var_est, &quot;sigma2delta_est&quot;=sigma2delta_est, &quot;seg_sites&quot;=parents_info$seg_sites, &quot;seg_sites_neu&quot;=parents_info$seg_sites_neu, &quot;seg_sites_ben&quot;=parents_info$seg_sites_ben, &quot;seg_sites_del&quot;=parents_info$seg_sites_del, &quot;mean_diversity&quot;=parents_info$mean_diversity)
+  analysis_data = data.frame(&quot;proj&quot;=proj, &quot;LDdelta&quot;=LDdelta, &quot;pa&quot;=pa, &quot;Vs&quot;=Vs, &quot;randomise&quot;=randomise, &quot;pdelta_method&quot;=pdelta, &quot;bdelta_method&quot;=paste(bdelta[1], bdelta[2], sep=&quot;_&quot;), &quot;va_true&quot;=parents_info$va_true, &quot;vA_true&quot;=parents_info$vA_true, &quot;vA_est&quot;=vA_est, &quot;vA_alpha_emp&quot;=parents_info$vA_alpha_emp, &quot;pdelta_emp&quot;=parents_info$parameters$pdelta, &quot;bdelta_intercept_emp&quot;=parents_info$parameters$bdelta_0, &quot;bdelta_slope_emp&quot;=parents_info$parameters$bdelta_1, &quot;sigma2delta_emp&quot;=parents_info$parameters$sigma2delta, &quot;pdelta_est&quot;=pdelta_est, &quot;pdelta_var_est&quot;=pdelta_var_est, &quot;bdelta_intercept_est&quot;=bdelta_intercept_est, &quot;bdelta_slope_est&quot;=bdelta_slope_est, &quot;bdelta_var_est&quot;=bdelta_var_est, &quot;sigma2delta_est&quot;=sigma2delta_est, &quot;seg_sites&quot;=parents_info$seg_sites, &quot;seg_sites_neu&quot;=parents_info$seg_sites_neu, &quot;seg_sites_ben&quot;=parents_info$seg_sites_ben, &quot;seg_sites_del&quot;=parents_info$seg_sites_del, &quot;mean_diversity&quot;=parents_info$mean_diversity, &quot;all.gp&quot; = all.gp)
 
   analysis_data = cbind(sim_params, analysis_data)
   write.table(rbind(names(analysis_data), analysis_data), file = paste(output_path, &quot;/&quot;, Set_ID, &quot;_sim_&quot;, sim, &quot;_Data_analysis.csv&quot;, sep = &quot;&quot;),col.names = FALSE, row.names = FALSE, sep = &quot;,&quot;)
