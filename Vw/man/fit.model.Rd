@@ -2,7 +2,7 @@
 \alias{fit.model}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+\Fit (generalised) linear mixed model
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~

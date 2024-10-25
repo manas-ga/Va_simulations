@@ -2,7 +2,7 @@
 \alias{extract_slim_data}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+\Extract useful information from SLiM outputs
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~

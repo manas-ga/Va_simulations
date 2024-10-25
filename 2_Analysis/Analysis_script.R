@@ -91,7 +91,7 @@ if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "bigga
 
 # Load packages and functions
 
-if(Sys.info()["nodename"]=="bigyin"){stop("Bigyin cannot run asreml-r. Use a different code.")}
+if(Sys.info()["nodename"]=="bigyin"){stop("Bigyin cannot run asreml-r. Use a different node.")}
 
 library(MCMCglmm)
 library(asreml)

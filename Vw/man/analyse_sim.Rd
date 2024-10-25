@@ -2,7 +2,7 @@
 \alias{analyse_sim}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+\Analyse a SLiM simulation to estimate Vw using the method 
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~

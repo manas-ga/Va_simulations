@@ -2,7 +2,7 @@
 \alias{form_nR}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+\Calculate the matrix of non-recombinant fractions
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~

@@ -2,7 +2,7 @@
 \alias{predict_Ne}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+\Predict the Ne of the population
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
