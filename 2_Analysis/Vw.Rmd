@@ -941,11 +941,22 @@ sample_gamete<-function(xi, r){
 }
 ```
 
-In order to calculate $Ne$ we need to know the variance in offspring number in the presence of environmental variance in fitness only.  When `fitness_model="Exp"`, parents are sampled from a multinomial of length $n$ and their non-normalised probabilities, $P$, are drawn from a log-normal with `meanlog`$=0$ and `sdlog`$=x$. The expected number of offspring for parent $i$ is $Np_i$ where $p_i$ is the normalised probability for individual $i$ and $N$ the total number of offspring to be drawn.  The variance in the number offspring for parent $i$ is $Np_i(1-p_i)$ and so from the law of total variance $Var(o) = (N^2)Var(p)+NE[p(1-p)]$.  If the $p$ are not too variable then $E[p(1-p)]$ is approximately $E[p](1-E[p])$ where $E[p] = 1/n$ and so $E[p(1-p)]$ is approximately $1/n$ if $n$ is large. Consequently, 
+In order to calculate $Ne$ we need to know the variance in offspring number in the presence of environmental variance in fitness only.  When `fitness_model="Exp"`, parents are sampled from a multinomial of length $n$ and their non-normalised probabilities, $P$, are drawn from a log-normal with `meanlog`$=0$ and `sdlog`$=x$. The expected number of offspring for parent $i$ is $Np_i$ where $p_i$ is the normalised probability for individual $i$ and $N$ the total number of offspring to be drawn.  The variance in the number offspring for parent $i$ is $Np_i(1-p_i)$ and so from the law of total variance $Var(o) = (N^2)Var(p)+NE[p(1-p)]$.  Since $E[p(1-p)]=E[p]-E[p^2]$ and $Var(p)=E[p^2]-E[p]^2$ then $E[p(1-p)]=E[p]-Var(p)+E[p]^2$. Since $E[p] = 1/n$ by definition, 
 
-$$Var(o) = (N^2)Var(p)+N/n$$
 
-From the properties of the log-normal (with `meanlog`=0) we know $E[P] = exp(x^2/2)$ and $Var(P) = exp(x^2)-1)exp(x^2)$. Since $p = P/(nE[P])$
+$$
+\begin{array}{rl}
+Var(o) =& N^2Var(p)+NE[p(1-p)]\\
+       =& N^2Var(p)+\frac{N}{n}-NVar(p)+\frac{N}{n^2}\\
+       =& (N^2-N)Var(p)+\frac{N}{n}+\frac{N}{n^2}\\
+\end{array}
+$$
+
+which simplifies to
+
+$$Var(o) = N^2Var(p)+N/n$$
+
+when $N$ and $n$ are large. From the properties of the log-normal (with `meanlog`=0) we know $E[P] = exp(x^2/2)$ and $Var(P) = exp(x^2)-1)exp(x^2)$. Since $p = P/(nE[P])$
 
 $$
 \begin{array}{rl}
@@ -968,7 +979,9 @@ If the population size is constant then $N=2n$ this simplifies to $Var(o) = 4exp
   N<-2*n
 
   Vo<-5.2
-  x<-sqrt(log((Vo+2)/4)) 
+  x<-sqrt(log((Vo+2)/4))
+
+  (N^2-N)*(exp(x^2)-1)/n^2+N/n+N/n^2 # exact Vo 
 
   P<-rlnorm(n, 0, x)
 
