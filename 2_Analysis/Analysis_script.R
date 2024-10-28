@@ -124,10 +124,10 @@ rmarkdown::render(file.path(analysis_path, "Vw_sim_functions.Rmd"))
 ########################
 
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "set code_test_SCE-BIO-C06645_2024-10-28_14_55_13.823051", commandArgs(trailingOnly = TRUE)[1])
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "code_test_SCE-BIO-C06645_2024-10-28_14_55_13.823051", commandArgs(trailingOnly = TRUE)[1])
 nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
 
-test = TRUE
+test = FALSE
 
 if(Sys.info()["nodename"]=="SCE-BIO-C06645"&test){
   message("Setting temperary paths for testing...")
