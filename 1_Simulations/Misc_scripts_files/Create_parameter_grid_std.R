@@ -15,7 +15,7 @@
 # Col 8 = mut_ratio
 
 nsims = 50 # number of simulations for each set
-mu_list = seq(5.56e-7, 5.56e-6, length = nsims)
+mu_list = seq(1.89e-7, 1.56e-6, length = nsims)
 
 param_matrix = data.frame(matrix(NA, nrow = nsims, ncol  = 8))
 

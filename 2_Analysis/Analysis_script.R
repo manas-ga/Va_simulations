@@ -1,5 +1,6 @@
 
 # Rscript /mnt/c/Users/msamant/Documents/GitHub/Va_simulations/2_Analysis/Analysis_script.R
+# source("/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/2_Analysis/Analysis_script.R")
 
 ##################
 ### File Paths ###
@@ -123,10 +124,10 @@ rmarkdown::render(file.path(analysis_path, "Vw_sim_functions.Rmd"))
 ########################
 
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "zero_test_bigyin_2024-10-09_16_53_28.860706_1.8969696969697e-07_1.4_1.4_1000_10_1_0_1", commandArgs(trailingOnly = TRUE)[1])
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "set code_test_SCE-BIO-C06645_2024-10-28_14_55_13.823051", commandArgs(trailingOnly = TRUE)[1])
 nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
 
-test = FALSE
+test = TRUE
 
 if(Sys.info()["nodename"]=="SCE-BIO-C06645"&test){
   message("Setting temperary paths for testing...")
@@ -149,12 +150,12 @@ for(sim in 1:nsims){
                               randomise = TRUE,                           # Optionally the reference allele can be randomised
                               delete_temp_files = TRUE,
                               proj = "BLoM",                              # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
-                              LDdelta = FALSE,                            # Should L or diag(L) be considered while modelling distribution of alphas
+                              LDalpha = FALSE,                            # Should L or diag(L) be considered while modelling distribution of alphas
                               pa = 1,
                               Vs = "LoNL",                                # "L" or "LoNL"
                               method="REML",                              # Can be "REML" or "MCMC"
-                              pdelta = NA,                                # If NA pdelta is estimated using optim()
-                              bdelta = c(NA, NA),                         # If c(NA,NA) both bedelta intercept and slope are estimated
+                              palpha = NA,                                # If NA pdelta is estimated using optim()
+                              balpha = c(NA, NA),                         # If c(NA,NA) both bedelta intercept and slope are estimated
                               AtleastOneRecomb=FALSE,
                               verbose = TRUE)
 
