@@ -127,7 +127,7 @@ trim_exp_files = FALSE                 # Should the SLiM output files for the ex
 del_files = TRUE                       # Should the .trees files be deleted at the end to save space?
 compress_files = FALSE                 # Should .txt and .trees files be compressed using gzip
 
-Job_ID = "few_sites"            # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
+Job_ID = "few_sites_with_neutral"            # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
 
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
 
@@ -242,8 +242,8 @@ for (sim in 1:nsims){
       
       mu = mu_list[sim]
       mu_msp = ifelse(end_gen==2, mu/5320, mu/5320)
-      # mu_neutral = ifelse(end_gen==2, mu_msp/3, mu/20)
-      mu_neutral = 0
+      mu_neutral = ifelse(end_gen==2, mu_msp/3, mu/20)
+      #mu_neutral = 0
       
       message(paste("Simulation", sim, "in progress..."))
     
