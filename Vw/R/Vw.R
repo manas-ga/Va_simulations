@@ -779,6 +779,7 @@ prob_novelB<-function(P,Q,R,S, nH){
 
 Q<-function(pbar1, pbar2){
 
+   # Equation 16 in Buffalo & Coop
    if(any(pbar2==0) | any(pbar2==1)){
      pbar2[which(pbar2==0 | pbar2==1)]<-NA
    }
@@ -787,15 +788,18 @@ Q<-function(pbar1, pbar2){
    }
    Q<-cov(t(pbar2-pbar1), use="pairwise.complete.obs")
    d<-rowMeans(pbar1*(1-pbar1), na.rm=TRUE)
-   Q<-Q/outer(d,d)
+   Q<-Q/(outer(d,d, "+")/2)
+   # taken the average p*(1-p) across the pair 
    return(Q)
 }
 
 Sigma<-function(L,nR, N=Inf, nrep){
 
+  # Equation 12 in Buffalo & Coop (multiplied by 2)
   n<-nrow(L)
 
   s<-(sum(abs(cov2cor(L))*nR)-n)/(n*(n-1))
+  # Equation 55 Buffalo & Coop
 
   Sigma<-matrix(s, nrep, nrep)
   diag(Sigma)<-1+1/N
@@ -805,6 +809,9 @@ Sigma<-function(L,nR, N=Inf, nrep){
 }
 
 est_Va_bc<-function(pbar1, pbar2, L, nR, nrep){
+
+  # Equations 20 and 21 in Buffalo & Coop
+  # should also scale a by the change in SSH
 
   Q<-Q(pbar1, pbar2)
   Sigma<-Sigma(L, nR, nrep=nrep)
