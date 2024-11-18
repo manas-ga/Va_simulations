@@ -161,6 +161,7 @@ for(sim in 1:nsims){
                               palpha = NA,                                # If NA pdelta is estimated using optim()
                               balpha = c(NA, NA),                         # If c(NA,NA) both bedelta intercept and slope are estimated
                               AtleastOneRecomb=FALSE,
+                              Ne_factor = c(1, 0.9, 0.9), 
                               verbose = TRUE)
 
 }

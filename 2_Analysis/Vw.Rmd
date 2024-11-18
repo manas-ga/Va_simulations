@@ -177,7 +177,7 @@ The allele frequencies can be analysed as is (`proj="N"`) or they can be project
 
 Rather than retain all vectors we only retain those eigenvectors whose square-rooted eigenvalues exceed `tol`.  For `proj="L"` and `proj="BLoM"` the maximum number of retained vector is equal to the number of individuals or the number of segregating sites, which ever is smaller. Since ${\bf L}\circ {\bf M}$ is typically full-rank the `proj="LoM"` projection may have substantially more retained eigenvectors but here we restrict the maximum retained to be the minimum of the number of individuals or the number of segregating sites, which ever is smaller.
 
-These projections generate i.i.d projected allele frequency changes when the covariance of allele frequency change is proportional to  $\tilde{\bf L}^{p_{a}}$ (`proj="L"`) or $(\tilde{\bf L}\circ {\bf M})^{p_{a}}$ (`proj="LoM"` or `proj="BLoM"`) respectively. Theoretically we expect the residuals to be i.i.d when `proj="LoM"` or  `proj="BLoM"` and $p_a=1$. We also expect them to have unit variance when the environmental variance in fitness is zero since then the census and the appropriate variance effective population size are equal - note the reduction in $Ne$ caused by linked selection appears in the between-locus rather than residual term (see below). When the the environmental variance in fitness is non-zero we expect the effective population size to be smaller than the census population. If the population size remains constant size then $Ne$ is smaller than $N$ by a factor $4/(2+Vo)$ where $Vo$ is variance in offspring number. This can be specified through the term `Ne_factor` and can be obtained by setting the census population size (`n`) to one in the function `predict_Ne` which also takes the variance in $e$ (`Ve`) and the `fitness_model`.
+These projections generate i.i.d projected allele frequency changes when the covariance of allele frequency change is proportional to  $\tilde{\bf L}^{p_{a}}$ (`proj="L"`) or $(\tilde{\bf L}\circ {\bf M})^{p_{a}}$ (`proj="LoM"` or `proj="BLoM"`) respectively. Theoretically we expect the residuals to be i.i.d when `proj="LoM"` or  `proj="BLoM"` and $p_a=1$. We also expect them to have unit variance when the environmental variance in fitness is zero since then the census and the appropriate variance effective population size are equal - note the reduction in $Ne$ caused by linked selection appears in the between-locus rather than residual term (see below). When the the environmental variance in fitness is non-zero we expect the effective population size to be smaller than the census population. If the population size remains constant then $Ne$ is smaller than $N$ by a factor $4/(2+Vo)$ where $Vo$ is variance in offspring number. This can be specified through the term `Ne_factor` and can be obtained by setting the census population size (`n`) to one in the function `predict_Ne` which also takes the variance in $e$ (`Ve`) and the `fitness_model`.
 
 ```{r predict_Ne}
 predict_Ne<-function(Ve, n, fitness_model = "Exp"){
@@ -291,7 +291,7 @@ form_nR<-function(SNPs,                   # SNP positions
 ```{r analysis_function}
 
 
-fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, nind, tprojp, pbar0, pbar1, pbar2, nrep, Selec, Ne_factor=1, LLonly=FALSE, method = "REML", verbose=TRUE){
+fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, nind, tprojp, pbar0, pbar1, pbar2, nrep, Selec, LLonly=FALSE, method = "REML", verbose=TRUE){
   
   if(verbose){
     message("Computing the covariance structure of locus effects...")
@@ -431,7 +431,7 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
                    L,           # between individual covariance in allele proportion
                    Ltilde,      # between gamete covariance in half allele proportion
                    svdL=NULL,   # list with elements UL and DL,
-                   Ne_factor=1,
+                   Ne_factor=1, # Can be a scalar or a vector (if a vector must be of length ngen2 - ngen1)
                    tol=sqrt(.Machine$double.eps),
                    save_tprojp=FALSE, 
                    verbose=TRUE)
@@ -514,19 +514,30 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
 
   if(proj=="LoM" | proj=="BLoM"){ 
     
+     # First decide if Ne_factor is a scalar or a vector
+    
+     if(length(Ne_factor) == 1){constant_Ne = TRUE}else{
+       constant_Ne = FALSE
+       if(length(Ne_factor)!=(ngen2 - ngen1)){stop("The length of Ne_factor must be equal to ngen2 - ngen1. Alternatively, provide a constant scalar to be used across all generations.")}
+     }
+    
      if(verbose){
        message("Computing M...")
      }
-
+    
      # Calculate the summation in two steps to save memory: (1) Write down the first term, (2) add the remaining terms only if ngen2 - ngen1 >1  Note this works even if ngen1=0, at least when Ne is constant.
+    
+     count = 1 # a variable that references the correct element of Ne_factor
 
-     M = ((1-1/(2*nind*Ne_factor))^(ngen1))*(1/(nind*Ne_factor))*nR^(1+ngen1)
+     M = ((1-1/(2*nind*Ne_factor[count]))^(ngen1))*(1/(nind*Ne_factor[count]))*nR^(1+ngen1)
      
      # Only perform further summations if (ngen2-ngen1 > 1)
      
      if((ngen2 - ngen1) > 1){
        for (x in (ngen1 + 2):(ngen2)){
-        M = M + ((1-1/(2*nind*Ne_factor))^(x-1))*(1/(nind*Ne_factor))*nR^x
+        # Increase count by one only if length(Ne_factor>1) 
+        if(!constant_Ne){count = count + 1}
+        M = M + ((1-1/(2*nind*Ne_factor[count]))^(x-1))*(1/(nind*Ne_factor[count]))*nR^x
       }       
      }
 
@@ -543,9 +554,11 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
      }
 
      # Calculate the summation in two steps to save memory: (1) Write down the first term, (2) add the remaining terms only if ngen2 - ngen1 >1
+     
+     count = 1
 
      if(ngen1!=0){  
-       N = {((1-1/(2*nind*Ne_factor))^(ngen1))*nR^(ngen1)}
+       N = {((1-1/(2*nind*Ne_factor[count]))^(ngen1))*nR^(ngen1)}
      }else{
        if(ngen2>1){
          N = matrix(0, ncol(nR), ncol(nR))
@@ -557,7 +570,8 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
      if((ngen2 - ngen1) > 1){
      
        for (x in (ngen1 + 2):(ngen2)){
-         N = N + {((1-1/(2*nind*Ne_factor))^(x-1))*nR^(x-1)}
+         if(!constant_Ne){count = count + 1}
+         N = N + {((1-1/(2*nind*Ne_factor[count]))^(x-1))*nR^(x-1)}
        }
 
      }
@@ -636,7 +650,7 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
       message("Estimating palpha...")
     }
 
-    palpha<-optim(0, fit.model, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, Selec=Selec, Ne_factor=Ne_factor, verbose=verbose, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1, factr = 1e+11), hessian=TRUE)
+    palpha<-optim(0, fit.model, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, Selec=Selec, verbose=verbose, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1, factr = 1e+11), hessian=TRUE)
 
     palpha_var<--1/palpha$hessian
     palpha<-palpha$par
@@ -649,7 +663,7 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
     message("Fitting the final model...")
   }
 
-  output<-fit.model(palpha=palpha, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, Selec=Selec, Ne_factor=Ne_factor, verbose=verbose)
+  output<-fit.model(palpha=palpha, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, Selec=Selec, verbose=verbose)
 
   if(verbose){
     message("Calculating the estimate of Vw...")
