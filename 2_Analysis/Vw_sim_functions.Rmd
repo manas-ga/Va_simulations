@@ -504,7 +504,8 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                                extract_mut_path = extract_mut_path,
                                mutations_path = mutations_path, 
                                c_matrix_path = c_matrix_path, 
-                               randomise = randomise)
+                               randomise = randomise,
+                               delete_temp_files = delete_temp_files)
   ### Analyse parents ###
   
   if(verbose){message("Analysing the parents' generation...")}
@@ -550,17 +551,24 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
   balpha_slope_est = m1$balpha[2]
   balpha_var_est = paste(m1$balpha_var[1,1], m1$balpha_var[2,2], m1$balpha_var[1,2], sep = "_")
   sigma2alpha_est = summary(m1$model)$varcomp[1,1]
+  
     
   ### Save file ###
+  
+  # Create a unique stamp for this analysis
+
+  unique_stamp = as.character(paste(Sys.info()["nodename"], Sys.time()))
+  unique_stamp = gsub(" ", "_", unique_stamp)
+  unique_stamp = gsub(":", "-", unique_stamp)
   
   if(verbose){message("Saving data...")}
  
   sim_params = sim_data$sim_params
 
-  analysis_data = data.frame("proj"=proj, "LDalpha"=LDalpha, "pa"=pa, "Vs"=Vs, "randomise"=randomise, "palpha_method"=palpha, "balpha_method"=paste(balpha[1], balpha[2], sep="_"), "va_true"=parents_info$va_true, "vA_true"=parents_info$vA_true, "vA_est"=vA_est, "vA_alpha_emp"=parents_info$vA_alpha_emp, "palpha_emp"=parents_info$parameters$palpha, "balpha_intercept_emp"=parents_info$parameters$balpha_0, "balpha_slope_emp"=parents_info$parameters$balpha_1, "sigma2alpha_emp"=parents_info$parameters$sigma2alpha, "palpha_est"=palpha_est, "palpha_var_est"=palpha_var_est, "balpha_intercept_est"=balpha_intercept_est, "balpha_slope_est"=balpha_slope_est, "balpha_var_est"=balpha_var_est, "sigma2alpha_est"=sigma2alpha_est, "seg_sites"=parents_info$seg_sites, "seg_sites_neu"=parents_info$seg_sites_neu, "seg_sites_ben"=parents_info$seg_sites_ben, "seg_sites_del"=parents_info$seg_sites_del, "mean_diversity"=parents_info$mean_diversity, "all.gp" = all.gp)
+  analysis_data = data.frame("proj"=proj, "LDalpha"=LDalpha, "pa"=pa, "Vs"=Vs, "randomise"=randomise, "palpha_method"=palpha, "balpha_method"=paste(balpha[1], balpha[2], sep="_"), "va_true"=parents_info$va_true, "vA_true"=parents_info$vA_true, "vA_est"=vA_est, "vA_alpha_emp"=parents_info$vA_alpha_emp, "model_res_var" = summary(m1$model)$varcomp[2,1], "palpha_emp"=parents_info$parameters$palpha, "balpha_intercept_emp"=parents_info$parameters$balpha_0, "balpha_slope_emp"=parents_info$parameters$balpha_1, "sigma2alpha_emp"=parents_info$parameters$sigma2alpha, "palpha_est"=palpha_est, "palpha_var_est"=palpha_var_est, "balpha_intercept_est"=balpha_intercept_est, "balpha_slope_est"=balpha_slope_est, "balpha_var_est"=balpha_var_est, "sigma2alpha_est"=sigma2alpha_est, "seg_sites"=parents_info$seg_sites, "seg_sites_neu"=parents_info$seg_sites_neu, "seg_sites_ben"=parents_info$seg_sites_ben, "seg_sites_del"=parents_info$seg_sites_del, "mean_diversity"=parents_info$mean_diversity, "all.gp" = all.gp, "analysis_stamp" = unique_stamp)
 
   analysis_data = cbind(sim_params, analysis_data)
-  write.table(rbind(names(analysis_data), analysis_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_Data_analysis.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
+  write.table(rbind(names(analysis_data), analysis_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_Data_analysis_", unique_stamp, ".csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
   
   return(analysis_data)
   

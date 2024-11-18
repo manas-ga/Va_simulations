@@ -13,10 +13,10 @@ alpha_distribution(alpha, p, tprojp = NULL, logit = FALSE, save_model = FALSE)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{alpha}{
-%%     ~~Describe \code{alpha} here~~
+A vector of average effects for relative fitness
 }
   \item{p}{
-%%     ~~Describe \code{p} here~~
+A vector of allele frequencies in the parents' generation
 }
   \item{tprojp}{
 %%     ~~Describe \code{tprojp} here~~

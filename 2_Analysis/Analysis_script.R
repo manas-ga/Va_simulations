@@ -70,8 +70,10 @@ output_path = paste(file_storage_path, "/c_Output", sep = "")                   
 ### Path to SLiM output ###
 ###########################
 
+test = TRUE
+
 if(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553"){
-  slim_output_path = file.path(slim_path, "SLiM_outputs")
+  slim_output_path = if(test){file.path(file_storage_path, "b_Interim_files/SLiM_outputs")}else{file.path(slim_path, "SLiM_outputs")}
 }
 
 if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig", "c1", "c2", "c3", "c4", "c5", "c6")){
@@ -83,7 +85,7 @@ if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "bigga
 ##########################################
 
 if(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553"){
-  sim_param_path = file.path(slim_path, "sim_params")   
+  sim_param_path = if(test){file.path(file_storage_path, "c_Output")}else{file.path(slim_path, "sim_params")}   
 }
 
 if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig", "c1", "c2", "c3", "c4", "c5", "c6")){
@@ -113,6 +115,8 @@ functions_only=TRUE ## Read only the functions
 
 rmarkdown::render(file.path(analysis_path, "Vw.Rmd"))
 
+#library(Vw)
+
 ##############################
 ### Load Manas's functions ###
 ##############################
@@ -124,7 +128,7 @@ rmarkdown::render(file.path(analysis_path, "Vw_sim_functions.Rmd"))
 ########################
 
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "code_test_SCE-BIO-C06645_2024-10-28_14_55_13.823051", commandArgs(trailingOnly = TRUE)[1])
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "few_sites_with_neutral_SCE-BIO-C06645_2024-11-18_10_52_40.675667", commandArgs(trailingOnly = TRUE)[1])
 nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
 
 test = FALSE
@@ -147,8 +151,8 @@ for(sim in 1:nsims){
                               mutations_path = temp_files_path,           # The directory where extracted mutations are to be stored (temp files)
                               c_matrix_path = temp_files_path,            # The directory where extracted genomes are to be stored (temp files)
                               output_path = output_path,                  # The path where the final data file is to be stored
-                              randomise = TRUE,                           # Optionally the reference allele can be randomised
-                              delete_temp_files = TRUE,
+                              randomise = FALSE,                           # Optionally the reference allele can be randomised
+                              delete_temp_files = FALSE,
                               proj = "BLoM",                              # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
                               LDalpha = FALSE,                            # Should L or diag(L) be considered while modelling distribution of alphas
                               pa = 1,

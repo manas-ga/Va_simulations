@@ -133,7 +133,7 @@ nsims = 1                              # Number of simulations - MUST be 1 if ru
 
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
-end_gen = 20000                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+end_gen = 2                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
 
 if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
@@ -177,10 +177,10 @@ DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal)
 
 # If DFE is "g"
 shape = 0.3                                     # Shape of the gamma DFE ##### mean = shape*scale
-scale_list = seq(0.1, 0.1, length = nsims)  # Vector of Scale of the gamma DFE
+scale_list = seq(0.03, 0.03, length = nsims)  # Vector of Scale of the gamma DFE
 
 # The ratio of beneficial:deleterious mutations 
-if(Sys.info()["nodename"]=="SCE-BIO-C06645"){mut_ratio=0}else{mut_ratio = as.numeric(commandArgs(trailingOnly = TRUE)[8])}
+if(Sys.info()["nodename"]=="SCE-BIO-C06645"){mut_ratio=1}else{mut_ratio = as.numeric(commandArgs(trailingOnly = TRUE)[8])}
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
@@ -196,7 +196,7 @@ var_alpha_list = seq(0.00002, 0.0002, length = nsims) # Vector to store variance
 
 Set_ID = as.character(paste(Sys.info()["nodename"], Sys.time()))
 Set_ID = gsub(" ", "_", Set_ID)
-Set_ID = gsub(":", "_", Set_ID)
+Set_ID = gsub(":", "-", Set_ID)
 Set_ID = paste(Job_ID, Set_ID, sep="_")
 
 ## Only attach command line parameters to the set id if not running on the PC
