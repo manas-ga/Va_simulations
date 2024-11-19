@@ -552,13 +552,16 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
 
   if(LDalpha){
     TrV<-sum(DL^(2*(output$palpha+1)))*sigma2alpha
-    aLa<-t(X%*%balpha)%*%L%*%X%*%balpha-sum(diag(t(X)%*%L%*%X%*%S))
+    aLa<-t(X%*%balpha)%*%L%*%X%*%balpha-sum(diag((t(X)%*%L)%*%(X%*%S)))
   }else{
     TrV<-sum(diag(L)^(output$palpha+1))*sigma2alpha
-    aLa<-t(X%*%balpha)%*%L%*%X%*%balpha-sum(diag(t(X)%*%L%*%X%*%S))
+    aLa<-t(X%*%balpha)%*%L%*%X%*%balpha-sum(diag((t(X)%*%L)%*%(X%*%S)))
+    
   }
 
   Vw_est<-TrV+aLa
+  
+
 
   return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, palpha=output$palpha, balpha=balpha, palpha_var=palpha_var, balpha_var=S, tprojp=if(save_tprojp){tprojp}else{NULL}, S=S, X=X, DL=ifelse(exists("DL"), DL, NA)))
 
@@ -793,34 +796,40 @@ Q<-function(pbar1, pbar2){
    return(Q)
 }
 
-Sigma<-function(L,nR, N=Inf, nrep){
+Sigma<-function(L, nR, nrep){
 
   # Equation 12 in Buffalo & Coop (multiplied by 2)
   n<-nrow(L)
 
-  s<-(sum(abs(cov2cor(L))*nR)-n)/(n*(n-1))
+  s<-(sum((cov2cor(L)^2)*nR)-n)/(n*(n-1))
   # Equation 55 Buffalo & Coop
 
   Sigma<-matrix(s, nrep, nrep)
-  diag(Sigma)<-1+1/N
 
   return(Sigma)
 
 }
 
-est_Va_bc<-function(pbar1, pbar2, L, nR, nrep){
+est_Va_bc<-function(pbar1, pbar2, L, nR){
 
   # Equations 20 and 21 in Buffalo & Coop
   # should also scale a by the change in SSH
+  
+  nrep = nrow(pbar1)
 
   Q<-Q(pbar1, pbar2)
   Sigma<-Sigma(L, nR, nrep=nrep)
 
   q<-Q[upper.tri(Q, diag=TRUE)]
-  a<-Sigma[upper.tri(Sigma, diag=TRUE)]
+  a<-0.5*Sigma[upper.tri(Sigma, diag=TRUE)]
   b<-diag(nrow(Q))[upper.tri(Q, diag=TRUE)]
 
-  coef(lm(q~a+b-1))["a"]
+  fit_BC = lm(q~a+b-1)
+  
+  Ne_BC = 0.5/coef(fit_BC)["b"]
+  vA_BC = coef(fit_BC)["a"]
+  
+  return(list(Ne_BC = Ne_BC, vA_BC = vA_BC))
 
 }
 
@@ -1260,14 +1269,15 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                        palpha = NA,           # If NA palpha is estimated using optim()
                        balpha = c(NA, NA),    # If c(NA,NA) both bedelta intercept and slope are estimated
                        AtleastOneRecomb=FALSE, 
+                       Ne_factor = 1,         # Can be a scalar or a vector (if a vector must be of length ngen2 - ngen1)
                        all.gp = FALSE,        # Ltilde = L'+L''(r/(1-r)) if all.gp=T L'' is assumed 0 and L'=L. 
                        verbose = TRUE
-                       ){
+){
   
   ### Extract sim data ###
   
   if(verbose){message("Extracting simulation data...")}
-
+  
   sim_data = extract_slim_data(Set_ID = Set_ID,
                                sim = sim,
                                unzip = unzip,
@@ -1277,11 +1287,12 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                                extract_mut_path = extract_mut_path,
                                mutations_path = mutations_path, 
                                c_matrix_path = c_matrix_path, 
-                               randomise = randomise)
+                               randomise = randomise,
+                               delete_temp_files = delete_temp_files)
   ### Analyse parents ###
   
   if(verbose){message("Analysing the parents' generation...")}
-
+  
   parents_info = analyse_parents(c_genome = sim_data$c_genome,  
                                  list_alpha = sim_data$list_alpha,     
                                  compute_svdL=TRUE,        
@@ -1290,11 +1301,11 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                                  RecombRate = sim_data$sim_params$r_expt,             
                                  HapLength = sim_data$sim_params$sequence_length,              
                                  AtleastOneRecomb=AtleastOneRecomb)
-
+  
   ### Fit model ###
   
   if(verbose){message("Performing analyses...")}
-
+  
   m1<-Vw_model(c_genome = NULL,          
                nR = parents_info$nR,
                pbar0 = sim_data$pbar0,                   
@@ -1313,9 +1324,10 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                L = parents_info$L,
                Ltilde = if(all.gp){parents_info$L}else{parents_info$Ltilde},      
                svdL = parents_info$svdL,           # list with elements UL and DL
+               Ne_factor = Ne_factor,
                tol = sqrt(.Machine$double.eps))
-
-
+  
+  
   vA_est = m1$Vw_est 
   palpha_est = m1$palpha 
   palpha_var_est = m1$palpha_var
@@ -1323,17 +1335,32 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
   balpha_slope_est = m1$balpha[2]
   balpha_var_est = paste(m1$balpha_var[1,1], m1$balpha_var[2,2], m1$balpha_var[1,2], sep = "_")
   sigma2alpha_est = summary(m1$model)$varcomp[1,1]
-    
+  
+  message("Calculating Vw using Buffalo and Coop's (2019) method ...")
+  ### Calculate Vw from Buffalo and Coop's method ###
+  
+  BC_fit = est_Va_bc(pbar1 = sim_data$pbar1,
+                     pbar2 = sim_data$pbar2,
+                     L = parents_info$L,
+                     nR = parents_info$nR)
+  
+  
   ### Save file ###
   
+  # Create a unique stamp for this analysis
+  
+  unique_stamp = as.character(paste(Sys.info()["nodename"], Sys.time()))
+  unique_stamp = gsub(" ", "_", unique_stamp)
+  unique_stamp = gsub(":", "-", unique_stamp)
+  
   if(verbose){message("Saving data...")}
- 
+  
   sim_params = sim_data$sim_params
-
-  analysis_data = data.frame("proj"=proj, "LDalpha"=LDalpha, "pa"=pa, "Vs"=Vs, "randomise"=randomise, "palpha_method"=palpha, "balpha_method"=paste(balpha[1], balpha[2], sep="_"), "va_true"=parents_info$va_true, "vA_true"=parents_info$vA_true, "vA_est"=vA_est, "vA_alpha_emp"=parents_info$vA_alpha_emp, "palpha_emp"=parents_info$parameters$palpha, "balpha_intercept_emp"=parents_info$parameters$balpha_0, "balpha_slope_emp"=parents_info$parameters$balpha_1, "sigma2alpha_emp"=parents_info$parameters$sigma2alpha, "palpha_est"=palpha_est, "palpha_var_est"=palpha_var_est, "balpha_intercept_est"=balpha_intercept_est, "balpha_slope_est"=balpha_slope_est, "balpha_var_est"=balpha_var_est, "sigma2alpha_est"=sigma2alpha_est, "seg_sites"=parents_info$seg_sites, "seg_sites_neu"=parents_info$seg_sites_neu, "seg_sites_ben"=parents_info$seg_sites_ben, "seg_sites_del"=parents_info$seg_sites_del, "mean_diversity"=parents_info$mean_diversity, "all.gp" = all.gp)
-
+  
+  analysis_data = data.frame("proj"=proj, "LDalpha"=LDalpha, "pa"=pa, "Vs"=Vs, "randomise"=randomise, "palpha_method"=palpha, "balpha_method"=paste(balpha[1], balpha[2], sep="_"), "Ne_factor" = paste(Ne_factor, collapse = "_"), "va_true"=parents_info$va_true, "vA_true"=parents_info$vA_true, "vA_est"=vA_est, "vA_alpha_emp"=parents_info$vA_alpha_emp, "vA_BC" = BC_fit$vA_BC, "Ne_BC" = BC_fit$Ne_BC, "Vw_model_res_var" = summary(m1$model)$varcomp[2,1], "palpha_emp"=parents_info$parameters$palpha, "balpha_intercept_emp"=parents_info$parameters$balpha_0, "balpha_slope_emp"=parents_info$parameters$balpha_1, "sigma2alpha_emp"=parents_info$parameters$sigma2alpha, "palpha_est"=palpha_est, "palpha_var_est"=palpha_var_est, "balpha_intercept_est"=balpha_intercept_est, "balpha_slope_est"=balpha_slope_est, "balpha_var_est"=balpha_var_est, "sigma2alpha_est"=sigma2alpha_est, "seg_sites"=parents_info$seg_sites, "seg_sites_neu"=parents_info$seg_sites_neu, "seg_sites_ben"=parents_info$seg_sites_ben, "seg_sites_del"=parents_info$seg_sites_del, "mean_diversity"=parents_info$mean_diversity, "all.gp" = all.gp, "analysis_stamp" = unique_stamp)
+  
   analysis_data = cbind(sim_params, analysis_data)
-  write.table(rbind(names(analysis_data), analysis_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_Data_analysis.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
+  write.table(rbind(names(analysis_data), analysis_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_Data_analysis_", unique_stamp, ".csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
   
   return(analysis_data)
   

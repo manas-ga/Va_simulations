@@ -1172,7 +1172,7 @@ Q<-function(pbar1, pbar2){
    }
    Q<-cov(t(pbar2-pbar1), use="pairwise.complete.obs")
    d<-rowMeans(pbar1*(1-pbar1), na.rm=TRUE)
-   Q<-Q/outer(d,d)
+   Q<-Q/sqrt(outer(d,d)) #!!!!
    return(Q)
 }
 ``` 
@@ -1184,10 +1184,10 @@ Sigma<-function(L,nR, N=Inf, nrep){
 
   n<-nrow(L)
 
-  s<-(sum(abs(cov2cor(L))*nR)-n)/(n*(n-1))
+  s<-2*(sum(abs(cov2cor(L))*nR))/(n*(n-1))
 
   Sigma<-matrix(s, nrep, nrep)
-  diag(Sigma)<-1+1/N
+  #diag(Sigma)<-1+1/N
 
   return(Sigma)
 
@@ -1198,16 +1198,24 @@ The function `est_Va_bc` gives an estimate of Va according to the method of Buff
 
 
 ```{r }
-est_Va_bc<-function(pbar1, pbar2, L, nR, nrep){
+est_Va_bc<-function(pbar1, pbar2, L, nR){
+  
+  nrep = nrow(pbar1)
 
   Q<-Q(pbar1, pbar2)
   Sigma<-Sigma(L, nR, nrep=nrep)
 
   q<-Q[upper.tri(Q, diag=TRUE)]
-  a<-Sigma[upper.tri(Sigma, diag=TRUE)]
+  a<-0.5*Sigma[upper.tri(Sigma, diag=TRUE)]
   b<-diag(nrow(Q))[upper.tri(Q, diag=TRUE)]
-
-  coef(lm(q~a+b-1))["a"]
+  
+  fit_BC = lm(q~a+b-1)
+  
+  Ne_BC = 0.5/coef(fit_BC)["b"]
+  vA_BC = coef(fit_BC)["a"]
+  
+  return(list(Ne_BC = Ne_BC, vA_BC = vA_BC))
+  
 
 }
 ```

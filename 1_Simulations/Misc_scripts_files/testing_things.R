@@ -137,7 +137,7 @@ if(Sys.info()["nodename"]=="SCE-BIO-C06645"&test){
 
 
 sim_data = extract_slim_data(Set_ID = Set_ID,
-                             sim = sim,
+                             sim = 1,
                              unzip = FALSE,
                              slim_output_path = slim_output_path, 
                              sim_param_path = sim_param_path,
@@ -146,3 +146,18 @@ sim_data = extract_slim_data(Set_ID = Set_ID,
                              mutations_path = temp_files_path, 
                              c_matrix_path = temp_files_path, 
                              randomise = FALSE)
+
+
+parents_info = analyse_parents(c_genome = sim_data$c_genome,  
+                               list_alpha = sim_data$list_alpha,     
+                               compute_svdL=TRUE,        
+                               LDalpha=FALSE,   
+                               SNPs = sim_data$SNPs,                   
+                               RecombRate = sim_data$sim_params$r_expt,             
+                               HapLength = sim_data$sim_params$sequence_length,              
+                               AtleastOneRecomb=FALSE)
+
+BC_fit = est_Va_bc(pbar1 = sim_data$pbar1,
+                   pbar2 = sim_data$pbar2,
+                   L = parents_info$L,
+                   nR = parents_info$nR)

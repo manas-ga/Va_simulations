@@ -100,7 +100,7 @@ library(MCMCglmm)
 library(asreml)
 library(Matrix)
 library(pryr) ## For tracking memory usage using mem_used()
-library(bigalgebra)
+#library(bigalgebra)
 library(RhpcBLASctl)
 
 # Control the number of BLAS threads if running on a cluster
@@ -111,17 +111,17 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04
 #### Load Jarrod's functions ####
 #################################
 
-functions_only=TRUE ## Read only the functions
+#functions_only=TRUE ## Read only the functions
 
-rmarkdown::render(file.path(analysis_path, "Vw.Rmd"))
+#rmarkdown::render(file.path(analysis_path, "Vw.Rmd"))
 
-#library(Vw)
+library(Vw)
 
 ##############################
 ### Load Manas's functions ###
 ##############################
 
-rmarkdown::render(file.path(analysis_path, "Vw_sim_functions.Rmd"))
+#rmarkdown::render(file.path(analysis_path, "Vw_sim_functions.Rmd"))
 
 ########################
 ### Perform analyses ###
@@ -151,17 +151,16 @@ for(sim in 1:nsims){
                               mutations_path = temp_files_path,           # The directory where extracted mutations are to be stored (temp files)
                               c_matrix_path = temp_files_path,            # The directory where extracted genomes are to be stored (temp files)
                               output_path = output_path,                  # The path where the final data file is to be stored
-                              randomise = FALSE,                           # Optionally the reference allele can be randomised
+                              randomise = TRUE,                           # Optionally the reference allele can be randomised
                               delete_temp_files = FALSE,
                               proj = "BLoM",                              # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
                               LDalpha = FALSE,                            # Should L or diag(L) be considered while modelling distribution of alphas
                               pa = 1,
                               Vs = "LoNL",                                # "L" or "LoNL"
                               method="REML",                              # Can be "REML" or "MCMC"
-                              palpha = NA,                                # If NA pdelta is estimated using optim()
+                              palpha = 0,                                # If NA pdelta is estimated using optim()
                               balpha = c(NA, NA),                         # If c(NA,NA) both bedelta intercept and slope are estimated
                               AtleastOneRecomb=FALSE,
-                              Ne_factor = c(1, 0.9, 0.9), 
                               verbose = TRUE)
 
 }
