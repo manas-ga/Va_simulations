@@ -13,6 +13,7 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"){message("WARNING: Command line argu
 if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig", "c1", "c2", "c3", "c4", "c5", "c6")){
   analysis_path = "/ceph/users/marun/Va_simulations/2_Analysis"
   file_storage_path = "/data/obbard/Va_simulations/analyses" # File storage path is the designated storage space on AC3 instead of the /home directory on qm
+  Vw_library_path = "/ceph/users/marun/Va_simulations/Vw"
 }
 
 ### On Vera ###
@@ -20,6 +21,8 @@ if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "bigga
 if(Sys.info()["nodename"]=="vera.bio.ed.ac.uk"){
   analysis_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/2_Analysis"  
   file_storage_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/1_Simulations"
+  Vw_library_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/Vw"
+  
 }
 
 ### On Eddie ###
@@ -27,6 +30,7 @@ if(Sys.info()["nodename"]=="vera.bio.ed.ac.uk"){
 if(grepl("ecdf.ed.ac.uk", Sys.info()["nodename"])){
   analysis_path = "/home/msamant/Va_simulations/2_Analysis"
   file_storage_path = "/exports/eddie/scratch/msamant"
+  Vw_library_path = "/home/msamant/Va_simulations/Vw"
 }
 
 ### On Manas's PC
@@ -38,12 +42,15 @@ if(Sys.info()["nodename"]=="SCE-BIO-C06645"){
     analysis_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/2_Analysis" 
     file_storage_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations"
     slim_path = "/mnt/u/Datastore/CSCE/biology/groups/hadfield/Va_simulations/sim_files"
+    Vw_library_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/Vw"
     
     
   }else{                                ## Local windows
     
     analysis_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/2_Analysis" 
     file_storage_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations"
+    slim_path = "U:/Datastore/CSCE/biology/groups/hadfield/Va_simulations/sim_files"
+    Vw_library_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/Vw"
   }
   
 }
@@ -54,6 +61,7 @@ if(Sys.info()["nodename"]=="sce-bio-c04553"){
   analysis_path = "~/Work/Va_simulations/2_Analysis"
   file_storage_path = "~/Work/Va_simulations/1_Simulations"
   slim_path = "/Volumes/hadfield/Va_simulations/sim_files"
+  Vw_library_path = "~/Work/Va_simulations/Vw"
 }
 
 ####################
@@ -100,35 +108,27 @@ library(MCMCglmm)
 library(asreml)
 library(Matrix)
 library(pryr) ## For tracking memory usage using mem_used()
-#library(bigalgebra)
 library(RhpcBLASctl)
 
 # Control the number of BLAS threads if running on a cluster
 if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(15)}
 
 
-#################################
-#### Load Jarrod's functions ####
-#################################
+################################################
+#### Load functions from the library ("Vw") ####
+################################################
 
-#functions_only=TRUE ## Read only the functions
+# First update the library and then load
 
-#rmarkdown::render(file.path(analysis_path, "Vw.Rmd"))
-
+install.packages(Vw_library_path, repos = NULL, type = "source")
 library(Vw)
-
-##############################
-### Load Manas's functions ###
-##############################
-
-#rmarkdown::render(file.path(analysis_path, "Vw_sim_functions.Rmd"))
 
 ########################
 ### Perform analyses ###
 ########################
 
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "few_sites_with_neutral_SCE-BIO-C06645_2024-11-18_10_52_40.675667", commandArgs(trailingOnly = TRUE)[1])
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "few_sites_with_neutral_SCE-BIO-C06645_2024-11-19_17-30-33.157934", commandArgs(trailingOnly = TRUE)[1])
 nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
 
 test = FALSE
@@ -151,7 +151,7 @@ for(sim in 1:nsims){
                               mutations_path = temp_files_path,           # The directory where extracted mutations are to be stored (temp files)
                               c_matrix_path = temp_files_path,            # The directory where extracted genomes are to be stored (temp files)
                               output_path = output_path,                  # The path where the final data file is to be stored
-                              randomise = TRUE,                           # Optionally the reference allele can be randomised
+                              randomise = FALSE,                           # Optionally the reference allele can be randomised
                               delete_temp_files = FALSE,
                               proj = "BLoM",                              # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
                               LDalpha = FALSE,                            # Should L or diag(L) be considered while modelling distribution of alphas
