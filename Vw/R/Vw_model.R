@@ -18,11 +18,16 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
                    L,           # between individual covariance in allele proportion
                    Ltilde,      # between gamete covariance in half allele proportion
                    svdL=NULL,   # list with elements UL and DL,
-                   Ne_factor=1,
+                   Ne=NULL,          # Can be a scalar (same Ne throughout), a vector of length 2 (different Ne's in the neutral (Ne[1]) and selected (Ne[2]) parts of the experiment), or a vector of length ngen2 (different Ne in each generation)
                    tol=sqrt(.Machine$double.eps),
                    save_tprojp=FALSE, 
                    verbose=TRUE)
 {
+  
+  # If Ne is not provided, Ne should be nind
+  if(is.null(Ne)){Ne = nind}
+  
+  if(!length(Ne)%in%c(1, 2, ngen2)){stop("Ne must be a vector of length either 1, 2, or ngen2")}
   
   asreml.options(Cfixed = TRUE)
   
@@ -57,14 +62,14 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
   }
   
   
-  
   if(!proj%in%c("LoM", "BLoM", "L", "N")){stop("proj must be one of 'LoM', 'L', 'N'")}
   if(!Vs%in%c("LoNL", "L")){stop("Vs must be either 'LoNL' or 'L'")}
   if(!method%in%c("REML", "MCMC")){stop("method must be either 'REML' or 'MCMC'")}
   
-  #################################
-  # calculate projection matrices #
-  #################################
+  #####################################
+  ### calculate projection matrices ###
+  #####################################
+  
   nsnps<-ncol(pbar1)
   nrep<-nrow(pbar1)
   
@@ -99,6 +104,10 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
     }
   }
   
+  ##################################
+  ### Calculate Drift covariance ###
+  ##################################
+  
   if(proj=="LoM" | proj=="BLoM"){ 
     
     if(verbose){
@@ -107,21 +116,61 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
     
     # Calculate the summation in two steps to save memory: (1) Write down the first term, (2) add the remaining terms only if ngen2 - ngen1 >1  Note this works even if ngen1=0, at least when Ne is constant.
     
-    M = ((1-1/(2*nind*Ne_factor))^(ngen1))*(1/(nind*Ne_factor))*nR^(1+ngen1)
+    ### If Ne is a scalar, the same Ne is to be used throughout ###
     
-    # Only perform further summations if (ngen2-ngen1 > 1)
-    
-    if((ngen2 - ngen1) > 1){
-      for (x in (ngen1 + 2):(ngen2)){
-        M = M + ((1-1/(2*nind*Ne_factor))^(x-1))*(1/(nind*Ne_factor))*nR^x
-      }       
+    if (length(Ne) == 1){
+            
+      M = ((1-1/(2*Ne))^ngen1)*(1/Ne)*nR^(1+ngen1)
+      
+      # Only perform further summations if (ngen2-ngen1 > 1)
+      
+      if((ngen2 - ngen1) > 1){
+        for (x in (ngen1 + 1):(ngen2 - 1)){
+          M = M + ((1-1/(2*Ne))^x)*(1/Ne)*nR^(x+1)
+        }       
+      }
+      
     }
     
+    if(length(Ne)==2){
+      
+      M = ((1-1/(2*Ne[1]))^ngen1)*(1/Ne[1])*nR^(1+ngen1)
+      
+      # Only perform further summations if (ngen2-ngen1 > 1)
+      
+      if((ngen2 - ngen1) > 1){
+        for (x in (ngen1 + 1):(ngen2 - 1)){
+          M = M + ((1-1/(2*Ne[1]))^ngen1)*((1-1/(2*Ne[2]))^(x-ngen1))*(1/Ne[2])*nR^(x+1)
+        }       
+      }
+      
+      
+    }
+    
+    if(length(Ne)==ngen2){
+      
+      
+      M = (prod(1-1/(2*Ne[1:ngen1])))*(1/Ne[ngen1+1])*nR^(1+ngen1)
+           
+      # Only perform further summations if (ngen2-ngen1 > 1)
+     
+      if((ngen2 - ngen1) > 1){
+        for (x in (ngen1 + 1):(ngen2 - 1)){
+          M = M + (prod(1-1/(2*Ne[1:x])))*(1/Ne[x+1])*nR^(1+x)
+        }       
+     }     
+      
+    }
+ 
     Drift<-Ltilde*M
     rm("M")
     # Garbage collection
     gc(verbose = FALSE)
   }
+  
+  ########################################################
+  ### Calculate Selec (the among-replicate covariance) ###
+  ########################################################
   
   if(Vs=="LoNL"){ 
     
@@ -131,20 +180,68 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
     
     # Calculate the summation in two steps to save memory: (1) Write down the first term, (2) add the remaining terms only if ngen2 - ngen1 >1
     
-    if(ngen1!=0){  
-      N = {((1-1/(2*nind*Ne_factor))^(ngen1))*nR^(ngen1)}
-    }else{
-      if(ngen2>1){
-        N = matrix(0, ncol(nR), ncol(nR))
+    if(length(Ne)==1){
+      
+      
+      if(ngen1!=0){  
+        N = {((1-1/(2*nind*Ne))^ngen1)*nR^ngen1}
+      }else{
+        if(ngen2>1){
+          N = matrix(0, ncol(nR), ncol(nR))
+        }
       }
+      
+      # Only perform further summations if (ngen2-ngen1 > 1)
+      
+      if((ngen2 - ngen1) > 1){
+        
+        for (x in (ngen1 + 1):(ngen2-1)){
+          N = N + ((1-1/(2*nind*Ne))^x)*nR^x
+        }
+        
+      }
+      
     }
     
-    # Only perform further summations if (ngen2-ngen1 > 1)
-    
-    if((ngen2 - ngen1) > 1){
+    if(length(Ne)==2){
       
-      for (x in (ngen1 + 2):(ngen2)){
-        N = N + {((1-1/(2*nind*Ne_factor))^(x-1))*nR^(x-1)}
+      if(ngen1!=0){  
+        N = {((1-1/(2*nind*Ne[1]))^ngen1)*nR^(ngen1)}
+      }else{
+        if(ngen2>1){
+          N = matrix(0, ncol(nR), ncol(nR))
+        }
+      }
+      
+      # Only perform further summations if (ngen2-ngen1 > 1)
+      
+      if((ngen2 - ngen1) > 1){
+        for (x in (ngen1 + 1):(ngen2-1)){
+          N = N + ((1-1/(2*nind*Ne[1]))^ngen1)*((1-1/(2*nind*Ne[2]))^(x-ngen1))*nR^x
+          
+        }
+        
+      }
+      
+    }
+    
+    if(length(Ne)==ngen2){
+      
+      if(ngen1!=0){  
+        N = (prod(1-1/(2*nind*Ne[1:ngen1])))*nR^ngen1
+      }else{
+        if(ngen2>1){
+          N = matrix(0, ncol(nR), ncol(nR))
+        }
+      }
+      
+      # Only perform further summations if (ngen2-ngen1 > 1)
+      
+      if((ngen2 - ngen1) > 1){
+        
+        for (x in (ngen1 + 1):(ngen2-1)){
+          N = N + (prod(1-1/(2*nind*Ne[1:x])))*nR^x
+        }
       }
       
     }
@@ -223,7 +320,7 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
       message("Estimating palpha...")
     }
     
-    palpha<-optim(0, fit.model, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, Selec=Selec, Ne_factor=Ne_factor, verbose=verbose, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1, factr = 1e+11), hessian=TRUE)
+    palpha<-optim(0, fit.model, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, Selec=Selec, verbose=verbose, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1, factr = 1e+11), hessian=TRUE)
     
     palpha_var<--1/palpha$hessian
     palpha<-palpha$par
@@ -236,7 +333,7 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
     message("Fitting the final model...")
   }
   
-  output<-fit.model(palpha=palpha, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, Selec=Selec, Ne_factor=Ne_factor, verbose=verbose)
+  output<-fit.model(palpha=palpha, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, Selec=Selec, verbose=verbose)
   
   if(verbose){
     message("Calculating the estimate of Vw...")

@@ -128,7 +128,7 @@ library(Vw)
 ########################
 
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "few_sites_with_neutral_SCE-BIO-C06645_2024-11-19_17-30-33.157934", commandArgs(trailingOnly = TRUE)[1])
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "few_sites_with_neutral_SCE-BIO-C06645_2024-11-22_18-04-06.412312", commandArgs(trailingOnly = TRUE)[1])
 nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
 
 test = FALSE
@@ -158,9 +158,10 @@ for(sim in 1:nsims){
                               pa = 1,
                               Vs = "LoNL",                                # "L" or "LoNL"
                               method="REML",                              # Can be "REML" or "MCMC"
-                              palpha = 0,                                # If NA pdelta is estimated using optim()
+                              palpha = NA,                                # If NA pdelta is estimated using optim()
                               balpha = c(NA, NA),                         # If c(NA,NA) both bedelta intercept and slope are estimated
                               AtleastOneRecomb=FALSE,
+                              Ne = c(1000,1000, 1000, 1000),
                               verbose = TRUE)
 
 }

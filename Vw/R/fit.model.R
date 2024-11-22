@@ -1,5 +1,5 @@
 
-fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, nind, tprojp, pbar0, pbar1, pbar2, nrep, Selec, Ne_factor=1, LLonly=FALSE, method = "REML", verbose=TRUE){
+fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, nind, tprojp, pbar0, pbar1, pbar2, nrep, Selec, LLonly=FALSE, method = "REML", verbose=TRUE){
   
   if(verbose){
     message("Computing the covariance structure of locus effects...")

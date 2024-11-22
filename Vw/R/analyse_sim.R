@@ -22,7 +22,7 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                        palpha = NA,           # If NA palpha is estimated using optim()
                        balpha = c(NA, NA),    # If c(NA,NA) both bedelta intercept and slope are estimated
                        AtleastOneRecomb=FALSE, 
-                       Ne_factor = 1,         # Can be a scalar or a vector 
+                       Ne=NULL,                    # Can be a scalar (same Ne throughout), a vector of length 2 (different Ne's in the neutral (Ne[1]) and selected (Ne[2]) parts of the experiment), or a vector of length ngen2 (different Ne in each generation)
                        all.gp = FALSE,        # Ltilde = L'+L''(r/(1-r)) if all.gp=T L'' is assumed 0 and L'=L. 
                        verbose = TRUE
 ){
@@ -77,7 +77,7 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                L = parents_info$L,
                Ltilde = if(all.gp){parents_info$L}else{parents_info$Ltilde},      
                svdL = parents_info$svdL,           # list with elements UL and DL
-               Ne_factor = Ne_factor,
+               Ne = Ne,
                tol = sqrt(.Machine$double.eps))
   
   
@@ -110,7 +110,8 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
   
   sim_params = sim_data$sim_params
   
-  analysis_data = data.frame("proj"=proj, "LDalpha"=LDalpha, "pa"=pa, "Vs"=Vs, "randomise"=randomise, "palpha_method"=palpha, "balpha_method"=paste(balpha[1], balpha[2], sep="_"), "Ne_factor" = paste(Ne_factor, collapse = "_"), "va_true"=parents_info$va_true, "vA_true"=parents_info$vA_true, "vA_est"=vA_est, "vA_alpha_emp"=parents_info$vA_alpha_emp, "vA_BC" = BC_fit$vA_BC, "Ne_BC" = BC_fit$Ne_BC, "Vw_model_res_var" = summary(m1$model)$varcomp[2,1], "palpha_emp"=parents_info$parameters$palpha, "balpha_intercept_emp"=parents_info$parameters$balpha_0, "balpha_slope_emp"=parents_info$parameters$balpha_1, "sigma2alpha_emp"=parents_info$parameters$sigma2alpha, "palpha_est"=palpha_est, "palpha_var_est"=palpha_var_est, "balpha_intercept_est"=balpha_intercept_est, "balpha_slope_est"=balpha_slope_est, "balpha_var_est"=balpha_var_est, "sigma2alpha_est"=sigma2alpha_est, "seg_sites"=parents_info$seg_sites, "seg_sites_neu"=parents_info$seg_sites_neu, "seg_sites_ben"=parents_info$seg_sites_ben, "seg_sites_del"=parents_info$seg_sites_del, "mean_diversity"=parents_info$mean_diversity, "all.gp" = all.gp, "analysis_stamp" = unique_stamp)
+  if(is.null(Ne)){Ne = sim_params$n_ind_exp}
+  analysis_data = data.frame("proj"=proj, "LDalpha"=LDalpha, "pa"=pa, "Vs"=Vs, "randomise"=randomise, "palpha_method"=palpha, "balpha_method"=paste(balpha[1], balpha[2], sep="_"), "Ne_exp" = paste(Ne, collapse = "_"), "va_true"=parents_info$va_true, "vA_true"=parents_info$vA_true, "vA_est"=vA_est, "vA_alpha_emp"=parents_info$vA_alpha_emp, "vA_BC" = BC_fit$vA_BC, "Ne_BC" = BC_fit$Ne_BC, "Residual_var" = summary(m1$model)$varcomp[2,1], "palpha_emp"=parents_info$parameters$palpha, "balpha_intercept_emp"=parents_info$parameters$balpha_0, "balpha_slope_emp"=parents_info$parameters$balpha_1, "sigma2alpha_emp"=parents_info$parameters$sigma2alpha, "palpha_est"=palpha_est, "palpha_var_est"=palpha_var_est, "balpha_intercept_est"=balpha_intercept_est, "balpha_slope_est"=balpha_slope_est, "balpha_var_est"=balpha_var_est, "sigma2alpha_est"=sigma2alpha_est, "seg_sites"=parents_info$seg_sites, "seg_sites_neu"=parents_info$seg_sites_neu, "seg_sites_ben"=parents_info$seg_sites_ben, "seg_sites_del"=parents_info$seg_sites_del, "mean_diversity"=parents_info$mean_diversity, "all.gp" = all.gp, "analysis_stamp" = unique_stamp)
   
   analysis_data = cbind(sim_params, analysis_data)
   write.table(rbind(names(analysis_data), analysis_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_Data_analysis_", unique_stamp, ".csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
