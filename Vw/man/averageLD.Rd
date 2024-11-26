@@ -1,5 +1,5 @@
-\name{Sigma}
-\alias{Sigma}
+\name{averageLD}
+\alias{averageLD}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 \sigma
@@ -8,7 +8,7 @@
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-Sigma(L, nR, N = Inf, nrep)
+averageLD(L, nR, N = Inf, nrep)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

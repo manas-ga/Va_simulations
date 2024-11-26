@@ -6,10 +6,10 @@ est_Va_bc<-function(pbar1, pbar2, L, nR){
   nrep = nrow(pbar1)
   
   Q<-Q(pbar1, pbar2)
-  Sigma<-Sigma(L, nR, nrep=nrep)
+  A<-averageLD(L, nR, nrep=nrep)
   
   q<-Q[upper.tri(Q, diag=TRUE)]
-  a<-0.5*Sigma[upper.tri(Sigma, diag=TRUE)]
+  a<-0.5*A[upper.tri(A, diag=TRUE)]
   b<-diag(nrow(Q))[upper.tri(Q, diag=TRUE)]
   
   fit_BC = lm(q~a+b-1)
