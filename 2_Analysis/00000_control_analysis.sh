@@ -4,9 +4,9 @@
 #$ -cwd
 #$ -N Analyse_sim
 #$ -t 1-50
-#$ -tc 1
+#$ -tc 10
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g,h=!bigyin
-#$ -pe smp 15
+#$ -pe smp 2
 #$ -j y
 #$ -o /data/obbard/Va_simulations/analyses/b_Interim_files/std_out/
 
