@@ -120,7 +120,7 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04
 
 # First update the library and then load
 
-install.packages(Vw_library_path, repos = NULL, type = "source")
+#install.packages(Vw_library_path, repos = NULL, type = "source")
 library(Vw)
 
 ########################
