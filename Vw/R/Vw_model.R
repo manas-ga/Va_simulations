@@ -134,7 +134,7 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
     
     if(length(Ne)==2){
       
-      M = ((1-1/(2*Ne[1]))^ngen1)*(1/Ne[1])*nR^(1+ngen1)
+      M = ((1-1/(2*Ne[1]))^ngen1)*(1/Ne[2])*nR^(1+ngen1)
       
       # Only perform further summations if (ngen2-ngen1 > 1)
       

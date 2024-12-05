@@ -2,6 +2,26 @@ initialize()
 {
 	initializeSLiMModelType("WF");
 	initializeTreeSeq();
+	
+	// Set default parameters if running on SLiMgui
+	if (exists("slimgui")){
+		defineConstant("DFE", "g");
+		defineConstant("mu", 5.56e-7);
+		defineConstant("shape", 0.3);
+		defineConstant("scale", 0.033);
+		defineConstant("mut_ratio", 0);
+		defineConstant("sequence_length", 1e+6);
+		defineConstant("r", 1e-6);
+		defineConstant("msprime_output_path", "C:/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/b_Interim_files/SLiM_outputs");
+      defineConstant("slim_output_path", "C:/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/b_Interim_files/SLiM_outputs");	
+		defineConstant("Set_ID", "NA");
+		defineConstant("simulation", 1);
+		defineConstant("end_gen", 20000);
+		defineConstant("n_ind_exp", 1000);
+		defineConstant("Ve_w", 1);
+		defineConstant("output_freq", 500);
+	}	
+	
 	initializeMutationRate(mu);
 	
 	if (DFE == "g"){
@@ -24,12 +44,19 @@ initialize()
 mutationEffect(m2) { return 1.0; }
 mutationEffect(m3) { return 1.0; }
 
+1 early(){
+	if(exists("slimgui")){
+		sim.addSubpop("p0", 2500);
+	}
+}
+
 1 late() {
 	
-	// Read from the msprime simulation 
-	
-	sim.readFromPopulationFile(msprime_output_path + "/" + Set_ID + "_sim" + simulation + "_neutral_burnin.trees");
-	sim.treeSeqRememberIndividuals(p0.individuals);
+	if(!exists("slimgui")){
+		// Read from the msprime simulation 
+		sim.readFromPopulationFile(msprime_output_path + "/" + Set_ID + "_sim" + simulation + "_neutral_burnin.trees");
+		sim.treeSeqRememberIndividuals(p0.individuals);
+	}
 
 }
 
@@ -49,23 +76,42 @@ mutationEffect(m3) { return 1.0; }
 		inds = sim.subpopulations.individuals; // Vector of all individuals
 		
 		if(DFE == "g"){
-			phenotypes = inds.sumOfMutationsOfType(m2) + inds.sumOfMutationsOfType(m3) + rnorm(length(inds), 0, 1); // Sum of all the selection coefficients (both m2 and m3) in each individuals genomes
+			phenotypes = inds.sumOfMutationsOfType(m2) + inds.sumOfMutationsOfType(m3) + rnorm(length(inds), 0, Ve_w); // Sum of all the selection coefficients (both m2 and m3) in each individuals genomes
 		}
 		
 		if (DFE == "n"){
-			phenotypes = inds.sumOfMutationsOfType(m2) + rnorm(length(inds), 0, 1); // Sum of all the selection coefficients (of type m2) in each individuals genomes
+			phenotypes = inds.sumOfMutationsOfType(m2) + rnorm(length(inds), 0, Ve_w); // Sum of all the selection coefficients (of type m2) in each individuals genomes
 		}
 		
 		inds.fitnessScaling = exp(phenotypes); // Calculate absolute fitness
 	}
 	
 	if (sim.cycle%output_freq == 1){
-		
+		// Caculate summary stats to be printed out 
+		seg_sites = size(sim.mutations);
+		p = sim.mutationFrequencies(p0);
+		diversity = p*(1-p)/2;
+		list_alpha = 2*sim.mutations.selectionCoeff;
+		va_true = sum(diversity*list_alpha^2);  
 		//sim.outputFull(slim_output_path + "/sim" + simulation + "_output_history_" + sim.cycle + ".txt");
-		catn(sim.cycle);
+		if(sim.cycle == 1){
+		catn("Gen" + " seg_sites" + " diversity" + " va_true");
+		writeFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_summary_stats" + ".txt", "Gen" + " seg_sites" + " diversity" + " va_true", append = F);}
+		
+		catn(sim.cycle + " " + seg_sites + " " + mean(diversity) + " " + va_true);
+		writeFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_summary_stats" + ".txt", sim.cycle + " " + seg_sites + " " + mean(diversity) + " " + va_true, append = T);
 	}
 	
 	if (sim.cycle == end_gen){
+		// Caculate summary stats to be printed out to std_out
+		seg_sites = size(sim.mutations);
+		p = sim.mutationFrequencies(p0);
+		diversity = p*(1-p)/2;
+		list_alpha = 2*sim.mutations.selectionCoeff;
+		va_true = sum(diversity*list_alpha^2);  	
+		catn(sim.cycle + " " + seg_sites + " " + mean(diversity) + " " + va_true);
+		writeFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_summary_stats" + ".txt", sim.cycle + " " + seg_sites + " " + mean(diversity) + " " + va_true, append = T);
+	
 		catn("The last generation of the burnin phase is " + sim.cycle);
 		catn("History phase (without neutral mutations) done.");
 				

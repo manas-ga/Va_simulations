@@ -102,7 +102,7 @@ system(paste("mkdir -p", paste(file_storage_path, "/b_Interim_files/SLiM_outputs
 # The ith command line arguments can be retrieved with commandArgs(trailingOnly = TRUE)[i]
 # Command line arguments are not used if running on Manas's PC
 
-# Arg 1 = mu
+# Arg 1 = mu_msp
 # Arg 2 = r*sequence_length
 # Arg 3 = r_expt*sequence_length
 # Arg 4 = n_ind_exp
@@ -127,7 +127,7 @@ trim_exp_files = FALSE                 # Should the SLiM output files for the ex
 del_files = TRUE                       # Should the .trees files be deleted at the end to save space?
 compress_files = FALSE                 # Should .txt and .trees files be compressed using gzip
 
-Job_ID = "few_sites_with_neutral"            # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
+Job_ID = "TEST"            # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
 
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
 
@@ -137,7 +137,7 @@ end_gen = 2                        # How many generations should the SLiM simula
 
 if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
-output_freq = 1000                     # The frequency with which SLiM outputs are to be generated for the analysis of history 
+output_freq = 500                      # The frequency with which summary stats are to be recorded in the history phase 
 ngen1 = 1                              # How many generations between the 1st expt generation and the parents
 ngen2 = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 4, (as.numeric(commandArgs(trailingOnly = TRUE)[6])))       # How many generations between the last expt generatio and the parents                        # How many generations should allele frequency changes be calculated over in the experiment
 flip_sel_coef = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 0, as.numeric(commandArgs(trailingOnly = TRUE)[7])) # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
@@ -146,28 +146,50 @@ flip_sel_coef = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 0, as.numeric(c
 ########### Pop gen parameters ############
 ###########################################
 
-Ne = 1.33e+06                          # Effective population size
-n_ind = 2500                           # Number of individuals to be sampled in msprime and then run forward in SLiM
+##################
+
+Ne = 10000                             # Effective population size in the msprime simulation
+n_ind = 10000                          # Number of individuals to be sampled in msprime and then run forward in SLiM
 n_ind_exp = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1000, (as.numeric(commandArgs(trailingOnly = TRUE)[4])))                       # The population size of the experiment. In 00_History.slim the population reduces to n_ind_exp in the last generation to simulate the sampling of the parents for the experiment
 n_sample = n_ind_exp                   # Number of individuals to be sampled to construct the c matrix  (This is just because c matrices become awfully large). Typically should be the same as n_ind_exp 
 
+##################
+
 sequence_length = 1e+06                # Just have a single continuous chromosome that is simulated
+
+##################
 
 map_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1.4, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))
 map_length_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1.4, (as.numeric(commandArgs(trailingOnly = TRUE)[3])))
 
 r = map_length/sequence_length             # Recombination rate (per site per generation) during the forward simulation of history
 r_expt = map_length_expt/sequence_length   # Recombination rate to be used during during the experiment (Drosophila melanogaster ~ 1.4e-08)
-r_msp = r/532                          # Recombination rate for the initial msprime simulation
+r_msp = 3.49e-07    #  r/532                          # Recombination rate for the initial msprime simulation
 
 AtleastOneRecomb = FALSE               # Whether there has to be at least one recombination event
 
-## Mutation rate of non_neutral mutations during the forward simulation of the history
-if(Sys.info()["nodename"]=="SCE-BIO-C06645"){mu_list=seq(3e-8, 2e-7, length = nsims)}else{mu_list=seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
+##################
 
-mu_expt = 0                             # Mutation rate during the experiment
+# Mutation rate in the msprime simulation
 
-# mu_msp and mu_neutral are specified within the loop over sims
+mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(7.5e-10, 5e-09, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
+
+# Mutation rate of non_neutral mutations during the forward simulation of the history
+
+mu_list = if(end_gen==2){seq(0, 0, length = nsims)}else{mu_msp_list}
+
+# The total mutation rate (selected + neutral)
+
+mu_total = if(end_gen==2){7.5e-09}else{7.5e-09}
+
+# Neutral mutation rate to be used to recapitualte neutral mutations
+
+mu_neutral_list = mu_total - mu_msp_list
+
+# Mutation rate during the experiment
+
+mu_expt = 0                             
+
 
 ##############################
 ### DFE-related parameters ###
@@ -186,6 +208,10 @@ if(Sys.info()["nodename"]=="SCE-BIO-C06645"){mut_ratio=1}else{mut_ratio = as.num
 mean_alpha = 0
 var_alpha_list = seq(0.00002, 0.0002, length = nsims) # Vector to store variance of normal DFE
 
+# Environmental variance for relative fitness
+
+Ve_w = 1 # In the history phase
+Ve_w_expt = 1 # In the experiment phase
 
 ###################################################################################################################
 ##### Create a spreadsheet to store cumulative data across all simulations (only if it doesn't exist already) #####
@@ -205,7 +231,7 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
 }
 
 if(!file.exists(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""))){
-  col_names = as.matrix(t(c("Set_ID","sim", "Time","end_gen", "ngen1", "ngen2", "Ne", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "flip_sel_coef")))
+  col_names = as.matrix(t(c("Set_ID","sim", "Time","end_gen", "ngen1", "ngen2", "Ne", "n_ind", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "flip_sel_coef", "Ve_w", "Ve_w_expt")))
   write.table(col_names, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
 }
 
@@ -241,8 +267,8 @@ for (sim in 1:nsims){
       # Specify the mutation rate for the SLiM history simulation
       
       mu = mu_list[sim]
-      mu_msp = ifelse(end_gen==2, mu/5320, mu/5320)
-      mu_neutral = ifelse(end_gen==2, mu_msp/3, mu/20)
+      mu_msp = mu_msp_list[sim]
+      mu_neutral = mu_neutral_list[sim]
       #mu_neutral = 0
       
       message(paste("Simulation", sim, "in progress..."))
@@ -283,8 +309,9 @@ for (sim in 1:nsims){
       arg15 = paste("-d ", shQuote(paste("Set_ID=", "'", Set_ID, "'", sep = "")), sep = "")
       arg16 = paste("-d simulation=", sim, sep = "")
       arg17 = paste("-d flip_sel_coef=", flip_sel_coef, sep = "")
+      arg18 = paste("-d Ve_w=", Ve_w, sep = "")
       
-      system(paste("slim", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, slim_history_path))
+      system(paste("slim", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, slim_history_path))
       
       ###################################################################
       ############### Add neutral mutations using msprime ###############
@@ -359,8 +386,9 @@ for (sim in 1:nsims){
         expt_arg14 = paste("-d simulation=", sim, sep = "")
         expt_arg15 = paste("-d cage=", cage, sep = "")
         expt_arg16 = paste("-d flip_sel_coef=", flip_sel_coef, sep = "")
+        expt_arg17 = paste("-d Ve_w_expt=", Ve_w_expt, sep = "")
         
-        system(paste("slim", expt_arg1, expt_arg2, expt_arg3, expt_arg4, expt_arg5, expt_arg6, expt_arg7, expt_arg8, expt_arg9, expt_arg10, expt_arg11, expt_arg12a, expt_arg12b, expt_arg13, expt_arg14, expt_arg15, expt_arg16, slim_expt_path))
+        system(paste("slim", expt_arg1, expt_arg2, expt_arg3, expt_arg4, expt_arg5, expt_arg6, expt_arg7, expt_arg8, expt_arg9, expt_arg10, expt_arg11, expt_arg12a, expt_arg12b, expt_arg13, expt_arg14, expt_arg15, expt_arg16, expt_arg17, slim_expt_path))
         
         ### Trim the SLim outputs for the experiment to just include the information on mutations to make them smaller
         
@@ -385,7 +413,7 @@ for (sim in 1:nsims){
       
       if(record == TRUE){
         dat = read.csv(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""), header=FALSE)
-        dat = rbind(dat, c(Set_ID, sim, as.character(Sys.time()), end_gen, ngen1, ngen2, Ne, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, flip_sel_coef))
+        dat = rbind(dat, c(Set_ID, sim, as.character(Sys.time()), end_gen, ngen1, ngen2, Ne, n_ind, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, flip_sel_coef, Ve_w, Ve_w_expt))
         write.table(dat, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
       }
       

@@ -66,11 +66,11 @@ mutationEffect(m3) { return 1.0; }
 		inds = sim.subpopulations.individuals; // Vector of all individuals
 		
 		if(DFE == "g"){
-			phenotypes = inds.sumOfMutationsOfType(m2) + inds.sumOfMutationsOfType(m3) + rnorm(length(inds), 0, 1); // Sum of all the selection coefficients (both m2 and m3) in each individuals genomes
+			phenotypes = inds.sumOfMutationsOfType(m2) + inds.sumOfMutationsOfType(m3) + rnorm(length(inds), 0, Ve_w_expt); // Sum of all the selection coefficients (both m2 and m3) in each individuals genomes
 		}
 		
 		if (DFE == "n"){
-			phenotypes = inds.sumOfMutationsOfType(m2) + rnorm(length(inds), 0, 1); // Sum of all the selection coefficients (of type m2) in each individuals genomes
+			phenotypes = inds.sumOfMutationsOfType(m2) + rnorm(length(inds), 0, Ve_w_expt); // Sum of all the selection coefficients (of type m2) in each individuals genomes
 		}
 		
 		inds.fitnessScaling = exp(phenotypes); // Calculate absolute fitness

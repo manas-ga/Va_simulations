@@ -5,7 +5,7 @@
 ##### Script to write a text file containing the grid of parameters ####
 ########################################################################
 
-# Col 1 = mu
+# Col 1 = mu_msp
 # Col 2 = r*sequence_length
 # Col 3 = r_expt*sequence_length
 # Col 4 = n_ind_exp
@@ -15,11 +15,11 @@
 # Col 8 = mut_ratio
 
 nsims = 50 # number of simulations for each set
-mu_list = seq(1.89e-7, 1.56e-6, length = nsims)
+mu_msp_list = seq(7.5e-10, 5e-9, length = nsims)
 
 param_matrix = data.frame(matrix(NA, nrow = nsims, ncol  = 8))
 
-param_matrix[,1] = mu_list
+param_matrix[,1] = mu_msp_list
 param_matrix[,2] = 1.4
 param_matrix[,3] = 14
 param_matrix[,4] = 1000

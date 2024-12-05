@@ -80,6 +80,26 @@ analyse_parents = function(c_genome,
   va_true = sum(diversity*list_alpha^2)          # additive genic variance
   vA_true = t(list_alpha)%*%L%*%list_alpha       # Additive genetic variance
   
+  if(verbose){message("Calculating neucleotide diversity (pi)...")}
+  
+  pair_diff = rep(NA, nrow(c_genome)*(nrow(c_genome) - 1)/2) # vector to record pairwise differences among genomes
+  
+  count = 1
+  
+  for(genome1 in 1:(nrow(c_genome)-1)){
+    for(genome2 in (genome1+1):nrow(c_genome)){
+      pair_diff[count] = sum(abs(c_genome[genome2,] - c_genome[genome1,]))
+      count = count + 1 
+    }
+  }
+  
+  pi = mean(pair_diff)
+  
+  if(verbose){message("Computing Watterson's theta...")}
+  
+  a = sum(1/(1:nrow(c_genome)))
+  theta = ncol(c_genome)/a
+  
   ###################################################################
   ##### Calculate empirical properties of distribution of alphas ####
   ###################################################################
@@ -108,6 +128,6 @@ analyse_parents = function(c_genome,
   
   vA_alpha_emp<-TrV+aLa
   
-  return(list(L=L, Ltilde=Ltilde, nR=nR, svdL=if(compute_svdL | LDalpha){list(UL=UL, DL=DL)}else{NULL}, seg_sites=seg_sites, seg_sites_neu=seg_sites_neu, seg_sites_ben=seg_sites_ben, seg_sites_del=seg_sites_del, mean_diversity=mean_diversity, va_true=va_true, vA_true=vA_true, vA_alpha_emp=vA_alpha_emp, parameters=alpha_properties[1:5]))
+  return(list(L=L, Ltilde=Ltilde, nR=nR, svdL=if(compute_svdL | LDalpha){list(UL=UL, DL=DL)}else{NULL}, seg_sites=seg_sites, seg_sites_neu=seg_sites_neu, seg_sites_ben=seg_sites_ben, seg_sites_del=seg_sites_del, mean_diversity=mean_diversity, pi=pi, theta=theta, va_true=va_true, vA_true=vA_true, vA_alpha_emp=vA_alpha_emp, parameters=alpha_properties[1:5]))
   
 }

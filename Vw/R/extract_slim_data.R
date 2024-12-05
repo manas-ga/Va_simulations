@@ -299,6 +299,6 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
     
   }
   
-  return(list(c_genome=c_genome, list_alpha=list_alpha, SNPs=SNPs, ngen1=ngen1, ngen2=ngen2,  pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, sim_params=sim_params[,1:20]))
+  return(list(c_genome=c_genome, list_alpha=list_alpha, SNPs=SNPs, ngen1=ngen1, ngen2=ngen2,  pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, sim_params=sim_params))
   
 }

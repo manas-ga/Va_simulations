@@ -128,8 +128,8 @@ library(Vw)
 ########################
 
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "few_sites_with_neutral_SCE-BIO-C06645_2024-11-22_18-04-06.412312", commandArgs(trailingOnly = TRUE)[1])
-nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "TEST_SCE-BIO-C06645_2024-12-05_12-03-10.665725", commandArgs(trailingOnly = TRUE)[1])
+nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 10, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
 
 test = FALSE
 
@@ -151,7 +151,7 @@ for(sim in 1:nsims){
                               mutations_path = temp_files_path,           # The directory where extracted mutations are to be stored (temp files)
                               c_matrix_path = temp_files_path,            # The directory where extracted genomes are to be stored (temp files)
                               output_path = output_path,                  # The path where the final data file is to be stored
-                              randomise = FALSE,                           # Optionally the reference allele can be randomised
+                              randomise = TRUE,                           # Optionally the reference allele can be randomised
                               delete_temp_files = FALSE,
                               proj = "BLoM",                              # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
                               LDalpha = FALSE,                            # Should L or diag(L) be considered while modelling distribution of alphas
@@ -161,7 +161,8 @@ for(sim in 1:nsims){
                               palpha = NA,                                # If NA pdelta is estimated using optim()
                               balpha = c(NA, NA),                         # If c(NA,NA) both bedelta intercept and slope are estimated
                               AtleastOneRecomb=FALSE,
-                              Ne = c(1000,1000, 1000, 1000),
+                              Ne = c(1000, 1000),
+                              predict_Ne =  TRUE,                         # If true, this overwrites the Ne supplied above by Ne = c(nind_expt, predict_Ne(nind_expt, Ve_w_expt))
                               verbose = TRUE)
 
 }
