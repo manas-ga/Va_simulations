@@ -159,7 +159,7 @@ sequence_length = 1e+06                # Just have a single continuous chromosom
 
 ##################
 
-map_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 500, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))
+map_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 5, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))
 map_length_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1.4, (as.numeric(commandArgs(trailingOnly = TRUE)[3])))
 
 r = map_length/sequence_length             # Recombination rate (per site per generation) during the forward simulation of history
@@ -180,11 +180,11 @@ mu_list = if(end_gen==2){seq(0, 0, length = nsims)}else{10*mu_msp_list}
 
 # The total mutation rate (selected + neutral)
 
-mu_total = if(end_gen==2){7.5e-09}else{6.0e-07}
+mu_total = if(end_gen==2){7.5e-09}else{6.0e-06}
 
 # Neutral mutation rate to be used to recapitualte neutral mutations
 
-mu_neutral_list = mu_total - mu_msp_list
+mu_neutral_list = mu_total - 10*mu_msp_list
 
 # Mutation rate during the experiment
 
@@ -202,7 +202,7 @@ shape = 0.3                                     # Shape of the gamma DFE ##### m
 scale_list = seq(0.033, 0.033, length = nsims)  # Vector of Scale of the gamma DFE
 
 # The ratio of beneficial:deleterious mutations 
-mut_ratio = if(Sys.info()["nodename"]=="SCE-BIO-C06645"){0}else{as.numeric(commandArgs(trailingOnly = TRUE)[8])}
+mut_ratio = if(Sys.info()["nodename"]=="SCE-BIO-C06645"){0.0002}else{as.numeric(commandArgs(trailingOnly = TRUE)[8])}
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
