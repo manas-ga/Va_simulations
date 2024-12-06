@@ -32,6 +32,8 @@ mutationEffect(m3) { return 1.0; }
 	
 	sim.readFromPopulationFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_with_neutral.trees");
 	
+	catn("There are " + size(sim.mutations) + " segregating sites in the parents' generation");
+	
 	sim.treeSeqRememberIndividuals(p0.individuals);
 	catn(sim.cycle + " (parents' generation)");
 	

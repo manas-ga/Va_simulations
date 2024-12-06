@@ -133,11 +133,11 @@ nsims = 1                              # Number of simulations - MUST be 1 if ru
 
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
-end_gen = 2                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+end_gen = 10000                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
 
 if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
-output_freq = 500                      # The frequency with which summary stats are to be recorded in the history phase 
+output_freq = 100                      # The frequency with which summary stats are to be recorded in the history phase 
 ngen1 = 1                              # How many generations between the 1st expt generation and the parents
 ngen2 = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 4, (as.numeric(commandArgs(trailingOnly = TRUE)[6])))       # How many generations between the last expt generatio and the parents                        # How many generations should allele frequency changes be calculated over in the experiment
 flip_sel_coef = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 0, as.numeric(commandArgs(trailingOnly = TRUE)[7])) # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
@@ -148,8 +148,8 @@ flip_sel_coef = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 0, as.numeric(c
 
 ##################
 
-Ne = 10000                             # Effective population size in the msprime simulation
-n_ind = 10000                          # Number of individuals to be sampled in msprime and then run forward in SLiM
+Ne = 2500                             # Effective population size in the msprime simulation
+n_ind = 2500                          # Number of individuals to be sampled in msprime and then run forward in SLiM
 n_ind_exp = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1000, (as.numeric(commandArgs(trailingOnly = TRUE)[4])))                       # The population size of the experiment. In 00_History.slim the population reduces to n_ind_exp in the last generation to simulate the sampling of the parents for the experiment
 n_sample = n_ind_exp                   # Number of individuals to be sampled to construct the c matrix  (This is just because c matrices become awfully large). Typically should be the same as n_ind_exp 
 
@@ -159,7 +159,7 @@ sequence_length = 1e+06                # Just have a single continuous chromosom
 
 ##################
 
-map_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1.4, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))
+map_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 500, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))
 map_length_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1.4, (as.numeric(commandArgs(trailingOnly = TRUE)[3])))
 
 r = map_length/sequence_length             # Recombination rate (per site per generation) during the forward simulation of history
@@ -172,15 +172,15 @@ AtleastOneRecomb = FALSE               # Whether there has to be at least one re
 
 # Mutation rate in the msprime simulation
 
-mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(7.5e-10, 5e-09, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
+mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(5.56e-7, 5.56-7, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
 
 # Mutation rate of non_neutral mutations during the forward simulation of the history
 
-mu_list = if(end_gen==2){seq(0, 0, length = nsims)}else{mu_msp_list}
+mu_list = if(end_gen==2){seq(0, 0, length = nsims)}else{10*mu_msp_list}
 
 # The total mutation rate (selected + neutral)
 
-mu_total = if(end_gen==2){7.5e-09}else{7.5e-09}
+mu_total = if(end_gen==2){7.5e-09}else{6.0e-07}
 
 # Neutral mutation rate to be used to recapitualte neutral mutations
 
@@ -202,7 +202,7 @@ shape = 0.3                                     # Shape of the gamma DFE ##### m
 scale_list = seq(0.033, 0.033, length = nsims)  # Vector of Scale of the gamma DFE
 
 # The ratio of beneficial:deleterious mutations 
-if(Sys.info()["nodename"]=="SCE-BIO-C06645"){mut_ratio=1}else{mut_ratio = as.numeric(commandArgs(trailingOnly = TRUE)[8])}
+mut_ratio = if(Sys.info()["nodename"]=="SCE-BIO-C06645"){0}else{as.numeric(commandArgs(trailingOnly = TRUE)[8])}
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0

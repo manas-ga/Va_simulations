@@ -76,7 +76,7 @@ mutationEffect(m3) { return 1.0; }
 		inds = sim.subpopulations.individuals; // Vector of all individuals
 		
 		if(DFE == "g"){
-			phenotypes = inds.sumOfMutationsOfType(m2) + inds.sumOfMutationsOfType(m3) + rnorm(length(inds), 0, Ve_w); // Sum of all the selection coefficients (both m2 and m3) in each individuals genomes
+			phenotypes = inds.sumOfMutationsOfType(m2) + inds.sumOfMutationsOfType(m3) + rnorm(length(inds), 0, Ve_w); // Sum of all the selection coefficients (both m2 and m3) in each individuals genomes	
 		}
 		
 		if (DFE == "n"){
