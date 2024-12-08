@@ -127,13 +127,13 @@ trim_exp_files = FALSE                 # Should the SLiM output files for the ex
 del_files = TRUE                       # Should the .trees files be deleted at the end to save space?
 compress_files = FALSE                 # Should .txt and .trees files be compressed using gzip
 
-Job_ID = "TEST"            # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
+Job_ID = "burnin_test"                 # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
 
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
 
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
-end_gen = 10000                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+end_gen = 25000                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
 
 if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
@@ -172,11 +172,14 @@ AtleastOneRecomb = FALSE               # Whether there has to be at least one re
 
 # Mutation rate in the msprime simulation
 
-mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(5.56e-7, 5.56-7, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
+mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(1.56e-7, 1.56-7, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
 
 # Mutation rate of non_neutral mutations during the forward simulation of the history
 
 mu_list = if(end_gen==2){seq(0, 0, length = nsims)}else{10*mu_msp_list}
+
+#!!! The mutation rate in the msprime simulation is deliberately kept lower 
+#!!! Otherwise at the beginning of the History simulation in SLiM, the fitness of all individuals becomes 0 and the simulation does not run 
 
 # The total mutation rate (selected + neutral)
 
@@ -184,7 +187,13 @@ mu_total = if(end_gen==2){7.5e-09}else{6.0e-06}
 
 # Neutral mutation rate to be used to recapitualte neutral mutations
 
-mu_neutral_list = mu_total - 10*mu_msp_list
+if(end_gen==2){
+  mu_neutral_list = mu_total - mu_msp_list
+}else{
+  mu_neutral_list = seq(0, 0, length = nsims)
+  #mu_neutral_list = seq(commandArgs(trailingOnly = TRUE)[9], commandArgs(trailingOnly = TRUE)[9], length = nsims)
+}
+
 
 # Mutation rate during the experiment
 
@@ -199,10 +208,10 @@ DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal)
 
 # If DFE is "g"
 shape = 0.3                                     # Shape of the gamma DFE ##### mean = shape*scale
-scale_list = seq(0.033, 0.033, length = nsims)  # Vector of Scale of the gamma DFE
+scale_list = seq(0.05, 0.05, length = nsims)  # Vector of Scale of the gamma DFE
 
 # The ratio of beneficial:deleterious mutations 
-mut_ratio = if(Sys.info()["nodename"]=="SCE-BIO-C06645"){0.0002}else{as.numeric(commandArgs(trailingOnly = TRUE)[8])}
+mut_ratio = if(Sys.info()["nodename"]=="SCE-BIO-C06645"){0.0000}else{as.numeric(commandArgs(trailingOnly = TRUE)[8])}
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
@@ -210,8 +219,8 @@ var_alpha_list = seq(0.00002, 0.0002, length = nsims) # Vector to store variance
 
 # Environmental variance for relative fitness
 
-Ve_w = 1 # In the history phase
-Ve_w_expt = 1 # In the experiment phase
+Ve_w = 1               # In the history phase
+Ve_w_expt = 1          # In the experiment phase
 
 ###################################################################################################################
 ##### Create a spreadsheet to store cumulative data across all simulations (only if it doesn't exist already) #####

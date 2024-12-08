@@ -93,7 +93,7 @@ analyse_parents = function(c_genome,
     }
   }
   
-  pi = mean(pair_diff)
+  pi = mean(pair_diff)/HapLength
   
   if(verbose){message("Computing Watterson's theta...")}
   

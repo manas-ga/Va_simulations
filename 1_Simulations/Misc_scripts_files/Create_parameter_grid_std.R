@@ -14,8 +14,8 @@
 # Col 7 = flip_sel_coef
 # Col 8 = mut_ratio
 
-nsims = 7 # number of simulations for each set
-mu_msp_list = seq(5.56e-8, 5.56e-7, length = nsims)
+nsims = 30 # number of simulations for each set
+mu_msp_list = seq(3.56e-8, 3.56e-7, length = nsims)
 
 param_matrix = data.frame(matrix(NA, nrow = nsims, ncol  = 8))
 
