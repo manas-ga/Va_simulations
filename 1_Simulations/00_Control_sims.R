@@ -172,7 +172,7 @@ AtleastOneRecomb = FALSE               # Whether there has to be at least one re
 
 # Mutation rate in the msprime simulation
 
-mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(1.56e-7, 1.56-7, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
+mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(3.56e-8, 3.56-8, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
 
 # Mutation rate of non_neutral mutations during the forward simulation of the history
 
@@ -181,9 +181,9 @@ mu_list = if(end_gen==2){seq(0, 0, length = nsims)}else{10*mu_msp_list}
 #!!! The mutation rate in the msprime simulation is deliberately kept lower 
 #!!! Otherwise at the beginning of the History simulation in SLiM, the fitness of all individuals becomes 0 and the simulation does not run 
 
-# The total mutation rate (selected + neutral)
+# The total number of permissible sites
 
-mu_total = if(end_gen==2){7.5e-09}else{6.0e-06}
+max_sites = 60000
 
 # Neutral mutation rate to be used to recapitualte neutral mutations
 
@@ -327,6 +327,21 @@ for (sim in 1:nsims){
       ###################################################################
       
       message("Adding neutral mutations...")
+      
+      # Load the summary data generated in the parents' generation and calculate the mutation rate for neutral mutations such that the total number of segregating sites is max_sites
+      # Using 4*Ne*mu_neutral = K/a to calculate mu_neutral
+      
+      d_summary = read.table(paste(slim_output_path, "/", Set_ID, "_sim", sim, "_summary_stats.txt", sep = ""), header=TRUE)
+      seg_sites_before_neutral = d_summary[d_summary$Gen==end_gen,]$seg_sites
+      
+      if(seg_sites_before_neutral>max_sites){
+        message("WARNING: Too many segregating sites - consider using a lower mutation rate.")
+        mu_neutral = 0}
+      
+      a = sum(1/(1:(2*n_ind_exp)))
+      
+      #mu_neutral = (max_sites - seg_sites_before_neutral)/(4*(n_ind/exp(Ve_w))*sequence_length*a)
+      mu_neutral=0
       system(paste("python", msprime_add_neutral_path, slim_output_path, mu_neutral, Set_ID, sim))
       
       ######################################################################
