@@ -84,3 +84,17 @@ Ne = 1.33e+06
 pdelta_method = "optim"
 bdelta_method = "estimate"
 
+(iii)
+
+Ne = 1.33e+6
+n_ind = 2500
+sequence_length = 1e+06
+end_gen = 25000
+DFE = "g"
+shape = 0.3
+scale = 0.1
+mut_ratio = 0
+mu_list = [1.8e-07, 1.6e-06]
+mu_msp = [1.8e-08, 1.6e-07]
+mu_neutral = [1.6e-06, 1.6e-07]
+

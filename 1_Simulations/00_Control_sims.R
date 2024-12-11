@@ -130,6 +130,8 @@ Job_ID = "burnin_test"                 # Job ID will be prefixed to Set_IDs so t
 
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
 
+if(Sys.info()["nodename"]!="SCE-BIO-C06645"&nsims>1)stop("nsims must be 1 when running on the cluster")
+
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
 end_gen = 25000                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
@@ -171,7 +173,7 @@ AtleastOneRecomb = FALSE               # Whether there has to be at least one re
 
 # Mutation rate in the msprime simulation
 
-mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(3.56e-8, 3.56-8, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
+mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(1.8e-8, 1.6e-7, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
 
 # Mutation rate of non_neutral mutations during the forward simulation of the history
 
@@ -180,10 +182,9 @@ mu_list = if(end_gen==2){seq(0, 0, length = nsims)}else{10*mu_msp_list}
 #!!! The mutation rate in the msprime simulation is deliberately kept lower 
 #!!! Otherwise at the beginning of the History simulation in SLiM, the fitness of all individuals becomes 0 and the simulation does not run 
 
-# Neutral mutation rate
+## total number of permissible sites (to be used to set the neutral mutation rate)
 
-mu_neutral_list = if(end_gen==2){max(mu_msp_list) - mu_msp_list}else{if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(1.6e-6, 1.6-7, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[9], commandArgs(trailingOnly = TRUE)[9], length = nsims)}  
-}
+total_sites = 40000
 
 # Mutation rate during the experiment
 
@@ -198,7 +199,7 @@ DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal)
 
 # If DFE is "g"
 shape = 0.3                                     # Shape of the gamma DFE ##### mean = shape*scale
-scale_list = seq(0.05, 0.05, length = nsims)  # Vector of Scale of the gamma DFE
+scale_list = seq(0.1, 0.1, length = nsims)  # Vector of Scale of the gamma DFE
 
 # The ratio of beneficial:deleterious mutations 
 mut_ratio = if(Sys.info()["nodename"]=="SCE-BIO-C06645"){0.0000}else{as.numeric(commandArgs(trailingOnly = TRUE)[8])}
@@ -230,7 +231,7 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
 }
 
 if(!file.exists(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""))){
-  col_names = as.matrix(t(c("Set_ID","sim", "Time","end_gen", "ngen1", "ngen2", "Ne", "n_ind", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_neutral", "shape", "scale", "mut_ratio", "flip_sel_coef", "Ve_w", "Ve_w_expt")))
+  col_names = as.matrix(t(c("Set_ID","sim", "Time","end_gen", "ngen1", "ngen2", "Ne", "n_ind", "n_ind_exp", "n_cages", "sequence_length", "r_msp", "r", "r_expt", "mu_msp", "mu", "mu_expt", "shape", "scale", "mut_ratio", "flip_sel_coef", "Ve_w", "Ve_w_expt")))
   write.table(col_names, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
 }
 
@@ -266,7 +267,6 @@ for (sim in 1:nsims){
       
       mu = mu_list[sim]
       mu_msp = mu_msp_list[sim]
-      mu_neutral = mu_neutral_list[sim]
       
       message(paste("Simulation", sim, "in progress..."))
     
@@ -314,7 +314,18 @@ for (sim in 1:nsims){
       
       message("Adding neutral mutations...")
       
-      system(paste("python", msprime_add_neutral_path, slim_output_path, mu_neutral, Set_ID, sim))
+      # Read the summary file to note the number of non-neutral segregating sites
+      
+      d_summary = read.table(paste(slim_output_path, "/", Set_ID, "_sim", sim, "_summary_stats.txt", sep = ""), header=T)
+      sel_sites = d_summary[d_summary$Gen==end_gen,]$seg_sites
+      
+      if(sel_sites>total_sites){stop("Too many segregating sites. Use a lower mutation rate.")}
+      
+      neutral_sites = total_sites - sel_sites # Expected number of neutral sites to be added
+      
+      message(paste("Choosing a mutation rate so that the expected number of neutral sites to be added is ", neutral_sites, sep = ""))
+      
+      system(paste("python", msprime_add_neutral_path, slim_output_path, neutral_sites, Set_ID, sim, sequence_length))
       
       ######################################################################
       ##### Randomly swap selection coefficients (if flip_sel_coef==T) #####
@@ -408,7 +419,7 @@ for (sim in 1:nsims){
       
       if(record == TRUE){
         dat = read.csv(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""), header=FALSE)
-        dat = rbind(dat, c(Set_ID, sim, as.character(Sys.time()), end_gen, ngen1, ngen2, Ne, n_ind, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_neutral, shape, scale, mut_ratio, flip_sel_coef, Ve_w, Ve_w_expt))
+        dat = rbind(dat, c(Set_ID, sim, as.character(Sys.time()), end_gen, ngen1, ngen2, Ne, n_ind, n_ind_exp, n_cages, sequence_length, r_msp, r, r_expt, mu_msp, mu, mu_expt, shape, scale, mut_ratio, flip_sel_coef, Ve_w, Ve_w_expt))
         write.table(dat, file = paste(output_path, "/", Set_ID, "_Data.csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
       }
       
