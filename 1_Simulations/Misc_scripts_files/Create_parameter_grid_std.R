@@ -17,12 +17,12 @@
 
 nsims = 15 # number of simulations for each set
 mu_msp_list = seq(3.56e-8, 3.56e-7, length = nsims)
-mu_neutral_list = seq(1.6e-6, 1.6e-7, length = nsims)
+mu_neutral_list = seq(1.76e-6, 0, length = nsims)
 
 param_matrix = data.frame(matrix(NA, nrow = nsims, ncol  = 8))
 
 param_matrix[,1] = mu_msp_list
-param_matrix[,2] = 50
+param_matrix[,2] = 5
 param_matrix[,3] = 1.4
 param_matrix[,4] = 1000
 param_matrix[,5] = 10
