@@ -6,7 +6,7 @@
 #$ -t 1-15
 #$ -tc 15
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g
-#$ -pe smp 1
+#$ -pe smp64 2
 #$ -j y
 #$ -o /data/obbard/Va_simulations/analyses/b_Interim_files/std_out/
 
