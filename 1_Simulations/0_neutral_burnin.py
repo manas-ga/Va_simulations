@@ -8,20 +8,37 @@ import msprime
 import numpy
 import sys
 
-############## Output path #################
+############## Command line arguments #################
 
-msprime_output_path = sys.argv[8] ### The output path is a command line argument to be fed by the controlling R script
+Ne = float(sys.argv[1])
+n_ind = float(sys.argv[2])
+sequence_length = float(sys.argv[3])
+r_msp = float(sys.argv[4])
+mu_msp = float(sys.argv[5])
+shape = float(sys.argv[6])
+scale = float(sys.argv[7])
+msprime_output_path = sys.argv[8]
+mut_ratio = float(sys.argv[9])
+DFE = sys.argv[10]                     # Can be "n" (normal) or "g" (gamma)
+mean_alpha = float(sys.argv[11])
+SD_alpha = float(sys.argv[12])
+Set_ID = sys.argv[13]
+sim = sys.argv[14]
 
 ###### Simulate a neutral ancestry using msprime ######
 
 demog_model = msprime.Demography()
-demog_model.add_population(initial_size=float(sys.argv[1])) # Ne
+demog_model.add_population(initial_size=Ne) # Ne
 
-ots = msprime.sim_ancestry(samples=float(sys.argv[2]), sequence_length = float(sys.argv[3]), demography=demog_model, recombination_rate=float(sys.argv[4]))
+ots = msprime.sim_ancestry(samples=n_ind, sequence_length=sequence_length, demography=demog_model, recombination_rate=r_msp)
 
 # Add annotations for SLiM
 
 ots = pyslim.annotate(ots, model_type="WF", tick=1, stage="late")
+
+breakpoints = ots.breakpoints(as_array=True)
+print("There are", ots.num_trees, "trees, associated with breakpoints", breakpoints)
+print("There are", len(ots.samples()), "samples")
 
 ####### Add mutations #######
 
@@ -29,7 +46,7 @@ ots = pyslim.annotate(ots, model_type="WF", tick=1, stage="late")
 
 mut_model = msprime.SLiMMutationModel(type=2)
 
-ots = msprime.sim_mutations(ots, rate = float(sys.argv[5]), model = mut_model, keep = True)
+ots = msprime.sim_mutations(ots, rate = mu_msp, model = mut_model, keep = True)
 
 print(f"The tree sequence now has {ots.num_mutations} mutations, at "
       f"{ots.num_sites} distinct sites.")
@@ -44,13 +61,13 @@ tables.mutations.clear()
 
 
 freq_deleterious = 10000
-freq_beneficial = int(freq_deleterious*float(sys.argv[9]))
+freq_beneficial = int(freq_deleterious*mut_ratio)
 freq_neutral = 0
 
-# Creae a list of 0s and 1s in frequencies of neutral and selected mutations
-# This list will be used to generate a random 0 or 1 to decide whether the mutation becomes neutral or selected
+# Creae a list of 0s and 1s and -1s in frequencies of neutral, beneficial, and deleterious mutations
+# This list will be used to generate a random 0 or 1 or -1 to decide whether the mutation becomes neutral or beneficial or deleterious
 
-freq_array = [0]*freq_neutral  + [1]*freq_beneficial + [-1]*freq_deleterious
+freq_array = [0]*freq_neutral + [1]*freq_beneficial + [-1]*freq_deleterious
 
 mut_map = {}
 for m in ots.mutations():
@@ -61,18 +78,14 @@ for m in ots.mutations():
     
     if sid not in mut_map:
       
-      if sys.argv[10] == "g":
+      if DFE == "g":
         
         # DFE is gamma
-        mut_map[sid] = freq_array[numpy.random.randint(0, len(freq_array))]*(min(numpy.random.gamma(shape = float(sys.argv[6]), scale = float(sys.argv[7])), 1.0)) # The max() function prevents negative fitnesses
+        mut_map[sid] = freq_array[numpy.random.randint(0, len(freq_array))]*(numpy.random.gamma(shape = shape, scale = scale)) 
 
-      if sys.argv[10] == "n":
-        mut_map[sid] = numpy.random.normal(float(sys.argv[11]), float(sys.argv[12]))
+      if DFE == "n":
+        mut_map[sid] = numpy.random.normal(mean_alpha, SD_alpha)
         
-
-      # DFE is just + or - s
-      #s = float(sys.argv[1]) # Use the comman line arguement as specified in the R script
-      #mut_map[sid] = freq_array[numpy.random.randint(0, len(freq_array))]*s
           
     md["selection_coeff"] = mut_map[sid]
   _ = tables.mutations.append(
@@ -92,4 +105,4 @@ ts_metadata = tables.metadata
 ts_metadata["SLiM"]["model_type"] = "WF"
 tables.metadata = ts_metadata
 ots = tables.tree_sequence()
-ots.dump(f"{msprime_output_path}/{sys.argv[13]}_sim{sys.argv[14]}_neutral_burnin.trees")
+ots.dump(f"{msprime_output_path}/{Set_ID}_sim{sim}_neutral_burnin.trees")

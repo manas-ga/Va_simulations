@@ -1,7 +1,7 @@
 initialize()
 {
 	initializeSLiMModelType("WF");
-	initializeTreeSeq();
+	initializeTreeSeq(); // Perform simplification every 100 generations
 	
 	// Set default parameters if running on SLiMgui
 	if (exists("slimgui")){
@@ -55,14 +55,14 @@ mutationEffect(m3) { return 1.0; }
 	if(!exists("slimgui")){
 		// Read from the msprime simulation 
 		sim.readFromPopulationFile(msprime_output_path + "/" + Set_ID + "_sim" + simulation + "_neutral_burnin.trees");
-		sim.treeSeqRememberIndividuals(p0.individuals);
+
 	}
 
 }
 
 1:150000 early(){
 	
-	if (sim.cycle == end_gen){
+	if (sim.cycle == (end_gen)){
 		p0.setSubpopulationSize(n_ind_exp); // Reduce the population size to 1000
 	}
 
@@ -86,7 +86,7 @@ mutationEffect(m3) { return 1.0; }
 		inds.fitnessScaling = exp(phenotypes); // Calculate absolute fitness
 	}
 	
-	if (sim.cycle%output_freq == 1){
+	if ((sim.cycle%output_freq == 1)&(sim.cycle != end_gen)){
 		// Caculate summary stats to be printed out 
 		seg_sites = size(sim.mutations);
 		p = sim.mutationFrequencies(p0);

@@ -27,6 +27,8 @@ initialize()
 1 late(){
 	sim.readFromPopulationFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_with_neutral.trees");
 	sim.treeSeqRememberIndividuals(p0.individuals);
+
+	catn("There are " + size(sim.mutations) + " segregating sites in the parents' generation");
 	
 	// The .trees output "forgets" changes to selection coefficients by default
 	// These can be recorded by creating a dectionary of slim_IDs and selection coefficients

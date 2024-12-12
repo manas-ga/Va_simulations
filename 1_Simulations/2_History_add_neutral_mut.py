@@ -5,7 +5,7 @@
 
 import pyslim
 import msprime
-import numpy
+import numpy as np
 import sys
 import tskit
 
@@ -15,7 +15,6 @@ slim_output_path = sys.argv[1]
 neutral_sites = float(sys.argv[2])
 Set_ID = sys.argv[3]
 sim = sys.argv[4]
-sequence_length = float(sys.argv[5])
 
 #############################################################
 
@@ -24,17 +23,31 @@ sequence_length = float(sys.argv[5])
 
 ts = tskit.load(f"{slim_output_path}/{Set_ID}_sim{sim}_output_history.trees").simplify()
 
-# Calculate the total branch length (T_total) in the tree sequence
+total_samples = len(ts.samples())
+breakpoints = ts.breakpoints(as_array=True)
 
-T_total = 0
-for tree in ts.trees():
-    T_total = T_total + tree.total_branch_length
+print("There are", ts.num_trees, "trees, associated with breakpoints", breakpoints)
+print("There are", total_samples, "samples")
+print("The length of the sequence is", ts.sequence_length)
 
-print(f"The total branch length of the tree sequence is {T_total}")
+# Calculate the total branch volume in the tree sequence
+# Calculate the branch volume of each tree (tree.total_branch_length* tree.span) and sum
+
+T_total_list = np.zeros(ts.num_trees)
+span_list = np.zeros(ts.num_trees)
+
+for index, tree in enumerate(ts.trees()):
+    span_list[index] = tree.span
+    T_total_list[index] = tree.total_branch_length
+
+assert(sum(span_list) == ts.sequence_length)
+
+Total_BV = sum(T_total_list*span_list)
+
 
 # Calculate the mutation rate
 
-mu_neutral = 4*neutral_sites/(T_total)
+mu_neutral = neutral_sites/Total_BV
 
 print(f"The mutation rate to be used to add neutral mutations = {mu_neutral}")
 

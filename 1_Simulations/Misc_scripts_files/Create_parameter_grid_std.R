@@ -14,7 +14,7 @@
 # Col 7 = flip_sel_coef
 # Col 8 = mut_ratio
 
-nsims = 10 # number of simulations for each set
+nsims = 5 # number of simulations for each set
 mu_msp_list = seq(1.8e-8, 1.6e-7, length = nsims)
 
 

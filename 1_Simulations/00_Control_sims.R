@@ -122,9 +122,9 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
 
 
 record = TRUE                          # Should the data of the simulations be recorded in a .csv file 
-trim_exp_files = FALSE                 # Should the SLiM output files for the experiment be trimmed ti include just the information on mutations to save space.
+trim_exp_files = FALSE                 # Should the SLiM output files for the experiment be trimmed to include just the information on mutations to save space.
 del_files = TRUE                       # Should the .trees files be deleted at the end to save space?
-compress_files = FALSE                 # Should .txt and .trees files be compressed using gzip
+compress_files = TRUE                  # Should .txt and .trees files be compressed using gzip
 
 Job_ID = "burnin_test"                 # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
 
@@ -149,10 +149,11 @@ flip_sel_coef = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 0, as.numeric(c
 
 ##################
 
+Dmel_Ne = 1.33e+6                     # Ne for D. melanogaster
 Ne = 2500                             # Effective population size in the msprime simulation
 n_ind = 2500                          # Number of individuals to be sampled in msprime and then run forward in SLiM
 n_ind_exp = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1000, (as.numeric(commandArgs(trailingOnly = TRUE)[4])))                       # The population size of the experiment. In 00_History.slim the population reduces to n_ind_exp in the last generation to simulate the sampling of the parents for the experiment
-n_sample = n_ind_exp                   # Number of individuals to be sampled to construct the c matrix  (This is just because c matrices become awfully large). Typically should be the same as n_ind_exp 
+n_sample = n_ind_exp                  # Number of individuals to be sampled to construct the c matrix  (This is just because c matrices become awfully large). Typically should be the same as n_ind_exp 
 
 ##################
 
@@ -160,14 +161,14 @@ sequence_length = 1e+06                # Just have a single continuous chromosom
 
 ##################
 
-map_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 50, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))
+map_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 5, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))
 map_length_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1.4, (as.numeric(commandArgs(trailingOnly = TRUE)[3])))
 
 r = map_length/sequence_length             # Recombination rate (per site per generation) during the forward simulation of history
 r_expt = map_length_expt/sequence_length   # Recombination rate to be used during during the experiment (Drosophila melanogaster ~ 1.4e-08)
-r_msp = 3.49e-07    #  r/532                          # Recombination rate for the initial msprime simulation
+r_msp = 1e-9*n_ind                      # Recombination rate for the initial msprime simulation
 
-AtleastOneRecomb = FALSE               # Whether there has to be at least one recombination event
+AtleastOneRecomb = FALSE                   # Whether there has to be at least one recombination event
 
 ##################
 
@@ -190,15 +191,14 @@ total_sites = 40000
 
 mu_expt = 0                             
 
-
 ##############################
 ### DFE-related parameters ###
 ##############################
 
-DFE = "g"                              # DFE can be "g" (gamma) or "n" (normal) 
+DFE = "g"                                   # DFE can be "g" (gamma) or "n" (normal) 
 
 # If DFE is "g"
-shape = 0.3                                     # Shape of the gamma DFE ##### mean = shape*scale
+shape = 0.3                                 # Shape of the gamma DFE ##### mean = shape*scale
 scale_list = seq(0.1, 0.1, length = nsims)  # Vector of Scale of the gamma DFE
 
 # The ratio of beneficial:deleterious mutations 
@@ -325,8 +325,8 @@ for (sim in 1:nsims){
       
       message(paste("Choosing a mutation rate so that the expected number of neutral sites to be added is ", neutral_sites, sep = ""))
       
-      system(paste("python", msprime_add_neutral_path, slim_output_path, neutral_sites, Set_ID, sim, sequence_length))
-      
+      system(paste("python", msprime_add_neutral_path, slim_output_path, neutral_sites, Set_ID, sim))
+
       ######################################################################
       ##### Randomly swap selection coefficients (if flip_sel_coef==T) #####
       ######################################################################
