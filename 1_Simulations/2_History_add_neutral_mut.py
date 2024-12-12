@@ -34,7 +34,7 @@ print(f"The total branch length of the tree sequence is {T_total}")
 
 # Calculate the mutation rate
 
-mu_neutral = neutral_sites/(T_total)
+mu_neutral = 4*neutral_sites/(T_total)
 
 print(f"The mutation rate to be used to add neutral mutations = {mu_neutral}")
 
