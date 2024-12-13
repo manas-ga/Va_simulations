@@ -166,7 +166,7 @@ map_length_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1.4, (as.nume
 
 r = map_length/sequence_length             # Recombination rate (per site per generation) during the forward simulation of history
 r_expt = map_length_expt/sequence_length   # Recombination rate to be used during during the experiment (Drosophila melanogaster ~ 1.4e-08)
-r_msp = 1e-9*n_ind                      # Recombination rate for the initial msprime simulation
+r_msp = 1e-9*Ne                      # Recombination rate for the initial msprime simulation
 
 AtleastOneRecomb = FALSE                   # Whether there has to be at least one recombination event
 
@@ -185,7 +185,7 @@ mu_list = if(end_gen==2){seq(0, 0, length = nsims)}else{10*mu_msp_list}
 
 ## total number of permissible sites (to be used to set the neutral mutation rate)
 
-total_sites = 40000
+total_sites = 30000
 
 # Mutation rate during the experiment
 
