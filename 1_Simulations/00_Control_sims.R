@@ -166,7 +166,7 @@ map_length_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1.4, (as.nume
 
 r = map_length/sequence_length             # Recombination rate (per site per generation) during the forward simulation of history
 r_expt = map_length_expt/sequence_length   # Recombination rate to be used during during the experiment (Drosophila melanogaster ~ 1.4e-08)
-r_msp = 1e-8*n_ind                       # Recombination rate for the initial msprime simulation
+r_msp = 1e-9*Dmel_Ne/Ne                    # Recombination rate for the initial msprime simulation
 
 ##################
 
