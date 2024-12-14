@@ -11,7 +11,7 @@
 
 These parameters, ensure that the DFE is comparable to the simulations with burnin
 
-Ne = 1.33e+6
+Ne = 2500
 n_ind = 2500
 sequence_length = 1e+06
 end_gen = 2
@@ -19,12 +19,11 @@ DFE = "g"
 shape = 0.3
 scale = 0.033
 mut_ratio = 1
-mu_list = [3.0e-08, 2.0e-07]
-mu_msp = mu_list/5320              # The ratio of 1.33 million (Ne) to 2500 (population size in the forward simulations)
-mu_neutral = mu_msp/3
-Ne = 1.33e+06
-pdelta_method = "optim"
-bdelta_method = "estimate"
+mu_list = [0,0]
+mu_msp = [2.25e-9, 2.35e-10]              # The ratio of 1.33 million (Ne) to 2500 (population size in the forward simulations)
+total_sites = 3000
+map_length = 25
+map_length_exp = 0.1
 
 ### OLD PARAMETERS ###
 

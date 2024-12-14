@@ -116,7 +116,7 @@ system(paste("mkdir -p", paste(file_storage_path, "/b_Interim_files/SLiM_outputs
 
 if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
   # Print command line arguments to screen
-  print(c("Mutation rate", "recombination rate (M)", "Population size", "No. of cages", "Experimental generations" ))
+  print(c("mu_msp", "map_length", "map_length_expt", "n_ind_exp", "n_cages", "ngen_expt", "flip_sel_coef", "mut_ratio"))
   print(commandArgs(trailingOnly = TRUE))
 }
 
@@ -126,7 +126,7 @@ trim_exp_files = FALSE                 # Should the SLiM output files for the ex
 del_files = TRUE                       # Should the .trees files be deleted at the end to save space?
 compress_files = TRUE                  # Should .txt and .trees files be compressed using gzip
 
-Job_ID = "burnin_test"                 # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
+Job_ID = "Set_0"                 # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
 
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
 
@@ -134,7 +134,7 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"&nsims>1)stop("nsims must be 1 when r
 
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
-end_gen = 25000                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+end_gen = 2                        # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
 
 if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
@@ -157,7 +157,7 @@ n_sample = n_ind_exp                  # Number of individuals to be sampled to c
 
 ##################
 
-sequence_length = 1e+06                # Just have a single continuous chromosome that is simulated
+sequence_length = 1e+06               # Just have a single continuous chromosome that is simulated
 
 ##################
 
@@ -166,15 +166,13 @@ map_length_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1.4, (as.nume
 
 r = map_length/sequence_length             # Recombination rate (per site per generation) during the forward simulation of history
 r_expt = map_length_expt/sequence_length   # Recombination rate to be used during during the experiment (Drosophila melanogaster ~ 1.4e-08)
-r_msp = 1e-9*Ne                      # Recombination rate for the initial msprime simulation
-
-AtleastOneRecomb = FALSE                   # Whether there has to be at least one recombination event
+r_msp = 1e-8*n_ind                       # Recombination rate for the initial msprime simulation
 
 ##################
 
 # Mutation rate in the msprime simulation
 
-mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(1.8e-8, 1.6e-7, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
+mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(3e-9, 2.35e-8, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
 
 # Mutation rate of non_neutral mutations during the forward simulation of the history
 
@@ -185,7 +183,7 @@ mu_list = if(end_gen==2){seq(0, 0, length = nsims)}else{10*mu_msp_list}
 
 ## total number of permissible sites (to be used to set the neutral mutation rate)
 
-total_sites = 30000
+total_sites = 3000
 
 # Mutation rate during the experiment
 
@@ -199,10 +197,10 @@ DFE = "g"                                   # DFE can be "g" (gamma) or "n" (nor
 
 # If DFE is "g"
 shape = 0.3                                 # Shape of the gamma DFE ##### mean = shape*scale
-scale_list = seq(0.1, 0.1, length = nsims)  # Vector of Scale of the gamma DFE
+scale_list = seq(0.033, 0.033, length = nsims)  # Vector of Scale of the gamma DFE
 
 # The ratio of beneficial:deleterious mutations 
-mut_ratio = if(Sys.info()["nodename"]=="SCE-BIO-C06645"){0.0000}else{as.numeric(commandArgs(trailingOnly = TRUE)[8])}
+mut_ratio = if(Sys.info()["nodename"]=="SCE-BIO-C06645"){1}else{as.numeric(commandArgs(trailingOnly = TRUE)[8])}
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0
@@ -275,6 +273,7 @@ for (sim in 1:nsims){
       #####################################################
       
       message("Running msprime...")
+      message(Sys.time())
       
       system(paste("python", msprime_burnin_path, Ne, n_ind, sequence_length, r_msp, mu_msp, shape, scale, slim_output_path, mut_ratio, DFE, mean_alpha, sqrt(var_alpha), Set_ID, sim))
       
@@ -283,6 +282,7 @@ for (sim in 1:nsims){
       ###############################################################
       
       message("Forward simulating the history using SLiM...")
+      message(Sys.time())
       
       ### This has lot's of command line arguments. Creating separate strings for each argument
       
@@ -313,6 +313,7 @@ for (sim in 1:nsims){
       ###################################################################
       
       message("Adding neutral mutations...")
+      message(Sys.time())
       
       # Read the summary file to note the number of non-neutral segregating sites
       
@@ -366,6 +367,7 @@ for (sim in 1:nsims){
       ###################################################
       
       message("Forward simulating the experiment using SLiM...")
+      message(Sys.time())
       
       ### Loop over the cage replicates
       

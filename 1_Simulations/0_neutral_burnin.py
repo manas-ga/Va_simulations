@@ -30,6 +30,8 @@ sim = sys.argv[14]
 demog_model = msprime.Demography()
 demog_model.add_population(initial_size=Ne) # Ne
 
+print("Simulating a tree sequence with recombination rate", r_msp)
+
 ots = msprime.sim_ancestry(samples=n_ind, sequence_length=sequence_length, demography=demog_model, recombination_rate=r_msp)
 
 # Add annotations for SLiM
@@ -39,6 +41,7 @@ ots = pyslim.annotate(ots, model_type="WF", tick=1, stage="late")
 breakpoints = ots.breakpoints(as_array=True)
 print("There are", ots.num_trees, "trees, associated with breakpoints", breakpoints)
 print("There are", len(ots.samples()), "samples")
+print("Adding mutations to the tree sequence using rate", mu_msp)
 
 ####### Add mutations #######
 

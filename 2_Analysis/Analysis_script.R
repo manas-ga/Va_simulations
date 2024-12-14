@@ -128,8 +128,8 @@ library(Vw)
 ########################
 
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "TEST_SCE-BIO-C06645_2024-12-05_16-38-41.614376", commandArgs(trailingOnly = TRUE)[1])
-nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "noburnin_test_SCE-BIO-C06645_2024-12-13_23-22-02.930194", commandArgs(trailingOnly = TRUE)[1])
+nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 10, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
 
 test = FALSE
 
@@ -143,7 +143,7 @@ for(sim in 1:nsims){
   message(paste("Analysing simulation", sim, "of set", Set_ID, "..."))
   analysed_data = analyse_sim(Set_ID = Set_ID,                            # The unique ID of the set of simulations that are controlled by a single R script
                               sim = sim,                                  # Each set can have multiple sims, but - on the cluster sim must always 1
-                              unzip = FALSE,                               # Should the SLiM output file be unzipped, read, and then zipped back?
+                              unzip = TRUE,                               # Should the SLiM output file be unzipped, read, and then zipped back?
                               slim_output_path = slim_output_path,        # The directory where the SLiM outputs (for parents and experimental replicates) are stored (as .txt files)
                               sim_param_path = sim_param_path,            # The path to the directory where the .csv file containing simulation parameters is stored
                               extract_genomes_path = extract_genomes_path,# The path to the python script that extracts genomes and mutations from SLim outputs
