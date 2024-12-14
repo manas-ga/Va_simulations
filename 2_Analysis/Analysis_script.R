@@ -129,15 +129,7 @@ library(Vw)
 
 
 Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "noburnin_test_SCE-BIO-C06645_2024-12-13_23-22-02.930194", commandArgs(trailingOnly = TRUE)[1])
-nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 10, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
-
-test = FALSE
-
-if(Sys.info()["nodename"]=="SCE-BIO-C06645"&test){
-  message("Setting temperary paths for testing...")
-  slim_output_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/b_Interim_files/SLiM_outputs"
-  sim_param_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/c_Output"
-}
+nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
 
 for(sim in 1:nsims){
   message(paste("Analysing simulation", sim, "of set", Set_ID, "..."))
