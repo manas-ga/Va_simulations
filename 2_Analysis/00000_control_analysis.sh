@@ -2,7 +2,7 @@
 
 #$ -V
 #$ -cwd
-#$ -N Vw_al_Set_1
+#$ -N Vw_al_Set_2
 #$ -t 1-800
 #$ -tc 10
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g,h=!bigyin
