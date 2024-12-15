@@ -14,22 +14,22 @@
 # Col 7 = flip_sel_coef
 # Col 8 = mut_ratio
 
-standard_only = FALSE
+standard_only = TRUE
 
 nsims = 100 # number of simulations for each set
-mu_msp_list = seq(3e-9, 2.35e-8, length = nsims)
+mu_msp_list = seq(1.8e-8, 1.6e-7, length = nsims)
 
 
 param_matrix = data.frame(matrix(NA, nrow = nsims, ncol  = 8))
 
 param_matrix[,1] = mu_msp_list
 param_matrix[,2] = 25
-param_matrix[,3] = 0.1
+param_matrix[,3] = 15
 param_matrix[,4] = 1000
 param_matrix[,5] = 10
 param_matrix[,6] = 4
 param_matrix[,7] = 0
-param_matrix[,8] = 1
+param_matrix[,8] = 0
 
 # Add to this matrix if simulations other than the standard set are also required
 
