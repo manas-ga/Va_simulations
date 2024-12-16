@@ -23,7 +23,7 @@ mu_msp_list = seq(1.8e-8, 1.6e-7, length = nsims)
 param_matrix = data.frame(matrix(NA, nrow = nsims, ncol  = 8))
 
 param_matrix[,1] = mu_msp_list
-param_matrix[,2] = 25
+param_matrix[,2] = 5
 param_matrix[,3] = 15
 param_matrix[,4] = 1000
 param_matrix[,5] = 10
