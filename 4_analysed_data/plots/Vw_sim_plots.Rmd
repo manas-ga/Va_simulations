@@ -1,0 +1,147 @@
+---
+title: "Vw_sim_plots"
+author: "Manas GA"
+date: "2024-12-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+library(ggplot2)
+library(cowplot)
+library(latex2exp)
+```
+
+## Simulations without burnin
+
+Selection coefficients were drawn from a gamma distribution (shape = 0.3, scale = 0.033) and assigned to mutations randomly. The recombination rate in the msprime simulation was 5.32e-07. Map length in the burnin phase of just 1 generation (eng_gen = 2) was 25.
+
+### Small map length in the experiment 
+
+Standard parameters:
+
+Map length in the experiment phase (ml_exp) = 0.1 M
+Number of individuals in the experiment (n_ind_exp) = 1000
+Number of cages (n_cages) = 10
+ngen2 = 4
+
+
+
+```{r}
+
+d_0 = read.csv("../combined_data/Set_0_output.csv") # Data for the standard set
+d_2 = read.csv("../combined_data/Set_2_output.csv") # Varying r_expt, n_ind_exp, n_cages, ngen2
+
+d_nb_0.1  = rbind(d_0, d_2)
+
+##################################################################################################
+####### Standard plots (Set_0: ml_expt = 0.1, n_indxpt = 1000, n_cages = 10, ngen2 = 4) ##########
+##################################################################################################
+
+# vA_est ~ vA_true
+
+p_nb_0.1_main = ggplot(d_0, aes(y = vA_est, x = vA_true)) + 
+  theme_bw() + 
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)")) + 
+  theme(text = element_text(size = 15)) 
+  
+# palpha_est histogram
+
+p_nb_0.1_palpha = ggplot(d_0, aes(x = palpha_est)) + 
+  theme_bw() + 
+  geom_histogram(color = "black", fill = "white") + 
+  labs(x = TeX(r"(Estimate of $p_{\alpha} $)"), y = "Frequency") + 
+  geom_vline(xintercept = 0, color = "red") +  
+  theme(text = element_text(size = 15)) 
+
+# balpha_intercept_est histogram
+
+p_nb_0.1_balpha_int = ggplot(d_0, aes(x = balpha_intercept_est)) + 
+  theme_bw() + 
+  geom_histogram(color = "black", fill = "white") + 
+  labs(x = TeX(r"(Estimate of $\beta^{(0)}_{\bar{\alpha}}$)"), y = "Frequency") + 
+  geom_vline(xintercept = 0, color = "red") + 
+  theme(text = element_text(size = 15)) 
+
+# balpha_slope_est histogram
+
+p_nb_0.1_balpha_slope = ggplot(d_0, aes(x = balpha_slope_est)) + 
+  theme_bw() + 
+  geom_histogram(color = "black", fill = "white") + 
+  labs(x = TeX(r"(Estimate of $\beta^{(1)}_{\bar{\alpha}}$)"), y = "Frequency") + 
+  geom_vline(xintercept = 0, color = "red") + 
+  theme(text = element_text(size = 15))
+
+# Combine the four plots
+
+p_nb_0.1_std = plot_grid(p_nb_0.1_main, p_nb_0.1_palpha, p_nb_0.1_balpha_int, p_nb_0.1_balpha_slope, labels = "AUTO")
+
+p_nb_0.1_std
+
+ggsave(p_nb_0.1_std, width = 8, height = 8, file = "p_nb_0.1_std.jpg")
+
+
+```
+
+We then vary ml_expt, n_ind_exp, n_cages, and ngen2 one at a time while keeping the other parameters fixed at their standard values.
+
+```{r}
+### ml_expt ###
+
+d_nb_0.1_ml = d_nb_0.1[d_nb_0.1$n_ind_exp==1000&d_nb_0.1$n_cages==10&d_nb_0.1$ngen2==4,]
+p_nb_0.1_ml = ggplot(d_nb_0.1_ml , aes(y=vA_est, x = vA_true, color = factor(sequence_length*r_expt))) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length (M)") + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE)
+
+### n_ind_exp ###
+d_nb_0.1_nind = d_nb_0.1[d_nb_0.1$r_exp==1e-7&d_nb_0.1$n_cages==10&d_nb_0.1$ngen2==4,]
+p_nb_0.1_nind = ggplot(d_nb_0.1_nind , aes(y=vA_est, x = vA_true, color = factor(n_ind_exp))) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Population size") + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) 
+
+### n_cages ###
+
+d_nb_0.1_ncages = d_nb_0.1[d_nb_0.1$r_exp==1e-7&d_nb_0.1$n_ind_exp==1000&d_nb_0.1$ngen2==4,]
+p_nb_0.1_ncages = ggplot(d_nb_0.1_ncages , aes(y=vA_est, x = vA_true, color = factor(n_cages))) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Replicate \npopulations") + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) 
+
+### ngen_expt ###
+
+d_nb_0.1_ngen2 = d_nb_0.1[d_nb_0.1$r_exp==1e-7&d_nb_0.1$n_ind_exp==1000&d_nb_0.1$n_cages==10,]
+p_nb_0.1_ngen2 = ggplot(d_nb_0.1_ngen2 , aes(y=vA_est, x = vA_true, color = factor(ngen2-ngen1))) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Generations") + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) 
+
+p_nb_0.1_combined = plot_grid(p_nb_0.1_ml, p_nb_0.1_nind, p_nb_0.1_ncages, p_nb_0.1_ngen2, labels = "AUTO")
+
+p_nb_0.1_combined
+ggsave(p_nb_0.1_combined, width = 12, height = 8, file = "p_nb_0.1_combined.jpg")
+
+```
+
