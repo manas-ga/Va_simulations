@@ -19,7 +19,11 @@ standard_only = FALSE
 ## The standard set (to be used as a reference to compare)
 
 nsims = 100 # number of simulations for each set
-mu_msp_list = seq(3e-9, 2.35e-8, length = nsims)
+end_gen = 25000
+
+mu_msp_list = if(end_gen==2){seq(3e-9, 2.35e-8, length = nsims)}else{seq(1.8e-8, 1.6e-7, length = nsims)}
+mut_ratio = if(end_gen==2){1}else{0}
+
 
 param_matrix = data.frame(matrix(NA, nrow = nsims, ncol  = 8))
 
@@ -30,7 +34,7 @@ param_matrix[,4] = 1000
 param_matrix[,5] = 10
 param_matrix[,6] = 4
 param_matrix[,7] = 0
-param_matrix[,8] = 1
+param_matrix[,8] = mut_ratio
 
 # Add to this matrix if simulations other than the standard set are also required
 
@@ -38,43 +42,50 @@ if(!standard_only){
   
   # Vary map_length_expt (sequence_length*r_expt)
   
-  param_matrix_ml_0.01 = param_matrix
-  param_matrix_ml_0.01[,3] = 0.01
+  param_matrix_ml_v1 = param_matrix
+  param_matrix_ml_v1[,3] = 0.01
   
-  param_matrix_ml_0.2 = param_matrix
-  param_matrix_ml_0.2[,3] = 0.2
+  param_matrix_ml_v2 = param_matrix
+  param_matrix_ml_v2[,3] = 0.2
   
-  # Vary n_ind_exp
+  if(TRUE==FALSE){
+    
+    # Vary n_ind_exp
+    
+    param_matrix_nind_100 = param_matrix
+    param_matrix_nind_100[,4] = 100
+    
+    param_matrix_nind_500 = param_matrix
+    param_matrix_nind_500[,4] = 500
+    
+    # Vary n_cages
+    
+    param_matrix_cage_3 = param_matrix
+    param_matrix_cage_3[,5] = 3
+    
+    param_matrix_cage_5 = param_matrix
+    param_matrix_cage_5[,5] = 5
+    
+    # Vary ngen2
+    
+    param_matrix_ngen2_2 = param_matrix
+    param_matrix_ngen2_2[,6] = 2
+    
+    param_matrix_ngen2_6 = param_matrix
+    param_matrix_ngen2_6[,6] = 6
   
-  param_matrix_nind_100 = param_matrix
-  param_matrix_nind_100[,4] = 100
   
-  param_matrix_nind_500 = param_matrix
-  param_matrix_nind_500[,4] = 500
-  
-  # Vary n_cages
-  
-  param_matrix_cage_3 = param_matrix
-  param_matrix_cage_3[,5] = 3
-  
-  param_matrix_cage_5 = param_matrix
-  param_matrix_cage_5[,5] = 5
-  
-  # Vary ngen2
-  
-  param_matrix_ngen2_2 = param_matrix
-  param_matrix_ngen2_2[,6] = 2
-  
-  param_matrix_ngen2_6 = param_matrix
-  param_matrix_ngen2_6[,6] = 6
   
   # Combine all these matrices one below the other
   
   param_matrix = rbind(param_matrix,
-                       param_matrix_ml_0.01, param_matrix_ml_0.2,
+                       param_matrix_ml_v1, param_matrix_ml_v2,
                        param_matrix_nind_100, param_matrix_nind_500,
                        param_matrix_cage_3, param_matrix_cage_5,
                        param_matrix_ngen2_2, param_matrix_ngen2_6)
+  
+  }
+  param_matrix = rbind(param_matrix, param_matrix_ml_v1, param_matrix_ml_v2)
   
 }
 

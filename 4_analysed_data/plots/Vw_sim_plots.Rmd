@@ -15,6 +15,76 @@ library(cowplot)
 library(latex2exp)
 ```
 
+## Function to make "standard" plot
+
+```{r}
+make_std_plots = function(data, font_size = 15){
+  
+  # vA_est ~ vA_true
+
+p_main = ggplot(data, aes(y = vA_est, x = vA_true)) + 
+  theme_bw() + 
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)")) + 
+  theme(text = element_text(size = font_size)) 
+  
+# palpha_est histogram
+
+p_palpha = ggplot(data, aes(x = palpha_est)) + 
+  theme_bw() + 
+  geom_histogram(color = "black", fill = "white") + 
+  labs(x = TeX(r"(Estimate of $p_{\alpha} $)"), y = "Frequency") + 
+  geom_vline(xintercept = 0, color = "red") +  
+  geom_vline(xintercept = mean(data$palpha_est), linetype = "dashed") +
+  theme(text = element_text(size = font_size)) 
+
+# balpha_intercept_est histogram
+
+p_balpha_int = ggplot(data, aes(x = balpha_intercept_est)) + 
+  theme_bw() + 
+  geom_histogram(color = "black", fill = "white") + 
+  labs(x = TeX(r"(Estimate of $\beta^{(0)}_{\bar{\alpha}}$)"), y = "Frequency") + 
+  geom_vline(xintercept = 0, color = "red") + 
+  geom_vline(xintercept = mean(data$balpha_intercept_est), linetype = "dashed") +
+  theme(text = element_text(size = font_size)) 
+
+# balpha_slope_est histogram
+
+p_balpha_slope = ggplot(data, aes(x = balpha_slope_est)) + 
+  theme_bw() + 
+  geom_histogram(color = "black", fill = "white") + 
+  labs(x = TeX(r"(Estimate of $\beta^{(1)}_{\bar{\alpha}}$)"), y = "Frequency") + 
+  geom_vline(xintercept = 0, color = "red") + 
+  geom_vline(xintercept = mean(data$balpha_slope_est), linetype = "dashed") +
+  theme(text = element_text(size = font_size))
+
+# Combine the four plots
+
+p_combined = plot_grid(p_main, p_palpha, p_balpha_int, p_balpha_slope, labels = "AUTO")
+
+# Title
+
+ml = unique(data$sequence_length*data$r)
+if(length(ml)>1){stop("The data set does not have the same map length in the burnin phase in every simulation.")}
+
+ml_expt = unique(data$sequence_length*data$r_expt)
+if(length(ml_expt)>1){stop("The data set does not have the same map length in the experiment in every simulation.")}
+
+
+title = ggdraw() + draw_label(paste("Map length in burnin = ", ml, " M, Map length in experiment = ", ml_expt, " M", sep = ""), hjust = 0.5, size = font_size)
+
+# Add title
+p_combined = plot_grid(title, p_combined, ncol = 1, rel_heights = c(0.1,1))
+  
+
+return(list(main = p_main, palpha = p_palpha, balpha_int = p_balpha_int, balpha_slope = p_balpha_slope,
+            combined = p_combined))
+
+  
+}
+```
+
 ## Simulations without burnin
 
 Selection coefficients were drawn from a gamma distribution (shape = 0.3, scale = 0.033) and assigned to mutations randomly. The recombination rate in the msprime simulation was 5.32e-07. Map length in the burnin phase of just 1 generation (eng_gen = 2) was 25.
@@ -41,50 +111,10 @@ d_nb_0.1  = rbind(d_0, d_2)
 ####### Standard plots (Set_0: ml_expt = 0.1, n_indxpt = 1000, n_cages = 10, ngen2 = 4) ##########
 ##################################################################################################
 
-# vA_est ~ vA_true
+p_nb_0.1_std = make_std_plots(d_0)
 
-p_nb_0.1_main = ggplot(d_0, aes(y = vA_est, x = vA_true)) + 
-  theme_bw() + 
-  geom_point() +
-  geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)")) + 
-  theme(text = element_text(size = 15)) 
-  
-# palpha_est histogram
-
-p_nb_0.1_palpha = ggplot(d_0, aes(x = palpha_est)) + 
-  theme_bw() + 
-  geom_histogram(color = "black", fill = "white") + 
-  labs(x = TeX(r"(Estimate of $p_{\alpha} $)"), y = "Frequency") + 
-  geom_vline(xintercept = 0, color = "red") +  
-  theme(text = element_text(size = 15)) 
-
-# balpha_intercept_est histogram
-
-p_nb_0.1_balpha_int = ggplot(d_0, aes(x = balpha_intercept_est)) + 
-  theme_bw() + 
-  geom_histogram(color = "black", fill = "white") + 
-  labs(x = TeX(r"(Estimate of $\beta^{(0)}_{\bar{\alpha}}$)"), y = "Frequency") + 
-  geom_vline(xintercept = 0, color = "red") + 
-  theme(text = element_text(size = 15)) 
-
-# balpha_slope_est histogram
-
-p_nb_0.1_balpha_slope = ggplot(d_0, aes(x = balpha_slope_est)) + 
-  theme_bw() + 
-  geom_histogram(color = "black", fill = "white") + 
-  labs(x = TeX(r"(Estimate of $\beta^{(1)}_{\bar{\alpha}}$)"), y = "Frequency") + 
-  geom_vline(xintercept = 0, color = "red") + 
-  theme(text = element_text(size = 15))
-
-# Combine the four plots
-
-p_nb_0.1_std = plot_grid(p_nb_0.1_main, p_nb_0.1_palpha, p_nb_0.1_balpha_int, p_nb_0.1_balpha_slope, labels = "AUTO")
-
-p_nb_0.1_std
-
-ggsave(p_nb_0.1_std, width = 8, height = 8, file = "p_nb_0.1_std.jpg")
-
+ggsave(p_nb_0.1_std$combined, width = 8, height = 8, file = "p_nb_0.1_std.jpg")
+p_nb_0.1_std$combined
 
 ```
 
@@ -145,3 +175,28 @@ ggsave(p_nb_0.1_combined, width = 12, height = 8, file = "p_nb_0.1_combined.jpg"
 
 ```
 
+## Simulations with burnin
+
+### Set 1 (ml = 25, ml_exp = 0.1)
+
+```{r}
+d_1 = read.csv("../combined_data/Set_1_output.csv")
+p_b_25_0.1_std = make_std_plots(d_1)
+ggsave(p_b_25_0.1_std$combined, width = 8, height = 8, file = "p_b_25_0.1_std.jpg")
+p_b_25_0.1_std$combined
+```
+### Set 3 (ml = 25, ml_exp = 15)
+
+```{r}
+d_3 = read.csv("../combined_data/Set_3_output.csv")
+p_b_25_15_std = make_std_plots(d_3)
+ggsave(p_b_25_15_std$combined, width = 8, height = 8, file = "p_b_25_15_std.jpg")
+p_b_25_15_std$combined
+```
+### Set 4 (ml = 5, ml_exp = 15)
+```{r}
+d_4 = read.csv("../combined_data/Set_4_output.csv")
+p_b_5_15_std = make_std_plots(d_4)
+ggsave(p_b_5_15_std$combined, width = 8, height = 8, file = "p_b_5_15_std.jpg")
+p_b_5_15_std$combined
+```
