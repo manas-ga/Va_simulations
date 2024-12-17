@@ -14,22 +14,23 @@
 # Col 7 = flip_sel_coef
 # Col 8 = mut_ratio
 
-standard_only = TRUE
+standard_only = FALSE
+
+## The standard set (to be used as a reference to compare)
 
 nsims = 100 # number of simulations for each set
-mu_msp_list = seq(1.8e-8, 1.6e-7, length = nsims)
-
+mu_msp_list = seq(3e-9, 2.35e-8, length = nsims)
 
 param_matrix = data.frame(matrix(NA, nrow = nsims, ncol  = 8))
 
 param_matrix[,1] = mu_msp_list
 param_matrix[,2] = 5
-param_matrix[,3] = 15
+param_matrix[,3] = 2
 param_matrix[,4] = 1000
 param_matrix[,5] = 10
 param_matrix[,6] = 4
 param_matrix[,7] = 0
-param_matrix[,8] = 0
+param_matrix[,8] = 1
 
 # Add to this matrix if simulations other than the standard set are also required
 
@@ -40,8 +41,8 @@ if(!standard_only){
   param_matrix_ml_0.01 = param_matrix
   param_matrix_ml_0.01[,3] = 0.01
   
-  param_matrix_ml_1 = param_matrix
-  param_matrix_ml_1[,3] = 1
+  param_matrix_ml_0.2 = param_matrix
+  param_matrix_ml_0.2[,3] = 0.2
   
   # Vary n_ind_exp
   
@@ -69,7 +70,8 @@ if(!standard_only){
   
   # Combine all these matrices one below the other
   
-  param_matrix = rbind(param_matrix_ml_0.01, param_matrix_ml_1,
+  param_matrix = rbind(param_matrix,
+                       param_matrix_ml_0.01, param_matrix_ml_0.2,
                        param_matrix_nind_100, param_matrix_nind_500,
                        param_matrix_cage_3, param_matrix_cage_5,
                        param_matrix_ngen2_2, param_matrix_ngen2_6)
