@@ -71,6 +71,16 @@ if(length(ml)>1){stop("The data set does not have the same map length in the bur
 ml_expt = unique(data$sequence_length*data$r_expt)
 if(length(ml_expt)>1){stop("The data set does not have the same map length in the experiment in every simulation.")}
 
+end_gen = unique(data$end_gen)
+if(length(end_gen)>1){stop("The data doe not have have the same end_gen for every simulations")}
+
+if(end_gen==2){
+  ml = unique(data$sequence_length*data$r_msp)
+  if(length(ml)>1){stop("The data set does not have the same map length in the burnin phase in every simulation.")}
+}else{
+  ml = unique(data$sequence_length*data$r)
+  if(length(ml)>1){stop("The data set does not have the same map length in the burnin phase in every simulation.")}
+}
 
 title = ggdraw() + draw_label(paste("Map length in burnin = ", ml, " M, Map length in experiment = ", ml_expt, " M", sep = ""), hjust = 0.5, size = font_size)
 
@@ -174,6 +184,83 @@ p_nb_0.1_combined
 ggsave(p_nb_0.1_combined, width = 12, height = 8, file = "p_nb_0.1_combined.jpg")
 
 ```
+
+### Set_5: Larger map length in the experiment (standard value = 2 M)
+
+Not varying the map length in burnin (fixed to 5 M)
+
+```{r}
+d_5 = read.csv("../combined_data/Set_5_output.csv")
+d_5_std = d_5[d_5$r_expt*d_5$sequence_length==2&d_5$n_ind_exp==1000&d_5$n_cages==10&d_5$ngen2==4,] # Data for the standard set
+
+##################################################################################################
+####### Standard plots (Set_0: ml_expt = 2, n_indxpt = 1000, n_cages = 10, ngen2 = 4) ############
+##################################################################################################
+
+p_nb_2_std = make_std_plots(d_5_std)
+
+ggsave(p_nb_2_std$combined, width = 8, height = 8, file = "p_nb_2_std.jpg")
+p_nb_2_std$combined
+
+
+```
+
+We then vary ml_expt, n_ind_exp, n_cages, and ngen2 one at a time while keeping the other parameters fixed at their standard values.
+```{r}
+### ml_expt ###
+
+d_5_ml = d_5[d_5$n_ind_exp==1000&d_5$n_cages==10&d_5$ngen2==4,]
+p_nb_2_ml = ggplot(d_5_ml , aes(y=vA_est, x = vA_true, color = factor(sequence_length*r_expt))) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length (M)") + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE)
+
+### n_ind_exp ###
+d_5_nind = d_5[d_5$r_exp==2e-6&d_5$n_cages==10&d_5$ngen2==4,]
+p_nb_2_nind = ggplot(d_5_nind , aes(y=vA_est, x = vA_true, color = factor(n_ind_exp))) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Population size") + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) 
+
+### n_cages ###
+
+d_5_ncages = d_5[d_5$r_exp==2e-6&d_5$n_ind_exp==1000&d_5$ngen2==4,]
+p_nb_2_ncages = ggplot(d_5_ncages , aes(y=vA_est, x = vA_true, color = factor(n_cages))) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Replicate \npopulations") + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) 
+
+### ngen_expt ###
+
+d_5_ngen2 = d_5[d_5$r_exp==2e-6&d_5$n_ind_exp==1000&d_5$n_cages==10,]
+p_nb_2_ngen2 = ggplot(d_5_ngen2 , aes(y=vA_est, x = vA_true, color = factor(ngen2-ngen1))) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Generations") + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) 
+
+p_nb_2_combined = plot_grid(p_nb_2_ml, p_nb_2_nind, p_nb_2_ncages, p_nb_2_ngen2, labels = "AUTO")
+
+p_nb_2_combined
+ggsave(p_nb_2_combined, width = 12, height = 8, file = "p_nb_2_combined.jpg")
+```
+
+
 
 ## Simulations with burnin
 

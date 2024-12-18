@@ -2,8 +2,8 @@
 
 #$ -V
 #$ -cwd
-#$ -N Vw_Set_6
-#$ -t 1-300
+#$ -N Vw_Set_7
+#$ -t 1-200
 #$ -tc 10
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g
 #$ -pe smp 5

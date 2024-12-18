@@ -40,15 +40,24 @@ param_matrix[,8] = mut_ratio
 
 if(!standard_only){
   
-  # Vary map_length_expt (sequence_length*r_expt)
+  # Vary map_length (sequence_length*r)
   
   param_matrix_ml_v1 = param_matrix
-  param_matrix_ml_v1[,3] = 0.01
+  param_matrix_ml_v1[,2] = 0.5
   
   param_matrix_ml_v2 = param_matrix
-  param_matrix_ml_v2[,3] = 0.2
+  param_matrix_ml_v2[,2] = 50
+
   
   if(TRUE==FALSE){
+    
+    # Vary map_length_expt (sequence_length*r_expt)
+    
+    param_matrix_ml_v1 = param_matrix
+    param_matrix_ml_v1[,3] = 0.01
+    
+    param_matrix_ml_v2 = param_matrix
+    param_matrix_ml_v2[,3] = 0.2
     
     # Vary n_ind_exp
     
@@ -85,7 +94,7 @@ if(!standard_only){
                        param_matrix_ngen2_2, param_matrix_ngen2_6)
   
   }
-  param_matrix = rbind(param_matrix, param_matrix_ml_v1, param_matrix_ml_v2)
+  param_matrix = rbind(param_matrix_ml_v1, param_matrix_ml_v2)
   
 }
 

@@ -22,9 +22,9 @@ mut_ratio = 1
 mu_list = [0,0]
 mu_msp = [3e-9, 2.35e-8]             
 total_sites = 3000
-map_length = 5
+map_length = map_length_msp = 0.5
 map_length_exp = 2
-r_msp = 1e-9*Dmel_Ne/Ne
+
 
 !!! Check Set_ID
 
@@ -99,8 +99,8 @@ mut_ratio = 0
 mu_list = [1.8e-07, 1.6e-06]
 mu_msp = [1.8e-08, 1.6e-07]
 total_sites = 30000
-map_length = 25
-map_length_expt = 0.1
+map_length = 5
+map_length_expt = 2
 r_msp = 1e-9*Dmel_Ne/Ne
 !!! Check Set_ID
 
