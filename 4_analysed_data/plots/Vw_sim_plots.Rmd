@@ -289,3 +289,28 @@ p_b_5_15_std$combined
 ```
 
 ### Set 6 (varying ml_exp: 0.01, 0.2, 2 (reference)) and 7 (varying ml: 0.5, 5 (reference), 50)
+
+```{r}
+d_6 = read.csv("../combined_data/Set_6_output.csv")
+d_6_std = d_6[d_6$r*d_6$sequence_length==5&d_6$r_exp*d_6$sequence_length==2,]
+p_b_5_2_std = make_std_plots(d_6_std)
+ggsave(p_b_5_2_std$combined, width = 8, height = 8, file = "p_b_5_2_std.jpg")
+p_b_5_2_std$combined
+
+### ml_expt ###
+
+p_b_5_2_ml = ggplot(d_6 , aes(y=vA_est, x = vA_true, color = factor(sequence_length*r_expt))) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length (M)", title = paste("Map length in burnin = ", unique(d_6$sequence_length*d_6$r), " M", sep = "")) + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggsave(p_b_5_2_ml, width = 8, height = 8, file = "p_b_5_2_ml.jpg")
+p_b_5_2_ml
+
+
+```

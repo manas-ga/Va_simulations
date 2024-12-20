@@ -71,7 +71,7 @@ mu_neutral = [1.6e-06, 1.6e-07]
 
 # This results in the maximum number of segregatng sites to be around 60000
 
-Ne = 1.33e+6
+Ne = 2500
 n_ind = 2500
 sequence_length = 1e+06
 end_gen = 20000
@@ -80,15 +80,16 @@ shape = 0.3
 scale = 0.033
 mut_ratio = 0
 mu_list = [5.56e-07, 5.56e-06]
-mu_msp = mu_list/5320
-mu_neutral = mu/20
-Ne = 1.33e+06
-pdelta_method = "optim"
-bdelta_method = "estimate"
+mu_msp = [5.56e-08, 5.56e-07]
+total_sites = 75000
+map_length = 5
+map_length_expt = 2
+r_msp = 1e-9*Dmel_Ne/Ne
+!!! Check Set_ID
 
 (iii)
 
-Ne = 1.33e+6
+Ne = 2500
 n_ind = 2500
 sequence_length = 1e+06
 end_gen = 25000
