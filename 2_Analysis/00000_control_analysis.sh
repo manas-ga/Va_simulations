@@ -2,9 +2,9 @@
 
 #$ -V
 #$ -cwd
-#$ -N Vw_al_Set_6
-#$ -t 1-300
-#$ -tc 10
+#$ -N Vw_al_Set_7
+#$ -t 1-200
+#$ -tc 12
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g,h=!bigyin
 #$ -pe smp64 15
 #$ -j y

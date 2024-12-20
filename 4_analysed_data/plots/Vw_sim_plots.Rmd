@@ -287,3 +287,5 @@ p_b_5_15_std = make_std_plots(d_4)
 ggsave(p_b_5_15_std$combined, width = 8, height = 8, file = "p_b_5_15_std.jpg")
 p_b_5_15_std$combined
 ```
+
+### Set 6 (varying ml_exp: 0.01, 0.2, 2 (reference)) and 7 (varying ml: 0.5, 5 (reference), 50)
