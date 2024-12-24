@@ -2,9 +2,9 @@
 
 #$ -V
 #$ -cwd
-#$ -N Vw_Set_8
-#$ -t 1-50
-#$ -tc 7
+#$ -N Vw_TEST
+#$ -t 1-9
+#$ -tc 9
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g
 #$ -pe smp 5
 #$ -j y

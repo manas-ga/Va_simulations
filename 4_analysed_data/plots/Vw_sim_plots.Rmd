@@ -18,7 +18,7 @@ library(latex2exp)
 ## Function to make "standard" plot
 
 ```{r}
-make_std_plots = function(data, font_size = 15){
+make_std_plots = function(data, font_size = 15, end_gen = 25000){
   
   # vA_est ~ vA_true
 
@@ -299,11 +299,36 @@ p_b_5_2_std$combined
 
 ### ml_expt ###
 
-p_b_5_2_ml = ggplot(d_6 , aes(y=vA_est, x = vA_true, color = factor(sequence_length*r_expt))) +
+p_b_5_2_ml_exp = ggplot(d_6 , aes(y=vA_est, x = vA_true, color = factor(sequence_length*r_expt))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length (M)", title = paste("Map length in burnin = ", unique(d_6$sequence_length*d_6$r), " M", sep = "")) + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggsave(p_b_5_2_ml_exp, width = 8, height = 8, file = "p_b_5_2_ml_exp.jpg")
+p_b_5_2_ml_exp
+
+d_7 = read.csv("../combined_data/Set_7_output.csv")
+
+d_7_std = d_7[d_7$r==5e-7,]
+
+p_b_0.5_2_std = make_std_plots(d_7_std)
+ggsave(p_b_0.5_2_std$combined, width = 8, height = 8, file = "p_b_0.5_2_std.jpg")
+p_b_0.5_2_std$combined
+
+d_7_ml = rbind(d_7, d_6_std)
+
+### ml ###
+
+p_b_5_2_ml = ggplot(d_7_ml , aes(y=vA_est, x = vA_true, color = factor(sequence_length*r))) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length (M)", title = paste("Map length in experiment = ", unique(d_7_ml$sequence_length*d_6$r_exp), " M", sep = "")) + 
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
@@ -314,3 +339,13 @@ p_b_5_2_ml
 
 
 ```
+### Set 8 (larger simulations (scale = 0.033): ml = 0.5, ml_exp = 2)
+```{r}
+d_8 = read.csv("../combined_data/Set_8_output.csv") # Data for the standard set
+
+p_b_large_std = make_std_plots(d_8)
+ggsave(plot = p_b_large_std$combined, width = 8, height = 8, file = "p_b_large_0.5_2_ml.jpg")
+p_b_large_std$combined
+
+```
+
