@@ -2,9 +2,9 @@
 
 #$ -V
 #$ -cwd
-#$ -N TEST2
-#$ -t 1-3
-#$ -tc 3
+#$ -N TEST3
+#$ -t 1-9
+#$ -tc 9
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g
 #$ -pe smp 5
 #$ -j y
