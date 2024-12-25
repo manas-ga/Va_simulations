@@ -183,7 +183,7 @@ mu_list = if(end_gen==2){seq(0, 0, length = nsims)}else{10*mu_msp_list}
 
 ## total number of permissible sites (to be used to set the neutral mutation rate)
 
-total_sites = if(end_gen==2){3000}else{45000}
+total_sites = if(end_gen==2){3000}else{50000}
 
 # Mutation rate during the experiment
 
