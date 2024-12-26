@@ -111,7 +111,7 @@ library(pryr) ## For tracking memory usage using mem_used()
 library(RhpcBLASctl)
 
 # Control the number of BLAS threads if running on a cluster
-if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(15)}
+if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(20)}
 
 
 ################################################
