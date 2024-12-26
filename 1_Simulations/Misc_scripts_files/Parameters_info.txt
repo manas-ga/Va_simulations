@@ -81,8 +81,8 @@ scale = 0.033
 mut_ratio = 0
 mu_list = [5.56e-07, 5.56e-06]
 mu_msp = [5.56e-08, 5.56e-07]
-total_sites = 75000
-map_length = 5
+total_sites = 65000
+map_length = 0.5
 map_length_expt = 2
 r_msp = 1e-9*Dmel_Ne/Ne
 !!! Check Set_ID
