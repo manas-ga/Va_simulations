@@ -202,6 +202,9 @@ p_nb_2_std = make_std_plots(d_5_std)
 ggsave(p_nb_2_std$combined, width = 8, height = 8, file = "p_nb_2_std.jpg")
 p_nb_2_std$combined
 
+ggsave(p_nb_2_std$main, width = 5, height = 5, file = "talk_noburnin.jpg")
+p_nb_2_std$combined
+
 
 ```
 
@@ -339,13 +342,25 @@ p_b_5_2_ml
 
 
 ```
-### Set 8 (larger simulations (scale = 0.033): ml = 0.5, ml_exp = 2)
+### Set 8 (larger simulations (scale = 0.033): ml = 0.5, ml_exp = 2) (pilot)
 ```{r}
 d_8 = read.csv("../combined_data/Set_8_output.csv") # Data for the standard set
 
 p_b_large_std = make_std_plots(d_8)
+ggsave(plot = p_b_large_std$combined, width = 8, height = 8, file = "p_b_large_0.5_2_ml_pilot.jpg")
+p_b_large_std$combined
+
+
+```
+
+### Set 9 (larger simulations (scale = 0.033): ml = 0.5, ml_exp = 2)
+```{r}
+d_9 = read.csv("../combined_data/Set_9_output.csv") # Data for the standard set
+
+p_b_large_std = make_std_plots(d_9)
 ggsave(plot = p_b_large_std$combined, width = 8, height = 8, file = "p_b_large_0.5_2_ml.jpg")
 p_b_large_std$combined
 
+ggsave(plot = p_b_large_std$main, width = 5, height = 5, file = "talk_burnin_del.jpg")
 ```
 
