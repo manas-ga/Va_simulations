@@ -364,3 +364,13 @@ p_b_large_std$combined
 ggsave(plot = p_b_large_std$main, width = 5, height = 5, file = "talk_burnin_del.jpg")
 ```
 
+### Set 11 (larger simulations (scale = 0.033): ml = 0.5, ml_exp = 2, mut_ratio = 0.0002) 
+
+```{r}
+d_11 = read.csv("../combined_data/Set_11_output.csv") # Data for the standard set
+
+p_b_large_ben_std = make_std_plots(d_11)
+ggsave(plot = p_b_large_ben_std$combined, width = 8, height = 8, file = "p_b_large_0.5_2_ben.jpg")
+p_b_large_std$combined
+
+#ggsave(plot = p_b_large_std$main, width = 5, height = 5, file = "talk_burnin_del.jpg")
