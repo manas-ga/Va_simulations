@@ -97,6 +97,18 @@ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/
 bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
 rm -rf ~/miniconda3/miniconda.sh
 
+####################################################
+### Exporting a conda environment to a .yml file ###
+####################################################
+
+# On AC3 or PC
+conda activate marun
+conda env export > Va_anal.yml
+
+# Installing from the yml file
+conda env create -f Va_anal.yml
+
+
 #############################
 ##### Installing asreml #####
 #############################
@@ -319,15 +331,17 @@ Execution halted
 cd /data/obbard/Va_simulations/analyses/b_Interim_files/std_out
 
 # Creating and downloading analysis_param_grid.txt 
-cat *Set_3* | grep -v Set_ID | cut -d "," -f 1,2 | tr -d \" | tr ',' ' ' > analysis_param_grid.txt ## On AC3
+cat *Set_11* | grep -v Set_ID | cut -d "," -f 1,2 | tr -d \" | tr ',' ' ' > analysis_param_grid.txt ## On AC3
 scp qm:/data/obbard/Va_simulations/analyses/c_Output/analysis_param_grid.txt /mnt/c/Users/msamant/Documents/GitHub/Va_simulations/2_Analysis ## On  local WSL
 
-cat Set_1*Data_analysis*csv | head -1 | tr -d \" > /mnt/c/Users/msamant/Downloads/Set_1_output.csv
-cat Set_1*Data_analysis*csv | grep -v Set_ID | tr -d \" >> /mnt/c/Users/msamant/Downloads/Set_1_output.csv
+cat Set_9*Data_analysis*csv | head -1 | tr -d \" > combined_data/Set_9_output.csv
+cat Set_9*Data_analysis*csv | grep -v Set_ID | tr -d \" >> combined_data/Set_9_output.csv
 
-# Downloading data
-scp -r qm:/data/obbard/Va_simulations/analyses/c_Output/Test_output.csv  /mnt/c/Users/msamant/Downloads 
+# Downloading data to my PC
 rsync -r --ignore-existing qm:/data/obbard/Va_simulations/analyses/c_Output/  /mnt/c/Users/msamant/Documents/GitHub/Va_simulations/4_analysed_data
+
+# Downloading simulation files and data to Vera (must be run on Vera)
+rsync -r --ignore-existing qm:/data/obbard/Va_simulations/analyses/ /RawData/Manas_NERC_Simulations  
 
 install.packages("/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/Vw", repos = NULL, type = "source")
 
