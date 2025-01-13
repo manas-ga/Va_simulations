@@ -156,7 +156,7 @@ for(sim in 1:nsims){
                               Ne = c(1000, 1000),
                               predict_Ne =  TRUE,                         # If true, this overwrites the Ne supplied above by Ne = c(nind_expt, predict_Ne(nind_expt, Ve_w_expt))
                               verbose = TRUE,
-                              all.gp = TRUE)
+                              all.gp = FALSE)
   
   message("Final output:")
   print(analysed_data)

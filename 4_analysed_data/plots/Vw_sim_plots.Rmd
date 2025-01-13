@@ -357,11 +357,21 @@ p_b_large_std$combined
 ```{r}
 d_9 = read.csv("../combined_data/Set_9_output.csv") # Data for the standard set
 
-p_b_large_std = make_std_plots(d_9)
+p_b_large_std = make_std_plots(d_9[d_9$all.gp==FALSE,])
 ggsave(plot = p_b_large_std$combined, width = 8, height = 8, file = "p_b_large_0.5_2_ml.jpg")
 p_b_large_std$combined
 
 ggsave(plot = p_b_large_std$main, width = 5, height = 5, file = "talk_burnin_del.jpg")
+
+# Plots for all.gp==TRUE
+
+p_b_large_all.gp = make_std_plots(d_9[d_9$all.gp==TRUE,])
+ggsave(plot = p_b_large_all.gp$combined, width = 8, height = 8, file = "p_b_large_0.5_2_ml_all.gp.jpg")
+p_b_large_all.gp$combined
+
+
+
+
 ```
 
 ### Set 11 (larger simulations (scale = 0.033): ml = 0.5, ml_exp = 2, mut_ratio = 0.0002) 
