@@ -7,7 +7,7 @@
 #$ -tc 10
 #$ -l h_rt=10:05:00
 #$ -l h_vmem=750G
-#$ -pe 50
+#$ -pe sharedmem 50
 #$ -j y
 #$ -o /exports/eddie/scratch/msamant/b_Interim_files/std_out/
 
