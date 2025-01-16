@@ -50,21 +50,26 @@ bdelta_method = "estimate"
 ## A. Sims with burnin (only deleterious) ##
 ############################################
 
-(i) If one wants to restrict the loss of Va between the parents and the experiment to about 7-8%
+(i) 
 
-# This results in the maximum number of segregatng sites to be around 33000
+# This results in the maximum number of segregatng sites to be around 65000 even at map_length = 50
 
-Ne = 1.33e+6
+Ne = 2500
 n_ind = 2500
 sequence_length = 1e+06
-end_gen = 25000
+end_gen = 20000
 DFE = "g"
 shape = 0.3
-scale = 0.05
+scale = 0.045
 mut_ratio = 0
-mu_list = [3.56e-07, 3.56e-06]
-mu_msp = [3.56e-08, 3.56e-07]
-mu_neutral = [1.6e-06, 1.6e-07]
+mu_list = [3.6e-07, 3.6e-06]
+mu_msp = [3.6e-08, 3.6e-07]
+total_sites = 65000
+map_length = 0.5
+map_length_expt = 2
+r_msp = 1e-9*Dmel_Ne/Ne
+!!! Check Set_ID
+
 
 
 (ii) If one wants to restrict the loss of Va between the parents and the experiment to about 5%

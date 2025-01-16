@@ -2,11 +2,11 @@
 
 #$ -V
 #$ -cwd
-#$ -N Vw_Set_11
-#$ -t 1-100
+#$ -N Vw_TEST
+#$ -t 1-30
 #$ -tc 10
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g
-#$ -pe smp64 5
+#$ -pe smp64 12
 #$ -j y
 #$ -o /data/obbard/Va_simulations/analyses/b_Interim_files/std_out/
 

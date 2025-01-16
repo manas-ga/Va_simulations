@@ -126,7 +126,7 @@ trim_exp_files = FALSE                 # Should the SLiM output files for the ex
 del_files = TRUE                       # Should the .trees files be deleted at the end to save space?
 compress_files = TRUE                  # Should .txt and .trees files be compressed using gzip
 
-Job_ID = "Set_11"                 # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
+Job_ID = "TEST_0.045"                 # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
 
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
 
@@ -161,7 +161,7 @@ sequence_length = 1e+06               # Just have a single continuous chromosome
 
 ##################
 
-map_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 5, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))
+map_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 50, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))
 map_length_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 2, (as.numeric(commandArgs(trailingOnly = TRUE)[3])))
 
 r = map_length/sequence_length                          # Recombination rate (per site per generation) during the forward simulation of history
@@ -172,7 +172,7 @@ r_msp = if(end_gen==2){r}else{1e-9*Dmel_Ne/Ne}          # Recombination rate for
 
 # Mutation rate in the msprime simulation
 
-mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(3e-9, 2.35e-8, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
+mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(3.6e-7, 3.6e-7, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
 
 # Mutation rate of non_neutral mutations during the forward simulation of the history
 
@@ -197,7 +197,7 @@ DFE = "g"                                   # DFE can be "g" (gamma) or "n" (nor
 
 # If DFE is "g"
 shape = 0.3                                 # Shape of the gamma DFE ##### mean = shape*scale
-scale_list = if(end_gen==2){seq(0.033, 0.033, length = nsims)}else{seq(0.033, 0.033, length = nsims)}  # Vector of Scale of the gamma DFE
+scale_list = if(end_gen==2){seq(0.033, 0.033, length = nsims)}else{seq(0.045, 0.045, length = nsims)}  # Vector of Scale of the gamma DFE
 
 # The ratio of beneficial:deleterious mutations 
 mut_ratio = if(Sys.info()["nodename"]=="SCE-BIO-C06645"){0}else{as.numeric(commandArgs(trailingOnly = TRUE)[8])}
@@ -307,7 +307,7 @@ for (sim in 1:nsims){
       arg18 = paste("-d Ve_w=", Ve_w, sep = "")
       
       system(paste("slim", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, slim_history_path))
-      
+
       ###################################################################
       ############### Add neutral mutations using msprime ###############
       ###################################################################
