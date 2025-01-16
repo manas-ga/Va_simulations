@@ -2,8 +2,8 @@
 
 #$ -V
 #$ -cwd
-#$ -N Vw_al_Set_9_rep
-#$ -t 1-100
+#$ -N Test_0.045
+#$ -t 1-30
 #$ -tc 8
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g,h=!bigyin
 #$ -pe smp64 22
