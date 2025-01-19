@@ -2,7 +2,7 @@
 
 #$ -V
 #$ -cwd
-#$ -N TEST
+#$ -N TEST1
 #$ -t 1-8
 #$ -tc 8
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g
