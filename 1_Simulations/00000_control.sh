@@ -2,8 +2,8 @@
 
 #$ -V
 #$ -cwd
-#$ -N Vw_TEST
-#$ -t 1-8
+#$ -N Vw_Set_N1
+#$ -t 1-300
 #$ -tc 8
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g
 #$ -pe smp64 12
