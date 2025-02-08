@@ -1,0 +1,2 @@
+"Set_ID","sim","Time","end_gen","ngen1","ngen2","Ne","n_ind","n_ind_exp","n_cages","sequence_length","r_msp","r","r_expt","mu_msp","mu","mu_expt","shape","scale","mut_ratio","flip_sel_coef","Ve_w","Ve_w_expt"
+"TEST_19JAN2_bigbird_2025-01-19_10-31-26.709472_3.6e-07_250_2_1000_10_4_0_0","1","2025-01-20 05:13:03.580697","25000","1","4","2500","2500","1000","10","1e+06","5.32e-07","0.00025","2e-06","3.6e-07","3.6e-06","0","0.3","0.045","0","0","1","1"

@@ -14,7 +14,7 @@
 # Col 7 = flip_sel_coef
 # Col 8 = mut_ratio
 
-standard_only = FALSE
+standard_only = TRUE
 
 ## The standard set (to be used as a reference to compare)
 
@@ -28,7 +28,7 @@ mut_ratio = if(end_gen==2){1}else{0.0000}
 param_matrix = data.frame(matrix(NA, nrow = nsims, ncol  = 8))
 
 param_matrix[,1] = mu_msp_list
-param_matrix[,2] = 5
+param_matrix[,2] = 0.5
 param_matrix[,3] = 2
 param_matrix[,4] = 1000
 param_matrix[,5] = 10

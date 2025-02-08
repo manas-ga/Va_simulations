@@ -384,3 +384,27 @@ ggsave(plot = p_b_large_ben_std$combined, width = 8, height = 8, file = "p_b_lar
 p_b_large_std$combined
 
 #ggsave(plot = p_b_large_std$main, width = 5, height = 5, file = "talk_burnin_del.jpg")
+```
+
+### Set_N1 (scale = 0.045): ml = c (5, 50, 250), ml_exp = 2, mut_ratio = 0 
+
+```{r}
+d_N1 = read.csv("../combined_data/Set_N1_output.csv")
+
+### ml ###
+
+p_b_2_0.045_ml = ggplot(d_N1 , aes(y=vA_est, x = vA_true, color = factor(sequence_length*r))) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length (M)", title = paste("Map length in experiment = ", unique(d_N1$sequence_length*d_N1$r_exp), " M", sep = "")) + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggsave(p_b_2_0.045_ml, width = 8, height = 8, file = "p_b_2_0.045_ml.jpg")
+p_b_2_0.045_ml
+```
+
+
