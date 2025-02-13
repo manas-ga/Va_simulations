@@ -2,8 +2,8 @@
 
 #$ -V
 #$ -cwd
-#$ -N Set_N1a
-#$ -t 1-100
+#$ -N Vw_Set_12
+#$ -t 1-200
 #$ -tc 10
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g
 #$ -pe smp64 14
