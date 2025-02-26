@@ -351,6 +351,8 @@ ggsave(plot = p_b_large_std$combined, width = 8, height = 8, file = "p_b_large_0
 p_b_large_std$combined
 
 
+
+
 ```
 
 ### Set 9 (larger simulations (scale = 0.033): ml = 0.5, ml_exp = 2)
@@ -405,6 +407,29 @@ p_b_2_0.045_ml = ggplot(d_N1 , aes(y=vA_est, x = vA_true, color = factor(sequenc
 
 ggsave(p_b_2_0.045_ml, width = 8, height = 8, file = "p_b_2_0.045_ml.jpg")
 p_b_2_0.045_ml
+
 ```
 
+### Set_12 Varyingthe map length in the experiment phase (scale = 0.033): ml_exp = c(0.01, 0.2, 2), mut_ratio = 0
+
+Needs data from set_12 as well as set_9
+
+```{r}
+d_9 = read.csv("../combined_data/Set_9_output.csv") # Data for the standard set
+d_12 = read.csv("../combined_data/Set_12_output.csv") # Data when mu_exp was varied
+d_ml_exp = rbind(d_9, d_12)
+
+p_ml_exp_0.033 = ggplot(d_ml_exp , aes(y=vA_est, x = vA_true, color = factor(sequence_length*r_expt))) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length in experiment (M)", title = paste("Map length in history = ", unique(d_ml_exp$sequence_length*d_ml_exp$r), " M", sep = "")) + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggsave(p_ml_exp_0.033, width = 8, height = 8, file = "p_ml_exp_0.033.jpg")
+p_ml_exp_0.033
+```
 
