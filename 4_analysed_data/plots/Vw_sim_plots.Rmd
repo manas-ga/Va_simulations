@@ -82,7 +82,9 @@ if(end_gen==2){
   if(length(ml)>1){stop("The data set does not have the same map length in the burnin phase in every simulation.")}
 }
 
-title = ggdraw() + draw_label(paste("Map length in burnin = ", ml, " M, Map length in experiment = ", ml_expt, " M", sep = ""), hjust = 0.5, size = font_size)
+mu_alpha = (data$shape)*(data$shape)
+
+title = ggdraw() + draw_label(paste("Map length in burnin = ", ml, " M, Map length in experiment = ", ml_expt, " M, scale = ", data$scale, sep = ""), hjust = 0.5, size = font_size)
 
 # Add title
 p_combined = plot_grid(title, p_combined, ncol = 1, rel_heights = c(0.1,1))
@@ -199,10 +201,10 @@ d_5_std = d_5[d_5$r_expt*d_5$sequence_length==2&d_5$n_ind_exp==1000&d_5$n_cages=
 
 p_nb_2_std = make_std_plots(d_5_std)
 
-ggsave(p_nb_2_std$combined, width = 8, height = 8, file = "p_nb_2_std.jpg")
+ggsave(p_nb_2_std$combined, width = 8, height = 8, file = "Manuscript_figures/Fig1.jpg")
 p_nb_2_std$combined
 
-ggsave(p_nb_2_std$main, width = 5, height = 5, file = "talk_noburnin.jpg")
+#ggsave(p_nb_2_std$main, width = 5, height = 5, file = "talk_noburnin.jpg")
 p_nb_2_std$combined
 
 
@@ -259,8 +261,13 @@ p_nb_2_ngen2 = ggplot(d_5_ngen2 , aes(y=vA_est, x = vA_true, color = factor(ngen
 
 p_nb_2_combined = plot_grid(p_nb_2_ml, p_nb_2_nind, p_nb_2_ncages, p_nb_2_ngen2, labels = "AUTO")
 
+title = ggdraw() + draw_label(paste("Map length in burnin = ", unique(d_5$r_msp*d_5$sequence_length), ", scale = ", d_5$scale, sep = ""), hjust = 0.5, size = 20)
+
+# Add title
+p_nb_2_combined = plot_grid(title, p_nb_2_combined, ncol = 1, rel_heights = c(0.1,1))
+
 p_nb_2_combined
-ggsave(p_nb_2_combined, width = 12, height = 8, file = "p_nb_2_combined.jpg")
+ggsave(p_nb_2_combined, width = 12, height = 8, file = "Manuscript_figures/Fig2.jpg")
 ```
 
 
@@ -359,8 +366,11 @@ p_b_large_std$combined
 ```{r}
 d_9 = read.csv("../combined_data/Set_9_output.csv") # Data for the standard set
 
-p_b_large_std = make_std_plots(d_9[d_9$all.gp==FALSE,])
-ggsave(plot = p_b_large_std$combined, width = 8, height = 8, file = "p_b_large_0.5_2_ml.jpg")
+d_9_std = d_9[d_9$all.gp==FALSE,]
+
+p_b_large_std = make_std_plots(d_9_std)
+#ggsave(plot = p_b_large_std$combined, width = 8, height = 8, file = "p_b_large_0.5_2_ml.jpg")
+ggsave(plot = p_b_large_std$combined, width = 8, height = 8, file = "Manuscript_figures/Fig3.jpg")
 p_b_large_std$combined
 
 ggsave(plot = p_b_large_std$main, width = 5, height = 5, file = "talk_burnin_del.jpg")
@@ -374,19 +384,11 @@ p_b_large_all.gp$combined
 
 
 
+
+
 ```
 
-### Set 11 (larger simulations (scale = 0.033): ml = 0.5, ml_exp = 2, mut_ratio = 0.0002) 
 
-```{r}
-d_11 = read.csv("../combined_data/Set_11_output.csv") # Data for the standard set
-
-p_b_large_ben_std = make_std_plots(d_11)
-ggsave(plot = p_b_large_ben_std$combined, width = 8, height = 8, file = "p_b_large_0.5_2_ben.jpg")
-p_b_large_std$combined
-
-#ggsave(plot = p_b_large_std$main, width = 5, height = 5, file = "talk_burnin_del.jpg")
-```
 
 ### Set_N1 (scale = 0.045): ml = c (5, 50, 250), ml_exp = 2, mut_ratio = 0 
 
@@ -410,6 +412,30 @@ p_b_2_0.045_ml
 
 ```
 
+### Set 11 (larger simulations (scale = 0.033): ml = 0.5, ml_exp = 2, mut_ratio = 0.0002) 
+
+```{r}
+d_11 = read.csv("../combined_data/Set_11_output.csv") # Data for the standard set
+
+p_b_large_ben_std = make_std_plots(d_11)
+ggsave(plot = p_b_large_ben_std$combined, width = 8, height = 8, file = "p_b_large_0.5_2_ben.jpg")
+p_b_large_std$combined
+
+# Combined plot for proportion of beneficial mutations
+
+p_ben_0.033 = ggplot(rbind(d_9_std, d_11), aes(y = vA_est, x = vA_true, color = factor(format(mut_ratio, scientific = FALSE)))) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Proportion of \nbeneficial \nmutations") + 
+  scale_color_manual(values = c("#0072B2", "#999999")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+p_ben_0.033
+```
+
 ### Set_12 Varyingthe map length in the experiment phase (scale = 0.033): ml_exp = c(0.01, 0.2, 2), mut_ratio = 0
 
 Needs data from set_12 as well as set_9
@@ -423,13 +449,48 @@ p_ml_exp_0.033 = ggplot(d_ml_exp , aes(y=vA_est, x = vA_true, color = factor(seq
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length in experiment (M)", title = paste("Map length in history = ", unique(d_ml_exp$sequence_length*d_ml_exp$r), " M", sep = "")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length in \nexperiment (M)") + 
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5)) 
 
 ggsave(p_ml_exp_0.033, width = 8, height = 8, file = "p_ml_exp_0.033.jpg")
 p_ml_exp_0.033
+```
+
+## Simulations with burnin (varying the scale)
+
+Needs datasets for set 7, set 9, and set N1
+
+```{r}
+d_scale_0.033 = rbind(d_7[d_7$r==5e-07,], d_9_std, d_N1[d_N1$r==5e-07,])
+
+p_scale_0.033 = ggplot(d_scale_0.033 , aes(y=vA_est, x = vA_true, color = factor(scale*shape))) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($\mu_{\alpha}$)")) + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) +
+  theme(plot.title = element_text(hjust = 0.5)) 
+p_scale_0.033
+```
+
+
+## Combine plots for large (scale = 0.033) simulations with burnin
+
+```{r}
+p_b_0.033_combined = plot_grid(p_ml_exp_0.033, p_ben_0.033, p_scale_0.033, ncol = 2, labels = "AUTO")
+
+title = ggdraw() + draw_label(paste("Map length in burnin = ", unique(d_9$r*d_9$sequence_length), sep = ""), hjust = 0.5, size = 20)
+
+# Add title
+p_b_0.033_combined = plot_grid(title, p_b_0.033_combined, ncol = 1, rel_heights = c(0.1,1))
+p_b_0.033_combined
+
+ggsave(p_b_0.033_combined, width = 12, height = 8, file = "manuscript_figures/Fig4.jpg")
+
 ```
 
