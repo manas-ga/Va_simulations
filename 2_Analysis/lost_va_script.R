@@ -1,3 +1,7 @@
+rm(list = ls())
+# Rscript /mnt/c/Users/msamant/Documents/GitHub/Va_simulations/2_Analysis/lost_va_script.R
+
+
 ##################
 ### File Paths ###
 ##################
@@ -133,15 +137,15 @@ for(sim in 1:nsims){
   
   sim_data = extract_slim_data(Set_ID = Set_ID,
                                sim = sim,
-                               unzip = unzip,
+                               unzip = TRUE,
                                slim_output_path = slim_output_path, 
                                sim_param_path = sim_param_path,
                                extract_genomes_path = extract_genomes_path, 
                                extract_mut_path = extract_mut_path,
-                               mutations_path = mutations_path, 
-                               c_matrix_path = c_matrix_path, 
+                               mutations_path = temp_files_path, 
+                               c_matrix_path = temp_files_path, 
                                randomise = TRUE,
-                               delete_temp_files = delete_temp_files)
+                               delete_temp_files = TRUE)
   
   c_genome = sim_data$c_genome  
   list_alpha = sim_data$list_alpha
@@ -158,9 +162,26 @@ for(sim in 1:nsims){
   
   # Repeat list_alpha n_cages times over rows
   
-  list_alpha = t(matrix(list_alpha, nrow = length(list_alpha), ncol = n_cages))
+  list_alpha_rep = t(matrix(list_alpha, nrow = length(list_alpha), ncol = n_cages))
   
-  va_left = mean(rowSums(0.5*pbar2*(1-pbar2)*list_alpha))
+  va_left = mean(rowSums(0.5*pbar2*(1-pbar2)*list_alpha_rep^2))
   
+  ### Save file ###
   
+  # Create a unique stamp for this analysis
+  
+  unique_stamp = as.character(paste(Sys.info()["nodename"], Sys.time()))
+  unique_stamp = gsub(" ", "_", unique_stamp)
+  unique_stamp = gsub(":", "-", unique_stamp)
+  
+  message("Saving data...")
+  
+  sim_params = sim_data$sim_params
+  
+  new_data = data.frame("va_true" = va_true, "va_left" = va_left, "time_stamp_va_left" = unique_stamp)
+  new_data = cbind(sim_params, new_data)
+  
+  write.table(rbind(names(new_data), new_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_va_lost_analysis_", unique_stamp, ".csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
+  print(Set_ID)
+  print(paste("Percentage additive genic variance left = ", va_left/va_true*100, sep = ""))
 }
