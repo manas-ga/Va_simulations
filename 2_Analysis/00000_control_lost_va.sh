@@ -5,7 +5,7 @@
 #$ -N lost_vw
 #$ -t 1-300
 #$ -tc 10
-#$ -l h_vmem=10g,h=bigyin
+#$ -l h_vmem=10g
 #$ -pe smp64 1
 #$ -j y
 #$ -o /data/obbard/Va_simulations/analyses/b_Interim_files/std_out/
