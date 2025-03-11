@@ -15,6 +15,6 @@
 # std_out on AC3: /data/obbard/Va_simulations/analyses/b_Interim_files/std_out/
 
 
-Param=`lost_va_IDs.txt | awk "NR==$SGE_TASK_ID"`
+Param=`cat lost_va_IDs.txt | awk "NR==$SGE_TASK_ID"`
 
 Rscript lost_va_script.R $Param
