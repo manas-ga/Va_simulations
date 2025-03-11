@@ -492,5 +492,16 @@ p_b_0.033_combined
 
 ggsave(p_b_0.033_combined, width = 12, height = 8, file = "manuscript_figures/Fig4.jpg")
 
+# Separate subplots for Jarrod's talk
+
+ggsave(p_nb_2_std$main, width = 5, height = 5, file = "Fig.1A.jpg")
+ggsave(p_nb_2_ml, width = 5, height = 5, file = "Fig.2A.jpg")
+ggsave(p_nb_2_nind, width = 5, height = 5, file = "Fig.2B.jpg")
+
+ggsave(p_b_0.045_ml + labs(title = TeX(r"(Non-neutral $\mu_{\alpha}$ = 0.0135)")), width = 5, height = 5, file = "Fig.4B.jpg")
+ggsave(p_ben_0.033, width = 5, height = 5, file = "Fig.4C.jpg")
+ggsave(p_scale_0.033, width = 5, height = 5, file = "Fig.4D.jpg")
+
+
 ```
 

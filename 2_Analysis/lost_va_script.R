@@ -19,9 +19,9 @@ if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "bigga
 ### On Vera ###
 
 if(Sys.info()["nodename"]=="vera.bio.ed.ac.uk"){
-  analysis_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/2_Analysis"  
-  file_storage_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/1_Simulations"
-  Vw_library_path = "/data/home/msamant/Manas/Va_simulations/Github/Va_simulations/Vw"
+  analysis_path = "~/Va_simulations/2_Analysis"  
+  file_storage_path = "/RawData/Manas_NERC_Simulations"
+  Vw_library_path = "~/Va_simulations/Vw"
   
 }
 
@@ -104,10 +104,6 @@ if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "bigga
 
 if(Sys.info()["nodename"]=="bigyin"){stop("Bigyin cannot run asreml-r. Use a different node.")}
 
-library(MCMCglmm)
-library(asreml)
-library(Matrix)
-library(pryr) ## For tracking memory usage using mem_used()
 library(RhpcBLASctl)
 
 # Control the number of BLAS threads if running on a cluster
@@ -123,6 +119,19 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04
 #install.packages(Vw_library_path, repos = NULL, type = "source")
 library(Vw)
 
+########################################################
+### Obtain the Set_IDs for sims varying \mu_{\alpha} ###
+########################################################
+
+d_N1 = read.csv("../4_analysed_data/combined_data/Set_N1_output.csv")
+d_7 = read.csv("../4_analysed_data/combined_data/Set_7_output.csv")
+d_9 = read.csv("../4_analysed_data/combined_data/Set_9_output.csv")
+
+d_scale_0.033 = rbind(d_7[d_7$r==5e-07,], d_9[d_9$all.gp==FALSE,], d_N1[d_N1$r==5e-07,])
+
+Set_ID_list = d_scale_0.033$Set_ID
+
+sim = 1 # This is always 1 for every simulation
 
 ########################
 ### Perform analyses ###
@@ -130,10 +139,11 @@ library(Vw)
 
 
 Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "Set_5_c3_2024-12-17_02-56-59.533089_4.65656565656566e-09_5_2_1000_10_4_0_1", commandArgs(trailingOnly = TRUE)[1])
-nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
-
+nsims = 1
 
 for(sim in 1:nsims){
+  
+  message(paste("Set_Id number", which(Set_ID==Set_ID_list), " in progress...", sep = ""))
   
   sim_data = extract_slim_data(Set_ID = Set_ID,
                                sim = sim,
