@@ -102,7 +102,11 @@ if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "bigga
 
 # Load packages and functions
 
-if(Sys.info()["nodename"]=="bigyin"){stop("Bigyin cannot run asreml-r. Use a different node.")}
+library(RhpcBLASctl)
+
+# Control the number of BLAS threads if running on a cluster
+if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(2)}
+
 
 
 ################################################
