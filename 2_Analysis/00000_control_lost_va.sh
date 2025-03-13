@@ -14,6 +14,6 @@ source $CONDA_PATH/etc/profile.d/conda.sh  # Initialize Conda in the job script
 # Activate the Conda environment
 conda activate marun
 
-Param=`cat lost_va_IDs.txt | awk "NR==$SGE_TASK_ID"`
+Param=`cat lost_va_IDs.txt | awk "NR==${SLURM_ARRAY_TASK_ID}"`
 
 Rscript lost_va_script.R $Param
