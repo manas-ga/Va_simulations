@@ -137,9 +137,7 @@ Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=
 nsims = 1
 
 for(sim in 1:nsims){
-  
-  message(paste("Set_Id number", which(Set_ID==Set_ID_list), " in progress...", sep = ""))
-  
+
   sim_data = extract_slim_data(Set_ID = Set_ID,
                                sim = sim,
                                unzip = TRUE,
