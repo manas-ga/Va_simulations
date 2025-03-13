@@ -10,10 +10,20 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"){message("WARNING: Command line argu
 
 ### On AC3 ###
 
+# Old
+
 if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig", "c1", "c2", "c3", "c4", "c5", "c6")){
   analysis_path = "/ceph/users/marun/Va_simulations/2_Analysis"
   file_storage_path = "/data/obbard/Va_simulations/analyses" # File storage path is the designated storage space on AC3 instead of the /home directory on qm
   Vw_library_path = "/ceph/users/marun/Va_simulations/Vw"
+}
+
+# New
+
+if(Sys.info()["nodename"]%in%c("ac3-n1", "ac3-n2", "ac3-n3", "ac3-n4", "ac3-n5", "ac3-n6")){
+  analysis_path = "~/Va_simulations/2_Analysis"
+  file_storage_path = "/mnt/hel/obbard/Va_simulations/analyses" # File storage path is the designated storage space on AC3 instead of the /home directory on qm
+  Vw_library_path = "~/Va_simulations/Vw"
 }
 
 ### On Vera ###
@@ -117,20 +127,6 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04
 
 #install.packages(Vw_library_path, repos = NULL, type = "source")
 library(Vw)
-
-########################################################
-### Obtain the Set_IDs for sims varying \mu_{\alpha} ###
-########################################################
-
-d_N1 = read.csv("../4_analysed_data/combined_data/Set_N1_output.csv")
-d_7 = read.csv("../4_analysed_data/combined_data/Set_7_output.csv")
-d_9 = read.csv("../4_analysed_data/combined_data/Set_9_output.csv")
-
-d_scale_0.033 = rbind(d_7[d_7$r==5e-07,], d_9[d_9$all.gp==FALSE,], d_N1[d_N1$r==5e-07,])
-
-Set_ID_list = d_scale_0.033$Set_ID
-
-sim = 1 # This is always 1 for every simulation
 
 ########################
 ### Perform analyses ###
