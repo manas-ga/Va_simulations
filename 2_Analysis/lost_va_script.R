@@ -128,6 +128,8 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04
 #install.packages(Vw_library_path, repos = NULL, type = "source")
 library(Vw)
 
+finescale = TRUE # Whether a file containing data on locus-wise va_lost vs alpha should be saved
+
 ########################
 ### Perform analyses ###
 ########################
@@ -187,4 +189,19 @@ for(sim in 1:nsims){
   write.table(rbind(names(new_data), new_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_va_lost_analysis_", unique_stamp, ".csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
   print(Set_ID)
   print(paste("Percentage additive genic variance left = ", va_left/va_true*100, sep = ""))
+  
+  ### Optionally save fine-scale data ###
+  # Save Set_ID, list_alpha, SNPs, locus-wise va_true and locus-wise va_left
+  
+  if(finescale){
+    finescale_data = data.frame("Set_ID" = rep(Set_ID, length(list_alpha)),
+                                 "sim" = rep(sim, length(list_alpha)),
+                                 "list_alpha" = list_alpha,
+                                 "SNPs" = sim_data$SNPs,
+                                 "locuswise_va_true" = diversity*list_alpha^2,
+                                 "locuswise_va_left" = colMeans(0.5*pbar2*(1-pbar2)*list_alpha_rep^2))
+    
+    write.table(rbind(names(finescale_data), finescale_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_finescale_va_", unique_stamp, ".csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
+    
+  }
 }
