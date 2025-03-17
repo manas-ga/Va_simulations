@@ -342,9 +342,9 @@ p_b_5_2_ml = ggplot(d_7_ml , aes(y=vA_est, x = vA_true, color = factor(sequence_
   scale_color_manual(values = c("#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  labs(title = TeX(r"(Non-neutral $\mu_{\alpha}$ = 0.03)"))
 
-ggsave(p_b_5_2_ml + labs(title = paste("scale = ", unique(d_7_ml$scale), sep = "")), width = 8, height = 8, file = "manuscript_figures/FigS1.jpg")
 p_b_5_2_ml
 
 
@@ -401,14 +401,17 @@ p_b_0.045_ml = ggplot(d_N1 , aes(y=vA_est, x = vA_true, color = factor(sequence_
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin burnin (M)", title = paste("scale = ", unique(d_N1$scale), sep = "")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin burnin (M)", title = TeX(r"(Non-neutral $\mu_{\alpha}$ = 0.0135)")) + 
   scale_color_manual(values = c("#D01C8B", "#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
   theme(plot.title = element_text(hjust = 0.5))
 
-ggsave(p_b_0.045_ml, width = 8, height = 8, file = "manuscript_figures/FigS2.jpg")
 p_b_0.045_ml
+
+extra_ml_combined = plot_grid(p_b_5_2_ml, p_b_0.045_ml, nrow = 2, labels = "AUTO")
+
+ggsave(extra_ml_combined, width = 6, height = 9, file = "manuscript_figures/FigS1.jpg")
 
 ```
 
@@ -507,19 +510,63 @@ ggsave(p_scale_0.033, width = 5, height = 5, file = "Fig.4D.jpg")
 
 ## Additive genic variance lost during the experiment
 
-Plot the fraction of the initial additive genic variance lost by the end of the experiment as a function of non-neutral \mu_{\alpha}. Then, identify the simulation with the greatest loss and plot locuswise fraction V_a lost vs abs(\alpha) for this simulations. The target simulation is the sim 1 in the set "Set_7_c5_2024-12-18_22-42-43.451498_2.08686868686869e-08_0.5_2_1000_10_4_0_0"
+Plot the fraction of the initial additive genic variance lost by the end of the experiment as a function of non-neutral \mu_{\alpha}. Then, identify the simulations with the greatest and smallest losses and plot locuswise fraction V_a lost vs abs(\alpha) for these simulations. The target simulations are "Set_7_c5_2024-12-18_22-42-43.451498_2.08686868686869e-08_0.5_2_1000_10_4_0_0" (greatest loss in V_a) and  sim 1. (sims are set to 1 by default when run on the AC3 cluster)
 ```{r va_lost}
 
 d_va_lost = read.csv("../combined_data/va_lost_combined.csv")
 
-va_lost_plot = ggplot(d_va_lost, aes(y = ((va_true - va_left)/va_true), x = factor(shape*scale))) +
+plot_lost_va = ggplot(d_va_lost, aes(y = ((va_true - va_left)/va_true), x = factor(round(shape*scale, digits = 4)))) +
   theme_bw() +
   geom_boxplot() +
-  labs(y = TeX(r"(Fraction of the initial $V_a$ lost)"), x = TeX(r"(Non-neutral $\mu_{\alpha}$)")) +
+  labs(y = TeX(r"(Fraction of the total $V_a(0)$ lost)"), x = TeX(r"(Non-neutral $\mu_{\alpha}$)")) +
   theme(text = element_text(size = 15)) 
 
-# Identify the worst simulation
+# Identify the simulation with the greatest fraction loss in V_a
+message("Simulation with the geratest relative loss in initial additive genic variance:")
 d_va_lost[which(d_va_lost$va_left/d_va_lost$va_true == min (d_va_lost$va_left/d_va_lost$va_true)),]$Set_ID
+
+# Identify the simulation with the smallest fraction loss in V_a
+message("Simulation with the smallest relative loss in initial additive genic variance:")
+d_va_lost[which(d_va_lost$va_left/d_va_lost$va_true == max (d_va_lost$va_left/d_va_lost$va_true)),]$Set_ID
+
+# The analysis was run on AC3
+
+# Load data
+
+# Maximum loss
+d_finescale_max = read.csv("../Set_7_c5_2024-12-18_22-42-43.451498_2.08686868686869e-08_0.5_2_1000_10_4_0_0_sim_1_finescale_va_ac3-n6_2025-03-14_11-47-27.887772.csv")
+# Minimum loss
+d_finescale_min = read.csv("../Set_9_biggar_2024-12-26_00-57-26.676051_9.60363636363636e-08_0.5_2_1000_10_4_0_0_sim_1_finescale_va_ac3-n6_2025-03-14_13-08-48.187668.csv")
+d_finescale = rbind(d_finescale_max, d_finescale_min)
+
+d_finescale$locuswise_va_lost = d_finescale$locuswise_va_true - d_finescale$locuswise_va_left
+d_finescale$lost_va_type = ifelse(d_finescale$Set_ID=="Set_9_biggar_2024-12-26_00-57-26.676051_9.60363636363636e-08_0.5_2_1000_10_4_0_0", "Min.", "Max.")
+
+va_true_min = sum(d_finescale[d_finescale$Set_ID=="Set_9_biggar_2024-12-26_00-57-26.676051_9.60363636363636e-08_0.5_2_1000_10_4_0_0",]$locuswise_va_true)
+va_true_max = sum(d_finescale[d_finescale$Set_ID=="Set_7_c5_2024-12-18_22-42-43.451498_2.08686868686869e-08_0.5_2_1000_10_4_0_0",]$locuswise_va_true)
+
+# Restricting to selected loci only
+d_finescale_sel = d_finescale[d_finescale$list_alpha!=0,]
+
+# Calculate the fraction of the total initial V_a lost at each locus
+d_finescale_sel$fract_locuswise_va_lost = ifelse(d_finescale_sel$lost_va_type=="Max.", d_finescale_sel$locuswise_va_lost/va_true_max, d_finescale_sel$locuswise_va_lost/va_true_min)
+
+plot_finescale_relative_va_lost = ggplot(d_finescale_sel, aes(y = fract_locuswise_va_lost, x = abs(list_alpha), color = lost_va_type)) +
+  theme_bw() +
+  geom_point() +
+  labs(y = TeX(r"($V_a$ lost at a locus / Total $V_a(0)$)"), x = TeX(r"(Non-neutral $\alpha$)"), color = "Simulation type") +
+  theme(text = element_text(size = 15)) +
+  theme(legend.position = "bottom") +
+  scale_color_manual(values = c("Min." = "#00BFC4", "Max." = "#F8766D"),
+    labels = c("Min." = TeX(r"(Min. $V_a$ lost)"), "Max." = TeX(r"(Max. $V_a$ lost)"))  # Custom legend labels
+  )
+
+### Combine the two plots ###
+
+va_lost_combined_plot = plot_grid(plot_lost_va, plot_finescale_relative_va_lost, ncol = 1, nrow = 2, labels = "AUTO")
+
+ggsave(va_lost_combined_plot, width = 6, height = 9, file = "manuscript_figures/FigS2.jpg")
+  
 
 ```
 

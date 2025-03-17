@@ -197,6 +197,7 @@ for(sim in 1:nsims){
     finescale_data = data.frame("Set_ID" = rep(Set_ID, length(list_alpha)),
                                  "sim" = rep(sim, length(list_alpha)),
                                  "list_alpha" = list_alpha,
+                                 "pbar0" = pbar0,
                                  "SNPs" = sim_data$SNPs,
                                  "locuswise_va_true" = diversity*list_alpha^2,
                                  "locuswise_va_left" = colMeans(0.5*pbar2*(1-pbar2)*list_alpha_rep^2))
