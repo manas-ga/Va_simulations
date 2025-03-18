@@ -110,3 +110,26 @@ map_length_expt = 2
 r_msp = 1e-9*Dmel_Ne/Ne
 !!! Check Set_ID
 
+(iv) Simulations with mut_ratio = 2
+
+
+
+Ne = 2500
+n_ind = 2500
+sequence_length = 1e+06
+end_gen = 20000
+DFE = "g"
+shape = 0.3
+scale = 0.033
+mut_ratio = 0.02
+mu_list = [2e-07, 2.5e-06]
+mu_msp = [2e-08, 2.5e-07]
+total_sites = 65000
+map_length = 0.5
+map_length_expt = 2
+r_msp = 1e-9*Dmel_Ne/Ne
+!!! Check Set_ID
+
+
+
+

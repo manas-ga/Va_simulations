@@ -37,9 +37,8 @@ if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "bigga
 # New
 
 if(Sys.info()["nodename"]%in%c("ac3-n1", "ac3-n2", "ac3-n3", "ac3-n4", "ac3-n5", "ac3-n6")){
-  analysis_path = "~/Va_simulations/2_Analysis"
+  base_path = "~/Va_simulations/1_Simulations"
   file_storage_path = "/mnt/hel/obbard/Va_simulations/analyses" # File storage path is the designated storage space on AC3 instead of the /home directory on qm
-  Vw_library_path = "~/Va_simulations/Vw"
 }
 
   
@@ -135,7 +134,7 @@ trim_exp_files = FALSE                 # Should the SLiM output files for the ex
 del_files = TRUE                       # Should the .trees files be deleted at the end to save space?
 compress_files = TRUE                  # Should .txt and .trees files be compressed using gzip
 
-Job_ID = "test_ben"                 # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
+Job_ID = "Set_14"                 # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
 
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
 
@@ -143,7 +142,7 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"&nsims>1)stop("nsims must be 1 when r
 
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
-end_gen = 10000                            # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+end_gen = 25000                            # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
 
 if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
@@ -170,7 +169,7 @@ sequence_length = 1e+06               # Just have a single continuous chromosome
 
 ##################
 
-map_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 5, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))
+map_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 0.5, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))
 map_length_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 2, (as.numeric(commandArgs(trailingOnly = TRUE)[3])))
 
 r = map_length/sequence_length                          # Recombination rate (per site per generation) during the forward simulation of history
@@ -181,7 +180,7 @@ r_msp = if(end_gen==2){r}else{1e-9*Dmel_Ne/Ne}          # Recombination rate for
 
 # Mutation rate in the msprime simulation
 
-mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(13e-8, 13e-8, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
+mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(2.0e-8, 2.0e-8, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
 
 # Mutation rate of non_neutral mutations during the forward simulation of the history
 
@@ -192,7 +191,7 @@ mu_list = if(end_gen==2){seq(0, 0, length = nsims)}else{10*mu_msp_list}
 
 ## total number of permissible sites (to be used to set the neutral mutation rate)
 
-total_sites = if(end_gen==2){3000}else{15000}
+total_sites = if(end_gen==2){3000}else{65000}
 
 # Mutation rate during the experiment
 
