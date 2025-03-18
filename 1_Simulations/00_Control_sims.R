@@ -181,7 +181,7 @@ r_msp = if(end_gen==2){r}else{1e-9*Dmel_Ne/Ne}          # Recombination rate for
 
 # Mutation rate in the msprime simulation
 
-mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(9e-8, 9e-8, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
+mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(13e-8, 13e-8, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
 
 # Mutation rate of non_neutral mutations during the forward simulation of the history
 

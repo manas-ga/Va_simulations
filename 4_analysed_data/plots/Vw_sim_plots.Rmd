@@ -481,11 +481,36 @@ p_scale_0.033 = ggplot(d_scale_0.033 , aes(y=vA_est, x = vA_true, color = factor
 p_scale_0.033
 ```
 
+## Simulations with burnin (varying the map length) (scale = 0.033)
+
+```{r}
+
+d_13 = read.csv("../combined_data/Set_13_output.csv")
+
+# Combine with the standard data set
+
+d_13 = rbind(d_9_std, d_13)
+
+p_b_0.033_ml = ggplot(d_13 , aes(y=vA_est, x = vA_true, color = factor(sequence_length*r))) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin burnin (M)") + 
+  scale_color_manual(values = c("#D01C8B", "#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+p_b_0.033_ml
+
+
+```
+
 
 ## Combine plots for large (scale = 0.033) simulations with burnin
 
 ```{r}
-p_b_0.033_combined = plot_grid(p_ml_exp_0.033, p_b_0.045_ml, p_ben_0.033, p_scale_0.033,  ncol = 2, labels = "AUTO")
+p_b_0.033_combined = plot_grid(p_ml_exp_0.033, p_b_0.033_ml, p_ben_0.033, p_scale_0.033,  ncol = 2, labels = "AUTO")
 
 title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 20)
 
