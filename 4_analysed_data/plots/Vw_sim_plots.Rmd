@@ -467,6 +467,11 @@ p_ml_exp_0.033
 Needs datasets for set 7, set 9, and set N1
 
 ```{r}
+d_N1 = read.csv("../combined_data/Set_N1_output.csv")
+d_9 = read.csv("../combined_data/Set_9_output.csv") # Data for the standard set
+d_9_std = d_9[d_9$all.gp==FALSE,]
+d_7 = read.csv("../combined_data/Set_7_output.csv")
+
 d_scale = rbind(d_7[d_7$r==5e-07,], d_9_std, d_N1[d_N1$r==5e-07,])
 
 p_scale = ggplot(d_scale , aes(y=vA_est, x = vA_true, color = factor(scale*shape))) +
@@ -554,6 +559,14 @@ d_va_lost[which(d_va_lost$va_left/d_va_lost$va_true == min (d_va_lost$va_left/d_
 message("Simulation with the smallest relative loss in initial additive genic variance:")
 d_va_lost[which(d_va_lost$va_left/d_va_lost$va_true == max (d_va_lost$va_left/d_va_lost$va_true)),]$Set_ID
 
+# Identify the simulation with the greatest absolute loss in V_a
+message("Simulation with the geratest absolute loss in initial additive genic variance:")
+d_va_lost[which((d_va_lost$va_true - d_va_lost$va_left) == max(d_va_lost$va_true - d_va_lost$va_left)),]$Set_ID
+
+# Identify the simulation with the smallest absolute loss in V_a
+message("Simulation with the smallest absolute loss in initial additive genic variance:")
+d_va_lost[which(d_va_lost$va_true - d_va_lost$va_left == min(d_va_lost$va_true - d_va_lost$va_left)),]$Set_ID
+
 # The analysis was run on AC3
 
 # Load data
@@ -598,12 +611,23 @@ ggsave(va_lost_combined_plot, width = 6, height = 9, file = "manuscript_figures/
 ## Relationship between addetive genic variance lost and B_alpha(1) and p_alpha
 
 ```{r}
+d_N1 = read.csv("../combined_data/Set_N1_output.csv")
+d_9 = read.csv("../combined_data/Set_9_output.csv") # Data for the standard set
+d_9_std = d_9[d_9$all.gp==FALSE,]
+d_7 = read.csv("../combined_data/Set_7_output.csv")
+d_va_lost = read.csv("../combined_data/va_lost_combined.csv")
+
+d_scale = rbind(d_7[d_7$r==5e-07,], d_9_std, d_N1[d_N1$r==5e-07,])
+
 d_scale$fract_va_lost = NA
+d_scale$abs_va_lost = NA
 
 for(set_id in d_scale$Set_ID){
   lost_va_data = d_va_lost[d_va_lost$Set_ID == set_id,]
   fract_va_lost = (lost_va_data$va_true - lost_va_data$va_left)/lost_va_data$va_true
+  abs_va_lost = (lost_va_data$va_true - lost_va_data$va_left)
   d_scale[d_scale$Set_ID==set_id,]$fract_va_lost = fract_va_lost
+  d_scale[d_scale$Set_ID==set_id,]$abs_va_lost = abs_va_lost
 }
 
 # Just check by plotting, if things are copied okay 
@@ -613,6 +637,15 @@ plot_lost_va_1 = ggplot(d_scale, aes(y = fract_va_lost, x = factor(round(shape*s
   geom_boxplot() +
   labs(y = TeX(r"(Fraction of the total $V_a(0)$ lost)"), x = TeX(r"(Non-neutral $\mu_{\alpha}$)")) +
   theme(text = element_text(size = 15)) 
+
+# Does abs_va_lost explain the bias in our estimates?
+
+plot_lost_va_bias = ggplot(d_scale, aes(y = vA_est - vA_true,x = abs_va_lost, color = factor(round(shape*scale, digits = 4)))) +
+  theme_bw() +
+  geom_point() +
+  labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"),x = TeX(r"(Total $V_a$ lost)"), color = TeX(r"(Non-neutral $\mu_{\alpha}$)")) +
+  theme(text = element_text(size = 15)) +
+  geom_abline(slope = -1, intercept = 0)
 
 # balpha_slope
 

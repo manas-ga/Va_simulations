@@ -115,8 +115,7 @@ if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "bigga
 library(RhpcBLASctl)
 
 # Control the number of BLAS threads if running on a cluster
-if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(2)}
-
+if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(15)}
 
 
 ################################################
@@ -186,7 +185,7 @@ for(sim in 1:nsims){
   new_data = data.frame("va_true" = va_true, "va_left" = va_left, "time_stamp_va_left" = unique_stamp)
   new_data = cbind(sim_params, new_data)
   
-  write.table(rbind(names(new_data), new_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_va_lost_analysis_", unique_stamp, ".csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
+  #write.table(rbind(names(new_data), new_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_va_lost_analysis_", unique_stamp, ".csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
   print(Set_ID)
   print(paste("Percentage additive genic variance left = ", va_left/va_true*100, sep = ""))
   
@@ -194,13 +193,31 @@ for(sim in 1:nsims){
   # Save Set_ID, list_alpha, SNPs, locus-wise va_true and locus-wise va_left
   
   if(finescale){
+    
+    list_alpha_new = list_alpha + (1 - 2*pbar0)*list_alpha^2
+    
+    n0_individuals = nrow(c_genome)/2
+    paternal<-seq(1, 2*n0_individuals, 2)
+    maternal<-paternal+1
+    c0<-(c_genome[paternal,]+c_genome[maternal,])/2
+    
+    rm("c_genome")
+    
+    L<-cov(c0)*(n0_individuals-1)/n0_individuals
+    
+    vA_true = t(list_alpha)%*%L%*%list_alpha       # Additive genetic variance
+    vA_true_new = t(list_alpha_new)%*%L%*%list_alpha_new       # Additive genetic variance with corrected alphas
+    
     finescale_data = data.frame("Set_ID" = rep(Set_ID, length(list_alpha)),
                                  "sim" = rep(sim, length(list_alpha)),
                                  "list_alpha" = list_alpha,
+                                 "list_alpha_new" = list_alpha_new,
                                  "pbar0" = pbar0,
                                  "SNPs" = sim_data$SNPs,
                                  "locuswise_va_true" = diversity*list_alpha^2,
-                                 "locuswise_va_left" = colMeans(0.5*pbar2*(1-pbar2)*list_alpha_rep^2))
+                                 "locuswise_va_left" = colMeans(0.5*pbar2*(1-pbar2)*list_alpha_rep^2),
+                                 "vA_true" = rep(vA_true, length(list_alpha)),
+                                 "vA_true_new" = rep(vA_true_new, length(list_alpha)))
     
     write.table(rbind(names(finescale_data), finescale_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_finescale_va_", unique_stamp, ".csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
     
