@@ -6,6 +6,7 @@
 #SBATCH --array=1-100%5                                                                          # Run replicate tasks
 #SBATCH --ntasks=12
 #SBATCH --mem=250G
+#SBATCH --nodelist=ac3-n6                                                                        # Only submit to n6 (has large RAM)
 
 # Path to Conda (if Conda isn't initialized by default)
 CONDA_PATH="/home/msamant/miniconda3"  # Update to where Miniconda/Anaconda is installed
