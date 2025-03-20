@@ -572,16 +572,16 @@ d_va_lost[which(d_va_lost$va_true - d_va_lost$va_left == min(d_va_lost$va_true -
 # Load data
 
 # Maximum loss
-d_finescale_max = read.csv("../Set_7_c5_2024-12-18_22-42-43.451498_2.08686868686869e-08_0.5_2_1000_10_4_0_0_sim_1_finescale_va_ac3-n6_2025-03-17_13-28-30.590183.csv")
+d_finescale_max = read.csv("../Set_7_c5_2024-12-19_01-46-27.974096_1.58565656565657e-07_0.5_2_1000_10_4_0_0_sim_1_finescale_va_ac3-n1_2025-03-19_17-59-21.412206.csv")
 # Minimum loss
-d_finescale_min = read.csv("../Set_9_biggar_2024-12-26_00-57-26.676051_9.60363636363636e-08_0.5_2_1000_10_4_0_0_sim_1_finescale_va_ac3-n6_2025-03-17_14-13-13.573319.csv")
+d_finescale_min = read.csv("../Set_9_bigbird_2024-12-26_00-57-27.25767_6.06545454545455e-08_0.5_2_1000_10_4_0_0_sim_1_finescale_va_ac3-n6_2025-03-19_18-33-04.254602.csv")
 d_finescale = rbind(d_finescale_max, d_finescale_min)
 
 d_finescale$locuswise_va_lost = d_finescale$locuswise_va_true - d_finescale$locuswise_va_left
-d_finescale$lost_va_type = ifelse(d_finescale$Set_ID=="Set_9_biggar_2024-12-26_00-57-26.676051_9.60363636363636e-08_0.5_2_1000_10_4_0_0", "Min.", "Max.")
+d_finescale$lost_va_type = ifelse(d_finescale$Set_ID=="Set_9_bigbird_2024-12-26_00-57-27.25767_6.06545454545455e-08_0.5_2_1000_10_4_0_0", "Min.", "Max.")
 
-va_true_min = sum(d_finescale[d_finescale$Set_ID=="Set_9_biggar_2024-12-26_00-57-26.676051_9.60363636363636e-08_0.5_2_1000_10_4_0_0",]$locuswise_va_true)
-va_true_max = sum(d_finescale[d_finescale$Set_ID=="Set_7_c5_2024-12-18_22-42-43.451498_2.08686868686869e-08_0.5_2_1000_10_4_0_0",]$locuswise_va_true)
+va_true_min = sum(d_finescale[d_finescale$Set_ID=="Set_9_bigbird_2024-12-26_00-57-27.25767_6.06545454545455e-08_0.5_2_1000_10_4_0_0",]$locuswise_va_true)
+va_true_max = sum(d_finescale[d_finescale$Set_ID=="Set_7_c5_2024-12-19_01-46-27.974096_1.58565656565657e-07_0.5_2_1000_10_4_0_0",]$locuswise_va_true)
 
 # Restricting to selected loci only
 d_finescale_sel = d_finescale[d_finescale$list_alpha!=0,]

@@ -120,7 +120,7 @@ library(pryr) ## For tracking memory usage using mem_used()
 library(RhpcBLASctl)
 
 # Control the number of BLAS threads if running on a cluster
-if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(22)}
+if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(12)}
 
 
 ################################################
@@ -165,7 +165,7 @@ for(sim in 1:nsims){
                               Ne = c(1000, 1000),
                               predict_Ne =  TRUE,                         # If true, this overwrites the Ne supplied above by Ne = c(nind_expt, predict_Ne(nind_expt, Ve_w_expt))
                               verbose = TRUE,
-                              all.gp = TRUE)
+                              all.gp = FALSE)
   
   message("Final output:")
   print(analysed_data)
