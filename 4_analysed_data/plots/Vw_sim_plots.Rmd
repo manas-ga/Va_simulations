@@ -366,7 +366,7 @@ p_b_large_std$combined
 ```{r}
 d_9 = read.csv("../combined_data/Set_9_output.csv") # Data for the standard set
 
-d_9_std = d_9[d_9$all.gp==FALSE,]
+d_9_std = d_9[d_9$all.gp==FALSE&d_9$Ne_exp!="1000_1000",]
 
 p_b_large_std = make_std_plots(d_9_std)
 #ggsave(plot = p_b_large_std$combined, width = 8, height = 8, file = "p_b_large_0.5_2_ml.jpg")
