@@ -418,7 +418,9 @@ ggsave(extra_ml_combined, width = 6, height = 9, file = "manuscript_figures/FigS
 ### Set 11 (larger simulations (scale = 0.033): ml = 0.5, ml_exp = 2, mut_ratio = 0.0002) 
 
 ```{r}
-d_11 = read.csv("../combined_data/Set_11_output.csv") # Data for the standard set
+d_11 = read.csv("../combined_data/Set_11_output.csv") # Data for the set with mut_ratio = 0.0002
+d_14 = read.csv("../combined_data/Set_14_output.csv") # Data for the set with mut_ratio = 0.02
+
 
 p_b_large_ben_std = make_std_plots(d_11)
 ggsave(plot = p_b_large_ben_std$combined, width = 8, height = 8, file = "p_b_large_0.5_2_ben.jpg")
@@ -426,12 +428,12 @@ p_b_large_std$combined
 
 # Combined plot for proportion of beneficial mutations
 
-p_ben_0.033 = ggplot(rbind(d_9_std, d_11), aes(y = vA_est, x = vA_true, color = factor(format(mut_ratio, scientific = FALSE)))) +
+p_ben_0.033 = ggplot(rbind(d_9_std, d_11, d_14), aes(y = vA_est, x = vA_true, color = factor(format(mut_ratio, scientific = FALSE)))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Proportion of \nbeneficial \nmutations") + 
-  scale_color_manual(values = c("#0072B2", "#999999")) + 
+  scale_color_manual(values = c("#0072B2", "#999999",  "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
   theme(plot.title = element_text(hjust = 0.5))
@@ -533,7 +535,7 @@ ggsave(p_nb_2_nind, width = 5, height = 5, file = "Fig.2B.jpg")
 ggsave(plot = p_b_large_std$main, width = 5, height = 5, file = "Fig.3A.jpg")
 ggsave(p_b_0.045_ml + labs(title = TeX(r"(Non-neutral $\mu_{\alpha}$ = 0.0135)")), width = 5, height = 5, file = "Fig.4B.jpg")
 ggsave(p_ben_0.033, width = 5, height = 5, file = "Fig.4C.jpg")
-ggsave(p_scale_0.033, width = 5, height = 5, file = "Fig.4D.jpg")
+ggsave(p_scale, width = 5, height = 5, file = "Fig.4D.jpg")
 
 
 ```
@@ -589,22 +591,18 @@ d_finescale_sel = d_finescale[d_finescale$list_alpha!=0,]
 # Calculate the fraction of the total initial V_a lost at each locus
 d_finescale_sel$fract_locuswise_va_lost = ifelse(d_finescale_sel$lost_va_type=="Max.", d_finescale_sel$locuswise_va_lost/va_true_max, d_finescale_sel$locuswise_va_lost/va_true_min)
 
-plot_finescale_relative_va_lost = ggplot(d_finescale_sel, aes(y = fract_locuswise_va_lost, x = abs(list_alpha), color = lost_va_type)) +
+plot_finescale_va_lost = ggplot(d_finescale_sel, aes(y = locuswise_va_lost, x = abs(list_alpha), color = lost_va_type)) +
   theme_bw() +
   geom_point() +
-  labs(y = TeX(r"($V_a$ lost at a locus / Total $V_a(0)$)"), x = TeX(r"(Non-neutral $\alpha$)"), color = "Simulation type") +
+  labs(y = TeX(r"($V_a$ lost at a locus$)"), x = TeX(r"(Non-neutral $\alpha$)"), color = "Simulation type") +
   theme(text = element_text(size = 15)) +
   theme(legend.position = "bottom") +
   scale_color_manual(values = c("Min." = "#00BFC4", "Max." = "#F8766D"),
     labels = c("Min." = TeX(r"(Min. $V_a$ lost)"), "Max." = TeX(r"(Max. $V_a$ lost)"))  # Custom legend labels
-  )
+  ) +
+  geom_line(aes(x = seq(0, 1.2, length = 28589), y = 0.5*(1/2000)*(1999/2000)*seq(0, 1.2, length = 28589)^2), linewidth = 0.1, color = "black")
 
-### Combine the two plots ###
 
-va_lost_combined_plot = plot_grid(plot_lost_va, plot_finescale_relative_va_lost, ncol = 1, nrow = 2, labels = "AUTO")
-
-ggsave(va_lost_combined_plot, width = 6, height = 9, file = "manuscript_figures/FigS2.jpg")
-  
 
 ```
 
@@ -630,13 +628,7 @@ for(set_id in d_scale$Set_ID){
   d_scale[d_scale$Set_ID==set_id,]$abs_va_lost = abs_va_lost
 }
 
-# Just check by plotting, if things are copied okay 
 
-plot_lost_va_1 = ggplot(d_scale, aes(y = fract_va_lost, x = factor(round(shape*scale, digits = 4)))) +
-  theme_bw() +
-  geom_boxplot() +
-  labs(y = TeX(r"(Fraction of the total $V_a(0)$ lost)"), x = TeX(r"(Non-neutral $\mu_{\alpha}$)")) +
-  theme(text = element_text(size = 15)) 
 
 # Does abs_va_lost explain the bias in our estimates?
 
@@ -645,40 +637,17 @@ plot_lost_va_bias = ggplot(d_scale, aes(y = vA_est - vA_true,x = abs_va_lost, co
   geom_point() +
   labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"),x = TeX(r"(Total $V_a$ lost)"), color = TeX(r"(Non-neutral $\mu_{\alpha}$)")) +
   theme(text = element_text(size = 15)) +
-  geom_abline(slope = -1, intercept = 0)
+  geom_abline(slope = -1, intercept = 0) + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
+  theme(legend.position = "bottom")
 
-# balpha_slope
+### Combine the three plots ###
 
-p_balpha1_lost_va = ggplot(d_scale, aes(x = fract_va_lost, y = balpha_slope_est, color = factor(scale*shape))) +
-  theme_bw() +
-  geom_point() +
-  labs(x = TeX(r"(Fraction of the total $V_a(0)$ lost)"), y = TeX(r"(Estimate of $\beta^{(1)}_{\bar{\alpha}}$)"), color = TeX(r"(Non-neutral $\mu_{\alpha}$)")) +
-  theme(text = element_text(size = 15))  + 
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) 
+va_lost_combined_plot = plot_grid(plot_lost_va, plot_lost_va_bias, plot_finescale_va_lost, ncol = 2, nrow = 2, labels = "AUTO")
 
-# balpha intercept
-
-p_balpha0_lost_va = ggplot(d_scale, aes(x = fract_va_lost, y = balpha_intercept_est, color = factor(scale*shape))) +
-  theme_bw() +
-  geom_point() +
-  labs(x = TeX(r"(Fraction of the total $V_a(0)$ lost)"), y = TeX(r"(Estimate of $\beta^{(0)}_{\bar{\alpha}}$)"), color = TeX(r"(Non-neutral $\mu_{\alpha}$)")) +
-  theme(text = element_text(size = 15))  + 
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) 
-
-#palpha
-
-p_palpha_lost_va = ggplot(d_scale, aes(x = fract_va_lost, y = palpha_est, color = factor(scale*shape))) +
-  theme_bw() +
-  geom_point() +
-  labs(x = TeX(r"(Fraction of the total $V_a(0)$ lost)"), y = TeX(r"(Estimate of $p_{\alpha} $)"), color = TeX(r"(Non-neutral $\mu_{\alpha}$)")) +
-  theme(text = element_text(size = 15))  + 
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) 
+ggsave(va_lost_combined_plot, width = 10, height = 10, file = "manuscript_figures/FigS2.jpg")
+  
 
 
-p_test = ggplot(d_scale, aes(x = (vA_true), y = palpha_est, color = factor(scale*shape))) +
-  theme_bw() +
-  geom_point() +
-  theme(text = element_text(size = 15))  + 
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) 
 ```
 
