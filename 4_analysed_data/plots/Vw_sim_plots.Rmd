@@ -513,6 +513,31 @@ p_b_0.033_ml
 
 ```
 
+## Simulations with burnin (scale = 0.033) analysed with all.gp = FALSE (standard) or all.gp = TRUE (gametic phase LD not used)
+
+```{r}
+d_9 = read.csv("../combined_data/Set_9_output.csv") # Data for the standard set
+d_9_std = d_9[d_9$all.gp==FALSE&d_9$Ne_exp!="1000_1000",]
+d_9_nstd = d_9[d_9$all.gp==TRUE&d_9$Ne_exp!="1000_1000",]
+
+d_all.gp = rbind(d_9_std, d_9_nstd)
+
+all.gp_labs = c(TeX(r"(Weighted sum of ${\bf L}^{'}_{0}$ and ${\bf L}^{''}_{0}$)"), TeX(r"($\bf L_0$)"))
+names(all.gp_labs) = c(FALSE, TRUE)
+
+p_all.gp = ggplot(d_all.gp, aes(y = vA_est, x = vA_true, color = all.gp)) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($\tilde{\bf L}_0$)")) + 
+  scale_color_manual(values = c("#D01C8B", "#0072B2"), labels = all.gp_labs) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) +
+  theme(plot.title = element_text(hjust = 0.5))
+  
+
+
+```
 
 ## Combine plots for large (scale = 0.033) simulations with burnin
 
