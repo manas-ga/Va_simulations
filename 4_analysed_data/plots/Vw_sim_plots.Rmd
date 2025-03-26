@@ -415,12 +415,13 @@ ggsave(extra_ml_combined, width = 6, height = 9, file = "manuscript_figures/FigS
 
 ```
 
-### Set 11 (larger simulations (scale = 0.033): ml = 0.5, ml_exp = 2, mut_ratio = 0.0002) 
+### Varying the ratio of beneficial:deleterious mutations (scale = 0.033)
 
 ```{r}
 d_11 = read.csv("../combined_data/Set_11_output.csv") # Data for the set with mut_ratio = 0.0002
 d_14 = read.csv("../combined_data/Set_14_output.csv") # Data for the set with mut_ratio = 0.02
-
+d_9 = read.csv("../combined_data/Set_9_output.csv") # Data for the standard set
+d_9_std = d_9[d_9$all.gp==FALSE&d_9$Ne_exp!="1000_1000",]
 
 p_b_large_ben_std = make_std_plots(d_11)
 ggsave(plot = p_b_large_ben_std$combined, width = 8, height = 8, file = "p_b_large_0.5_2_ben.jpg")
@@ -447,8 +448,9 @@ Needs data from set_12 as well as set_9
 
 ```{r}
 d_9 = read.csv("../combined_data/Set_9_output.csv") # Data for the standard set
+d_9_std = d_9[d_9$all.gp==FALSE&d_9$Ne_exp!="1000_1000",]
 d_12 = read.csv("../combined_data/Set_12_output.csv") # Data when mu_exp was varied
-d_ml_exp = rbind(d_9, d_12)
+d_ml_exp = rbind(d_9_std, d_12)
 
 p_ml_exp_0.033 = ggplot(d_ml_exp , aes(y=vA_est, x = vA_true, color = factor(sequence_length*r_expt))) +
   theme_bw() + 
@@ -471,7 +473,7 @@ Needs datasets for set 7, set 9, and set N1
 ```{r}
 d_N1 = read.csv("../combined_data/Set_N1_output.csv")
 d_9 = read.csv("../combined_data/Set_9_output.csv") # Data for the standard set
-d_9_std = d_9[d_9$all.gp==FALSE,]
+d_9_std = d_9[d_9$all.gp==FALSE&d_9$Ne_exp!="1000_1000",]
 d_7 = read.csv("../combined_data/Set_7_output.csv")
 
 d_scale = rbind(d_7[d_7$r==5e-07,], d_9_std, d_N1[d_N1$r==5e-07,])
@@ -493,6 +495,8 @@ p_scale
 ```{r}
 
 d_13 = read.csv("../combined_data/Set_13_output.csv")
+d_9 = read.csv("../combined_data/Set_9_output.csv") # Data for the standard set
+d_9_std = d_9[d_9$all.gp==FALSE&d_9$Ne_exp!="1000_1000",]
 
 # Combine with the standard data set
 
@@ -520,9 +524,34 @@ d_9 = read.csv("../combined_data/Set_9_output.csv") # Data for the standard set
 d_9_std = d_9[d_9$all.gp==FALSE&d_9$Ne_exp!="1000_1000",]
 d_9_nstd = d_9[d_9$all.gp==TRUE&d_9$Ne_exp!="1000_1000",]
 
+# In d_9_nstd there are some simulations that were analysed twiced
+# Retaining among them the analysis performed first
+
+for (set_id in unique(d_9_nstd$Set_ID)){
+  
+  count = sum(d_9_nstd$Set_ID == set_id)
+  
+  if(count==2){
+    data_sim = d_9_nstd[d_9_nstd$Set_ID==set_id,]
+    
+    # Remove the nodename and the year from the analysis stamp and then identify the analysis which was performed later 
+    
+    max_time = max(sub("big.*_2025-", "",  data_sim$analysis_stamp))
+    analysis_to_be_deleted = data_sim$analysis_stamp[grep(max_time, data_sim$analysis_stamp)]
+    
+    # Delete this analysis from d_9_nstd
+    
+    d_9_nstd = d_9_nstd[d_9_nstd$analysis_stamp!=analysis_to_be_deleted,]
+    
+  }
+  
+}
+
+
+
 d_all.gp = rbind(d_9_std, d_9_nstd)
 
-all.gp_labs = c(TeX(r"(Weighted sum of ${\bf L}^{'}_{0}$ and ${\bf L}^{''}_{0}$)"), TeX(r"($\bf L_0$)"))
+all.gp_labs = c(TeX(r"(${\bf L}^{'}_{0}$ + $\frac{r_{ij}{\bf L}^{''}_{0}}{1-r_{ij}}$)"), TeX(r"($\bf L_0$)"))
 names(all.gp_labs) = c(FALSE, TRUE)
 
 p_all.gp = ggplot(d_all.gp, aes(y = vA_est, x = vA_true, color = all.gp)) +
@@ -542,7 +571,7 @@ p_all.gp = ggplot(d_all.gp, aes(y = vA_est, x = vA_true, color = all.gp)) +
 ## Combine plots for large (scale = 0.033) simulations with burnin
 
 ```{r}
-p_b_0.033_combined = plot_grid(p_ml_exp_0.033, p_b_0.033_ml, p_ben_0.033, p_scale,  ncol = 2, labels = "AUTO")
+p_b_0.033_combined = plot_grid(p_ml_exp_0.033, p_b_0.033_ml, p_ben_0.033, p_scale, p_all.gp, ncol = 2, labels = "AUTO")
 
 title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 20)
 
@@ -550,7 +579,7 @@ title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 20)
 p_b_0.033_combined = plot_grid(title, p_b_0.033_combined, ncol = 1, rel_heights = c(0.1,1))
 p_b_0.033_combined
 
-ggsave(p_b_0.033_combined, width = 12, height = 8, file = "manuscript_figures/Fig4.jpg")
+ggsave(p_b_0.033_combined, width = 12, height = 12, file = "manuscript_figures/Fig4.jpg")
 
 # Separate subplots for Jarrod's talk
 
