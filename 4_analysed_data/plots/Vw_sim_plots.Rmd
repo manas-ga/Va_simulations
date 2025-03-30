@@ -219,7 +219,7 @@ p_nb_2_ml = ggplot(d_5_ml , aes(y=vA_est, x = vA_true, color = factor(sequence_l
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length in\nexperiment (M)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length in\nPhase 2 (M)") + 
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE)
@@ -338,12 +338,12 @@ p_b_5_2_ml = ggplot(d_7_ml , aes(y=vA_est, x = vA_true, color = factor(sequence_
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin burnin (M)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin Phase 1 (M)") + 
   scale_color_manual(values = c("#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
   theme(plot.title = element_text(hjust = 0.5)) + 
-  labs(title = TeX(r"(Non-neutral $\mu_{\alpha}$ = 0.03)"))
+  labs(title = TeX(r"($\eta_{scale} = 0.1$)"))
 
 p_b_5_2_ml
 
@@ -401,7 +401,7 @@ p_b_0.045_ml = ggplot(d_N1 , aes(y=vA_est, x = vA_true, color = factor(sequence_
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin burnin (M)", title = TeX(r"(Non-neutral $\mu_{\alpha}$ = 0.0135)")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin Phase 1 (M)", title = TeX(r"($\eta_{scale}$ = 0.045)")) + 
   scale_color_manual(values = c("#D01C8B", "#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
@@ -409,9 +409,7 @@ p_b_0.045_ml = ggplot(d_N1 , aes(y=vA_est, x = vA_true, color = factor(sequence_
 
 p_b_0.045_ml
 
-extra_ml_combined = plot_grid(p_b_5_2_ml, p_b_0.045_ml, nrow = 2, labels = "AUTO")
-
-ggsave(extra_ml_combined, width = 6, height = 9, file = "manuscript_figures/FigS1.jpg")
+ggsave(p_b_0.045_ml, width = 5, height = 5, file = "manuscript_figures/FigS1.jpg")
 
 ```
 
@@ -433,7 +431,7 @@ p_ben_0.033 = ggplot(rbind(d_9_std, d_11, d_14), aes(y = vA_est, x = vA_true, co
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Proportion of \nbeneficial \nmutations") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($\mu_{ben} : \mu_{del}$)")) + 
   scale_color_manual(values = c("#0072B2", "#999999",  "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
@@ -456,7 +454,7 @@ p_ml_exp_0.033 = ggplot(d_ml_exp , aes(y=vA_est, x = vA_true, color = factor(seq
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length in \nexperiment (M)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length in \nPhase 2 (M)") + 
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
@@ -478,11 +476,11 @@ d_7 = read.csv("../combined_data/Set_7_output.csv")
 
 d_scale = rbind(d_7[d_7$r==5e-07,], d_9_std, d_N1[d_N1$r==5e-07,])
 
-p_scale = ggplot(d_scale , aes(y=vA_est, x = vA_true, color = factor(scale*shape))) +
+p_scale = ggplot(d_scale , aes(y=vA_est, x = vA_true, color = factor(scale))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"(Non-neutral $\mu_{\alpha}$)")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($\eta_{scale}$)")) + 
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
@@ -506,7 +504,7 @@ p_b_0.033_ml = ggplot(d_13 , aes(y=vA_est, x = vA_true, color = factor(sequence_
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin burnin (M)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin Phase 1 (M)") + 
   scale_color_manual(values = c("#D01C8B", "#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
@@ -568,10 +566,63 @@ p_all.gp = ggplot(d_all.gp, aes(y = vA_est, x = vA_true, color = all.gp)) +
 
 ```
 
+## Simulations with burnin (scale = 0.033) analysed with Ne = nind = 1000
+
+```{r}
+d_9 = read.csv("../combined_data/Set_9_output.csv") # Data for the standard set
+d_9_std = d_9[d_9$all.gp==FALSE&d_9$Ne_exp!="1000_1000",]
+d_9_fixed_Ne = d_9[d_9$all.gp==FALSE&d_9$Ne_exp=="1000_1000",]
+
+d_9_Ne = rbind(d_9_std, d_9_fixed_Ne)
+
+# Create labels for Ne_type
+Ne_type = unique(d_9_Ne$Ne_exp)
+Ne_type_labs = rep(NA, length(Ne_type))
+
+for(i in 1:length(Ne_type)){
+  Ne_type_labs[i] = round(as.numeric(unlist(strsplit(Ne_type[i], "_"))[2]), 2)
+  nind_exp = unique(d_9_Ne[d_9_Ne$Ne_exp==Ne_type[i],]$n_ind_exp)
+  
+  if(Ne_type_labs[i]==nind_exp){
+    Ne_type_labs[i] = paste("Fixed:", Ne_type_labs[i])
+  }else{
+      Ne_type_labs[i] = paste("Estimated:", Ne_type_labs[i])
+      }
+}
+
+names(Ne_type_labs) = Ne_type
+
+p_Ne = ggplot(d_9_Ne, aes(y = vA_est, x = vA_true, color = Ne_exp)) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($N_E$)")) + 
+  scale_color_manual(values = c("#D01C8B", "#0072B2"), labels = Ne_type_labs) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# plot residual variance
+
+p_Ne_res = ggplot(d_9_Ne, aes(y = Residual_var, x = Ne_exp)) +
+  theme_bw() + 
+  geom_boxplot() +
+  labs(y = "Residual variance", x = TeX(r"($N_E$)")) +
+  scale_x_discrete(labels = Ne_type_labs) +
+  theme(text = element_text(size = 15))
+  
+ggsave(p_Ne_res, width = 5, height = 5, file = "manuscript_figures/FigS3.jpg")
+
+
+
+
+```
+
+
 ## Combine plots for large (scale = 0.033) simulations with burnin
 
 ```{r}
-p_b_0.033_combined = plot_grid(p_ml_exp_0.033, p_b_0.033_ml, p_ben_0.033, p_scale, p_all.gp, ncol = 2, labels = "AUTO")
+p_b_0.033_combined = plot_grid(p_ml_exp_0.033, p_b_0.033_ml, p_ben_0.033, p_scale, p_all.gp, p_Ne, ncol = 2, labels = "AUTO")
 
 title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 20)
 
@@ -601,10 +652,10 @@ Plot the fraction of the initial additive genic variance lost by the end of the 
 
 d_va_lost = read.csv("../combined_data/va_lost_combined.csv")
 
-plot_lost_va = ggplot(d_va_lost, aes(y = ((va_true - va_left)/va_true), x = factor(round(shape*scale, digits = 4)))) +
+plot_lost_va = ggplot(d_va_lost, aes(y = ((va_true - va_left)/va_true), x = factor(round(scale, digits = 4)))) +
   theme_bw() +
   geom_boxplot() +
-  labs(y = TeX(r"(Fraction of the total $V_a(0)$ lost)"), x = TeX(r"(Non-neutral $\mu_{\alpha}$)")) +
+  labs(y = TeX(r"(Fraction of the total $V_a(0)$ lost)"), x = TeX(r"($\eta_{scale}$)")) +
   theme(text = element_text(size = 15)) 
 
 # Identify the simulation with the greatest fraction loss in V_a
@@ -648,7 +699,7 @@ d_finescale_sel$fract_locuswise_va_lost = ifelse(d_finescale_sel$lost_va_type=="
 plot_finescale_va_lost = ggplot(d_finescale_sel, aes(y = locuswise_va_lost, x = abs(list_alpha), color = lost_va_type)) +
   theme_bw() +
   geom_point() +
-  labs(y = TeX(r"($V_a$ lost at a locus$)"), x = TeX(r"(Non-neutral $\alpha$)"), color = "Simulation type") +
+  labs(y = TeX(r"($V_a$ lost at a locus$)"), x = TeX(r"($|\eta|$)"), color = "Simulation type") +
   theme(text = element_text(size = 15)) +
   theme(legend.position = "bottom") +
   scale_color_manual(values = c("Min." = "#00BFC4", "Max." = "#F8766D"),
@@ -686,10 +737,10 @@ for(set_id in d_scale$Set_ID){
 
 # Does abs_va_lost explain the bias in our estimates?
 
-plot_lost_va_bias = ggplot(d_scale, aes(y = vA_est - vA_true,x = abs_va_lost, color = factor(round(shape*scale, digits = 4)))) +
+plot_lost_va_bias = ggplot(d_scale, aes(y = vA_est - vA_true,x = abs_va_lost, color = factor(round(scale, digits = 4)))) +
   theme_bw() +
   geom_point() +
-  labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"),x = TeX(r"(Total $V_a$ lost)"), color = TeX(r"(Non-neutral $\mu_{\alpha}$)")) +
+  labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"),x = TeX(r"(Total $V_a$ lost)"), color = TeX(r"($\eta_{scale}$)")) +
   theme(text = element_text(size = 15)) +
   geom_abline(slope = -1, intercept = 0) + 
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
@@ -700,8 +751,57 @@ plot_lost_va_bias = ggplot(d_scale, aes(y = vA_est - vA_true,x = abs_va_lost, co
 va_lost_combined_plot = plot_grid(plot_lost_va, plot_lost_va_bias, plot_finescale_va_lost, ncol = 2, nrow = 2, labels = "AUTO")
 
 ggsave(va_lost_combined_plot, width = 10, height = 10, file = "manuscript_figures/FigS2.jpg")
-  
 
+
+
+plot_palpha_bias = ggplot(d_scale, aes(y = vA_est - vA_true,x = palpha_est, color = factor(round(scale, digits = 4)))) +
+  theme_bw() +
+  geom_point() +
+  labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"), color = TeX(r"($\eta_{scale}$)")) +
+  theme(text = element_text(size = 15)) +
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
+  theme(legend.position = "bottom")
+  
+plot_balpha_slope_bias = ggplot(d_scale, aes(y = vA_est - vA_true,x = balpha_slope_est, color = factor(round(scale, digits = 4)))) +
+  theme_bw() +
+  geom_point() +
+  labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"), color = TeX(r"($\eta_{scale}$)")) +
+  theme(text = element_text(size = 15)) +
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
+  theme(legend.position = "bottom")
+
+plot_balpha_intercept_bias = ggplot(d_scale, aes(y = vA_est - vA_true,x = balpha_intercept_est, color = factor(round(scale, digits = 4)))) +
+  theme_bw() +
+  geom_point() +
+  labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"), color = TeX(r"($\eta_{scale}$)")) +
+  theme(text = element_text(size = 15)) +
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
+  theme(legend.position = "bottom")
+
+plot_palphaemp_bias = ggplot(d_scale, aes(y = vA_est - vA_true,x = palpha_emp, color = factor(round(scale, digits = 4)))) +
+  theme_bw() +
+  geom_point() +
+  labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"), color = TeX(r"($\eta_{scale}$)")) +
+  theme(text = element_text(size = 15)) +
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
+  theme(legend.position = "bottom")
+
+plot_palphaemp = ggplot(d_scale, aes(y = palpha_est,x = palpha_emp, color = factor(round(scale, digits = 4)))) +
+  theme_bw() +
+  geom_point() +
+  labs( color = TeX(r"($\eta_{scale}$)")) +
+  theme(text = element_text(size = 15)) +
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
+  theme(legend.position = "bottom") + geom_abline(slope = 1, intercept = 0)
+
+plot_balpha_slopeemp = ggplot(d_scale, aes(y = balpha_slope_est,x = balpha_slope_emp, color = factor(round(scale, digits = 4)))) +
+  theme_bw() +
+  geom_point() +
+  labs( color = TeX(r"($\eta_{scale}$)")) +
+  theme(text = element_text(size = 15)) +
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
+  theme(legend.position = "bottom") + geom_abline(slope = 0.5, intercept = 0)
+  
 
 ```
 
