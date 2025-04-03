@@ -2,8 +2,8 @@
 
 #$ -V
 #$ -cwd
-#$ -N Set_15_a
-#$ -t 1-100
+#$ -N Set_15_b
+#$ -t 66-100
 #$ -tc 5
 #$ -l mem_free=250g,s_vmem=350g,h_vmem=450g,h=!bigyin
 #$ -pe smp64 22
