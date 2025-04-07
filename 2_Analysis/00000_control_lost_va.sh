@@ -1,19 +1,20 @@
 #!/bin/bash
 
-#SBATCH --job-name=lost_va
-#SBATCH --output=/mnt/hel/obbard/Va_simulations/analyses/b_Interim_files/std_out/job_%A_%a.log   # Store logs in a custom directory
-#SBATCH --open-mode=append                                                                       # Append output if the file already exists
-#SBATCH --array=1-2%2                                                                         # Run replicate tasks
-#SBATCH --ntasks=15
-#SBATCH --mem=65G
+#$ -V
+#$ -cwd
+#$ -N New_V_A
+#$ -t 1-300
+#$ -tc 15
+#$ -l mem_free=50g,s_vmem=65g,h_vmem=75g
+#$ -pe smp64 9
+#$ -j y
+#$ -o /data/obbard/Va_simulations/analyses/b_Interim_files/std_out/
 
-# Path to Conda (if Conda isn't initialized by default)
-CONDA_PATH="/home/msamant/miniconda3"  # Update to where Miniconda/Anaconda is installed
-source $CONDA_PATH/etc/profile.d/conda.sh  # Initialize Conda in the job script
 
-# Activate the Conda environment
-conda activate marun
+# std_out on Eddie: /exports/eddie/scratch/msamant/Va_simulations/b_Interim_files/std_out/
+# std_out on AC3: /data/obbard/Va_simulations/analyses/b_Interim_files/std_out/
 
-Param=`cat lost_va_IDs.txt | awk "NR==${SLURM_ARRAY_TASK_ID}"`
+
+Param=`cat lost_va_IDs.txt | awk "NR==$SGE_TASK_ID"`
 
 Rscript lost_va_script.R $Param

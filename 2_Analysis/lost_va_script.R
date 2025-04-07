@@ -1,3 +1,8 @@
+# This script calculates:
+# 1. True V_A and V_a using \alpha = \eta (old) or \alpha = \eta + 0.25(1 -2p)(\eta)^2 (new) 
+# 2. Average va left (using old and new definitions of \alpha) at the end of the experiment
+# 3. If finescale = TRUE, also records the \eta and frequency for each sefrefating locus.
+
 rm(list = ls())
 # Rscript /mnt/c/Users/msamant/Documents/GitHub/Va_simulations/2_Analysis/lost_va_script.R
 
@@ -115,7 +120,7 @@ if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "bigga
 library(RhpcBLASctl)
 
 # Control the number of BLAS threads if running on a cluster
-if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(15)}
+if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(9)}
 
 
 ################################################
@@ -128,6 +133,7 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04
 library(Vw)
 
 finescale = TRUE # Whether a file containing data on locus-wise va_lost vs alpha should be saved
+verbose = TRUE
 
 ########################
 ### Perform analyses ###
@@ -152,15 +158,43 @@ for(sim in 1:nsims){
                                delete_temp_files = TRUE)
   
   c_genome = sim_data$c_genome  
-  list_alpha = sim_data$list_alpha
+  pbar0 = colMeans(c_genome)
   pbar2 = sim_data$pbar2
+  diversity = pbar0*(1 - pbar0)/2
   n_cages = sim_data$sim_params$n_cages 
+  n0_individuals = nrow(c_genome)/2
+  
+  list_alpha = sim_data$list_alpha
+  list_alpha_new = list_alpha + 0.25*(1 - 2*pbar0)*list_alpha^2
+  
+  
+  if(verbose){
+    message("Calculating L...")
+  }
+  
+  paternal<-seq(1, 2*n0_individuals, 2)
+  maternal<-paternal+1
+  
+  c0<-(c_genome[paternal,]+c_genome[maternal,])/2
+  
+  rm("c_genome")
+  
+  L<-cov(c0)*(n0_individuals-1)/n0_individuals
+  
+  if(verbose){message("Calculating initial additive genetic and genic variances using old and new definitions of alphas...")}
+  
+  # Initial additive genetic variance
+  
+  vA_true = t(list_alpha)%*%L%*%list_alpha
+  vA_true_new = t(list_alpha_new)%*%L%*%list_alpha_new
   
   # Initial additive genic variance
   
-  pbar0 = colMeans(c_genome) 
-  diversity = pbar0*(1 - pbar0)/2
   va_true = sum(diversity*list_alpha^2)
+  va_true_new = sum(diversity*list_alpha_new^2)
+  
+  if(verbose){message("Calculating average additive genic variance left at the end of the experiment using old and new definitions of alphas...")}
+  
   
   # Average additive genic variance at the end of the experiment
   
@@ -170,6 +204,12 @@ for(sim in 1:nsims){
   
   va_left = mean(rowSums(0.5*pbar2*(1-pbar2)*list_alpha_rep^2))
   
+  list_alpha_rep_new = t(matrix(list_alpha_new, nrow = length(list_alpha_new), ncol = n_cages))
+  
+  va_left_new = mean(rowSums(0.5*pbar2*(1-pbar2)*list_alpha_rep_new^2))
+  
+  if(verbose){message("Saving data...")}
+  
   ### Save file ###
   
   # Create a unique stamp for this analysis
@@ -178,46 +218,37 @@ for(sim in 1:nsims){
   unique_stamp = gsub(" ", "_", unique_stamp)
   unique_stamp = gsub(":", "-", unique_stamp)
   
-  message("Saving data...")
-  
   sim_params = sim_data$sim_params
   
-  new_data = data.frame("va_true" = va_true, "va_left" = va_left, "time_stamp_va_left" = unique_stamp)
+  new_data = data.frame("vA_true" = vA_true, "vA_true_new" = vA_true_new, "va_true" = va_true, "va_true_new" = va_true_new, "va_left" = va_left, "va_left_new" = va_left_new, "time_stamp_va_left" = unique_stamp)
   new_data = cbind(sim_params, new_data)
   
-  #write.table(rbind(names(new_data), new_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_va_lost_analysis_", unique_stamp, ".csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
+  write.table(rbind(names(new_data), new_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_new_va_calculation_", unique_stamp, ".csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
   print(Set_ID)
-  print(paste("Percentage additive genic variance left = ", va_left/va_true*100, sep = ""))
+  print(paste("Percentage additive genic variance left (average) = ", va_left/va_true*100, " (old) ", va_left_new/va_true_new*100, " (new) ", sep = ""))
   
   ### Optionally save fine-scale data ###
   # Save Set_ID, list_alpha, SNPs, locus-wise va_true and locus-wise va_left
   
   if(finescale){
     
-    list_alpha_new = list_alpha + (1 - 2*pbar0)*list_alpha^2
-    
-    n0_individuals = nrow(c_genome)/2
-    paternal<-seq(1, 2*n0_individuals, 2)
-    maternal<-paternal+1
-    c0<-(c_genome[paternal,]+c_genome[maternal,])/2
-    
-    rm("c_genome")
-    
-    L<-cov(c0)*(n0_individuals-1)/n0_individuals
-    
-    vA_true = t(list_alpha)%*%L%*%list_alpha       # Additive genetic variance
-    vA_true_new = t(list_alpha_new)%*%L%*%list_alpha_new       # Additive genetic variance with corrected alphas
+    if(verbose){message("Saving finescale data...")}
     
     finescale_data = data.frame("Set_ID" = rep(Set_ID, length(list_alpha)),
                                  "sim" = rep(sim, length(list_alpha)),
                                  "list_alpha" = list_alpha,
                                  "list_alpha_new" = list_alpha_new,
                                  "pbar0" = pbar0,
+                                 "pbar2_av" = colMeans(pbar2),
                                  "SNPs" = sim_data$SNPs,
                                  "locuswise_va_true" = diversity*list_alpha^2,
                                  "locuswise_va_left" = colMeans(0.5*pbar2*(1-pbar2)*list_alpha_rep^2),
+                                 "locuswise_va_true_new" = diversity*list_alpha_new^2,
+                                 "locuswise_va_left_new" = colMeans(0.5*pbar2*(1-pbar2)*list_alpha_rep_new^2),
                                  "vA_true" = rep(vA_true, length(list_alpha)),
-                                 "vA_true_new" = rep(vA_true_new, length(list_alpha)))
+                                 "vA_true_new" = rep(vA_true_new, length(list_alpha)),
+                                 "va_true" = rep(va_true, length(list_alpha)),
+                                 "va_true_new" = rep(va_true_new, length(list_alpha)))
     
     write.table(rbind(names(finescale_data), finescale_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_finescale_va_", unique_stamp, ".csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
     

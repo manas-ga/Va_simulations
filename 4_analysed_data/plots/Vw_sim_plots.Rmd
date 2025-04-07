@@ -469,12 +469,11 @@ p_ml_exp_0.033
 Needs datasets for set 7, set 9, and set N1
 
 ```{r}
-d_N1 = read.csv("../combined_data/Set_N1_output.csv")
 d_9 = read.csv("../combined_data/Set_9_output.csv") # Data for the standard set
 d_9_std = d_9[d_9$all.gp==FALSE&d_9$Ne_exp!="1000_1000",]
-d_7 = read.csv("../combined_data/Set_7_output.csv")
+d_15 = read.csv("../combined_data/Set_15_output.csv")
 
-d_scale = rbind(d_7[d_7$r==5e-07,], d_9_std, d_N1[d_N1$r==5e-07,])
+d_scale = rbind(d_9_std, d_15)
 
 p_scale = ggplot(d_scale , aes(y=vA_est, x = vA_true, color = factor(scale))) +
   theme_bw() + 
