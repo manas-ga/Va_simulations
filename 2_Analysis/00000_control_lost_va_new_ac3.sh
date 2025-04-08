@@ -3,9 +3,10 @@
 #SBATCH --job-name=lost_va
 #SBATCH --output=/mnt/hel/obbard/Va_simulations/analyses/b_Interim_files/std_out/job_%A_%a.log   # Store logs in a custom directory
 #SBATCH --open-mode=append                                                                       # Append output if the file already exists
-#SBATCH --array=1-2%2                                                                         # Run replicate tasks
-#SBATCH --ntasks=15
+#SBATCH --array=1-200%12                                                                         # Run replicate tasks
+#SBATCH --ntasks=10
 #SBATCH --mem=65G
+#SBATCH --nodelist=ac3-n6
 
 # Path to Conda (if Conda isn't initialized by default)
 CONDA_PATH="/home/msamant/miniconda3"  # Update to where Miniconda/Anaconda is installed

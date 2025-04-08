@@ -15,6 +15,40 @@ library(cowplot)
 library(latex2exp)
 ```
 
+## Function to remove duplication
+
+Some simulations were erroneously analysed twice. The following function takes a data frame for a set of simulations as input and if there are any simulations analysed twice, retains the analysis performed earlier in time.
+
+```{r}
+
+deduplicate_sim_analyses = function(data_frame){
+
+  for (set_id in unique(data_frame$Set_ID)){
+    
+    count = sum(data_frame$Set_ID == set_id)
+    
+    if(count>1){
+      data_sim = data_frame[data_frame$Set_ID==set_id,]
+      
+      # Remove the nodename and the year from the analysis stamp and then identify the analysis which was performed later 
+      
+      max_time = max(sub(".*_2025-", "",  data_sim$analysis_stamp))
+      analysis_to_be_deleted = data_sim$analysis_stamp[grep(max_time, data_sim$analysis_stamp)]
+      
+      # Delete this analysis from d_9_nstd
+      
+      data_frame = data_frame[data_frame$analysis_stamp!=analysis_to_be_deleted,]
+      
+    }
+    
+  }
+  
+  return(data_frame)
+  
+}
+```
+
+
 ## Function to make "standard" plot
 
 ```{r}
@@ -475,6 +509,10 @@ d_15 = read.csv("../combined_data/Set_15_output.csv")
 
 d_scale = rbind(d_9_std, d_15)
 
+d_scale = deduplicate_sim_analyses(d_scale)
+
+# Deduplicate simulations. Some simulations were accidentally analysed twice
+
 p_scale = ggplot(d_scale , aes(y=vA_est, x = vA_true, color = factor(scale))) +
   theme_bw() + 
   geom_point() + 
@@ -524,26 +562,7 @@ d_9_nstd = d_9[d_9$all.gp==TRUE&d_9$Ne_exp!="1000_1000",]
 # In d_9_nstd there are some simulations that were analysed twiced
 # Retaining among them the analysis performed first
 
-for (set_id in unique(d_9_nstd$Set_ID)){
-  
-  count = sum(d_9_nstd$Set_ID == set_id)
-  
-  if(count==2){
-    data_sim = d_9_nstd[d_9_nstd$Set_ID==set_id,]
-    
-    # Remove the nodename and the year from the analysis stamp and then identify the analysis which was performed later 
-    
-    max_time = max(sub("big.*_2025-", "",  data_sim$analysis_stamp))
-    analysis_to_be_deleted = data_sim$analysis_stamp[grep(max_time, data_sim$analysis_stamp)]
-    
-    # Delete this analysis from d_9_nstd
-    
-    d_9_nstd = d_9_nstd[d_9_nstd$analysis_stamp!=analysis_to_be_deleted,]
-    
-  }
-  
-}
-
+d_9_nstd = deduplicate_sim_analyses(d_9_nstd)
 
 
 d_all.gp = rbind(d_9_std, d_9_nstd)
