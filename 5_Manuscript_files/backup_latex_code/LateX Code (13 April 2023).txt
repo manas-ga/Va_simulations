@@ -1,0 +1,186 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[round]{natbib}
+\usepackage{amsmath}
+
+
+\title{Estimating additive genetic variance for fitness ($V_w$)}
+\author{}
+\date{13 April 2023}
+
+
+
+
+
+
+\begin{document}
+
+\maketitle
+
+\section*{Introduction}
+
+In spite of its simplicity, the fundamental theorem of natural selection (FTNS) \citep{fisher1930genetical,fisher1958genetical} is one of the most central results in evolutionary biology, providing a concise mathematical statement of how quickly a population is expected to adapt. It describes the gain in mean relative fitness made by a population every generation as a result of natural selection, in the absence of genetic drift, migration and mutation. The crucial insight that FTNS provides is that the increase in the mean relative fitness of a population is exactly equal to the additive genetic variance for relative fitness ($V_w$) in the population \citep{burt1995evolution, grafen2015biological}. In other words, the additive genetic variance for relative fitness captures the 'adaptive potential' of a population. An ecologically useful interpretation of FTNS is obtained by recognising that the average population fitness is a measure of the population growth rate. FTNS then implies that as long as the environment (including variables intrinsic to the population such as density or allele frequencies) is constant, the proportional increase in the population growth rate after one generation of selection is given by $V_w$. Furthermore, since $V_w$ is by definition non-negative, the population growth rate can never decrease as a consequence of selection, all else being held constant. 
+
+A number of attempts have been made to measure $V_w$ in wild populations. Typically, these have involved long term studies on natural populations in which the lifetime reproductive success of a large number of focal individuals has been measured. Combining these fitness data with information on the relatedness among individuals (for example, information on pedigrees) in a generalised linear mixed model approach (i.e., the animal model \citep{kruuk2004estimating,wilson2010ecologist}) yields estimates of $V_w$. This is far from straightforward in natural populations, as it can be notoriously difficult to tease apart additive genetic effects from common environmental effects, as well as parental effects \citep{kruuk2007separate, shaw2014quantitative}. In addition, wild study systems are rarely closed, meaning emigration can be misinterpreted as mortality, and offspring sired outside the study area can be overlooked. Furthermore, many studies on wild populations lack genetic pedigrees, an example being the blue tit populations investigated by \citet{bonnet2022genetic}. Blue tit males exhibit non-trivial rates of extra-pair paternity (EPP), with variation in EPP contributing to substantially to $V_w$ \citep{vedder2011polygyny}. An absence of genetic pedigrees can, therefore, can cause important components of fitness to be missed, leading to an underestimation of $V_w$. Quite unsurprisingly, there is considerable uncertainty around the estimates of $V_w$ measured in wild populations. \citet{burt1995evolution} reviewed studies estimating \citet{bonnet2022genetic} in 3 species of plants and 3 species of animals, and found that most estimates of $V_w$ were not significantly different from 0. They argued that the upper bound for estimates of $V_w$ should be 0.3. Consistent with this, and using a much larger data set (25 animal and 5 plant species), \citet{hendry2018contemporary}, reported that estimates of $V_w$  varied between 0 and 0.85, with the vast majority of estimates (73\%) being less than 0.2. Overall, the meta-analytic mean for $V_w$ was 0.08. In a recent meta-analysis, \citet{bonnet2022genetic} applied Bayesian quantitative genetic methods to data obtained from 19 long term studies on wild vertebrate populations. They reported that the across-population median (0.100) and mean (0.185) of posterior modes of $V_w$ were considerably higher than those obtained by \citet{burt1995evolution} and \citet{hendry2018contemporary}. In fact the posterior modes of $V_w$ in populations of spotted hyenas, as well as two of the three populations of blue tits were higher than 0.4. This is a remarkably surprising finding, since it suggests that growth rates in these populations should increase nearly 1.5 fold every generation due to selection, provided the environment remains constant. All three meta-analyses investigating $V_w$ \citep{burt1995evolution,hendry2018contemporary,bonnet2022genetic} have detected substantial variability between study systems in their estimates of $V_w$. For example, \citet{hendry2018contemporary} reported that the across-study standard deviation in the estimates of $V_w$ was 0.16. However, what fraction of this variability is driven by real biological differences among study systems, as opposed to mere sampling noise, is not fully clear.  
+
+Measuring $V_w$ in the laboratory is considerably more straightforward, and involves either quantitative genetic breeding designs such as the full-sib half-sib design \citep{falconer1996,lynch1998}, or experimental techniques such as hemiclonal analysis \citep{abbott2011obtaining}. The standardised environment of the laboratory can, to a large extent, help overcome some of the challenges faced by field studies. However, genetic correlations for fitness between laboratory and natural environments are likely to be considerably less than unity. Therefore, it is not entirely clear if the laboratory estimates of $V_w$ can be particularly informative as far as the fate of natural populations are concerned. 
+
+A common difficulty for both field and laboratory approaches employed to date is that while Darwinian fitness is a deceptively intuitive concept, there is little consensus on its precise definition. In fact, it has been argued that the appropriate definition of fitness can vary depending on the context \citep{hendry2018contemporary}. In the absence of a universal definition, empiricists can only measure suitable proxies of fitness. It is reasonable to assume that estimates of $V_w$ are likely to be highly sensitive to the proxy of fitness used. A useful illustration of this point is provided by two studies that estimated $V_w$ in a wild population of red deer, using largely overlapping datasets, but markedly different definitions of fitness \citep{kruuk2000heritability, foerster2007sexually}. \citet{kruuk2000heritability} defined fitness as the total number of progeny produced by an individual in its lifetime. For females, this was the total number of calves given birth to by individual females during their entire lifetime; for males, it was the total number of calves sired by each male during their lifetime, with paternity assigned using a behavioural criterion. They estimated $V_w$ to be 0.1. On the other hand, \cite{foerster2007sexually}, employing a more complicated definition of fitness that measured an individual’s contribution to population change \citep{coulson2006estimating}, obtained an appreciably higher estimate for $V_w$ (0.64). 
+
+Some of the definitional difficulties of measuring $V_w$ can be overcome by measuring $V_w$ as the rate of adaptation, rather than comparing the fitness proxies of relatives. The rate of adaptation can be inferred from  genome-wide allele frequency changes due to natural selection. In a landmark study, \citet{buffalo2019linked} developed a novel theoretical framework for the effects of linked selection. The linchpin of their theory was the idea that allele frequency changes at neutral loci due to linked selection ought to exhibit across-generation covariances (i.e., temporal autocovariances) if associations between these neutral loci and their respective non-neutral backgrounds persist across generations. \citet{buffalo2019linked} showed that these autocovariances can be used to estimate the amount of allele frequency change that can be attributed to selection. This new theoretical framework has the potential to pave the way for a powerful empirical tool to detect genomic signatures of linked selection. Furthermore, \citet{buffalo2019linked} demonstrated that these autocovariances can also be used to estimate $V_w$, albeit under rather restrictive assumptions. One of these assumptions deals with the distribution of Fishers's average effects (i.e., $\alpha_i$) across loci. $\alpha_i$s can be thought of as the coefficients of a multiple regression of copy numbers of the reference allele at each locus on fitness. \citet{buffalo2019linked} assumed that effect sizes (i.e., $\alpha_i$s) are constant, and more importantly, equal across loci. This is a particularly crucial assumption that underpins their derivation of the expression for the additive genic variance (i.e., additive genetic variance ignoring the contribution due to linkage disequilibria between loci) ($V_a$) in any generation in terms of additive genic variation in the initial generation. Relaxing the assumption that $\alpha_i$s are constant yields the following expression for the additive genic variance:
+$V_a = nE[2pq\alpha^2 ] = nE[2pq]E[\alpha^2 ]+nCOV(2pq, \alpha^2)$, where p is the frequency of the reference allele and q = 1-p. Mutation-selection models predict a negative relationship between $\alpha_i^2$ and genetic diversity, meaning that $nCOV(2pq, \alpha^2)$ is likely to be negative. This implies that the expression for $V_a$ given by the equation (13) in \citet{buffalo2019linked} should inflate $V_a$, since it ignores the covariance between $\alpha_i^2$ and 2pq. This would, in turn, lead to an inflated estimate of $V_w$.  
+
+In this study, we present an alternative theoretical framework that relates $V_w$ to genome-wide changes in allele-frequency change. Using mathematical identities only, we show how $V_w$ can be obtained from an initial linkage disequilibrium matrix and expected allele frequency changes due to selection without making any assumptions about patterns of gene action or the relatioships between genotype fitnesses and allele frequencies. Our approach, like that of \citet{buffalo2019linked}, relies on temporal genomic data and does not necessitate measuring fitness in individuals. However, in contrast to Buffalo and Coop's (2019) bottom-up population genetic approach, ours is a top-down quantitative genetic approach. Therefore, despite being more general, our result is considerably simpler. 
+
+The aim of this manuscript is two-fold. First, we derive our central theoretical result from first principles. Second, we develop the statistical machinery required to apply our result to real biological data, and and validate it with individual based simulations. 
+
+
+\section*{Outline of the theory}
+
+We consider a population consisting of $n_I$ diploid individuals. We assume that there are $n_L$ segregating loci in the population. Let $c_{i,l}$ and $\alpha_l$ represent the proportion of copies of the reference allele at locus l in individual i and Fisher's average effects for fitness at locus l, respectively. $\alpha$'s can be defined as the regression coefficients obtained from a multiple regression of the $c$'s on fitness. The vector $\boldsymbol{{\alpha}}$ can be expressed as follows,
+\begin{equation} \label{eq1}
+\begin{align*} 
+\boldsymbol{{\alpha}} &= \textbf{L}^{-1}Cov(\textbf{c}, w) 
+\end{align*}
+\end{equation}
+where $\textbf{L}$ is a symmetric ${n_L} \times {n_L}$ matrix describing the second mixed moments of the $c$s across individuals. Under random mating, the diagonal elements of $\textbf{L}$ are proportional to the genetic diversity at each locus, while the off-diagonal elements are proportional to the signed linkage disequilibrium (LD) between loci. The breeding value for fitness of individual $i$ is
+
+$$u_i = \sum_{l=1}^{n_L}{c_{i,l}}{\alpha_l}$$
+and the additive genetic variance for fitness is the variance of this quantity across individuals:
+
+\begin{equation} \label{eq2}
+\begin{align*} 
+{V_w} &= Var(u) \\ 
+&=  {\sum_{l=1}^{n_L}Var({c_l}{\alpha_l})} +{\sum_{l \neq m}Cov({c_l}{\alpha_l}, {c_m}{\alpha_m})} \\
+&= {\sum_{l=1}^{n_L}{{\alpha_l}^2}Var({c_l})} +{\sum_{l \neq m}{{\alpha_l}{\alpha_m}}Cov({c_l}, {c_m})}
+\end{align*}
+\end{equation}
+The last result follows from the fact that at any given point in time $\alpha$'s are constant across individuals. This can be  expressed in matrix form as follows,
+
+\begin{equation} \label{eq3}
+\begin{align*}
+{V_w} = \boldsymbol{\alpha}^{\top}\textbf{L}\boldsymbol{\alpha}
+\end{align*}
+\end{equation}
+In the absence of mutation and meiotic drive, the allele frequency in parents is transmitted to offspring without bias, such that the vector of expected change in allele frequencies due to selection can be expressed as Robertson's covariance \citep{robertson1966mathematical, price1970selection, queller2017fundamental}:
+
+\begin{equation} \label{eq4}
+\begin{align*}
+E(\Delta{\textbf{p}}) &= E(\Delta\bar{{\textbf{c}}})\\
+&= Cov(\textbf{c}, w)
+\end{align*}
+\end{equation}
+Combining equations \ref{eq1}, \ref{eq3}, and \ref{eq4} then yields,
+
+\begin{equation} \label{eq5}
+\begin{align*}
+{V_w} &= [{\textbf{L}^{-1}E(\Delta{\textbf{p}})}]^{\top}{\textbf{L}}[{\textbf{L}^{-1}E(\Delta{\textbf{p}})}]\\
+&= [E(\Delta{\textbf{p}})]^{\top}{\textbf{L}^{-1}}[E(\Delta{\textbf{p}})]
+\end{align*}
+\end{equation}
+Equation \ref{eq5} is a general result and involves no assumptions about the patterns of dominance or epistasis for fitness.
+
+\section*{Comparison to the results of \citet{buffalo2019linked}}
+
+I think here I would work through in detail the differences between our theory and B&C's and perhaps shorten the critique in the Introduction.
+
+
+
+
+\section*{Distribution of average effects}
+While our theory involves minimal assumptions, applying it to real data requires that we make certain assumptions about the distribution of average effects for fitness $\boldsymbol{{\alpha}}$. Treating the average effects as random variables rather than fixed \citep{gianola2009additive} we can obtain the expected $V_w$ after averaging over the distribution of $\boldsymbol{{\alpha}}$:
+
+\begin{equation} \label{eq6}
+\begin{align*}
+E({V_w}) &= E(\boldsymbol{\alpha}^{\top}\textbf{L}\boldsymbol{\alpha})\\
+&= tr(\textbf{L}\boldsymbol{V_{\alpha}}) + \boldsymbol{\mu_{\alpha}}^{\top}\textbf{L}\boldsymbol{\mu_{\alpha}}\\
+&= tr(\textbf{L}\boldsymbol{V_{\alpha}})
+\end{align*}
+\end{equation}
+by applying sum of squares theory \citep[page 355]{searle2006} to Equation \ref{eq3}. Here,$\boldsymbol{V_{\alpha}}$ is the (co)variance matrix for the ${\alpha}$'s, and $\boldsymbol{\mu_{\alpha}}$ is the vector consisting of the expectations of the ${\alpha}$'s. The last result follows from the fact that the assignment of the reference allele at each locus is entirely arbitrary, implying that $\boldsymbol{\mu_{\alpha}} = {\bf 0}$.
+
+Specifically, we consider two different models for $\boldsymbol{V_{\alpha}}$. In the first model ${\alpha}$'s are independent and identically distributed (i.i.d.) with a variance of ${\sigma^2}_\alpha$, i.e. $\boldsymbol{V_{\alpha}} = {{\sigma^2}_\alpha}\textbf{I}$. This scenario us consistent with drift-recombination-mutation equilibrium (DRME). Substituting in equation \ref{eq6} yields,
+\begin{equation} \label{eq7}
+\begin{align*}
+E({V_w}) &= {{\sigma^2}_\alpha}tr(\textbf{L})
+\end{align*}
+\end{equation}
+In the second model, we assume that ${\alpha_l}$s are inversely proportional to genetic diversity, i.e. $\boldsymbol{V_{\alpha}} = {{\sigma^2}_\alpha}\textbf{L}^{-1}$. This is consistent with drift-recombination-mutation-selection equilibrium (DRMSE). The expected ${V_w}$ for this case is,
+\begin{equation} \label{eq8}
+\begin{align*}
+E({V_w}) &= {{\sigma^2}_\alpha}tr(\textbf{L}\textbf{L}^{-1})\\
+&= {{\sigma^2}_\alpha}tr(\textbf{I})\\
+&= {{\sigma^2}_\alpha}{n_L}
+\end{align*}
+\end{equation}
+
+\section*{Inference outline}
+
+Our inference approach rests on using multiple evolutionary replicates starting from a common ancestral population, such that each replicate has the same $\textbf{L}$. With a finite number of replicates, $E(\Delta{\textbf{p}})$ cannot be calculated exactly from the $\Delta{\textbf{p}}$ vector for each replicate. Therefore, we model $\Delta{\textbf{p}}$ with a linear mixed model treating locus effects as random. This allows us to partition allele frequency changes into two components: changes that are concordant across replicates (i.e. those caused by selection), and residual changes (i.e. those caused by drift and recombination). A challenge with using $\Delta{\textbf{p}}$ as the response variable in the model is that, as a consequence of LD between loci, the model residuals will be correlated with each other. Below, we outline how expressing the $\Delta{\textbf{p}}$ vectors using a new set of bases leads to the residuals of the model being i.i.d.
+
+It can be shown that the (co)variance in allele frequency change as a result of one generation of drift and recombination is proportional to $\textbf{L}\circ\textbf{R}$, where \textbf{R} is the matrix whose diagonal elements are 1 and off-diagonal elements represent the pairwise non-recombinant fractions, and $\circ$ represents Hadamard product. Spectral decomposition of $\textbf{L}\circ\textbf{R}$ yields,
+
+\begin{equation} \label{eq9}
+\begin{align*}
+\textbf{L}\circ\textbf{R} &= \textbf{U}\textbf{D}^2\textbf{U}^{\top}
+\end{align*}
+\end{equation}
+where $\textbf{U}$ is a unitary matrix consisting of the eigenvectors of $\textbf{L}\circ\textbf{R}$ and $\textbf{D}^2$ is a diagonal matrix with its diagonal elements representing the corresponding eigenvalues. We then express allele frequency changes in the space defined by this eigendecomposition,
+\begin{equation} \label{eq10}
+\begin{align*}
+\Delta{\Tilde{{\textbf{p}}}} &= \textbf{D}^{-1}\textbf{U}^{\top}\Delta{\textbf{p}}
+\end{align*}
+\end{equation}
+The (co)variance matrix for allele frequency change in the projected space is given by,
+\begin{equation} \label{eq11}
+\begin{align*}
+Var(\Delta{\Tilde{{\textbf{p}}}}) &= Var(\textbf{D}^{-1}\textbf{U}^{\top}\Delta{\textbf{p}})\\
+&= \textbf{D}^{-1}\textbf{U}^{\top}Var(\Delta{\textbf{p}})(\textbf{D}^{-1}\textbf{U}^{\top})^{\top}\\
+&\sim \textbf{D}^{-1}\textbf{U}^{\top}(\textbf{L}\circ\textbf{R})(\textbf{D}^{-1}\textbf{U}^{\top})^{\top}\\
+\end{align*}
+\end{equation}
+Substituting equation \ref{eq9} in equation \ref{eq11} yields,
+\begin{equation} \label{eq12}
+\begin{align*}
+Var(\Delta{\Tilde{{\textbf{p}}}})
+&\sim \textbf{D}^{-1}\textbf{U}^{\top}(\textbf{U}\textbf{D}^2\textbf{U}^{\top})(\textbf{D}^{-1}\textbf{U}^{\top})^{\top}\\
+&\sim \textbf{I}
+\end{align*}
+\end{equation}
+where \textbf{I} is the identity matrix. The last result follows from the fact that \textbf{U} is a unitary matrix such that $\textbf{U}^{\top}\textbf{U} = \textbf{I}$.
+Equation \ref{eq12} implies that if one models $\Delta{\Tilde{{\textbf{p}}}}$ (as opposed to $\Delta{\textbf{p}}$) using a linear mixed model with locus effects modeled to be random, the residuals should be i.i.d. It is important to note that in this model, locus effects model concordant allele frequency changes across evolutionary replicates, i.e. changes caused by selection. Therefore, the (co)variance structure for the locus effects can be modeled as follows:
+\begin{equation} \label{eq13}
+\begin{align*}
+Var[E(\Delta\tilde{\textbf{p}})] &= Var[E(\textbf{D}^{-1}\textbf{U}^{\top}\Delta{\textbf{p}})]\\
+&= \textbf{D}^{-1}\textbf{U}^{\top} Var[E(\Delta{{\textbf{p}}})]\textbf{U}\textbf{D}^{-1}
+\end{align*}
+\end{equation}
+Using equations \ref{eq1} and \ref{eq4}, and substituting for $\Delta{\textbf{p}}$ in equation \ref{eq13} then yields,
+\begin{equation} \label{eq14}
+\begin{align*}
+Var[E(\Delta\tilde{\textbf{p}})] 
+&= \textbf{D}^{-1}\textbf{U}^{\top} Var[\boldsymbol{\alpha}\textbf{L}]\textbf{U}\textbf{D}^{-1}\\
+&= \textbf{D}^{-1}\textbf{U}^{\top}{\boldsymbol{V_{\alpha}}}\textbf{L}\textbf{L}\textbf{U}\textbf{D}^{-1}
+\end{align*}
+\end{equation}
+For the scenario consistent with DRME (i.e. $\boldsymbol{V_{\alpha}} = {{\sigma^2}_\alpha}\textbf{I}$) the covariance structure is given by
+\begin{equation} \label{eq15}
+\begin{align*}
+Var[E(\Delta\tilde{\textbf{p}})] 
+&= {{\sigma^2}_\alpha}\textbf{D}^{-1}\textbf{U}^{\top}\textbf{L}\textbf{L}\textbf{U}\textbf{D}^{-1}
+\end{align*}
+\end{equation}
+On the other hand, for the scenario consistent with DRMSE (i.e. $\boldsymbol{V_{\alpha}} = {{\sigma^2}_\alpha}\textbf{L}^{-1}$), the covariance structure becomes
+\begin{equation} \label{eq16}
+\begin{align*}
+Var[E(\Delta\tilde{\textbf{p}})] 
+&= {{\sigma^2}_\alpha}\textbf{D}^{-1}\textbf{U}^{\top}\textbf{L}\textbf{U}\textbf{D}^{-1}
+\end{align*}
+\end{equation}
+
+To summarise, our inference approach involves first projecting the allele frequency change vector ($\Delta{\textbf{p}}$) for each replicate onto a space defined by the spectral decomposition of $\textbf{L}\circ\textbf{R}$. We then model these transformed allele frequency changes ($\Delta\tilde{\textbf{p}}$) using a linear mixed model that treats locus effects as random. Depending on our assumptions for the distribution of average effects, we choose the covariance structure for locus effects defined by either equation \ref{eq15} (DRME) or equation \ref{eq16} (DRMSE). We then substitute the estimates of ${\sigma^2}_\alpha$ obtained from these linear mixed models into either equation \ref{eq7} (DRME) or equation \ref{eq8} (DRMSE) to calculate estimates of $V_w$.
+\bibliography{Vw}
+\bibliographystyle{plainnat}
+%\printbibliography
+
+\end{document}

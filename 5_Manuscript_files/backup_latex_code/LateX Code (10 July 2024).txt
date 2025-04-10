@@ -1,0 +1,1133 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[round]{natbib}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    filecolor=blue,      
+    urlcolor=blue,
+    pdfpagemode=FullScreen,
+}
+\hypersetup{linktocpage}
+\renewcommand\contentsname{}
+
+\title{Estimating the additive genetic variance for fitness}
+\author{}
+
+
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+
+In spite of its simplicity, the fundamental theorem of natural selection (FTNS) \citep{fisher1930genetical,fisher1958genetical} is one of the most central results in evolutionary biology, providing a concise mathematical statement of how quickly a population is expected to adapt. It describes the gain in mean fitness made by a population every generation as a result of natural selection, as long as the environment (including variables intrinsic to the population such as density or allele frequencies) is constant \citep{Frank&Slatkin}. The crucial insight that FTNS provides is that this increase in mean fitness is exactly equal to the additive genetic variance for relative fitness ($V_A$) in the population \citep{burt1995evolution, grafen2015biological}. In other words, the additive genetic variance for relative fitness captures the `adaptive potential' of a population. This is despite the FTNS being criticised because of its inability to predict the actual gain in mean fitness \citep{price1972fisher, ewens1989interpretation}: evolution has no foresight, and it is natural that a measure of adaptation should be made with respect to the current environment \citep[contra][]{fisher2019indirect}. 
+
+*Something about conservation biology, trait evolution, mate choice, linked selection arguments of Santiago and Caballero etc*
+
+A number of attempts have been made to measure $V_A$ in wild populations. Typically, these have involved long term studies on natural populations in which the lifetime reproductive success of a large number of focal individuals has been measured. Combining these fitness data with information on the relatedness among individuals (for example, information on pedigrees) in a generalised linear mixed model approach (i.e., the animal model \citep{kruuk2004estimating,wilson2010ecologist}) yields estimates of $V_A$. This is far from straightforward in natural populations, as it can be notoriously difficult to tease apart additive genetic effects from common environmental effects such as parental effects \citep{kruuk2007separate, shaw2014quantitative}. In addition, wild study systems are rarely closed, meaning emigration can be misinterpreted as mortality, and offspring sired outside the study area can be overlooked. Furthermore, many studies on wild populations lack genetic pedigrees, and as a consequence may miss substantial fitness variation acquired through undetected polygamy \citep{vedder2011polygyny}. Quite unsurprisingly, there is considerable uncertainty around the estimates of $V_A$ measured in wild populations. \citet{burt1995evolution} reviewed studies estimating $V_A$ in 3 species of plants and 3 species of animals, and found that most estimates of $V_A$ were not significantly different from 0. They argued that the upper bound for estimates of $V_A$ could be as high as 0.3, but most likely less than 0.1. Consistent with this, and using a much larger data set (25 animal and 5 plant species), \citet{hendry2018contemporary} reported that estimates of $V_A$  varied between 0 and 0.85, with the vast majority of estimates (73\%) being less than 0.2. Overall, the mean $V_A$ across studies was 0.08. In a recent meta-analysis, \citet{bonnet2022genetic} applied Bayesian quantitative genetic methods to data obtained from 19 long term studies on wild vertebrate populations. They reported a meta-analytic mean $V_A$ of 0.185 across studies, considerably higher than those obtained by \citet{burt1995evolution} and \citet{hendry2018contemporary}. In fact estimates of $V_A$ in populations of Spotted Hyenas (\emph{Crocuta crocuta}), as well as two of the three populations of Blue Tits (\emph{Cyanistes caeruleus}) were higher than 0.4. This is a remarkable finding, since it suggests that growth rates in these populations should increase nearly 1.5 fold every generation due to selection, provided the environment remains constant. All three meta-analyses investigating $V_A$ \citep{burt1995evolution,hendry2018contemporary,bonnet2022genetic} have detected substantial variability between study systems in their estimates of $V_A$. For example, \citet{hendry2018contemporary} reported that the across-study standard deviation in the estimates of $V_A$ was 0.16. However, what fraction of this variability is driven by real biological differences among study systems, as opposed to mere sampling noise, is not fully clear.  
+
+Measuring $V_A$ in the laboratory is considerably more straightforward, and involves either quantitative genetic breeding designs such as the full-sib half-sib design \citep{falconer1996,lynch1998}, or experimental techniques such as hemiclonal analysis \citep{abbott2011obtaining}. The standardised environment of the laboratory can, to a large extent, help overcome some of the challenges faced by field studies. However, given that laboratory environments often lack important features that are likely to generate fitness variation, such as parasites, predators and competitors, it is not entirely clear if laboratory estimates of $V_A$ are particularly relevant. 
+
+A common difficulty for both field and laboratory approaches employed to date is that while Darwinian fitness is a deceptively intuitive concept, there is little consensus on its precise definition. In fact, it has been argued that the appropriate definition of fitness can vary depending on the context \citep{hendry2018contemporary}. In the absence of a universal definition, empiricists can only measure suitable proxies of fitness. It is reasonable to assume that estimates of $V_A$ are likely to be highly sensitive to the proxy of fitness used. A useful illustration of this point is provided by two studies that estimated $V_A$ in a wild population of red deer (\emph{Cervus elaphus}), using largely overlapping datasets, but markedly different definitions of fitness \citep{kruuk2000heritability, foerster2007sexually}. \citet{kruuk2000heritability} defined fitness as the total number of progeny produced by an individual in its lifetime and estimated $V_A$ to be 0.1, whereas \cite{foerster2007sexually}, employed a more complicated definition of fitness that measured an individual’s contribution to population change \citep{coulson2006estimating} and obtained the appreciably higher estimate of 0.64. 
+
+Some of the definitional difficulties of measuring $V_A$ can be overcome by measuring $V_A$ as the rate of adaptation, rather than comparing the fitness proxies of relatives. In a landmark study, \citet{buffalo2019linked} developed a method to estimate the amount of genome-wide allele frequency change that can be attributed to selection.  The linchpin of their theory is the idea that allele frequency changes at neutral loci due to linked selection ought to exhibit across-generation covariances if associations between these neutral loci and their respective non-neutral backgrounds persist across generations. This new theoretical framework has the potential to pave the way for a powerful empirical tool to detect genomic signatures of linked selection \citep{Buffalo.2020, simon2024contribution}. They go on to show that their method can also be used to obtain estimates of $V_A$, albeit under rather restrictive assumptions (see below).
+
+In this study, we present an alternative theoretical framework that relates $V_A$ to genome-wide changes in allele-frequency change. Using mathematical identities only, we show how $V_A$ can be obtained from an initial linkage disequilibrium (LD) matrix and expected allele frequency changes due to selection without making any assumptions about patterns of gene action or the relationships between genotype fitnesses and genotype frequencies. Our approach, like that of \citet{buffalo2019linked}, relies on temporal genomic data and does not necessitate measuring fitness in individuals. However, in contrast to Buffalo and Coop's (2019) bottom-up population genetic approach, ours is a top-down quantitative genetic approach. Therefore, despite being more general, our result is considerably simpler with fewer assumptions (see below for a discussion on the similarities and differences between our approach and that of \citet{buffalo2019linked}). 
+
+The aim of this manuscript is two-fold. First, we derive our central theoretical result from first principles. Second, we develop the statistical machinery required to apply our result to real biological data, and validate it with individual based simulations. 
+
+
+\section*{Outline of the theory}
+\addcontentsline{toc}{section}{Outline of the theory}
+
+
+We consider a population consisting of $N$ diploid individuals. We assume that there are $n_L$ segregating loci in the population. Let $c_{k,i}$ and $\alpha_i$ represent the proportion of copies of the reference allele at locus $i$ in individual $k$ and Fisher's average effects for fitness at locus $i$, respectively. The widely accepted mathematical definition of the $\alpha$'s are the regression coefficients obtained from a multiple regression of the $c$'s on relative fitness, $w$ \citep{Fisher.1941, Lee.2013}. The vector $\boldsymbol{{\alpha}}$ can be expressed as follows,
+\begin{equation} \label{eq1}
+\begin{array}{rl} 
+\boldsymbol{{\alpha}} &= \textbf{L}^{-1}Cov(\textbf{c}, w) 
+\end{array}
+\end{equation}
+where $\textbf{L}$ is a symmetric ${n_L} \times {n_L}$ matrix describing the second mixed moments of the $c$'s across individuals and $\textbf{c}$ is the random vector of $c$'s at all loci for an individual.
+
+The breeding value for the realtive fitness of individual $k$ is
+
+$$u_k = \sum_{i=1}^{n_L}{c_{k,i}}{\alpha_i}$$
+and the additive genetic variance for relative fitness is the variance of this quantity across individuals:
+
+\begin{equation} \label{eq2}
+\begin{array}{rl} 
+{V_A} &= Var(u) \\ 
+&=  {\sum_{i=1}^{n_L}Var({c_i}{\alpha_i})} +\sum_{i=1}^{n_L}\sum_{j\neq i}^{n_L}Cov({c_i}{\alpha_i}, {c_j}{\alpha_j})\\
+&= {\sum_{i=1}^{n_L}{{\alpha_i}^2}Var({c_i})} +\sum_{i=1}^{n_L}\sum_{j\neq i}^{n_L}{\alpha_i}{\alpha_j}Cov({c_i}, {c_j})
+\end{array}
+\end{equation}
+The last result follows from the fact that at any given point in time $\alpha$'s are constant across individuals. Equation \ref{eq2} can be  expressed in matrix form as follows,
+
+\begin{equation} \label{eq3}
+\begin{array}{rl}
+{V_A} =& \boldsymbol{\alpha}^{\top}\textbf{L}\boldsymbol{\alpha}\\
+\end{array}
+\end{equation}
+In the absence of mutation and meiotic drive, the allele frequency in parents is transmitted to offspring without bias, such that the vector of expected change in allele frequencies due to selection can be expressed as Robertson's covariance \citep{robertson1966mathematical, price1970selection, queller2017fundamental}:
+
+\begin{equation} \label{eq4}
+\begin{array}{rl}
+E(\Delta{\textbf{p}}) &= E(\Delta\bar{{\textbf{c}}})\\
+&= Cov(\textbf{c}, w)
+\end{array}
+\end{equation}
+
+Substituting Equation \ref{eq1} into Equation \ref{eq4} gives $E(\Delta{\textbf{p}}) = {\bf L}\boldsymbol{\alpha}$, which is the mutivariate analogue of Equation 10 in \citet{Kirkpatrick.2002}. Combining this with Equation \ref{eq3} yields,
+
+\begin{equation} \label{eq5}
+\begin{array}{rl}
+{V_A} &= [{\textbf{L}^{-1}E(\Delta{\textbf{p}})}]^{\top}{\textbf{L}}[{\textbf{L}^{-1}E(\Delta{\textbf{p}})}]\\
+&= [E(\Delta{\textbf{p}})]^{\top}{\textbf{L}^{-1}}[E(\Delta{\textbf{p}})]
+\end{array}
+\end{equation}
+
+Equation \ref{eq5} is a general result and involves no assumptions about the patterns of dominance or epistasis for fitness, or about patterns of mating. An intuitive explanation of why $V_A$ can be calculated this way is to note that Fisher's Fundamental Theorem states that ${V_A}$ is equal to the (partial) increase in mean fitness caused by evolutionary change by natural selection. Equation \ref{eq3} can be expressed as
+
+\begin{equation} \label{eq3b}
+\begin{array}{rl}
+{V_A} &= \boldsymbol{\alpha}^{\top}E(\Delta{\textbf{p}})
+\end{array}
+\end{equation}
+
+which is a sum of $\alpha_i E(\Delta p_i)$ over all loci. $\alpha$ represents the causal effect of a change in allele frequency at a locus on population mean fitness \citep{Fisher.1941, Kojima.1959, Lee.2013} and so multiplying $\alpha$ by the actual change caused by natural selection, $E(\Delta p)$, we get the change in mean fitness caused by evolutionary change by natural selection at that locus. If we then add these changes at every locus in the genome, we obtain the total change in mean fitness due to evolutionary change by natural selection, and hence $V_A$.  
+
+
+
+\section*{Extending our approach to practical situations}
+\addcontentsline{toc}{section}{Extending our approach}
+
+
+Our theoretical approach assumes $\boldsymbol{\alpha}$ or $E[\Delta {\bf p}]$ are known. In reality, neither can be directly observed and must be inferred from data on observed allele frequency change, $\Delta {\bf p}$. Since $\Delta {\bf p}$ will vary around $E[\Delta {\bf p}]$ due to drift, $E[\Delta {\bf p}]$ must be inferred using replicate observations of $\Delta {\bf p}$. Since time cannot be replayed, we infer $E[\Delta {\bf p}]$ through experimental replicates (see \citet{Buffalo.2020} also). Our theoretical model also assumes ${\bf L}$ is known, but since it is hard to generate experimental replicates without at least one round of reproduction, we condition on ${\bf L}_{0}$ (the ${\bf L}$ in a generation prior to the first generation over which allele frequency change is measured).  As the above suggests, we also allow allele frequency changes to be measured over multiple generations, rather than a single generation, such that $\Delta {\bf p}_m = \Delta {\bf p}_{t_m,m}+\Delta {\bf p}_{t_m+1,m}\dots\Delta {\bf p}_{\tau_m,m}$ is the observed change in allele frequency from generation $t_m$ to $\tau_m$ in replicate $m$.  Our aim is to estimate $V_A(0)=\bar{\boldsymbol{\alpha}}^{\top}{\bf L}_0\bar{\boldsymbol{\alpha}}$ where $\bar{\boldsymbol{\alpha}}$ is the vector of mean average effects across time and replicates.\\
+
+
+We first note that the total change in allele frequency in replicate $m$ between times $t_m$ and $\tau_m$ is
+
+\begin{equation}
+\Delta {\bf p}_{m} = \sum^{\tau_m}_{t=t_m}\left({\bf L}_{t,m}\boldsymbol{\alpha}_{t,m}+\underset{D}\Delta {\bf p}_{t,m}\right)
+\end{equation}
+
+where ${\bf L}_{t,m}\boldsymbol{\alpha}_{t,m}=E[\Delta{\bf p}_{t,m}]$ is the expected change in allele frequency due to selection in replicate $m$ between generation $t$ and $t+1$ and $\underset{D}\Delta {\bf p}_{t,m}$ is the change due to drift. ${\bf L}$ will vary over time and we decompose ${\bf L}$ at a particular time into a part that can be predicted by ${\bf L}_0$ and the action of drift and recombination, and a part that cannot be predicted. To do this we decompose  ${\bf L}$ into ${\bf L}^{'}$ and ${\bf L}^{''}$, following the notation of \citet{buffalo2019linked}. ${\bf L}^{'}$ are the (co)variances that arise due to alleles on the same gamete and so the diagonal elements are proportional to gametic (genetic) and the off-diagonals proportional to gametic-phase disequilibrium. ${\bf L}^{''}$ are the (co)variances that arise due to alleles on the different gametic contributions of a genotype, and so the diagonal elements are proportional to the Hardy-Weinberg disequilibrium (JARROD check Bulmer book to see if this is the write term) and the off-diagonal elements are proprtional to the nongametic-phase disequilibrium. Given this decomposition,
+
+\begin{equation}
+{\bf L}_{t,m}= {\bf N}_{t,m}\circ\tilde{\bf L}_{0}+\Delta {\bf L}^{'}_{t,m}+{\bf L}^{''}_{t,m}
+\end{equation}
+
+where $\tilde{\bf L}_{0}$ is the weighted sum of ${\bf L}^{'}_{0}$ and ${\bf L}^{''}_{0}$ , with the $ij^{th}$ element of ${\bf L}^{''}_{0}$ weighted by $r_{i,j}/(1-r_{i,j})$ where $r_{i,j}$ is the recombination rate between the two loci. ${\bf N}_{t,m}$ is a matrix with the $ij^{th}$ element being $(1-r_{ij})^{t}\prod_{k=0}^{t-1}(1-\frac{1}{2N_{k_m}})$ where  $N_{k_m}$ is the effective population size in generation $k$ in replicate $m$. $\Delta {\bf L}^{'}_{t,m}$ is a stochastic term with zero expectation that represents the accumulated change in ${\bf L}^{'}$ between generations 0 and $t$ in replicate $m$ that cannot be predicted. ${\bf L}^{''}_{t,m}$ is the matrix of nongametic-phase disequilbria that arises in generation $t$ in replicate $m$  (See Appendix \ref{Appendix:LD} for details).  It will also be useful to have $\boldsymbol{\alpha}_{t,m}=\bar{\boldsymbol{\alpha}}+\Delta\boldsymbol{\alpha}_{t,m}$ where $\Delta\boldsymbol{\alpha}_{t,m}$ is the deviation of the average effects in generation $t$ in replicate $m$ from the mean of the average effects across time and replicates.  We can then decompose the change due to selection into two terms:
+
+\begin{equation}
+\begin{array}{rl}
+\Delta {\bf p}_m
+=& \sum_{t=t_m}^{\tau_m} \left(({\bf N}_{t,m}\circ\tilde{\bf L}_0)\bar{\boldsymbol{\alpha}}+(\Delta{\bf L}^{'}_{0,m}+\Delta{\bf L}^{'}_{t,m}+{\bf L}^{''}_{t,m})\bar{\boldsymbol{\alpha}}+({\bf N}_{t,m}\circ\tilde{\bf L}_0)\Delta\boldsymbol{\alpha}_{t,m}\right.\\
+&\left.+(\Delta{\bf L}^{'}_{0,m}+\Delta{\bf L}^{'}_{t,m}+{\bf L}^{''}_{t,m})\Delta\boldsymbol{\alpha}_{t,m}
++\underset{D}\Delta {\bf p}_{t, m}\right)\\
+=& \sum_{t=t_m}^{\tau_m} \left(({\bf N}_{t,m}\circ\tilde{\bf L}_0)\bar{\boldsymbol{\alpha}}+\underset{U}\Delta {\bf p}_{t, m}+\underset{D}\Delta {\bf p}_{t, m}\right)\\
+\end{array}
+\label{Eq:dp}
+\end{equation}
+
+where, with some abuse of notation, $\Delta{\bf L}^{'}_{0,m}$ is the (possibly multi-generational) change in ${\bf L}^{'}$ from generation 0 to $t_m$. When $t_m=1$, $\Delta{\bf L}^{'}_{0,m}$ is the standard single-generation change in ${\bf L}$. $({\bf N}_{t,m}\circ\tilde{\bf L}_0)\bar{\boldsymbol{\alpha}}$ is the predictable change due to selection and $\underset{U}\Delta {\bf p}_{t,m}=(\Delta{\bf L}^{'}_{0,m}+\Delta{\bf L}^{'}_{t,m}+{\bf L}^{''}_{t,m})\bar{\boldsymbol{\alpha}}+({\bf N}_{t,m}\circ\tilde{\bf L}_0)\Delta\boldsymbol{\alpha}_{t,m}+(\Delta{\bf L}^{'}_{0,m}+\Delta{\bf L}^{'}_{t,m}+{\bf L}^{''}_{t,m})\Delta\boldsymbol{\alpha}_{t,m}$ is the unpredictable change due to selection due to stochastic changes in  ${\bf L}$ and/or $\boldsymbol{\alpha}$\citep{Bitter.2023}. Note that $\underset{D}\Delta {\bf p}$ and $\underset{U}\Delta {\bf p}$ have expectation zero and that the $\underset{D}\Delta {\bf p}$ terms are independent across replicates, generations and generations within replicates \citep{buffalo2019linked}. The $\underset{U}\Delta {\bf p}$, are never independent across generations within replicates since the $\Delta {\bf L}^{'}$ are sums of changes over all previous generations after Generation 0. They may, however, be independent across replicates if replicates are all initiated from Generation $0$ individuals and therefore do not share changes in ${\bf L}$ from generation $0$ to $t_m$ (i.e. $\Delta{\bf L}_{0,m}\neq\Delta{\bf L}_{0,n}$). However, if there is some structure to either the $(\Delta {\bf L}^{'}+{\bf L}^{''})$'s or the $\Delta\boldsymbol{\alpha}$'s they may however be dependent across replicates. The $(\Delta {\bf L}^{'}+{\bf L}^{''})$'s may be non-independent if selection induces correlated changes in ${\bf L}$ across replicates, but here we follow the assumption of the infinitesimal model where such changes are negligible \citep{Barton.2017}, at least for the diagonal elements \citep{Bulmer.1980}. Ideally $t_m$ is made as small as possible so that changes in ${\bf L}$ from ${\bf L}_0$ are minimised. Making $\tau_m-t_m=1$ (i.e. calculating change over one generation) will result in the least bias since any change in ${\bf L}$ due to selection should also be small and the approximations that follow should hold well. However, increasing $\tau_m-t_m$ (i.e. calculating change over multiple generations) will increase power since the changes in allele frequency changes due to selection will be larger.  The $\Delta\boldsymbol{\alpha}$'s may also be non-independent across replicates, if, for example, a selection regime is unique to a time point but experienced by all replicates. 
+
+Assuming the  $(\Delta {\bf L}^{'}+{\bf L}^{''})$'s and the $\Delta\boldsymbol{\alpha}$'s are independent across replicates we can derive the mean and covariance structure of allele frequency change across replicates in terms of the mean ($\boldsymbol{\mu}_{\bar{\alpha}}$) and covariance structure (${\bf V}_{\bar{\alpha}}$) of the mean average effects (Appendix \ref{App:dist}):
+
+\begin{equation}
+\begin{array}{rl}
+E\left[\Delta {\bf p}_m\right]
+=& \left(\tilde{\bf L}_0\circ{\bf N}^{(m)}\right)\boldsymbol{\mu}_{\bar{\alpha}}\\
+\end{array}
+\label{eq:Edelta}
+\end{equation}
+
+where ${\bf N}^{(m)}=\sum_{t=t_m}^{\tau_m}{\bf N}_{t,m}$. The conditional between replicate covariance is also straight forward
+
+\begin{equation}
+\begin{array}{rl}
+COV(\Delta {\bf p}_m, \Delta {\bf p}_n^{\top})
+=&\left(\tilde{\bf L}_0\circ{\bf N}^{(m)}\right){\bf V}_{\bar{\alpha}}\left(\tilde{\bf L}_0\circ{\bf N}^{(n)}\right)\\
+\end{array}
+\label{eq:covdelta}
+\end{equation}
+
+where $m$ and $n$ are a pair of replicates. The within replicate (co)variances are much harder as not only do they include the predictable response to selection but also the effects of drift and the unpredictable response to selection. There is no easy form for the covariances due to the total impact of the unpredictable response to selection, and here we simply write the covariance due to the unpredictable response as $VAR(\underset{U}\Delta {\bf p}_m)$, which gives
+
+\begin{equation}
+\begin{array}{rl}
+VAR\left(\Delta {\bf p}_m\right) =&\left(\tilde{\bf L}_0\circ{\bf N}^{(m)}\right){\bf V}_{\bar{\alpha}}\left(\tilde{\bf L}_0\circ{\bf N}^{(m)}\right)+\tilde{\bf L}_{0}\circ{\bf M}^{(m)}+VAR(\underset{U}\Delta {\bf p}_m)\\
+\end{array}
+\end{equation}
+
+where ${\bf M}^{(m)}=\sum_{t=t_m}^{\tau_m}{\bf M}_{t,m}\circ{\bf N}_{t,m}$ and the $ij^{th}$ element of ${\bf M}_{t,m}$ is $(1-r_{ij})/N_{t}$.\\
+
+Note that here, we are treating the average effects as random rather than fixed \citep[see][for a discussion on what this implies]{gianola2009additive}. It should also be noted that when $VAR(\Delta {\boldsymbol \alpha})$ is non-zero the additive genetic variance exhibited in replicate $m$ at generation $t$ will in general exceed $V_A(0)$ and we should more generally think of $V_A(0)$ not as the additive genetic variance for fitness in the ancestral population, but the additive genetic covariance in fitness between replicates.
+
+
+\section*{Inference outline}
+\addcontentsline{toc}{section}{Inference outline}
+
+By applying sum of squares theory \citep[page 355]{searle2006} to Equation \ref{eq3} we can obtain the expected $V_A(0)$ after averaging over the distribution of average effects:
+
+
+\begin{equation} \label{eq6}
+\begin{array}{rl}
+E[V_A(0)] &= E[\boldsymbol{\bar \alpha}^{\top}\textbf{L}_0\bar{\boldsymbol{\alpha}}]\\
+&= tr(\textbf{L}_0{\bf V}_{\bar{\alpha}}) + \boldsymbol{\mu}_{\bar{\alpha}}^{\top}\textbf{L}_0\boldsymbol{\mu}_{\bar{\alpha}}\\
+\end{array}
+\end{equation}
+
+where we aim to estimate $\boldsymbol{\mu}_{\bar{\alpha}}$ and ${\bf V}_{\bar{\alpha}}$ through Equations \ref{eq:Edelta} and \ref{eq:covdelta} using multiple evolutionary replicates starting from a common ancestral population.
+
+Rather than working with the allele frequency changes directly, we project them on to a new (reduced) basis and denote this new vector of changes as $\Delta\overrightarrow{\bf p} = {\bf P}\Delta{\bf p}$ where ${\bf P}$ is some projection matrix. We chose a projection 
+that collapses allele frequency changes into the non-null subspace of ${\bf L}_{0}$, since $V_A(0)$ only depends on this subspace \citep{de2015genomic}. To do this, have ${\bf U}_{\bf L}$ as the compact left singular vectors of ${\bf L}_{0}$ and then the drift covariance in the reduced subspace is ${\bf U}_{\bf L}^{\top}(\tilde{\bf L}_{0}\circ{\bf M}^{(m)}){\bf U}_{\bf L}$. If we have ${\bf U}_2$ and ${\bf D}_2$ as the eigenvectors and singular values of this matrix then the projection matrix ${\bf P} = {\bf D}_2^{-1}{\bf U}_2^{\top}{\bf U}_{\bf L}^{\top}$ results in projected allele frequency changes that are i.i.d under drift in the reduced subspace only (see Appendix \ref{App:projection}).
+
+The mean and covariance of the projected allele frequency changes due to predictable selection are:
+
+\begin{equation} 
+\begin{array}{rl}
+E[\Delta \overrightarrow{\bf p}_m] = &
+{\bf P}_{m}(\tilde{\bf L}_0\circ{\bf N}^{(m)})
+\boldsymbol{\mu}_{\bar{\alpha}}
+\end{array}
+\end{equation}
+
+and 
+
+\begin{equation} 
+\begin{array}{rl}
+COV(\Delta \overrightarrow{\bf p}_m, \Delta \overrightarrow{\bf p}_n) = &
+{\bf P}_{m}(\tilde{\bf L}_0\circ{\bf N}^{(m)}){\bf V}_{\bar{\alpha}}
+(\tilde{\bf L}_0\circ{\bf N}^{(n)}){\bf P}^{\top}_{n}
+\end{array}
+\end{equation}
+
+In Appendix \ref{App:alpha_random} we determine permissible models for $\boldsymbol{\mu}_{\bar{\alpha}}^{\top}$ and ${\bf V}_{\bar{\alpha}}$, and of those, we identify the sensible biological model:
+
+
+\begin{equation} 
+\begin{array}{rl}
+\boldsymbol{\mu}_{\bar{\alpha}} = & \beta^{(0)}_{\bar{\alpha}}+\beta^{(1)}_{\bar{\alpha}}({\bf p}_{0}-{\bf q}_{0})
+\end{array}
+\end{equation}
+
+where ${\bf p}_{0}$ is the frequency of the reference alleles at each locus in the ancestral population and ${\bf q}_{0}=1-{\bf p}_{0}$,  and 
+
+\begin{equation} 
+\begin{array}{rl}
+{\bf V}_{\bar{\alpha}}=& \sigma^2_{\bar{\alpha}}{\bf L}_{0}^{p_{\bar{\alpha}}}
+\end{array}
+\end{equation}.
+
+With $p_{\bar{\alpha}}$ known, the model is a linear mixed model with covariance structure due to the predictable response to selection being proportional (by a factor $\sigma^2_{\bar{\alpha}}$ to be estimated) to
+
+\begin{equation} 
+{\bf V}_{m,n} \propto {\bf P}(\tilde{\bf L}_0\circ{\bf N}^{(m)}){\bf L}_{0}^{p_{\bar{\alpha}}}
+(\tilde{\bf L}_0\circ{\bf N}^{(m)}){\bf P}^{\top}
+\end{equation}
+
+between replicates $m$ and $n$. When ${\bf N}^{(m)}={\bf N}^{(n)}$ for all $n$ and $m$, then this can more easily be fitted by having locus as a random effect with the above covariance structure. The fixed effect covariate (shown for replicate $m$)
+
+\begin{equation} 
+{\bf P}(\tilde{\bf L}_0\circ{\bf N}^{(m)})({\bf p}_{0}-{\bf q}_{0})
+\end{equation}.
+
+can also be fitted with associated coefficient $\beta^{(1)}_{\bar{\alpha}}$ to be estimated in addition to the intercept, $\beta^{(0)}_{\bar{\alpha}}$. 
+
+We therefore estimate ${\boldsymbol \beta}_{\bar{\alpha}}= \left[\beta^{(0)}_{\bar{\alpha}}, \beta^{(1)}_{\bar{\alpha}} \right]^{\top}$, $\sigma^2_{\bar{\alpha}}$ and $\sigma^2_e$ (the residual variance) by fitting the model in asreml conditional on ${p_{\bar{\alpha}}}$. We then obtain the log-likelihood of this fitted model and then find the ${p_{\bar{\alpha}}}$ that maximises the log-likelihood using the R function optim.  Note that $\sigma^2_e$ should equal one if the N's in ${\bf N}$ are really the effective population size and there is no unpredictable responses to selection. 
+
+Although linear (mixed) models generate unbiased estimates of $\boldsymbol{\mu}_{\bar{\alpha}}$ the quadratic form $\widehat{\boldsymbol{\mu}_{\bar{\alpha}}}^{\top}{\bf L}_0\widehat{\boldsymbol{\mu}_{\bar{\alpha}}}$ will be upwardly biased by sampling error on ${\boldsymbol \beta}_{\bar{\alpha}}$. We use the inverse Hessian to get an approximate expression for the sampling (co)variance matrix of the two parameters, ${\bf S}_{\bar{\alpha}}$, and use this in order to get an improved estimate (see Appendix \ref{App:bias_correction}):
+
+\begin{equation} 
+\widehat{\boldsymbol{\mu}_{\bar{\alpha}}^{\top}{\bf L}_0\boldsymbol{\mu}_{\bar{\alpha}}}= \widehat{\boldsymbol{\mu}_{\bar{\alpha}}}^{\top}{\bf L}_0\widehat{\boldsymbol{\mu}_{\bar{\alpha}}}-Tr\left({\bf X}^{\top}{\bf L}_0{\bf X}{\bf S}_{\bar{\alpha}}\right)
+\end{equation}
+
+where ${\bf X}$ is the fixed effect design matrix.
+
+\section*{Comparison to the results of \citet{buffalo2019linked}}
+\addcontentsline{toc}{section}{Comparison to the results of \citet{buffalo2019linked}}
+
+
+To connect our work with \citet{buffalo2019linked} (B\&C henceforth) it will be useful to express the covariance matrix  ${\bf L}$ in terms of a diagonal matrix of standard deviations,  ${\bf B}$, (half the square-root of the genetic diversities under random mating) and the correlation matrix, ${\bf R}$:  ${\bf L}={\bf B}{\bf R}{\bf B}$. We can then split the response to selection in generation $t$ into two parts
+
+\begin{equation}
+\begin{array}{rrcl}
+{\bf L}_t\boldsymbol{\alpha}_t =& {\bf B}_t{\bf B}_t\boldsymbol{\alpha}_t&+&{\bf B}_t({\bf R}_t-{\bf I}){\bf B}_t\boldsymbol{\alpha}_t\\
+=&\underset{S}\Delta {\bf p}_t&+&\underset{L}\Delta {\bf p}_t
+\end{array}
+\end{equation}
+
+where the first term is due to direct selection at the loci, and the second term is due to linkage-disequilibria with other selected loci. It will also be useful to distinguish the additive genetic variance in generation $t$
+
+\begin{equation}
+V_A(t) = \boldsymbol{\alpha}_t{\bf L}_t\boldsymbol{\alpha}^{\top}_t
+\end{equation}
+
+from the additive genic variance  
+
+\begin{equation}
+V_a(t) = \boldsymbol{\alpha}_t{\bf B}_t{\bf B}_t\boldsymbol{\alpha}^{\top}_t
+\end{equation}
+
+in generation $t$. We can also think about the additive genetic/genic covariance in fitness between generation $t$ and $\tau$ for a population with genetic structure equal to that in generation $t$:
+
+\begin{equation}
+C_A(\tau\rightarrow t) = \boldsymbol{\alpha}_{t}{\bf L}_t\boldsymbol{\alpha}^{\top}_{\tau}
+\end{equation}
+
+and
+
+\begin{equation}
+C_a(\tau\rightarrow t) = \boldsymbol{\alpha}_{t}{\bf B}_t{\bf B}_t\boldsymbol{\alpha}^{\top}_{\tau}
+\end{equation}
+
+These will differ from $V_A(t)$ or $V_a(t)$ when the average effects at generation $\tau$ are different from those at generation $t$. This could happen either because the selective environment has changed and so parameters such as $s$ and $h$ have changed, or if  ${\bf L}_{\tau}$ is different from ${\bf L}_{t}$ and there is non-additivity (e.g. $h\neq0.5$) since then the multiple regression coefficients will change.\\
+
+In our theoretical section we assumed ${\bf L}_t$ and $\boldsymbol{\alpha}_t$ were known and so the change due to both direct and linked selection are fixed quantities, as is $V_A(t)$. However,  B\&C condition on ${\bf B}_t$ and $\boldsymbol{\alpha}_t$ and treat ${\bf R}_t$ as a random variable which leads to the change due to direct selection and $V_a(t)$ being fixed, but the change due to indirect selection and $V_A(t)$ being random. However,  since $\boldsymbol{\alpha}$ cannot be directly observed, we also deconditioned on $\boldsymbol{\alpha}$ in our inference section. The $\boldsymbol{\alpha}$'s and the elements of ${\bf B}$ for selected sites are also not directly observed in the approach of B\&C, but they make a number of strong assumptions that effectively allows the joint distribution of the average effects and selected site diversities to be marginalised.\\
+
+In Appendix \ref{App:BandC} we work through the derivation of B\&C but in terms of our own notation and retaining a full multi-locus treatment. Here, we summarise the assumptions underlying the general approach, many of which were also stated explicitly in B\&C:
+ 
+\begin{itemize}
+
+\item Assumption A) allele frequency changes are only measured over a single generation.
+
+\item Assumption B) there is no direct selection on the loci for which allele frequency change is measured.
+
+\item Assumption C) The reference allele at a neutral locus is chosen arbitrarily.
+
+\item Assumption D) The linkage-disequilibrium between selected sites is zero, which precludes processes such as Hill-Robertson interference. Under this assumption $V_A=V_a$.
+
+\item Assumption E) Changes in ${\bf R}$ are due to recombination alone - drift is absent. 
+
+\item Assumption F) Nongametic-phase linkage disequilibrium is absent.  
+
+\item Assumption G) Haldane's mapping function relates distance between two sites to their recombination rate.
+
+\item Assumption H) The genome can be broken down into a set of independent regions of fixed map length $R$. 
+
+\item Assumption I) Within a region a single selected and neutral locus exist.
+
+\item Assumption J) The two loci within a region are distributed uniformly and independently across the region such that the distance between them has a triangular distribution. 
+
+\item Assumption K)  There is no relationship between the genetic diversity at a selected site and its LD with neutral sites (as measured through $R_{i_t, j_t}R_{i_\tau, j_\tau}$ where $i$ is a neutral locus and $j$ a selected locus. Since the relationship between genetic diversity and LD (even measured as a correlation) has constraints, this is unlikely to be met \citep{sved2018one}.
+
+\item Assumption L) The average effects are constant $\boldsymbol{\alpha}_t=\boldsymbol{\alpha}_{\tau}$ if estimates are to be interpreted as the additive genic variance (or additive genetic variance if Assumption D is met) in generation $\tau$. If they are not constant, the additive genic/genetic covariance between generations $t$ and $\tau$ is measured.  
+
+\item Assumption M) The initial expected LD-structure  $E[R_{i_t, j_t}^2]$ is approximated from an expression for $E[L_{i_t, j_t}^2]$ which is itself derived under mutation-recombination-drift balance (i.e. no selection). 
+
+\item Assumption N) the ratio of genetic diversity in generation $\tau$ to genetic diversity in generation $t$ is constant across all selected loci, with constant $c$. Under these assumptions, dividing the estimate of $V_a(\tau)$ by $c$ gives an estimate of $V_a(t)$.
+
+\item Assumption O) Since the genetic diversity at selected sites is not measured it is assumed that $c$ is equal to the ratio of genetic diversity in generation $\tau$ to genetic diversity in generation $t$ across all neutral loci.
+\end{itemize}
+
+Our approach relaxes many of these assumptions although in the absence of a recombination map Assumption G may be applied. In addition, if ${\bf L}_0$ cannot be partitioned into gametic-phase and nongametic-phase contributions, Assumption F might also be made by substituting ${\bf L}_0$ for ${\bf L}^{'}_0$ in $\tilde{\bf L}_0\circ{\bf N}$ and $\tilde{\bf L}_0\circ{\bf M}$. We also make Assumption L if we choose to interpret $V_A(0)$ as an additive genetic variance rather than an additive genetic covariance. Assumptions K \& L result in the unpredictable response to selection being zero. While we do not make this assumption, we do assume that the unpredictable responses to selection are independent across replicates. By relaxing the strong or impractical assumptions of B\&C we are forced into making  assumptions about the mean and covariance structure of the average effects, and when making inferences about their distributional form (multivariate normal).
+
+In applying their theory to data B\&C introduce some more approximation/assumptions.
+
+\begin{itemize}
+\item Fixation/losses are coded as missing
+\item In the theoretical section, expectations and (co)variances are taken over evolutionary realisations.  However, in the inference section expectations and (co)variances are taken over loci. 
+
+\end{itemize}
+
+In our simulations/inference section we assume that the within-replicate (residual) (co)variances are driven by drift only (rather than an unpredictable response to selection) and that the drift (co)variances are equal to their expected values (conditional on ${\bf L}_0$). In reality, the within-replicate covariances are likely larger due to the unpredictable response to selection, and evolutionary variance in the drift (co)variances. These assumptions might not be too severe if these two additional processes result in within-replicate (co)variances that are proportional to those under pure drift. Under this scenario, the model should perform well although the residual variance may be higher than expected.\\
+
+
+In addition, obtaining $\tilde{\bf L}_{0}$ requires phased data in order to partition  ${\bf L}_{0}$ in to ${\bf L}^{'}_{0}$ and ${\bf L}^{''}_{0}$ in order to perform the weighting (assuming the recombination map is known). 
+
+\section*{Simulations}
+\addcontentsline{toc}{section}{Simulations}
+In order to validate our method and our inference approach, we performed multilocus simulations using msprime (version 1.2.0) \citep{kelleher2016efficient} and SLiM (version 4.2.2) \citep{haller2023slim}. Our aim was to investigate the sensitivity of our method to the following parameters: (1) map length of the genomic region simulated, (2) number of replicate populations in the evolve and resequence experiment, (3) the population size of each of the replicate populations, (4) number of generations for which the evolve and resequence experiment conducted. 
+
+We used an additive model for relative fitness, as described in our theory. The breeding value of an individual's relative fitness was defined as $u_k = \sum_{i=1}^{n_L}{c_{k,i}}{\alpha_i}$, where, as before, ${c_{k,i}}$ represents the proportion of copies of the reference allele in individual k at locus i, and $\alpha_i$ represents the average effect for relative fitness at that locus. To obtain the relative fitness of each individual we added a noise term drawn from a standard normal distribution (mean = 0, variance = 1) to the breeding value.  Following \citet{buffalo2019linked} we then exponentiated the relative fitness of each individual to obtain that individual's absolute fitness.  
+
+We sampled the $\alpha_i$'s from a distribution of fitness effects (DFE) that was a weighted mixture of three distributions: (1) a point mass at $\alpha = 0$ representing neutral mutations, (2) a reflected gamma distribution with shape = 0.3 and scale = 0.033 representing deleterious mutations, and (3) a gamma distribution with shape = 0.3 and scale = 0.033 representing beneficial mutations. We assumed that 25 \% of all mutations were neutral ($\alpha = 0$). Among the non-neutral mutations, the proportion of beneficial mutations varied depending on the the type of simulation. We ran one set of simulations with neutral and deleterious mutations only. In simulations which included beneficial mutations, they were allowed to occur at a rate that was 0.02 \% the rate of non-neutral mutations. 
+
+Our simulations had two distinct phases. Using msprime and SLiM, the first phase simulated the history of the ancestral population from which experimental populations are later derived. The second phase simulated a typical evolve and resequence experiment with independent replicate experimental populations derived from the same ancestral population. We simulated a single, contiguous 1 million base-pair long genomic region. Our goal was to obtain true levels of $V_A$ that varied between 0.01 and 0.1 at the end of the first phase. We varied the true levels of $V_A$ by changing the mutation rate such that the total number of segregating sites at the end of the first phase ranged between about 8000 and 60000. This made our downstream analyses computationally tractable, while also allowing for polygenecity for fitness. 
+
+First, using a neutral coalescent simulation implemented using msprime \citep{kelleher2016efficient}, we constructed geneologies for 2500 diploid genomes and simulated mutations on them. Using pyslim, to each of these mutations, we attached an $\alpha$ randomly drawn only from the non-neutral part of the DFE described above.  It is important to note that at this point in the simulation there was no relationship between genetic diversities and $\alpha$'s; in other words, $p_{\alpha} = 0$. Using a Wright-Fisher simulation implemented using SLiM, we let this population of 2500 individuals evolve forward in time for 20000 generations. To speed up our simulations, we only forward-simulated non-neutral mutations in this phase.  In one set of simulations we allowed only deleterious mutations to occur. In simulations which allowed both deleterious and beneficial mutations, the proportion of beneficial mutations was fixed at 0.02 \%.  In generation 20000, we sampled $n_I$ (chosen to be either 1000, 500, or 100) diploid individuals from this population which would  go on to become the parents in the next phase of the simulation. At this stage, we added neutral mutations to the tree sequence recorded so far using the ``pyslim" package, to generate complete genomes for the $n_I$ parents. We recorded the genotype of each parent at each locus. This allowed us the construct ${\bf L}_0$. At this point in time in the simulations, we expect the relationship between genetic diversities and $\alpha$'s, i.e. $p_{\alpha} $, to have evolved away from $p_{\alpha} = 0$. 
+
+In the second phase of our simulation, again implemented in SLiM, we first allowed the parents to undergo one round of reproduction without selection to establish replicate experimental populations (either 10, 5, or 3 replicates). Next, we allowed each of these populations to evolve forward in time using a Wright-Fisher simulation to simulate the experiment. We allowed the number of generations in the experiment to be either 1, 3, or 5. We allowed no new mutations during this phase. For each of the independent replicate populations, we recorded the genome-wide vector of allele frequencies in each generation of the experiment. 
+
+In addition to these simulations, we performed simplified, proof-of-principle simulations to test the logic of our method. These simulations were different from the more realistic simulations described above in several ways:
+
+(1) The first phase was highly abbreviated such that the forward simulation implemented in SLiM lasted only a single generation. This meant that the ancestral population - from which replicate experimental population were founded - had evolved entirely under neutrality. In other words, we expected there to be no relationship between genetic diversities and $\alpha$s, such that $p_{\alpha}$ was 0. 
+
+(2) In our simulations we first generate neutral diversity using msprime and attach $\alpha$s randomly drawn from the DFE desctibed above to derived mutations. However, derived alleles typically tend to be rarer than their ancestral counterparts. Therefore, in order to avoid any relationship between $\alpha$s and genetic diversities, in our DFE, we set the ratio of deleterious to beneficial mutations to 1.
+
+While these simulations are far from realistic they are comparable to the multilocus simulations used by \citet{buffalo2019linked} to test their method. Furthermore, in typical evolve and resequence studies, laboratory adapted populations are allowed to evolve in experimental environments that are novel relative to the regular laboratory environment of the population. This novel selective environment can take the form of a novel pathogen, extreme temperature stress, unusual population densities, among others. It is, therefore, possible that sites that were neutral during laboratory adaptation acquire non-zero selection coefficients in the experimental evolution phase, a scenario akin to our simplified simulations.       
+
+\section*{Results}
+
+\section{Appendices}
+%\addcontentsline{toc}{section}{Appendix}
+
+
+\subsection{Appendix 1: The dynamics of ${\bf L}$ under drift and recombination.} \label{Appendix:LD}
+%\addcontentsline{toc}{subsection}{Appendix 3: The dynamics of ${\bf L}$ under drift and recombination.}
+
+The matrix ${\bf L}$ is a covariance matrix whose elements are proportional to the genotypic linkage-disequilbria (off-diagonals) or variance in genotypic allele frequencies (diagonals) at the start of a generation, before selection has acted. We can decompose  ${\bf L}$ into ${\bf L}^{'}$ and ${\bf L}^{''}$ following the notation of \citet{buffalo2019linked} where ${\bf L}^{'}$ are the (co)variances that arise due to alleles on the same gamete and ${\bf L}^{''}$ are the (co)variances that arise due to alleles on the different gametic contributions of a genotype. The elements of ${\bf L}^{'}$ and ${\bf L}^{''}$ have direct correspondences with genetic diversities and additive measures of disequilibria. Under the notation of \citet{Weir.1989}, the diagonal elements of ${\bf L}^{'}$ are half the gametic genetic diversities ($\pi_i=p_i(1-p_i)=2L^{'}_{i,i}$), and the off-diagonals are half the gametic-phase disequilibria ($D_{ij}=2L^{'}_{i,j}$). The diagonal elements of ${\bf L}^{''}$ are half the additive coefficients of Hardy Weinberg disequilibria ($D_{i}=2L^{''}_{i,i}$), and the off-diagonals are half the nongametic-phase disequilibria ($D_{i/j}=2L^{''}_{i,j}$). 
+
+
+To see these correspondences imagine two bi-allelic loci, $i$ and $j$, with reference/alternate alleles A/a and B/b, respectively. There are four possible gametic haplotypes, and we can denote the frequency of haplotype $mn$ as $p_mn$ in the gametes. Designating the frequency of allele $m$ as $p_m$, and noting that $p_m$ is equal to the summed frequencies of all haplotypes containing allele $m$. Decompose $c_i$ into the sum of maternal and paternal contribution $c_i = m_i+f_i$ where $m_i$ (or $f_i$) takes the value 1/2 if the mother contributed a reference allele and 0 if not. Then
+
+\begin{equation}
+\begin{array}{rl}
+L_{i,j} =& COV(c_i, c_j)\\
+        =& COV(m_i+f_i,  m_j+f_j)\\
+        =& COV(m_i,  m_j)+COV(f_i,f_j)+COV(m_i,  f_j)+COV(f_i,  m_j)\\
+\end{array}
+\end{equation}
+
+Assuming haplotype frequencies are identical in male and female gametes we get
+
+\begin{equation}
+\begin{array}{rl}
+L_{i,j} =& (p_{AB}-p_{A}p_{B})/4+(p_{AB}-p_{A}p_{B})/4+(p_{AB}-p_{A}p_{B})/4+(p_{A/B}-p_{A}p_{B})/4\\
+=& (p_{AB}-p_{A}p_{B})/2+(p_{A/B}-p_{A}p_{B})/2\\
+=& D_{ij}/2+D_{i/j}/2\\
+\end{array}
+\end{equation}
+
+where $p_{A/B}$ is the frequency of zygotes that have an A from their mother and a B from their father, or vice versa.  When $i=j$,
+
+\begin{equation}
+\begin{array}{rl}
+L_{i,i} =& COV(c_i, c_i)\\
+=& (p_{A}^2-p_{A})/2+(p_{A/A}-p_{A}^2)/2\\
+=& \pi_i/2+D_{i}/2\\
+\end{array}
+\end{equation}
+
+where $p_{A/A}$ is the frequency of $A$ homozygotes and noting that 
+\citet{Weir.1989} uses $\pi$ to denote $p_i(1-p_i)$ rather than the more usual (and less natural) $2p_i(1-p_i)$.
+
+In order to derive expressions for the dynamics of ${\bf L}^{'}$ and ${\bf L}^{''}$, note that ${\bf L}^{''}$ is generated anew each generation under random mating and in a finite population has zero expectation such that
+
+\begin{equation}
+L^{''}_{i_{t+1}, j_{t+1}} = e^{''}_{i_{t+1}, j_{t+1}}
+\end{equation}
+
+where $e^{''}_{i_{t+1}, j_{t+1}}$ is a stochastic term with mean zero and variance given in \citet{Weir.1996} The elements of ${\bf L}^{'}$ under recombination and drift are \citep{Hill.1968, Santiago.1998}
+
+\begin{equation}
+\begin{array}{rl}
+L^{'}_{i_{t+1},j_{t+1}} =& \left(1-\frac{1}{2N_t}
+\right)\left((1-r_{i_{t},j_{t}})L^{'}_{i_{t},j_{t}} + r_{i_{t},j_{t}}L^{''}_{i_{t},j_{t}}\right)+e^{'}_{i_{t+1},j_{t+1}}\\
+=& c_tL^{'}_{i_{t},j_{t}} + h_tL^{''}_{i_{t},j_{t}}+e^{'}_{i_{t+1},j_{t+1}}\\
+
+\end{array}
+\end{equation}
+
+where $c_t=(1-r_{i_{t},j_{t}})(1-\frac{1}{2N_t})$ and  $h_t=r_{i_{t},j_{t}}(1-\frac{1}{2N_t})$ with $r_{i_{t},j_{t}}$ being the recombination rate between locus $i$ and $j$ in generation $t$ and $N_t$ the effective population size in generation $t$.The stochastic terms, $e^{'}_{i_{t+1},j_{t+1}}$, have zero mean and are uncorrelated over time, with variances given by \citet[][Eq 25, although those variances must be divided by 4 here since we are working with the frequency of alleles in individuals rather than gametes]{Ohta.1969}. The covariances between, for example, $e^{'}_{i_{t+1},j_{t+1}}$ and $e^{'}_{k_{t+1},l_{t+1}}$ are not given, and may be unknown. As a consequence,
+
+
+
+\begin{equation}
+\begin{array}{rl}
+L^{'}_{i_{1},j_{1}} =& c_0L^{'}_{i_{0},j_{0}}+h_0L^{''}_{i_{0},j_{0}}+e^{'}_{i_{1},j_{1}}\\
+L^{'}_{i_{2},j_{2}} =& c_1(c_0L^{'}_{i_{0},j_{0}}+h_0L^{''}_{i_{0},j_{0}}+e^{'}_{i_{1},j_{1}})+h_1L^{''}_{i_{1},j_{1}}+e^{'}_{i_{2},j_{2}}\\
+L^{'}_{i_{3},j_{3}} =& 
+
+c_2(c_1(c_0L^{'}_{i_{0},j_{0}}+h_0L^{''}_{i_{0},j_{0}}+e^{'}_{i_{1},j_{1}})+h_1L^{''}_{i_{1},j_{1}}+e^{'}_{i_{2},j_{2}})+h_2L^{''}_{i_{2},j_{2}}+e^{'}_{i_{3},j_{3}}\\
+
+L^{'}_{i_{3},j_{3}} =&c_2c_1c_0L^{'}_{i_{0},j_{0}}+c_2c_1h_0L^{''}_{i_{0},j_{0}}+c_2c_1e_{i_{1},j_{1}}^{'}+c_2h_1L^{''}_{i_{1},j_{1}}+c_2e_{i_{2},j_{2}}^{'}+h_2L^{''}_{i_{2},j_{2}}+e_{i_{3},j_{3}}^{'}\\
+
+\dots=&\dots\\
+
+L^{'}_{i_{t},j_{t}} =&L^{'}_{i_{0},j_{0}}\prod_{k=0}^{t-1}c_k+\sum_{k=0}^{t-1}h_kL^{''}_{i_{k},j_{k}}\prod_{u=k+1}^{t-1}c_u+\sum_{k=1}^{t-1}e^{'}_{i_{k},j_{k}}\prod_{u=k}^{t-1}c_u+e^{'}_{i_{t},j_{t}}\\
+
+
+L^{'}_{i_{t},j_{t}} =&L^{'}_{i_{0},j_{0}}\prod_{k=0}^{t-1}c_k+h_0L^{''}_{i_{0},j_{0}}\prod_{k=1}^{t-1}c_k+\sum_{k=1}^{t-1}h_kL^{''}_{i_{k},j_{k}}\prod_{u=k+1}^{t-1}c_u+\sum_{k=1}^{t-1}e^{'}_{i_{k},j_{k}}\prod_{u=k}^{t-1}c_u+e^{'}_{i_{t},j_{t}}\\
+
+L^{'}_{i_{t},j_{t}} =&L^{'}_{i_{0},j_{0}}\prod_{k=0}^{t-1}c_k+\frac{h_0}{c_0}L^{''}_{i_{0},j_{0}}\prod_{k=0}^{t-1}c_k+\sum_{k=1}^{t-1}\frac{h_k}{c_k}L^{''}_{i_{k},j_{k}}\prod_{u=k}^{t-1}c_u+\sum_{k=1}^{t-1}e^{'}_{i_{k},j_{k}}\prod_{u=k}^{t-1}c_u+e^{'}_{i_{t},j_{t}}\\
+
+L^{'}_{i_{t},j_{t}} =&\left(L^{'}_{i_{0},j_{0}}+\frac{h_0}{c_0}L^{''}_{i_{0},j_{0}}\right)\prod_{k=0}^{t-1}c_k+\sum_{k=1}^{t-1}\left(e^{'}_{i_{k},j_{k}}+\frac{h_k}{c_k}L^{''}_{i_{k},j_{k}}\right) \prod_{u=k}^{t-1}c_u+e^{'}_{i_{t},j_{t}}\\
+
+\end{array}
+\label{eq:LD1}
+\end{equation}
+
+ Having the matrix ${\bf N}_t$ with the $ij^{th}$ element being the relevant $\prod_{k=0}^{t-1}c_k$, we have
+ 
+\begin{equation}
+{\bf L}_{t}= {\bf N}_t\circ\tilde{\bf L}_{0}+\Delta {\bf L}^{'}_t+{\bf L}^{''}_t
+\label{eq:LD3}
+\end{equation}
+ 
+ where $\circ$ is the Hadamard product. The first term is the expected ${\bf L}$ (and ${\bf L}^{'}$) in generation $t$ conditional on the genotypic composition of the population in Generation 0, where $\tilde{\bf L}_{0}$ is the sum of ${\bf L}^{'}_{0}$ and ${\bf L}^{''}_{0}$ with the elements of the latter weighted by $h_0/c_0=r_{i,j}/(1-r_i,j)$. $\Delta {\bf L}^{'}_t$ is a matrix with elements equal to the sum of the stochastic terms involving $e$ in Equation \ref{eq:LD1} and represents stochastic changes in ${\bf L}^{'}$ from generation 0 to generation $t$. ${\bf L}^{''}_t$ are the new nongametic-phase disequilibria that arise in generation $t$. Note that if replicate populations are initiated from the offspring of Generation $0$, then the stochastic terms, $\Delta {\bf L}^{'}_t$ and ${\bf L}^{''}_t$, will be unique in each replicate although the deterministic part is shared. If recombination rates are constant in time $r_{i_t, j_t}=r_{i, j}$ then $h_0/c_0 = r_{ij}/(1-r_{ij})$ and $\prod_{k=0}^{t-1}c_k =(1-r_{ij})^{t}\prod_{k=0}^{t-1}(1-\frac{1}{2N_k})$. When population sizes are also constant ($N_t=N$) then $\prod_{k=0}^{t-1}c_k =(1-r_{ij})^{t}(1-\frac{1}{2N})^t$.\\ 
+
+ 
+
+ JARROD: what is effective population size here? In Generation 0 all parents contribute a son and daughter to Generation 1, and so the effective population size will be double the census population size? Thereafter, I think any reduction in $N_e$ due to genetic variance in fitness from Gen 0 should be ignored (because we soak that up through the deterministic part of the allele frequency change  - Equation \ref{eq:Edelta}) but any reductions from new genetic variance or that inherited from previous generations should be included. Reductions due to environmental variance in family size should also be included.
+
+
+\subsection{Appendix 2: Derivation for the mean, within-replicate (co)variances and between replicate (co)variances allele frequency changes.}
+%\addcontentsline{toc}{subsection}{Appendix 4: Derivation for the mean, within-replicate (co)variances and between replicate (co)variances allele frequency changes.}
+\label{App:dist}
+
+Both $\underset{D}\Delta {\bf p}$ and $\underset{U}\Delta {\bf p}$ have expectation zero such that the conditional mean is
+
+\begin{equation}
+\begin{array}{rl}
+E\left[\Delta {\bf p}_m\right] =& \sum_{t=t_m}^{\tau_m}E\left[({\bf N}_{t,m}\circ\tilde{\bf L}_0)\bar{\boldsymbol{\alpha}}\right]\\
+=& \left(\sum_{t=t_m}^{\tau_m}({\bf N}_{t,m}\circ\tilde{\bf L}_0)\right)E\left[\bar{\boldsymbol{\alpha}}\right]\\
+=& \left(\tilde{\bf L}_0\circ\sum_{t=t_m}^{\tau_m}{\bf N}_{t,m}\right)E\left[\bar{\boldsymbol{\alpha}}\right]\\
+=& \left(\tilde{\bf L}_0\circ{\bf N}^{(m)}\right)E\left[\bar{\boldsymbol{\alpha}}\right]\\
+\end{array}
+\end{equation}
+
+where ${\bf N}^{(m)}=\sum_{t=t_m}^{\tau_m}{\bf N}_{t,m}$. The conditional between replicate covariance is also straight forward
+
+\begin{equation}
+\begin{array}{rl}
+COV(\Delta {\bf p}_m, \Delta {\bf p}_n^{\top})=&\sum_{t=t_m}^{\tau_m}\sum_{t_n=1}^{\tau_n}COV(({\bf N}_{t,m}\circ\tilde{\bf L}_0)\bar{\boldsymbol{\alpha}}, \bar{\boldsymbol{\alpha}}^{\top}({\bf N}_{t_n}\circ\tilde{\bf L}_0))\\
+=&\sum_{t=t_m}^{\tau_m}\sum_{t_n=1}^{\tau_n}({\bf N}_{t,m}\circ\tilde{\bf L}_0)VAR(\bar{\boldsymbol{\alpha}}, \bar{\boldsymbol{\alpha}}^{\top})({\bf N}_{t_n}\circ\tilde{\bf L}_0)\\
+=&\left(\tilde{\bf L}_0\circ\sum_{t=t_m}^{\tau_m}{\bf N}_{t,m}\right)VAR(\bar{\boldsymbol{\alpha}})\left(\tilde{\bf L}_0\circ\sum_{t_n=1}^{\tau_n}{\bf N}_{t_n}\right)\\
+=&\left(\tilde{\bf L}_0\circ{\bf N}^{(m)}\right)VAR(\bar{\boldsymbol{\alpha}})\left(\tilde{\bf L}_0\circ{\bf N}^{(n)}\right)\\
+\end{array}
+\end{equation}
+
+where $m$ and $n$ are a pair of replicates. The within replicate (co)variances are much harder as not only do they include the predictable response to selection but also the effects of drift and the unpredictable response to selection. In what follows we assume $E\left[\Delta\boldsymbol{\alpha}\right]=0$ and $COV(\Delta{\bf L}^{'}+{\bf L}^{''}, \bar{\boldsymbol{\alpha}})=0$ such that the predictable and unpredictable response to selection are independent. In addition, we will also assume $COV(\Delta{\bf L}^{'}+{\bf L}^{''}, \Delta\boldsymbol{\alpha})=0$ and that all $\Delta\boldsymbol{\alpha}$ are independent of each other. Since $\Delta {\bf L}^{'}_t$ is the sum of stochastic changes from generation $1$ to $t$, $COV(\Delta {\bf L}^{'}_{t_1, m}, \Delta {\bf L}^{'}_{t_2, m})=VAR(\Delta {\bf L}^{'}_{t_1, m})$ when $t_1\leq t_2$. Note $COV({\bf L}^{''}_{t_1, m}, {\bf L}^{''}_{t_2, m})=0$. These assumptions allow the simplification:
+
+\begin{tiny}
+\begin{equation}
+\begin{array}{rl}
+VAR\left(\Delta {\bf p}_m\right) =& VAR\left(\sum_{t=t_m}^{\tau_m}\left(({\bf N}_{t,m}\circ\tilde{\bf L}_0)\bar{\boldsymbol{\alpha}}+\underset{U}\Delta {\bf p}_{t, m}+\underset{D}\Delta {\bf p}_{t, m}\right)\right)\\
+VAR\left(\Delta {\bf p}_m\right) =& \sum_{t_1=t_m}^{\tau_m}\sum_{t_2=t_m}^{\tau_m}COV\left(({\bf N}_{t_1}\circ\tilde{\bf L}_0)\bar{\boldsymbol{\alpha}}+\underset{U}\Delta {\bf p}_{t_1, m}+\underset{D}\Delta {\bf p}_{t_1, m}, ({\bf N}_{t_2}\circ\tilde{\bf L}_0)\bar{\boldsymbol{\alpha}}+\underset{U}\Delta {\bf p}_{t_2, m}+\underset{D}\Delta {\bf p}_{t_2, m}\right)\\
+
+VAR\left(\Delta {\bf p}_m\right) =& \sum_{t=t_m}^{\tau_m}VAR\left(\underset{D}\Delta {\bf p}_{t, m}\right)+\sum_{t_1=t_m}^{\tau_m}\sum_{t_2=t_m}^{\tau_m}COV\left(({\bf N}_{t_1}\circ\tilde{\bf L}_0)\bar{\boldsymbol{\alpha}}+\underset{U}\Delta {\bf p}_{t_1, m}, ({\bf N}_{t_2}\circ\tilde{\bf L}_0)\bar{\boldsymbol{\alpha}}+\underset{U}\Delta {\bf p}_{t_2, m}\right)\\
+
+
+VAR\left(\Delta {\bf p}_m\right) =& \sum_{t=t_m}^{\tau_m}VAR\left(\underset{D}\Delta {\bf p}_{t, m}\right)+\left(\sum_{t_1=t_m}^{\tau_m}({\bf N}_{t_1}\circ\tilde{\bf L}_0)\right)VAR(\bar{\boldsymbol{\alpha}})\left(\sum_{t_2=t_m}^{\tau_m}({\bf N}_{t_2}\circ\tilde{\bf L}_0))\right)\\
+&+\sum_{t_1=t_m}^{\tau_m}\sum_{t_2=t_m}^{\tau_m}COV\left(\underset{U}\Delta {\bf p}_{t_1, m},\underset{U}\Delta {\bf p}_{t_2, m}\right)\\
+
+VAR\left(\Delta {\bf p}_m\right) =& \sum_{t=t_m}^{\tau_m}VAR\left(\underset{D}\Delta {\bf p}_{t, m}\right)+\left(\sum_{t_1=t_m}^{\tau_m}({\bf N}_{t_1}\circ\tilde{\bf L}_0)\right)VAR(\bar{\boldsymbol{\alpha}})\left(\sum_{t_2=t_m}^{\tau_m}({\bf N}_{t_2}\circ\tilde{\bf L}_0))\right)\\
+&+\sum_{t=t_m}^{\tau_m}(2(\tau^m-t)+1)VAR\left(\underset{U}\Delta {\bf p}_{t}\right)\\
+
+VAR\left(\Delta {\bf p}_m\right) =& \sum_{t=t_m}^{\tau_m}VAR\left(\underset{D}\Delta {\bf p}_{t_{m}, m}\right)+\left(\tilde{\bf L}_0\circ{\bf N}^{(m)}\right)VAR(\bar{\boldsymbol{\alpha}})\left(\tilde{\bf L}_0\circ{\bf N}^{(m)}\right)\\
+&+\sum_{t=t_m}^{\tau_m}(2(\tau^m-t)+1)VAR\left(\underset{U}\Delta {\bf p}_{t}\right)\\
+
+
+\end{array}
+\end{equation}
+\end{tiny}
+
+which requires an expressions for $VAR\left(\underset{U}\Delta {\bf p}_{t_1, m}\right)$ and $VAR\left(\underset{D}\Delta {\bf p}_{t_{m}, m}\right)$. The variance due to unpredictable selection is:
+
+
+\begin{tiny}
+\begin{equation}
+\begin{array}{rl}
+VAR\left(\underset{U}\Delta {\bf p}_{t_{m}, m}\right)=&VAR\left(
+(\Delta{\bf L}^{'}_{t_{m}}+{\bf L}^{''}_{t_{m}})\bar{\boldsymbol{\alpha}}+({\bf N}_{t_{m}}\circ\tilde{\bf L}_0)\Delta\boldsymbol{\alpha}_{t_{m}}+(\Delta{\bf L}^{'}_{t_{m}}+{\bf L}^{''}_{t_{m}})\Delta\boldsymbol{\alpha}_{t_{m}}\right)\\
+=&VAR\left(
+(\Delta{\bf L}^{'}_{t_{m}}+{\bf L}^{''}_{t_{m}})\bar{\boldsymbol{\alpha}}\right)+VAR\left(({\bf N}_{t_{m}}\circ\tilde{\bf L}_0)\Delta\boldsymbol{\alpha}_{t_{m}}\right)+VAR\left((\Delta{\bf L}^{'}_{t_{m}}+{\bf L}^{''}_{t_{m}})\Delta\boldsymbol{\alpha}_{t_{m}}\right)\\
+
+=&VAR\left(
+\Delta{\bf L}^{'}_{t_{m}}+{\bf L}^{''}_{t_{m}}\right)VAR\left(\bar{\boldsymbol{\alpha}}\right)+({\bf N}_{t_{m}}\circ\tilde{\bf L}_0)VAR\left(\Delta\boldsymbol{\alpha}_{t_{m}}\right)({\bf N}_{t_{m}}\circ\tilde{\bf L}_0)+VAR\left(\Delta{\bf L}^{'}_{t_{m}}+{\bf L}^{''}_{t_{m}}\right)VAR\left(\Delta\boldsymbol{\alpha}_{t_{m}}\right)\\
+\end{array}
+\end{equation}
+\end{tiny}
+
+and cannot be simplified.\\
+
+For the drift covariances, note that under random mating, haplotypes are drawn from a multinomial with $2N$ trials. Using AB, Ab, AB and aB to denote the \emph{number} of each haplotypes in the gamete pool, the number of haplotypes $mn$ has variance $2Np_mn(1-p_mn)$ and the covariance in the numbers of haplotypes $mn$ and $op$ is $-2Np_mnp_op$ where $p_mn$ is the frequency in the gamete pool (i.e the parental haplotype frequencies modified by recombination). The covariane in the number of A and B alleles sampled, is therefore 
+
+
+\begin{equation}
+\begin{array}{rl}
+COV(AB+Ab, AB+aB) =& COV(AB, AB)+COV(AB, aB)+COV(Ab, AB)+COV(Ab, aB)\\
+=& 2N\left[p_{AB}(1-p_{AB})-p_{AB}p_{aB}-p_{Ab}p_{AB}-p_{Ab}p_{aB}\right]\\
+=& 2N\left[p_{AB}(1-p_{AB}-p_{aB})-p_{Ab}(p_{AB}+p_{aB})\right]\\
+=& 2N\left[p_{AB}(1-p_{B})-p_{Ab}p_{B}\right]\\
+=& 2N\left[p_{AB}-(p_{Ab}+p_{AB})p_{B}\right]\\
+=& 2N\left[p_{AB}-p_{A}p_{B}\right]\\
+=& 4N\bar{L}^{'}_{i,j}\\
+\end{array}
+\end{equation}
+
+where $\bar{L}^{'}_{i,j}$ is the gametic-phase linkage disequilibria that would be achieved in an infinite population. We can divide through by $(1/2N)^2$ to obtain the drift covariance in frequency (rather than counts) as $\bar{L}^{'}_{i,j}/N$ (i.e the drift (co)variances in a allele frequency from generation $t$ to $t+1$ are proportional to the gametic-phase disequilibria in generation $t+1$ that would be achieved in an infinite population conditional on the genotypic composition of the population in generation $t$). This recovers the well known result for the drift variance in allele frequency: $\bar{L}^{'}_{i,i}/N = p_i(1-p_i)/2N$. Since $\bar{L}^{'}_{i_{t+1},j_{t+1}}=L^{'}_{i_t,j_t}r_{i,j}+L^{''}_{i_t,j}(1-r_{i,j})$ we get, in matrix terms,
+
+\begin{equation}
+\begin{array}{rl}
+VAR\left(\underset{D}\Delta {\bf p}_{t,m}\right) =& \frac{1}{N_{t,m}} \bar{\bf L}^{'}_{t+1,m}\\
+VAR\left(\underset{D}\Delta {\bf p}_{t,m}\right) =& \frac{1}{N_{t,m}}\left[{\bf R}_{-}\circ{\bf L}^{'}_{t,m}+{\bf R}_{+}\circ{\bf L}^{''}_{t, m}\right]\\
+
+VAR\left(\underset{D}\Delta {\bf p}_{t,m}\right) =& \frac{1}{N_{t,m}}\left[{\bf R}_{-}\circ\left({\bf N}_{t, m}\circ\tilde{\bf L}_{0}+\Delta {\bf L}^{'}_{t, m}\right)+{\bf R}_{+}\circ{\bf L}^{''}_{t, m} \right]\\
+\end{array}
+\end{equation}
+
+where ${\bf R}_{+}$ and ${\bf R}_{\_}$ are matricies with the $ij_{th}$ being $r_{ij}$ and $1-r_{ij}$ respectively. The expected drift terms (conditional on ${\bf L}_0$) are therefore:
+
+\begin{equation}
+\begin{array}{rl}
+E\left[VAR\left(\underset{D}\Delta {\bf p}_{t,m}\right)\right] =& \frac{1}{N_{t,m}}\left({\bf R}_{-}\circ{\bf N}_{t,m}\circ\tilde{\bf L}_{0}\right)\\
+\end{array}
+\end{equation}
+
+We define a new matrix ${\bf M}_{t,m}$ with the $ij^{th}$ element being $(1-r_{i,j})/N_{t,m}$ (${\bf M}_{t,m}=\frac{1}{N_{t,m}}{\bf R}_{-}$) to give
+
+\begin{equation}
+\begin{array}{rl}
+E\left[VAR\left(\underset{D}\Delta {\bf p}_{t,m}\right)\right] 
+=& {\bf M}_{t,m}\circ{\bf N}_{t,m}\circ\tilde{\bf L}_{0}\\
+\end{array}
+\end{equation}
+
+
+Since the drift terms are independent, this gives:
+
+\begin{equation}
+\begin{array}{rl}
+E\left[VAR\left(\underset{D}\Delta {\bf p}_{m}\right)\right]=&\sum_{t=t_m}^{\tau_m}E\left[VAR\left(\underset{D}\Delta {\bf p}_{t,m}\right)\right]\\
+=& \sum_{t=t_m}^{\tau_m}{\bf M}_{t,m}\circ{\bf N}_{t,m}\circ\tilde{\bf L}_{0}\\
+=& \tilde{\bf L}_{0}\circ\sum_{t=t_m}^{\tau_m}{\bf M}_{t,m}\circ{\bf N}_{t,m}\\
+=& \tilde{\bf L}_{0}\circ{\bf M}^{(m)}\\
+\end{array}
+\end{equation}
+
+Where ${\bf M}^{(m)}=\sum_{t=t_m}^{\tau_m}{\bf M}_{t,m}\circ{\bf N}_{t,m}$. Note the $ij^{th}$ element of ${\bf M}_{t,m}\circ{\bf N}_{t,m}=(1-r_{ij})^{t+1}\frac{1}{N_{t}}\prod_{k=0}^{t-1}(1-\frac{1}{2N_{k_m}})$ which reduces to $(1-r_{ij})^{t+1}\frac{1}{N_m}(1-\frac{1}{2N_m})^{t}$ with constant population size. JARROD: it's not clear how large the evolutionary variance in $VAR\left(\underset{D}\Delta {\bf p}_{m}\right)$ is, and whether we should try and deal with it - it would be very hard!.
+
+The selection and drift covariances in replicate $m$ involve the terms $\tilde{\bf L}_0\circ{\bf N}^{(m)}$ and $\tilde{\bf L}_0\circ{\bf M}^{(m)}$ respectively. The terms ${\bf N}^{(m)}$ and ${\bf M}^{(m)}$ were derived under the assumption of discrete generations and assuming effective population sizes are known in each generation. How sensitive are inferences when generations are overlapping and/or effective population sizes are not known accurately? What measure of effective population size should we use, and how should this be obtaining given there is heritable variation in fitness?  Although it looks like \citet{Santiago.1998} might have relevant results, we need the drift variance after accounting for the predictable linked selection, but it seems the drift variance in \citet{Santiago.1998} includes change due predictable linked selection.
+
+Our predictable bit is proportional to $\sum_{i=0}^{\tau}(S^{'}_i+S^{''}_i)$ in \citet{Santiago.1998}, although they do not assume all covariances are due to gametic-phase disequilibrium (Jarrod, is this true, as Santiago's equation is for the correlated change that is attributable to the initial LD, not additional LD that arises during the experiment (I guess this is in our $\Delta L$ bit?) ). 
+
+
+
+Obtaining expressions for $N_m$ in the presence of fitness variation is difficult. With constant population size, autosomal inheritance, random mating, no sex differences \citep[P218-P223][Eq 5.12b]{Charlesworth.2010}
+
+\begin{equation}
+N_e = \frac{4N_c}{4+V_W - 1}
+\end{equation}
+
+where $N_c$ is the census population size and $V_W$ is the variance in absolute fitness (presumably the variance is assumed to be purely stochastic/environmental). With a log-normal distribution of fitness $E[W]=e^{a+b^2/2}$ where $a$ and $b$ are the mean and standard deviation of fitness on the log scale. With constant population size $E[W]=1$. The variance in expected fitness is $(e^{b^2}-1)e^{2a+b^2} = (e^{b^2}-1)(e^{a+b^2/2})^2=(e^{b^2}-1)/E[W]^2 = e^{b^2}-1$ and so the variance in realised fitness is $e^{b^2}$ since we have to add the binomial variance (approximated as a Poisson):
+
+\begin{equation}
+\begin{array}{rl}
+N_e = N_c\frac{4}{3+e^{b^2}}
+\end{array}
+\end{equation}
+
+\citet{Robertson.1961} (given in \citet{Santiago.1998}) gives it as
+
+\begin{equation}
+\begin{array}{rl}
+N_e = \frac{N_c}{1+V_AQ^2}
+\end{array}
+\end{equation}
+
+where $Q^2=2$ for unlinked genes under weak selection.  
+
+\citet{Santiago.1998} also give an expression:
+
+\begin{equation}
+N_e = N_c exp(-V_A^2/V_MS)
+\end{equation}
+
+where $V_M$ is the mutational variance in (relative?) fitness and $S$ is the size of the genome in Morgans.  
+
+\subsection{Appendix 3: Treating $\boldsymbol{\alpha}$ as random}
+\label{App:alpha_random}
+
+%\addcontentsline{toc}{subsection}{Appendix 1: Treating $\boldsymbol{\alpha}$ as random}
+
+Before we consider $\boldsymbol{\alpha}$ as random rather than fixed, it is important to understand that quantities such as $V_A$ and genomic best linear unbiased predictors (gBLUP) are insensitive to which allele at a locus we consider the reference allele and which allele we consider the alternate allele.  To make this explicit, consider the diagonal `assignment' matrix ${\bf A}$ for which the diagonal elements are either 1 (the fittest allele is the reference allele) or -1 (the fittest allele is the alternate allele). Under a particular assignment, $\boldsymbol{\alpha}={\bf A}|\boldsymbol{\alpha}|$, where we use $|.|$ to denote a vector whose elements have been replaced by their absolute values. In addition ${\bf L}={\bf A}{\bf L}^{+}{\bf A}$ where ${\bf L}^{+}$ is ${\bf L}$ had the fitter of the two alleles been the reference allele at all loci. If we consider $V_A$ conditional on a particular assignment we get:
+
+
+\begin{equation}
+\begin{array}{rl}
+V_A =& \boldsymbol{\alpha}^{\top}{\bf L}\boldsymbol{\alpha}\\
+    =& ({\bf A}|\boldsymbol{\alpha}|)^{\top}{\bf A}{\bf L}^{+}{\bf A}{\bf A}|\boldsymbol{\alpha}|\\
+    =& |\boldsymbol{\alpha}|^{\top}{\bf A}{\bf A}{\bf L}^{+}{\bf A}{\bf A}|\boldsymbol{\alpha}|\\
+    =& |\boldsymbol{\alpha}|^{\top}{\bf L}^{+}|\boldsymbol{\alpha}|\\
+\end{array}
+\end{equation}
+
+since ${\bf A}{\bf A}={\bf I}$: we get the same value of $V_A$ irrespective of the assignment we choose.  In contrast, quantities such as $E[{\bf L}\boldsymbol{\alpha}]$ are sensitive to the assignment, since they undergo a sign reversal under a different choice: 
+
+\begin{equation}
+\begin{array}{rl}
+{\bf L}\boldsymbol{\alpha} =& {\bf A}{\bf L}^{+}{\bf A}{\bf A}|\boldsymbol{\alpha}|\\
+    =& {\bf A}{\bf L}^{+}|\boldsymbol{\alpha}|\\
+\end{array}
+\label{Eq:Lalpha}
+\end{equation}
+
+It is tempting to use the argument that $E[{\bf L}\boldsymbol{\alpha}]={\bf 0}$ when the reference allele is chosen at random since $\alpha$ is equally likely to be positive as negative. The logic behind this argument can be expressed mathematically as $E[\boldsymbol{\alpha}]=E[{\bf A}]E[|\boldsymbol{\alpha}|]$ since the reference allele is chosen at random and so ${\bf A}$ must be independent of $|\boldsymbol{\alpha}|$. Under this same assumption $E[{\bf A}]={\bf 0}$, since any diagonal element has an equal chance of being -1 or 1, such that $E[{\bf L}\boldsymbol{\alpha}]=0$. However, this logic is incorrect. The argument envisages ${\bf A}$ as random, yet for any particular analysis ${\bf A}$ is no longer a random variable but fixed - a choice has been made as to which allele is the reference allele - even if there remains epistemic uncertainty as to whether the reference allele is the fitter of the two alleles.\\
+
+In our inference section we show that
+
+\begin{equation}
+\begin{array}{rl}
+E_{\textbf{L}_0}({V_A}) &= E_{\textbf{L}_0}[\boldsymbol{\bar \alpha}^{\top}\textbf{L}_0\bar{\boldsymbol{\alpha}}]\\
+&= tr(\textbf{L}_0{\bf V}_{\bar{\alpha}}) + \boldsymbol{\mu}_{\bar{\alpha}}^{\top}\textbf{L}_0\boldsymbol{\mu}_{\bar{\alpha}}\\
+\end{array}
+\end{equation}
+
+where $\boldsymbol{\mu}_{\bar{\alpha}}$ and ${\bf V}_{\bar{\alpha}}$ are the mean vector and covariance matrix of average effects to be averaged over.   When the reference allele is chosen  arbitrarily any sensible distribution for the $\alpha$'s must induce the same distribution on the $|\alpha|$'s regardless of the assignment. If ${\boldsymbol \mu}_{|\alpha|}$ and ${\bf V}_{|\alpha|}$ are the means and (co)variances of the average effects had all reference alleles been the fitter allele, then the distribution for a particular assignment becomes ${\boldsymbol \mu}_{\alpha}={\bf A}{\boldsymbol \mu}_{|\alpha|}$ and ${\bf V}_{\bar{\alpha}} = {\bf A}{\bf V}_{|\alpha|}{\bf A}$. Given ${\bf A}^{-1}={\bf A}$ this implies  ${\boldsymbol \mu}_{|\alpha|}={\bf A}{\boldsymbol \mu}_{\alpha}$ and ${\bf V}_{|\alpha|}={\bf A}{\bf V}_{\bar{\alpha}}{\bf A}$. For, ${\boldsymbol \mu}_{\alpha}$ this implies that suitable models should be (weighted) sums of differences between invariant properties of the alleles such that the difference reverses sign hen the reference and alternate allele are switched. This might be their (log) frequency, such that the model is $\beta(p-q)$, with $\beta$ a parameter, or it might be the difference in derived vs ancestral coded as 1 vs -1, such that the model is $2\beta$ or $-2\beta$ depending on whether the reference allele is derived or ancestral, respectively. The difference $log(p)-log(q) = log(p/(1-p))$ is particularly appealing since the the change in this quantity over a generation is equal to $\alpha$ under additivity \citep{fisher1930genetical}. 
+
+If ${\bf V}_{\bar{\alpha}}$ is assumed to be diagonal, all models are permissible since the square removes any sign. Since the multiplication of diagonal matrices is not affected by order we can see this directly:
+
+\begin{equation}
+\begin{array}{rl}
+{\bf V}_{|\alpha|} =& {\bf A}{\bf V}_{\bar{\alpha}}{\bf A}\\
+{\bf V}_{|\alpha|} =& {\bf A}{\bf A}{\bf V}_{\bar{\alpha}}\\
+{\bf V}_{|\alpha|} =& {\bf V}_{\bar{\alpha}}\\
+\end{array}
+\end{equation}
+
+However, for non-diagonal matrices a suitable distribution must result in a sign reversal of all covariances at a locus when the reference and alternate alleles are switched. The most obvious way to achieve this is to allow ${\bf V}_{\bar{\alpha}}$ to be proportional to ${\bf L}^{p}$ since
+
+\begin{equation}
+\begin{array}{rl}
+{\bf L}^{p}=&({\bf A}({\bf L}_{+}){\bf A})^{p}\\
+         =&{\bf A}({\bf L}_{+}){\bf A}...{\bf A}({\bf L}_{+}){\bf A}\\
+         =&{\bf A}({\bf L}_{+})^p{\bf A}\\
+\end{array}
+\end{equation}
+
+where ${\bf L}_{+}$ is the linkage-disequilbrium matrix had the fittest allele been the reference allele at all loci. Under this assumption
+
+\begin{equation}
+\begin{array}{rl}
+{\bf V}_{|\alpha|} =& {\bf A}{\bf V}_{\bar{\alpha}}{\bf A}\\
+{\bf V}_{|\alpha|} \propto& {\bf A}{\bf L}^{p}{\bf A}\\
+{\bf V}_{|\alpha|} \propto& {\bf A}{\bf A}({\bf L}_{+})^p{\bf A}{\bf A}\\
+{\bf V}_{|\alpha|} \propto&({\bf L}_{+})^p\\
+\end{array}
+\end{equation}
+
+A similar model was proposed by \citet{zeng2018signatures}, although there, ${\bf L}$ was treated as diagonal such that the variance of the average effect was assumed to be proportional to the genetic diversity at the locus to some power. 
+
+\subsection{Appendix 4: Projection matrices}
+\label{App:projection}
+
+To show that our chosen projection (${\bf P} = {\bf D}_2^{-1}{\bf U}_2^{\top}{\bf U}_{\bf L}^{\top}$) results in i.i.d residuals, we need to show that the drift covariance matrix is an identity matrix under this projection. First, we note that both ${\bf U}_{\bf L}$ and ${\bf U}_2$ are (semi-)unitary such that ${\bf U}{\bf U}^{\top}={\bf U}^{\top}{\bf U}={\bf I}$. Next we write down the eigendecomposition of ${\bf U}_{\bf L}^{\top}(\tilde{\bf L}_{0}\circ{\bf M}^{(m)}){\bf U}_{\bf L} = {\bf U}_2{\bf D}_2{\bf D}_2{\bf U}_2^{\top}$, and use the unitary property of ${\bf U}_{\bf L}$ to note that $\tilde{\bf L}_{0}\circ{\bf M}^{(m)}$ can be expressed as ${\bf U}_{\bf L}{\bf U}_2{\bf D}_2{\bf D}_2{\bf U}_2^{\top}{\bf U}_{\bf L}^{\top}$. The drift covariance matrix under the projection is then:
+
+\begin{equation} 
+\begin{array}{rl}
+VAR(\underset{D}\Delta \overrightarrow{\bf p}_m) &= {\bf P}VAR(\underset{D}\Delta {\bf p}_m){\bf P}^{\top}\\
+&= {\bf P}(\tilde{\bf L}_{0}\circ{\bf M}^{(m)}){\bf P}^{\top}\\
+&= {\bf P}{\bf U}_{\bf L}{\bf U}_2{\bf D}_2{\bf D}_2{\bf U}_2^{\top}{\bf U}_{\bf L}^{\top}{\bf P}^{\top}\\
+&= {\bf D}_2^{-1}{\bf U}_2^{\top}{\bf U}_{\bf L}^{\top}{\bf U}_{\bf L}{\bf U}_2{\bf D}_2{\bf D}_2{\bf U}_2^{\top}{\bf U}_{\bf L}^{\top}{\bf U}_{\bf L}{\bf U}_2{\bf D}_2^{-1}\\
+&= {\bf I}\\
+\end{array}
+\end{equation}
+
+\subsection{Appendix 5: Bias correction for $\boldsymbol{\mu}_{\bar{\alpha}}^{\top}{\bf L}_0\boldsymbol{\mu}_{\bar{\alpha}}$}
+\label{App:bias_correction}
+
+Using 
+$\widehat{\boldsymbol{\mu}_{\bar{\alpha}}}^{\top}{\bf L}_0\widehat{\boldsymbol{\mu}_{\bar{\alpha}}}$ as an estimator of $\boldsymbol{\mu}_{\bar{\alpha}}^{\top}{\bf L}_0\boldsymbol{\mu}_{\bar{\alpha}}$ results in upward bias. To understand this, and correct for it, have
+\begin{equation} 
+\widehat{{\boldsymbol \beta}_{\bar{\alpha}}} = {\boldsymbol \beta}_{\bar{\alpha}}+{\bf m}_{\bar{\alpha}}
+\end{equation}
+
+where  ${\bf m}_{\bar{\alpha}}$ is the vector of deviations of the estimates from their true value.  The expected estimate of $\boldsymbol{\mu}_{\bar{\alpha}}^{\top}{\bf L}_0\boldsymbol{\mu}_{\bar{\alpha}}$ is then
+
+\begin{equation}
+\begin{array}{rl}
+E[\widehat{\boldsymbol{\mu}_{\bar{\alpha}}}^{\top}{\bf L}_0\widehat{\boldsymbol{\mu}_{\bar{\alpha}}}]=& {\boldsymbol \beta}_{\bar{\alpha}}^{\top}{\bf X}^{\top}{\bf L}_0{\bf X}{\boldsymbol \beta}_{\bar{\alpha}}+E[{\bf m}_{\bar{\alpha}}^{\top}{\bf X}^{\top}{\bf L}_0{\bf X}{\bf m}_{\bar{\alpha}}]\\
+=& \boldsymbol{\mu}_{\bar{\alpha}}^{\top}{\bf L}_0\boldsymbol{\mu}_{\bar{\alpha}}+E[{\bf m}_{\bar{\alpha}}^{\top}{\bf X}^{\top}{\bf L}_0{\bf X}{\bf m}_{\bar{\alpha}}]\\
+
+\end{array}
+\end{equation} 
+
+where ${\bf X}$ is the design matrix with the first column all ones, and the second ${\bf p}_{0}-{\bf q}_{0}$. Here, the expectation is taken over the distribution of estimates, and it is assumed the estimates are unbiased (since then, $E[{\bf m}_{\bar{\alpha}}]={\bf 0}$, and so $E[{\bf m}_{\bar{\alpha}}{\boldsymbol \beta}_{\bar{\alpha}}^{\top}]={\bf 0}$). This same assumption implies
+
+
+\begin{equation}
+\begin{array}{rl}
+E[\widehat{\boldsymbol{\mu}_{\bar{\alpha}}}^{\top}{\bf L}_0\widehat{\boldsymbol{\mu}_{\bar{\alpha}}}]=& \boldsymbol{\mu}_{\bar{\alpha}}^{\top}{\bf L}_0\boldsymbol{\mu}_{\bar{\alpha}}+Tr\left({\bf X}^{\top}{\bf L}_0{\bf X}E[{\bf m}_{\bar{\alpha}}^{\top}{\bf m}_{\bar{\alpha}}]\right)\\
+\end{array}
+\end{equation} 
+
+Since $E[{\bf m}_{\bar{\alpha}}^{\top}{\bf m}_{\bar{\alpha}}]$ is a matrix of sampling (co)variances for the parameters, we can use the inverse Hessian to get an approximate ${\bf S}_{\bar{\alpha}}$ in order to get an improved estimate:
+
+\begin{equation} 
+\widehat{\boldsymbol{\mu}_{\bar{\alpha}}^{\top}{\bf L}_0\boldsymbol{\mu}_{\bar{\alpha}}}= \widehat{\boldsymbol{\mu}_{\bar{\alpha}}}^{\top}{\bf L}_0\widehat{\boldsymbol{\mu}_{\bar{\alpha}}}-Tr\left({\bf X}^{\top}{\bf L}_0{\bf X}{\bf S}_{\bar{\alpha}}\right)
+\end{equation} 
+
+In addition, it is not clear whether $tr({\bf L}_0\widehat{{\bf V}_\alpha})$ is an unbiased estimator of $tr({\bf L}_0{\bf V}_\alpha)$. Assuming estimates of $\sigma^2_\alpha$ and $p_{\bar{\alpha}}$ are unbiased then the sampling distribution of $\widehat{{\bf V}_\alpha}$ is log normal if the sampling distribution of $log(\widehat{\sigma^2_\alpha})$ and $\widehat{p_{\bar{\alpha}}}$ is multivariate normal. Typically, the large sample approximation for the sampling distribution of $\widehat{\sigma^2_\alpha}$ is assumed normal rather than log normal, although ..
+
+\begin{equation}
+\begin{array}{rl}
+tr({\bf L}_0\widehat{{\bf V}_\alpha}) =& tr({\bf L}_0\widehat{\sigma^2_\alpha}{\bf L}_0^{\widehat{p_{\bar{\alpha}}}})\\
+                                     =& \widehat{\sigma^2_\alpha}tr({\bf L}_0^{1+\widehat{p_{\bar{\alpha}}}})\\
+                                     =& \widehat{\sigma^2_\alpha}tr({\bf D}_L^{2+2\widehat{p_{\bar{\alpha}}}})\\
+                                     =& \widehat{\sigma^2_\alpha}\left(\sum_i d_i^{2+2\widehat{p_{\bar{\alpha}}}}\right)\\
+                                     =& \widehat{\sigma^2_\alpha}\left(\sum_i d_i^2d_i^{2\widehat{p_{\bar{\alpha}}}}\right)\\
+                                     =& \widehat{\sigma^2_\alpha}\left(\sum_i exp(2log(d_i)+2\widehat{p_{\bar{\alpha}}}log(d_i))\right)\\
+\end{array}
+\end{equation}
+
+If $\widehat{p_{\bar{\alpha}}}$ is unbiased with a normal sampling distribution then $exp(2log(d_i)+2\widehat{p_{\bar{\alpha}}}log(d_i))$ follows a log-normal distribution with expectation:
+
+\begin{equation}
+\begin{array}{rl}
+E[d_i^{2+2\widehat{p_{\bar{\alpha}}}}]=&E[exp(2log(d_i)+2\widehat{p_{\bar{\alpha}}}log(d_i))]\\
+                              =&exp(2log(d_i)+2p_{\bar{\alpha}} log(d_i)+2log(d_i)^2VAR(\widehat{p_{\bar{\alpha}}}))\\
+                              =&d_i^{2+2p_{\bar{\alpha}}}exp(2log(d_i)^2VAR(\widehat{p_{\bar{\alpha}}}))\\
+\end{array}
+\end{equation}
+
+
+\subsection{Appendix 6: Comparison with the method of \citet{buffalo2019linked}}
+\label{App:BandC}
+
+In order to make the distinction with our approach clearer, here we explicitly express the expectations and covariances appearing in B\&C as conditional on ${\bf B}$ and $\boldsymbol{\alpha}$. In the sections dealing with our theory and inference the conditioning (on ${\bf L}_0$) is left implicit. B\&C work with the quantity
+
+\begin{equation}
+COV(\Delta {\bf p}_t, \Delta {\bf p}_{\tau}^{\top} | {\bf B}, \boldsymbol{\alpha})
+\end{equation}
+
+where $\tau$ is some generation after $t$ (B\&C actually only work with the diagonal elements of this matrix, but we retain the full multi-locus model here for generality). Importantly, when B\&C estimate the additive genetic variance in fitness they assume that both $\Delta {\bf p}_t$ and $\Delta {\bf p}_{\tau}$ both represent allele frequency change over a single generation (Assumption A). Since the change due to drift will be independent in different generations, we can rewrite B\&C's covariance: 
+
+\begin{equation}
+\begin{array}{rl}
+COV(\Delta {\bf p}_t, \Delta {\bf p}_{\tau}^\top  | {\bf B}, \boldsymbol{\alpha}) 
+=& COV({\bf L}_t\boldsymbol{\alpha}_t,  \boldsymbol{\alpha}_{\tau}^{\top}{\bf L}_{\tau}  | {\bf B}, \boldsymbol{\alpha})\\
+%=& E\left[{\bf L}_t\boldsymbol{\alpha}_t\boldsymbol{\alpha}_{\tau}^{\top}{\bf L}_{\tau}  | {\bf B}, \boldsymbol{\alpha}\right]-\left[{\bf L}_t\boldsymbol{\alpha}_t  | {\bf B}, \boldsymbol{\alpha}\right] E\left[\boldsymbol{\alpha}_{\tau}^{\top}{\bf L}_{\tau} | {\bf B}, \boldsymbol{\alpha}\right]\\
+=& E\left[{\bf L}_t\boldsymbol{\alpha}_t\boldsymbol{\alpha}_{\tau}^{\top}{\bf L}_{\tau} | {\bf B}, \boldsymbol{\alpha}\right]-E\left[{\bf L}_t | {\bf B}, \boldsymbol{\alpha}\right]\boldsymbol{\alpha}_t \boldsymbol{\alpha}_{\tau}^{\top}E\left[{\bf L}_{\tau} | {\bf B}, \boldsymbol{\alpha}\right]\\
+\end{array}
+\label{Eq:BCcov1}
+\end{equation}
+
+Since the diagonal elements of ${\bf L}$ have to be positive, a sufficient, but not necessary, condition for the final term to be zero is that there is no direct selection on the loci (i.e. $\boldsymbol{\alpha}={\bf 0}$). It is not a necessary condition because the change caused by direct selection at all loci could be exactly balanced by the change caused by indirect selection at other loci, although we ignore this unlikely scenario. The assumption that $\boldsymbol{\alpha}={\bf 0}$ is achieved in B\&C by assuming that sites can be partitioned into neutral and selected sites and that allele frequency change is only tracked at the neutral sites (Assumption B). To understand the consequences of this assumption we consider all loci are being followed, both a selected set (${\mathcal S}$) and a neutral set (${\mathcal N}$). Consequently,
+
+\begin{equation}
+\boldsymbol{\alpha}=
+\left[
+\begin{array}{c}
+{\bf 0}\\
+\boldsymbol{\alpha}_{\mathcal S}\\
+\end{array}
+\right]
+\end{equation}
+
+and so
+
+\begin{equation}
+\boldsymbol{\alpha}\boldsymbol{\alpha}^{\top}=
+\left[
+\begin{array}{cc}
+{\bf 0}&{\bf 0}\\
+{\bf 0}&\boldsymbol{\alpha}_{\mathcal S}\boldsymbol{\alpha}^{\top}_{\mathcal S}\\
+\end{array}
+\right]
+\end{equation}
+
+We can also partition ${\bf L}$
+
+\begin{equation}
+{\bf L}=
+\left[
+\begin{array}{cc}
+{\bf L}_{\mathcal N}&{\bf L}_{{\mathcal N}, {\mathcal S}}\\
+{\bf L}_{{\mathcal S}, {\mathcal N}}&{\bf L}_{\mathcal S}\\
+\end{array}
+\right]
+\end{equation}
+
+and writing ${\bf L}_{{\mathcal N}, {\mathcal S}} = {\bf B}_{{\mathcal N}}{\bf R}_{{\mathcal N}, {\mathcal S}}{\bf B}_{{\mathcal S}}$, Equation \ref{Eq:BCcov1} for neutral sites becomes
+
+
+\begin{equation}
+\begin{array}{rl}
+COV(\Delta {\bf p}_{{\mathcal N}_t}, \Delta {\bf p}_{{\mathcal N}_{\tau}}^\top  | {\bf B}, \boldsymbol{\alpha}) 
+%=& E\left[{\bf L}_{{\mathcal N}_t, {\mathcal S}_t}\boldsymbol{\alpha}_{{\mathcal S}_t}\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}^{\top}{\bf L}_{{\mathcal S}_\tau, {\mathcal N}_\tau} | {\bf B}, \boldsymbol{\alpha}\right]+E\left[{\bf L}_{{\mathcal N}_t, {\mathcal S}_t}\boldsymbol{\alpha}_{{\mathcal S}_t} | {\bf B}, \boldsymbol{\alpha}\right]E\left[\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}^{\top}{\bf L}_{{\mathcal S}_\tau, {\mathcal N}_\tau} | {\bf B}, \boldsymbol{\alpha}\right]\\
+%=& E\left[{\bf B}_{{\mathcal N}_t}{\bf R}_{{\mathcal N}_t, {\mathcal S}_t}{\bf B}_{{\mathcal S}_t}\boldsymbol{\alpha}_{{\mathcal S}_t}\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}^{\top}{\bf B}_{{\mathcal S}_{\tau}}{\bf R}_{{\mathcal S}_\tau, {\mathcal N}_{\tau}}{\bf B}_{{\mathcal N}_{\tau}} | {\bf B}, \boldsymbol{\alpha}\right]\\
+%&+E\left[{\bf B}_{{\mathcal N}_t}{\bf R}_{{\mathcal N}_t, {\mathcal S}_t}{\bf B}_{{\mathcal S}_t}\boldsymbol{\alpha}_{{\mathcal S}_t} | {\bf B}, \boldsymbol{\alpha}\right]E\left[\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}^{\top}{\bf B}_{{\mathcal S}_{\tau}}{\bf R}_{{\mathcal S}_\tau, {\mathcal N}_{\tau}}{\bf B}_{{\mathcal N}_{\tau}} | {\bf B}, \boldsymbol{\alpha}\right]\\
+=& {\bf B}_{{\mathcal N}_t}E\left[{\bf R}_{{\mathcal N}_t, {\mathcal S}_t}{\bf B}_{{\mathcal S}_t}\boldsymbol{\alpha}_{{\mathcal S}_t}\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}^{\top}{\bf B}_{{\mathcal S}_{\tau}}{\bf R}_{{\mathcal S}_\tau, {\mathcal N}_{\tau}} | {\bf B}, \boldsymbol{\alpha}\right]{\bf B}_{{\mathcal N}_{\tau}}\\
+&+{\bf B}_{{\mathcal N}_t}E\left[{\bf R}_{{\mathcal N}_t, {\mathcal S}_t} | {\bf B}, \boldsymbol{\alpha}\right]{\bf B}_{{\mathcal S}_t}\boldsymbol{\alpha}_{{\mathcal S}_t}\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}^{\top}{\bf B}_{{\mathcal S}_{\tau}}E\left[{\bf R}_{{\mathcal S}_\tau, {\mathcal N}_{\tau}} | {\bf B}, \boldsymbol{\alpha}\right]{\bf B}_{{\mathcal N}_{\tau}}\\ 
+\end{array}
+\label{Eq:BCcov3}
+\end{equation}
+
+Under the conditioning of B\&C, ${\bf R}_{{\mathcal S}, {\mathcal N}_\tau}$ is a random variable.  If we assume that the linkage-disequilibrium between the neutral alleles and the selected alleles has arbitrary sign then $E[{\bf R}_{{\mathcal S}, {\mathcal N}_\tau} |  {\bf B}, \boldsymbol{\alpha}]={\bf 0}$, which will be met if the reference allele is chosen arbitrarily (e.g. not based on minor allele frequency \cite{GetFromRoman}). Under this assumption (Assumption C) the final term in Equation \ref{Eq:BCcov3} disappears to give: 
+
+\begin{equation}
+\begin{array}{rl}
+COV(\Delta {\bf p}_{{\mathcal N}_t}, \Delta {\bf p}_{{\mathcal N}_{\tau}}^\top | {\bf B}, \boldsymbol{\alpha})
+=& {\bf B}_{{\mathcal N}_t}E\left[{\bf R}_{{\mathcal N}_t, {\mathcal S}_t}{\bf B}_{{\mathcal S}_t}\boldsymbol{\alpha}_{{\mathcal S}_t}\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}^{\top}{\bf B}_{{\mathcal S}_{\tau}}{\bf R}_{{\mathcal S}_\tau, {\mathcal N}_{\tau}} | {\bf B}, \boldsymbol{\alpha}\right]{\bf B}_{{\mathcal N}_{\tau}}\\
+\end{array}
+\label{Eq:BCcov4}
+\end{equation}
+
+As in our inference section, the vector of allele frequency changes could be transformed using matrix ${\bf P}$ ($\Delta \overrightarrow{\bf p} = {\bf P}\Delta {\bf p}$) and B\&C use the projection ${\bf P}={\bf B}_{{\mathcal N}_t}^{-1}$ which results in
+
+\begin{equation}
+\begin{array}{rl}
+COV(\Delta \overrightarrow{\bf p}_{{\mathcal N}_t}, \Delta \overrightarrow{\bf p}_{{\mathcal N}_{\tau}}^\top | {\bf B}, \boldsymbol{\alpha}) 
+=& E\left[{\bf R}_{{\mathcal N}_t, {\mathcal S}_t}{\bf B}_{{\mathcal S}_t}\boldsymbol{\alpha}_{{\mathcal S}_t}\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}^{\top}{\bf B}_{{\mathcal S}_{\tau}}{\bf R}_{{\mathcal S}_\tau, {\mathcal N}_{\tau}} | {\bf B}, \boldsymbol{\alpha}\right]{\bf B}_{{\mathcal N}_{\tau}}{\bf B}_{{\mathcal N}_t}^{-1}\\
+=& {\bf B}_{{\mathcal N}_t}^{-1}E\left[{\bf R}_{{\mathcal N}_t, {\mathcal S}_t}{\bf B}_{{\mathcal S}_t}\boldsymbol{\alpha}_{{\mathcal S}_t}\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}^{\top}{\bf B}_{{\mathcal S}_{\tau}}{\bf R}_{{\mathcal S}_\tau, {\mathcal N}_{\tau}} | {\bf B}, \boldsymbol{\alpha}\right]{\bf B}_{{\mathcal N}_{\tau}}\\
+
+\end{array}
+\label{Eq:BCcov5}
+\end{equation}
+
+Since the trace of an outer product is equal to the inner product we get:
+
+\begin{equation}
+\begin{array}{rl}
+Tr\left(COV(\Delta \overrightarrow{\bf p}_{{\mathcal N}_t}, \Delta \overrightarrow{\bf p}_{{\mathcal N}_{\tau}}^\top  | {\bf B}, \boldsymbol{\alpha})\right)&=
+E\left[\boldsymbol{\alpha}_{{\mathcal S}_{t}}^{\top}{\bf B}_{{\mathcal S}_t}{\bf R}_{{\mathcal S}_t, {\mathcal N}_t}{\bf B}_{{\mathcal N}_t}^{-1}{\bf B}_{{\mathcal N}_{\tau}}{\bf R}_{{\mathcal N}_\tau, {\mathcal S}_{\tau}}{\bf B}_{{\mathcal S}_{\tau}}\boldsymbol{\alpha}_{{\mathcal S}_{\tau}} | {\bf B}, \boldsymbol{\alpha}\right]\\
+&=
+\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}^{\top}{\bf B}_{{\mathcal S}_t}E\left[{\bf R}_{{\mathcal S}_t, {\mathcal N}_t}{\bf B}_{{\mathcal N}_t}^{-1}{\bf B}_{{\mathcal N}_{\tau}}{\bf R}_{{\mathcal N}_\tau, {\mathcal S}_{\tau}} | {\bf B}, \boldsymbol{\alpha}\right]{\bf B}_{{\mathcal S}_{\tau}}\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}\\
+\end{array}
+\label{Eq:BCcov6}
+\end{equation}
+
+
+The diagonal element $j$ of ${\bf W}_{t\tau}={\bf R}_{{\mathcal S}_t, {\mathcal N}_t}{\bf B}_{{\mathcal N}_t}^{-1}{\bf B}_{{\mathcal N}_{\tau}}{\bf R}_{{\mathcal N}_\tau, {\mathcal S}_{\tau}}$ is equal to the sum of selected locus $j$'s $R_{j_t,i_t}R_{j_{\tau},i_{\tau}}(b_{i_\tau}/b_{i_t})$ across all neutral loci $i$. The $jk^{th}$ off-diagonal element is the sum of $R_{j_t,i_t}R_{k_{\tau},i_{\tau}}(b_{i_\tau}/b_{i_t})$ for selected loci $j$ and $k$ across all neutral loci $i$. If we write  ${\bf W}_{t\tau} = {\bf H}_{t\tau}+({\bf W}_{t\tau}-{\bf H}_{t\tau})$ where ${\bf H}_{t\tau}$ and ${\bf W}_{t\tau}-{\bf H}_{t\tau}$ are zero but for the diagonal and off-diagonal elements respectively, then Equation \ref{Eq:BCcov6} becomes
+
+\begin{equation}
+\begin{array}{rl}
+Tr\left(COV(\Delta \overrightarrow{\bf p}_{{\mathcal N}_t}, \Delta \overrightarrow{\bf p}_{{\mathcal N}_{\tau}}^\top | {\bf B}, \boldsymbol{\alpha})\right)&=
+\boldsymbol{\alpha}_{{\mathcal S}_t}^{\top}{\bf B}_{{\mathcal S}_t}E\left[{\bf H}_{t\tau} | {\bf B}, \boldsymbol{\alpha}\right]{\bf B}_{{\mathcal S}_{\tau}}\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}+\boldsymbol{\alpha}_{{\mathcal S}_{t}}^{\top}{\bf B}_{{\mathcal S}_t}E\left[{\bf W}_{t\tau}-{\bf H}_{t\tau} | {\bf B}, \boldsymbol{\alpha}\right]{\bf B}_{{\mathcal S}_{\tau}}\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}\\
+\end{array}
+\label{Eq:BCcov7}
+\end{equation}
+
+If we focus on a system with two selected loci $j$ and $k$ then the final term in Equation \ref{Eq:BCcov7} is equal to:
+\begin{tiny}
+\begin{equation}
+\sum_j\sum_k\left(\alpha_{j_t}\alpha_{k_{\tau}}b_{j_t,j_t}b_{k_{\tau},k_{\tau}}\sum _i \left(E\left[R_{i_t,j_t}R_{i_{\tau},k_{\tau}} | {\bf B}, \boldsymbol{\alpha}\right]b_{i_\tau}/b_{i_t}\right)+\alpha_{j_{\tau}}\alpha_{k_t}b_{j_{\tau},j_{\tau}}b_{k_t,k_t}\sum _i \left(E\left[R_{i_{\tau},j_{\tau}}R_{i_t,k} | {\bf B}, \boldsymbol{\alpha}\right]b_{i_\tau}/b_{i_t}\right)\right).
+\label{eq:AssumpE}
+\end{equation}
+\end{tiny}
+
+Under Hill-Robertson Interference, if $\alpha_j$ and $\alpha_k$ have the same sign we expect them to be in negative LD with each other and as a consequence have opposing patterns of LD with the neutral loci (i.e. if $\alpha_j\alpha_k>0$ then we expect $E[R_{i,j}R_{i,k}]<0$ and vice versa). Although the terms of these products are evaluated at different generations in Equation \ref{eq:AssumpE} ($t$ and $\tau$) we expect the terms to share sign in the same way, generating a negative expectation for the second term in Equation \ref{Eq:BCcov7}.  However, assuming an absence of Hill-Robertson interference, or signed linkage-disequilibrium more generally (Assumption D), then the final term in Equation \ref{Eq:BCcov7} can be dropped (Equation 7b B\&C):
+
+\begin{equation}
+\begin{array}{rl}
+Tr\left(COV(\Delta \overrightarrow{\bf p}_{{\mathcal N}_t}, \Delta \overrightarrow{\bf p}_{{\mathcal N}_{\tau}}^\top) | {\bf B}, \boldsymbol{\alpha}\right)&=
+\boldsymbol{\alpha}_{{\mathcal S}_t}^{\top}{\bf B}_{{\mathcal S}_t}E\left[{\bf H}_{t\tau} | {\bf B}, \boldsymbol{\alpha}\right]{\bf B}_{{\mathcal S}_{\tau}}\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}
+\end{array}
+\label{Eq:BCcov8}
+\end{equation}
+
+Equations 40-44 in B\&C derive an expression for $E\left[{\bf H}_{t\tau} | {\bf B}, \boldsymbol{\alpha}\right]$ based on a deterministic model for changes in linkage-disequilibrium (Assumption E) and assuming nongametic-phase linkage-disequilibrium is absent (Assumption F). Under the assumption that drift (or selection) does not alter the dynamics of ${\bf R}$ then ( Equation 42 in B\&C):
+
+\begin{equation}
+\begin{array}{rl}
+L_{j_{\tau},i_{\tau}} =& L_{j_t,i_t}\frac{b_{j_\tau}^2}{b_{j_t}^2}(1-r(g_{j,i}))^{\tau-t}\\
+\end{array}
+\end{equation}
+
+which implies
+
+\begin{equation}
+\begin{array}{rl}
+R_{j_{\tau},i_{\tau}} =&R_{j_t,i_t}\frac{b_{j_\tau}b_{i_t}}{b_{j_t}b_{i_\tau}}(1-r(g_{j,i}))^{\tau-t}\\
+\end{array}
+\end{equation}
+
+and so
+
+\begin{equation}
+\begin{array}{rl}
+E\left[H_{j_t, j_\tau} | {\bf B}, \boldsymbol{\alpha}\right]
+&=\sum_i E\left[R_{j_t,i_t}R_{j_{\tau},i_{\tau}} | {\bf B}, \boldsymbol{\alpha}\right]\frac{b_{i_\tau}}{b_{i_t}}\\
+%&=\sum_i E\left[R_{j_t,i_t}^2 | {\bf B}, \boldsymbol{\alpha}\right]\frac{b_{i_\tau}}{b_{i_t}}\frac{b_{j_\tau}b_{i_t}}{b_{j_t}b_{i_\tau}}(1-r(g_{j,i}))^{\tau-t}\\
+%&=\sum_i E\left[R_{j_t,i_t}^2 | {\bf B}, \boldsymbol{\alpha}\right]\frac{b_{j_\tau}}{b_{j_t}}(1-r(g_{j,i}))^{\tau-t}\\
+&=\frac{b_{j_\tau}}{b_{j_t}}\sum_i E\left[R_{j_t,i_t}^2 | {\bf B}, \boldsymbol{\alpha}\right](1-r(g_{j,i}))^{\tau-t}\\
+\end{array}
+\end{equation}
+
+
+where $r(g_{j,i})$ is the recombination rate as a function of the distance $g_{i,j}$ between the two loci. Haldane's mapping function is assumed for $r(g)$ (Assumption G) but since the selected loci and their their map position are assumed unknown a model is also required for $g$. B\&C assume that the genome can be broken down into a set of independent regions of fixed map length $R$ (Assumption H). Within a region a single selected and neutral locus exist (Assumption I) and are distributed uniformly and independently across the region (Assumption J). Then, $g_{j,i}$ has a triangular distribution. The trace in Equation \ref{Eq:BCcov8} is then not a sum over loci, but a sum over regions with fixed Morgan length. 
+
+
+Writing ${\bf F}_{t\tau}$ a diagonal matrix with the $j^{th}$ element equal to $\sum_i E\left[R_{j_t,i_t}^2 | {\bf B}, \boldsymbol{\alpha}\right](1-r(g_{j,i}))^{\tau-t}$, then $E\left[{\bf H}_{t\tau} | {\bf B}, \boldsymbol{\alpha}\right]= E\left[{\bf F}_{t\tau} | {\bf B}, \boldsymbol{\alpha}\right]{\bf B}_{\mathcal{S}_\tau}{\bf B}_{\mathcal{S}_t}^{-1}$ and so
+
+\begin{equation}
+\begin{array}{rl}
+Tr\left(COV(\Delta \overrightarrow{\bf p}_{{\mathcal N}_t}, \Delta \overrightarrow{\bf p}_{{\mathcal N}_{\tau}}^\top | {\bf B}, \boldsymbol{\alpha})\right)&=
+\boldsymbol{\alpha}_{{\mathcal S}_t}^{\top}{\bf B}_{{\mathcal S}_t}E\left[{\bf F}_{t\tau} | {\bf B}, \boldsymbol{\alpha}\right]{\bf B}_{\mathcal{S}_\tau}{\bf B}_{\mathcal{S}_t}^{-1}{\bf B}_{{\mathcal S}_{\tau}}\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}\\
+&=
+\boldsymbol{\alpha}_{{\mathcal S}_t}^{\top}E\left[{\bf F}_{t\tau} | {\bf B}, \boldsymbol{\alpha}\right]{\bf B}_{\mathcal{S}_\tau}{\bf B}_{{\mathcal S}_{\tau}}\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}\\
+&=
+\boldsymbol{\alpha}_{{\mathcal S}_t}^{\top}E\left[{\bf F}_{t\tau} | {\bf B}, \boldsymbol{\alpha}\right]\boldsymbol{\pi}_{\mathcal{S}_\tau}\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}\\
+\end{array}
+\label{Eq:BCcov9}
+\end{equation}
+
+where (under random mating) $\boldsymbol{\pi} = \bf{B}\bf{B}$ is a diagonal matrix with elements proportional to the genetic diversities.
+
+This is Equation 7b of B\&C, but it is still hard to evaluate since $E\left[{\bf F}_{t\tau} | {\bf B}, \boldsymbol{\alpha}\right]$ will vary over loci in a way that may depend on $\boldsymbol{\pi}_{{\mathcal S}_t}$. For example, if $\boldsymbol{\pi}_{{\mathcal S}_{jj_t}}$ is small relative to the diagonal elements of ${\bf B}_{{\mathcal N}_t}$ (because the reference allele at selected locus $j$ is deleterious) then we expect  $F_{{t\tau}_j}$ to be small because $R_{i_t,j_t}^2$ cannot cover the full range of -1 to 1 as it could for more weakly selected loci that have genetic diversities closer to the genetic diversities at neutral loci \citep{sved2018one}. However B\&C assume that $E_{{\bf B},\boldsymbol{\alpha}}\left[{\bf F}_{t\tau}\right]$ is independent of ${\bf B}_{{\mathcal S}}$ (Assumption K) and under this assumption:
+
+\begin{equation}
+\begin{array}{rl}
+Tr\left(COV(\Delta \overrightarrow{\bf p}_{{\mathcal N}_t}, \Delta \overrightarrow{\bf p}_{{\mathcal N}_{\tau}}^\top | {\bf B}, \boldsymbol{\alpha}) \right)&=
+\boldsymbol{\alpha}_{{\mathcal S}_{t}}^{\top}\boldsymbol{\pi}_{{\mathcal S}_\tau}\boldsymbol{\alpha}_{{\mathcal S}_{\tau}}E\left[Tr({\bf F}_{t\tau}) | {\bf B}, \boldsymbol{\alpha}\right]\\
+&=
+C_a(t\rightarrow\tau)E\left[Tr({\bf F}_{t\tau}) | {\bf B}, \boldsymbol{\alpha}\right]\\
+\end{array}
+\label{Eq:BCcov10}
+\end{equation}
+
+If we further assume (Assumption L) that the average effects are constant in time such that $\boldsymbol{\alpha}_t=\boldsymbol{\alpha}_\tau$ then this reduces to
+
+\begin{equation}
+\begin{array}{rl}
+Tr\left(COV(\Delta \overrightarrow{\bf p}_{{\mathcal N}_t}, \Delta \overrightarrow{\bf p}_{{\mathcal N}_{\tau}}^\top | {\bf B}, \boldsymbol{\alpha}) \right)&=
+V_a(\tau)E\left[Tr({\bf F}_{t\tau}) | {\bf B}, \boldsymbol{\alpha}\right]\\
+\end{array}
+\label{Eq:BCcov11}
+\end{equation}
+
+Which is the equivalent of Equation 8 in B\&C (multiplied by 2L).  B\&C approximate ${\bf R}_t$, and therefore ${\bf F}_{t\tau}$ under the assumption of mutation-drift-recombination equilibrium (Assumption M). \citet{Ohta.1971} derived the expectation of $L_{j_t, i_t}L_{j_t, i_t}=L^2_{j_t, i_t}$ under this assumption, although the expectation of $R^2_{j_t, i_t}$ can only be approximated as the expectation of $L^2_{j_t, i_t}$ divided by the expectation of the genetic diversities at the two loci, and is only accurate when the minor allele frequencies are greater than 10\%  \citep{McVean.2002} and can be out by orders of magnitude when allele frequencies are extreme \citep{Song.2007} as can be expected at loci under selection.  Moreover,  \citet{Ohta.1971} derives the expectation $E[L^2_{j_t, i_t}]$ yet B\&C actually require $E\left[L^2_{j_t, i_t} | {\bf B}, \boldsymbol{\alpha}\right]$ which is considerably more challenging to compute \citep{good2022linkage}.
+
+Equation \ref{Eq:BCcov11} allows $V_a(\tau)$ to be estimated, but B\&C aim to estimate $V_a(t)$.  Under Assumption L and assuming that the change in genetic diversity at selected loci between generation $t$ and $\tau$ is constant across loci (Assumption N: $\boldsymbol{\pi}_{\mathcal{S}_t}\boldsymbol{\pi}_{\mathcal{S}_\tau}^{-1} = c{\bf I}$) then $V_a(t)=cV_a(\tau)$. However, since the selected sites are unobserved, $c$ cannot be computed and so it is assumed that that $c$ is equal to the ratio of genetic diversity at generation $\tau$ to genetic diversity at generation $t$ across all neutral loci (Assumption O). Note that if $\boldsymbol{\alpha}$ and $\boldsymbol{\pi}_{\mathcal{S}_t}$ are random then Assumption N probably just requires they are uncorrelated.\\ 
+
+In additional to the assumptions/approximations made when developing the theory, a number of additional assumptions/approximations are made when making inferences from data. 
+
+In the theoretical section, the covariance in Equations \ref{Eq:BCcov9}-\ref{Eq:BCcov11} are taken over possible realisations of ${\bf R}$.  However, in the inference section expectations and (co)variances are taken over loci. Subscripting expectations and (co)variances by $R$ or $L$ to indicate they are taken over realisations of ${\bf R}$ or loci, respectively, B\&C work with the quantity
+
+\begin{equation}
+COV_{L}\left(\Delta \overrightarrow{p}_{{\mathcal N}_t}, \Delta \overrightarrow{p}_{{\mathcal N}_{\tau}}^\top | {\bf B}, \boldsymbol{\alpha}\right)
+\end{equation}
+
+in their inference section, rather than:
+
+\begin{equation}
+E_{L}\left[COV_{R}\left(\Delta \overrightarrow{p}_{{\mathcal N}_t}, \Delta \overrightarrow{p}_{{\mathcal N}_{\tau}}^\top | {\bf B}, \boldsymbol{\alpha}\right)\right]
+\end{equation}
+
+where we express the trace operator as as an expectation over loci multiplied by $L$.
+
+In addition, rather than projecting allele frequency change (i.e. dividing the frequency change at allele $i$ by $b_i$) they divide the average covariance between allele frequency changes and then divide this average by the average value of $b^2$, which is wrong.
+
+In addition, if there is measurement error in allele frequencies and the same allele frequency measurements are used to calculate change over adjacent intervals then this will generate downward bias in the estimated covariances. This is dealt with by assuming the sampling noise is binomial around the true value, although this cannot be implemented for pool-seq data without replicates or non-binomial causes of overdispersion.
+
+They suggest bootstrapping genomic windows to get CI's. Is this OK - are genomic windows exchangeable? 
+
+\section*{Some stuff to integrate}
+\addcontentsline{toc}{section}{Some stuff to integrate}
+
+%With genome sequencing technologies becoming increasingly accessible, recent years have seen the development of new methods to analyse multi-generation allele frequency data. A number of studies have developed new conceptual frameworks to detect patterns of selection using genomic data from multiple evolutionary time-points \citep{illingworth2011distinguishing, illingworth2012quantifying, feder2014identifying, baldwin2014power, illingworth2014identifying, terhorst2015multi, taus2017quantifying, buffalo2019linked, bertram2021allele, sohail2021mpl, sohail2022inferring,li2023estimating}. 
+
+Buffalo \& Coop's \citeyearpar{buffalo2019linked} (B\&C henceforth) primary aim was to measure the effects of linked selection on a genome-wide scale using temporal (co)variances in allele frequency change. However, they also show how these effect allow the computation of $V_A$, and in this section we make a detailed comparison between their method and ours to highlight some of the advantages of using a top-down quantitative genetic approach. However, we note that whereas our theory is applied to allele frequencies over one generation, B\&C must be applied in a multigenerational context by necessity (since they are looking at covariances in allele frequency change between two pairs of generations). B\&C therefore requires assumptions about how recombination and mating affects patterns of LD over time whereas we are only forced into making similar assumptions when the theory is to be applied to multigenerational data (see Inference Section). 
+
+
+Equation 5 in B\&C is the change in the neutral focal allele's frequency over one generation due to its associations with all selected alleles in the genome. It depends on the average effect for fitness at the selected loci and the LD (expressed as a covariance - equivalent to our ${\bf L}$) between them and the focal site. It is equivalent to our result although it ignores direct selection on the focal site (see \citet{Kirkpatrick.2002} also). It should also be noted that although B\&C stated that they assume additivity, this assumption is not required until much later (JARROD where) and their $\alpha$'s can be interpreted as average effects rather than selection coefficients in an additive model. \footnote{The $\alpha$'s are required in order to compute an individuals relative fitness ($w_i$ = $f_i$ in their notation) for use in Eq 34. Eq 35 shows that $w_i$ is only required for calculating $COV(c_i, w_i)$ ($c_i$ is $x_i/2$ in their notation). Since the residuals from a regression are uncorrelated with the predictor value $c$ by construction this implies that  $COV(c_i, w_i)=COV(c_i, u_i)$ such that the $\alpha$'s in \citet{buffalo2019linked} can be interpreted as average effects rather than selection coefficients in an additive model.} 
+
+Using Equation 5, B\&C go on to derive the covariances in the neutral focal allele's frequency change over pairs of generations - $t$ to $t+1$ and $s$ to $s+1$ (Equation 6, B\&C). The covariance is taken over the evolutionary process, but it is not clear what (if anything) is being conditioned on - I believe from what follows only the initial frequencies of the focal neutral allele ($p_t$ and $p_s$) but possibly also the selected allele ($p_{t,l}$ and $p_{s,l}$). 
+
+Assuming average effects are constant in time, the covariances depend on the product of LD in the two generations, $t$ and $s$. These products involve either the LD between the focal site and i) the same selected site in the two generations or ii) different selected sites in the two generations. A model of how LD might change between generations $s$ and $t$ is required in order to obtain the products. B\&C achieve this (Equation 7a, B\&C) by ignoring nongametic LD and using Smith and Haigh's \citeyearpar{MaynardSmith.1974} deterministic model of how gametic LD decays with time\footnote{B\&C's equation involves $E[D_{t,l}D_{s,l}]= E[R_{t,l}R_{s,l}\sqrt{\pi_t\pi_{t,l}\pi_s\pi_{s,l}}]$. However, they end up using $E[D_{t,l}D_{s,l}]=E[R_{t,l}R_{s,l}]\pi_t\pi_{s,l}$ and it's not clear how they can do this. If the initial frequencies of both selected and non-selected alleles are conditioned on then $E[D_{t,l}D_{s,l}]=E[R_{t,l}R_{s,l}]\sqrt{\pi_t\pi_{t,l}\pi_s\pi_{s,l}}$ is OK, but even then it must be assumed that $\pi_t=\pi_{t,l}$ and $\pi_s=\pi_{s,l}$ which cannot be true if allele frequency change has taken place.  It should also be noted that \citet{sved2018one} state that $E[R_{t,l}R_{t,l}]$ is not tractable but a very good approximation was used by \citet{Ohta.1971}: $E[R_{t,l}R_{t,l}]\approx E[D_{t,l}D_{t,l}]/E[\pi_t\pi_{t,l}]$. This provides some motivation for $E[D_{t,l}D_{s,l}]\approx E[R_{t,l}R_{s,l}]\pi_t\pi_{s,l}$ but it's still not clear why $\pi_t\pi_{s,l}$ is not $E[\sqrt{\pi_t\pi_{t,l}\pi_s\pi_{s,l}}]$. If the starting frequencies are not conditioned on, this expectation is likely to be complex since $\pi_t$ and $\pi_{s,l}$ may be strongly correlated for linked sites \citep{Griffiths.1981}. In particular, see Equations 8 \& 9 in \citep{McVean.2002} that derive Ohta and Kimura 1971's quantity in terms of the coalescent.}. In our inference section we also assume that LD decays according to Smith and Haigh's \citeyearpar{MaynardSmith.1974} deterministic model. However, B\&C also assume LD between focal sites and different selected sites in the two generations (ii) is zero. They go onto to show that the covariance in allele frequency change at a locus scaled by its genetic diversity in the first of the generations ($t$) can be written as a sum over selected loci with the summands being the product of the additive genic variance contributed by a locus, the LD (expressed as a correlation correlation coefficient - henceforth $R^2$) between the focal and selected and how LD decays with time (Equation 7b B\&C). When there is no LD between focal sites the additive genetic variance is equal to the additive genic variance.
+
+
+Equation 8 makes the critical assumption that the additive genetic variances for fitness at selected loci are independent of their $R^2$ with the neutral site. This allows the additive genetic variances for fitness to be factored out such that the scaled covariances can be written in terms of the total additive \emph{genic} variance divided by the number of selected loci ($V_a(s)/(2L)$) and a sum over selected loci that only involves paramaters that pertain to the LD of the focal site with the selected sites. It is not clear that such a factoring would be possible for the additive genetic variance had LD between selected sites not been ignored. Moreover, the assumption that the additive genetic variances for fitness at a selected site is independent of the $R^2$ between the selected and focal site is likely violated simply due the constraints on the permissible values around 0 that LD can take. If allele frequencies are extreme, $V_a$ (which is proportional to $2pq$ under random mating) is small, and LD (and therefore, the squared correlation) is constrained to be close to zero \citep{sved2018one}. On the other hand, if allele frequencies are close to 50:50, $V_a$ becomes larger, and so does the permissible range of values that LD can take. Since the squared correlation can only take positive values, this can result in a \emph{positive} relationship between $V_a$ and the square of the correlation between the selected site and the focal neutral site. This is likely to lead to overestimation of $V_a$ in equation 8 in \citet{buffalo2019linked}, and therefore, lead to an inflated estimate of $V_A$. 
+
+Equation 7.12 of Walsh and Lynch gives the genetic diversity at an additive locus at selection-drift-mutation balance \citet{Kimura.1969}:
+
+\begin{equation}
+E[2pq] = 2N\mu\left(\frac{4N_e}{N}\right)\left(\frac{S-1+e^{-S}}{S\left[1-e^{-S}\right]} \right)\\
+     = 2\frac{\mu}{s}\left(\frac{S-1+e^{-S}}{1-e^{-S}} \right)\\
+\end{equation}
+
+where $S=4N_es$. Not sure why I have put this here, but it seems a useful result!
+
+
+
+
+Application of Equation 8 requires that the selected sites and their position need to be identified. To avoid this difficulty, B\&C assume that selected sites are uniformly distributed on the genetic (rather than phyiscal map) and only consider the impact of selected sites on the scaled covariance that are within a specified distance (in Morgans) of the focal site (Equation 9). In doing so the reduction in effective population size caused by unlinked selected sites (Santiago \& Caballero 1995, 1998) is ignored and when scaling up to the genome, the contribution of a genomic region to the additive genic variance is assumed proportional to its map length.
+
+In a region there will be multiple neutral sites and so Equation 10 approximates the average scaled covariance across these sites assuming neutral focal sites are also sampled uniformly on a genetic region. In addition the average is approximated as a ratio of averages rather than an average of the ratio to give the average scaled covariance as $\frac{V_a(s)}{2}\mathcal{A}(R,t,s)$ where $V_a(s)$ is the additive genic variance in generation $s$ and $\mathcal{A}(R,t,s)$ is the average $R^2$ between selected and neutral sites that persists from generations $t$ to $s$. Under the above assumptions $\mathcal{A}(R,t,s)$ is a function of $R$ (the size of the region in morgans), $r(g)$ (the recombination mapping function, assumed to be Haldane's (1919) mapping function) and $s-t$ (the number of generations)
+
+Equation 10 gets the average scaled covariance (or actually the ratio of averages rather than the average ratio) across focal sites that are assumed to be distributed uniformly on a genetic region. This equates to $\frac{V_a(s)}{2}\mathcal{A}(R,t,s)$ where $V_a(s)$ is the additive genic variance in generation $s$. and $\mathcal{A}(R,t,s)$ is the average LD between selected and neutral sites that persists from generations $t$ to $s$. Under the above assumptions $\mathcal{A}(R,t,s)$ is a function of $R$ (the size of the region in morgans), $r(g)$ (the recombination mapping function, assumed to be Haldane's (1919) mapping function) and $s-t$ (the number of generations)
+
+Equation 10 requires $V_a(s)$ which may change over time. Equation 13 assumes average effects over loci are constant such that $V_a(s) = \alpha^2L\pi(s)$ where $\pi(s)$ is the average genetic diversity at selected sites in generation $s$. This can be written as $V_a(s) = V_a(1)\pi_s/\pi_1$ and it is assumed that the change in selected site diversity $\pi(s)/\pi(1)$ is equal to the change in neutral site diversity $\pi_n(s)/\pi_n(1)$. 
+
+Equation 16 applies the theory to simulated data, but note that the covariance is now over loci rather than over time for a locus and so it is assume that the scaled covariance has the same form over time for a locus, or between loci over a pair of time points. Using simulations that have constant additive effects and allele frequencies drawn at mutation-recombination-drift balance - they show that the covariances can be captured when treating $V_a(s)$ as a known parameter - but better if $V_A(s)$ (the additive genetic rather than genic variance) is used.
+
+Equations 18 and 19 shows how the theory relates to data and states how $V_A(1)$ can be estimated using least-squares. In reality, the underlying theory only applies to the initial additive genic variance $V_a(1)$, but Figure 5a suggests it is reasonably good at estimating the initial additive genetic variance. However, because the initial generation is at mutation-drift-recombination balance rather than mutation-drift-recombination-selection balance the additive genetic variance is equal to the additive genic variance and so it is not clear how well the procedure would work with a population at mutation-drift-recombination-selection balance. The fact that the temporal covariances are better predicted by $V_A$ that $V_a$ (Figure 2) suggests that the procedure might still result in good estimates.  
+
+
+
+
+
+
+
+
+
+
+One of the most crucial assumption made by \citet{buffalo2019linked} deals with the distribution of Fishers's average effects (i.e., $\alpha_i$) across loci. \citet{buffalo2019linked} assume that effect sizes (i.e., $\alpha_i$s) are constant, and more importantly, equal across loci. This is a particularly crucial assumption that underpins their derivation of the expression for additive genic variance (i.e., additive genetic variance ignoring the contribution due to LD between loci) ($V_a$) in any generation in terms of $V_a$ in the initial generation. Relaxing the assumption that $\alpha_i$s are constant yields the following expression for the additive genic variance:
+$V_a = nE[2pq\alpha^2 ] = nE[2pq]E[\alpha^2 ]+nCOV(2pq, \alpha^2)$, where $p$ is the frequency of the reference allele and $q = 1-p$. Mutation-selection models predict a negative relationship between $\alpha_i^2$ and genetic diversity, meaning that $nCOV(2pq, \alpha^2)$ is likely to be negative \citep{park2011distribution,ruzicka2021sex}. This implies that the expression for $V_a$ given by the equation 13 in \citet{buffalo2019linked} should inflate $V_a$, since it ignores the covariance between $\alpha_i^2$ and 2pq. This would, in turn, lead to an inflated estimate of $V_A$. It is also important to note that expressing $V_a$ at a locus as $2pq\alpha^2$ (equation 13 in \citet{buffalo2019linked}) assumes Hardy-Weinberg genotypic frequencies, and therefore, random mating.
+
+
+A key feature of the approach used by \citet{buffalo2019linked} that sets it apart from ours is their assumption that segregating sites belong to two distinct classes: neutral sites and selected sites. They then explicitly model temporal autocovariances for allele frequency change at neutral loci, which requires taking into account the LD between focal neutral sites and each of the selected sites. Mathematical tractability then requires making certain important assumptions about the LD between neutral and selected sites. For example, they assume that there are no directional associations involving the LD between the focal neutral locus and two different selected loci (i.e., $E({D_{t,k}}{D_{s,l}}) = 0$ in equation 6 of \citet{buffalo2019linked}). However, this assumption is valid only under drift-recombination-mutation equilibrium. In the presence of selection, it is likely to be violated due to Hill-Robertson interference \citep{hill1966effect}, which would drive $E({D_{t,k}}{D_{s,l}})$ to be negative. Ignoring this term would, therefore, lead to an overestimation of temporal autocovariances, leading to an inflated estimate of $V_A$.
+
+
+
+Another problem with binning segregating loci into two discrete bins (neutral vs selected) is that there is no way of identifying selected loci  \emph{a priori}. Therefore, in their calculations of $V_A$, \citet{buffalo2019linked} are forced to substitute ratios of heterozygocities at selected sites between two time points by ratios of heterozygocities at neutral sites between those time points. Additionally, having developed expressions for temporal autocovariances for individual neutral loci, \citet{buffalo2019linked} then calculate the expectation for these autocovariances scaled by the genetic diversity over all the neutral loci randomly distributed across the genome. In doing so, following \citet{bhatia2013estimating}, they approximate the expectation of ratios autocovariances and genetic diversities by the ratio of expectations of autocovariances and genetic diversities (Equation (10) of \citet{buffalo2019linked}).
+
+
+ In contrast to \citet{buffalo2019linked}, we avoid modelling the evolution of individual loci. Instead of classifying loci as selected and neutral, we model the distribution of fitness effects for segregating loci. This frees us from making any assumptions about the LD between pairs of loci.  Our theory is also robust to non-random mating as we make no assumptions about the relationship between allelic and genotypic frequencies. Furthermore, our core theory makes no assumptions about the distribution of $\alpha_i$s. Our flexible inference approach then allows us to model the distribution of $\alpha_i$s in several different ways (see below).  
+\\\\
+
+\textbf{Assumptions made by Buffalo and Coop (2019):}\\
+
+A. General assumptions
+
+- Additivity across loci\\
+
+Although additivity is a stated assumption it is not required. While additivity is required in order to compute an individuals relative fitness ($w_i$ = $f_i$ in their notation) for use in Eq 34, Eq 35 shows that $w_i$ is only required for calculating $COV(c_i, w_i)$ ($c_i$ is $x_i/2$ in their notation). Since the residuals from a regression are uncorrelated with the predictor value $c$ by construction this implies that  $COV(c_i, w_i)=COV(c_i, u_i)$ such that the $\alpha$'s in \citet{buffalo2019linked} can be interpreted as average effects rather than selection coefficients in an additive model. 
+
+- Random mating (while ignoring non-gametic LD)\\
+
+Gametic-phase LD decays at rate $1-r$ allowing it be modelled simply. Non-gametic LD increases by factor r each generation and is complicated by patterns of mating. Although our theory makes no assumptions about patterns of gametic or non-gametic LD and how they change over time, our inference method when applied to multi-generational does, and actually we model it as decaying as $1-r$ (i.e. we also assume that non-gametic LD is negligible)\\
+
+B. Assumptions while modelling directional selection\\
+
+- ${\alpha}$'s are constant in time\\
+
+We assume this too\\
+
+- $E({D_{t,k}{D_{s,l}}}) = 0$, i.e., there are no directional associations between different selected sites and the focal neutral site. (Does this imply no LD between selected sites?)
+
+- Selected sites increase in frequency independently, such that LD between pairs of selected and neutral sites can be treated with two-locus dynamics
+
+- Are these assumptions consistent with Hill-Robertson interference?
+
+- No covariation between $V_a$ at a selected site and the LD between that selected site and the focal neutral site 
+\\\\
+C. Assumptions while calculating the average autocovariance for an average neutral locus
+
+- Selected sites are randomly and uniformly distributed across the region and the focal neutral site is located exactly in the middle of this region
+
+- The LD between the focal neutral site and a selected site depends only on the recombination fraction between them and not on the absolute position or the effect size
+
+- Haldane's mapping function for recombination fraction, $r(g) = (1 - e^{-2|g|})/2$ is assumed
+
+- Expectation of ratios is approximated by ratios of expectations
+\\\\
+D. Assumptions while estimating $V_A$
+
+- ${\alpha}$'s are uncorrelated with genetic diversity
+
+Eq 8 actually assumes the genic variance at a locus (I think they assume all the additive genetic variance is genic by ignoring the second term in equation 6) is uncorrelated with $E[\mathcal R^2_{t,l}]$ not that the ${\alpha}$'s are uncorrelated with genetic diversity. Only in Equations 13 and 14 do they assume constant ${\alpha}$'s (although as discussed their method probably works if ${\alpha}$'s is uncorrelated with genetic diversity)
+
+- Sum of site heterozygocity (SSH) across selected sites is approximated by SSH across neutral sites
+\\\\
+E. What is the point of calculating covariances across loci as opposed to assignments of ${\alpha}$'s?
+
+
+
+
+
+\bibliography{Vw}
+\bibliographystyle{ecol_let}
+%\printbibliography
+
+\end{document}

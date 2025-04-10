@@ -52,7 +52,7 @@ deduplicate_sim_analyses = function(data_frame){
 ## Function to make "standard" plot
 
 ```{r}
-make_std_plots = function(data, font_size = 15, end_gen = 25000){
+make_std_plots = function(data, font_size = 15, end_gen = 25000, data_in_title = FALSE){
   
   # vA_est ~ vA_true
 
@@ -97,32 +97,35 @@ p_balpha_slope = ggplot(data, aes(x = balpha_slope_est)) +
 
 p_combined = plot_grid(p_main, p_palpha, p_balpha_int, p_balpha_slope, labels = "AUTO")
 
-# Title
+if(data_in_title){
 
-ml = unique(data$sequence_length*data$r)
-if(length(ml)>1){stop("The data set does not have the same map length in the burnin phase in every simulation.")}
-
-ml_expt = unique(data$sequence_length*data$r_expt)
-if(length(ml_expt)>1){stop("The data set does not have the same map length in the experiment in every simulation.")}
-
-end_gen = unique(data$end_gen)
-if(length(end_gen)>1){stop("The data doe not have have the same end_gen for every simulations")}
-
-if(end_gen==2){
-  ml = unique(data$sequence_length*data$r_msp)
-  if(length(ml)>1){stop("The data set does not have the same map length in the burnin phase in every simulation.")}
-}else{
+  # Title
+  
   ml = unique(data$sequence_length*data$r)
   if(length(ml)>1){stop("The data set does not have the same map length in the burnin phase in every simulation.")}
-}
-
-mu_alpha = (data$shape)*(data$shape)
-
-title = ggdraw() + draw_label(paste("Map length in burnin = ", ml, " M, Map length in experiment = ", ml_expt, " M, scale = ", data$scale, sep = ""), hjust = 0.5, size = font_size)
-
-# Add title
-p_combined = plot_grid(title, p_combined, ncol = 1, rel_heights = c(0.1,1))
   
+  ml_expt = unique(data$sequence_length*data$r_expt)
+  if(length(ml_expt)>1){stop("The data set does not have the same map length in the experiment in every simulation.")}
+  
+  end_gen = unique(data$end_gen)
+  if(length(end_gen)>1){stop("The data doe not have have the same end_gen for every simulations")}
+  
+  if(end_gen==2){
+    ml = unique(data$sequence_length*data$r_msp)
+    if(length(ml)>1){stop("The data set does not have the same map length in the burnin phase in every simulation.")}
+  }else{
+    ml = unique(data$sequence_length*data$r)
+    if(length(ml)>1){stop("The data set does not have the same map length in the burnin phase in every simulation.")}
+  }
+  
+  mu_alpha = (data$shape)*(data$shape)
+  
+  title = ggdraw() + draw_label(paste("Map length in burnin = ", ml, " M, Map length in experiment = ", ml_expt, " M, scale = ", data$scale, sep = ""), hjust = 0.5, size = font_size)
+  
+  # Add title
+  p_combined = plot_grid(title, p_combined, ncol = 1, rel_heights = c(0.1,1))
+    
+}
 
 return(list(main = p_main, palpha = p_palpha, balpha_int = p_balpha_int, balpha_slope = p_balpha_slope,
             combined = p_combined))
@@ -233,13 +236,15 @@ d_5_std = d_5[d_5$r_expt*d_5$sequence_length==2&d_5$n_ind_exp==1000&d_5$n_cages=
 ####### Standard plots (Set_0: ml_expt = 2, n_indxpt = 1000, n_cages = 10, ngen2 = 4) ############
 ##################################################################################################
 
-p_nb_2_std = make_std_plots(d_5_std)
+p_nb_2_std = make_std_plots(d_5_std)$combined
+p_nb_2_std
 
-ggsave(p_nb_2_std$combined, width = 8, height = 8, file = "Manuscript_figures/Fig1.jpg")
-p_nb_2_std$combined
+title = ggdraw() + draw_label("Simplified simulations", hjust = 0.5, size = 30)
+p_nb_2_std = plot_grid(title, p_nb_2_std, ncol = 1, rel_heights = c(0.1,1))
 
-#ggsave(p_nb_2_std$main, width = 5, height = 5, file = "talk_noburnin.jpg")
-p_nb_2_std$combined
+ggsave(p_nb_2_std, width = 8, height = 8, file = "Manuscript_figures/Fig1.jpg")
+p_nb_2_std
+
 
 
 ```
@@ -253,10 +258,18 @@ p_nb_2_ml = ggplot(d_5_ml , aes(y=vA_est, x = vA_true, color = factor(sequence_l
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length in\nPhase 2 (M)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length in\nmorgans \n(experiment)") + 
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE)
+p_nb_2_ml
+
+legend_nb_2_ml = get_legend(p_nb_2_ml)
+p_nb_2_ml = plot_grid(p_nb_2_ml + theme(legend.position = "none"),
+                      legend_nb_2_ml,
+                      ncol = 2,
+                      rel_widths = c(1.0, 0.3))
+p_nb_2_ml
 
 ### n_ind_exp ###
 d_5_nind = d_5[d_5$r_exp==2e-6&d_5$n_cages==10&d_5$ngen2==4,]
@@ -264,10 +277,18 @@ p_nb_2_nind = ggplot(d_5_nind , aes(y=vA_est, x = vA_true, color = factor(n_ind_
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Population size") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Population \nsize \n(experiment)") + 
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) 
+p_nb_2_nind
+
+legend_nb_2_nind = get_legend(p_nb_2_nind)
+p_nb_2_nind = plot_grid(p_nb_2_nind + theme(legend.position = "none"),
+                        legend_nb_2_nind,
+                        ncol = 2,
+                        rel_widths = c(1.0, 0.3))
+p_nb_2_nind
 
 ### n_cages ###
 
@@ -280,6 +301,14 @@ p_nb_2_ncages = ggplot(d_5_ncages , aes(y=vA_est, x = vA_true, color = factor(n_
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) 
+p_nb_2_ncages
+
+legend_nb_2_ncages = get_legend(p_nb_2_ncages)
+p_nb_2_ncages = plot_grid(p_nb_2_ncages + theme(legend.position = "none"),
+                          legend_nb_2_ncages,
+                          ncol = 2,
+                          rel_widths = c(1.0, 0.3))
+p_nb_2_ncages
 
 ### ngen_expt ###
 
@@ -292,16 +321,26 @@ p_nb_2_ngen2 = ggplot(d_5_ngen2 , aes(y=vA_est, x = vA_true, color = factor(ngen
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) 
+p_nb_2_ngen2
+
+legend_nb_2_ngen2 = get_legend(p_nb_2_ngen2)
+p_nb_2_ngen2 = plot_grid(p_nb_2_ngen2 + theme(legend.position = "none"),
+                         legend_nb_2_ngen2,
+                         ncol = 2,
+                         rel_widths = c(1.0, 0.3))
+p_nb_2_ngen2
+
+### Combine the plots ###
 
 p_nb_2_combined = plot_grid(p_nb_2_ml, p_nb_2_nind, p_nb_2_ncages, p_nb_2_ngen2, labels = "AUTO")
 
-title = ggdraw() + draw_label("Abbreviated simulations", hjust = 0.5, size = 20)
+title = ggdraw() + draw_label("Simplified simulations", hjust = 0.5, size = 30)
 
 # Add title
 p_nb_2_combined = plot_grid(title, p_nb_2_combined, ncol = 1, rel_heights = c(0.1,1))
 
 p_nb_2_combined
-ggsave(p_nb_2_combined, width = 12, height = 8, file = "Manuscript_figures/Fig2.jpg")
+ggsave(p_nb_2_combined, width = 12, height = 10, file = "Manuscript_figures/Fig2.jpg")
 ```
 
 
@@ -402,22 +441,13 @@ d_9 = read.csv("../combined_data/Set_9_output.csv") # Data for the standard set
 
 d_9_std = d_9[d_9$all.gp==FALSE&d_9$Ne_exp!="1000_1000",]
 
-p_b_large_std = make_std_plots(d_9_std)
-#ggsave(plot = p_b_large_std$combined, width = 8, height = 8, file = "p_b_large_0.5_2_ml.jpg")
-ggsave(plot = p_b_large_std$combined, width = 8, height = 8, file = "Manuscript_figures/Fig3.jpg")
-p_b_large_std$combined
+p_b_large_std = make_std_plots(d_9_std)$combined
+title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
 
-ggsave(plot = p_b_large_std$main, width = 5, height = 5, file = "talk_burnin_del.jpg")
+p_b_large_std = plot_grid(title, p_b_large_std, ncol = 1, rel_heights = c(0.1,1))
 
-# Plots for all.gp==TRUE
-
-p_b_large_all.gp = make_std_plots(d_9[d_9$all.gp==TRUE,])
-ggsave(plot = p_b_large_all.gp$combined, width = 8, height = 8, file = "p_b_large_0.5_2_ml_all.gp.jpg")
-p_b_large_all.gp$combined
-
-
-
-
+ggsave(plot = p_b_large_std, width = 8, height = 8, file = "Manuscript_figures/Fig3.jpg")
+p_b_large_std
 
 
 ```
@@ -435,7 +465,7 @@ p_b_0.045_ml = ggplot(d_N1 , aes(y=vA_est, x = vA_true, color = factor(sequence_
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin Phase 1 (M)", title = TeX(r"($\eta_{scale}$ = 0.045)")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans\n(Experiment)", title = TeX(r"($\eta_{scale}$ = 0.045)")) + 
   scale_color_manual(values = c("#D01C8B", "#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
@@ -443,7 +473,7 @@ p_b_0.045_ml = ggplot(d_N1 , aes(y=vA_est, x = vA_true, color = factor(sequence_
 
 p_b_0.045_ml
 
-ggsave(p_b_0.045_ml, width = 5, height = 5, file = "manuscript_figures/FigS1.jpg")
+ggsave(p_b_0.045_ml, width = 6, height = 5, file = "manuscript_figures/FigS1.jpg")
 
 ```
 
@@ -457,7 +487,7 @@ d_9_std = d_9[d_9$all.gp==FALSE&d_9$Ne_exp!="1000_1000",]
 
 p_b_large_ben_std = make_std_plots(d_11)
 ggsave(plot = p_b_large_ben_std$combined, width = 8, height = 8, file = "p_b_large_0.5_2_ben.jpg")
-p_b_large_std$combined
+p_b_large_ben_std$combined
 
 # Combined plot for proportion of beneficial mutations
 
@@ -471,6 +501,14 @@ p_ben_0.033 = ggplot(rbind(d_9_std, d_11, d_14), aes(y = vA_est, x = vA_true, co
   geom_smooth(method = "lm", se=FALSE) +
   theme(plot.title = element_text(hjust = 0.5))
 
+p_ben_0.033
+
+legend_ben = get_legend(p_ben_0.033)
+
+p_ben_0.033 = plot_grid(p_ben_0.033 + theme(legend.position = "none"),
+                        legend_ben,
+                        ncol = 2,
+                        rel_widths = c(1, 0.3))
 p_ben_0.033
 ```
 
@@ -488,14 +526,24 @@ p_ml_exp_0.033 = ggplot(d_ml_exp , aes(y=vA_est, x = vA_true, color = factor(seq
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length in \nPhase 2 (M)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(experiment)") + 
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
   theme(plot.title = element_text(hjust = 0.5)) 
 
 ggsave(p_ml_exp_0.033, width = 8, height = 8, file = "p_ml_exp_0.033.jpg")
-p_ml_exp_0.033
+
+
+# When combining such plots, varying legend sizes can result in mesaligned plots
+# Standardising the size of the plot and the space allocated to the legend by extractig the legend and then combining the legend-less plot and the legend in a standardised way
+
+legend_ml_exp_0.033 = get_legend(p_ml_exp_0.033)
+p_ml_exp_0.033 = plot_grid(p_ml_exp_0.033 + theme(legend.position = "none"),
+                           legend_ml_exp_0.033,
+                           ncol = 2,
+                           rel_widths = c(1, 0.3))
+
 ```
 
 ## Simulations with burnin (varying the scale)
@@ -522,7 +570,19 @@ p_scale = ggplot(d_scale , aes(y=vA_est, x = vA_true, color = factor(scale))) +
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
   theme(plot.title = element_text(hjust = 0.5)) 
+
+# When combining such plots, varying legend sizes can result in mesaligned plots
+# Standardising the size of the plot and the space allocated to the legend by extractig the legend and then combining the legend-less plot and the legend in a standardised way
+
+legend_scale = get_legend(p_scale)
+
+p_scale = plot_grid(p_scale + theme(legend.position = "none"),
+                    legend_scale,
+                    ncol = 2,
+                    rel_widths = c(1, 0.3))
+
 p_scale
+
 ```
 
 ## Simulations with burnin (varying the map length) (scale = 0.033)
@@ -541,7 +601,7 @@ p_b_0.033_ml = ggplot(d_13 , aes(y=vA_est, x = vA_true, color = factor(sequence_
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin Phase 1 (M)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
   scale_color_manual(values = c("#D01C8B", "#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
@@ -549,6 +609,16 @@ p_b_0.033_ml = ggplot(d_13 , aes(y=vA_est, x = vA_true, color = factor(sequence_
 
 p_b_0.033_ml
 
+# When combining such plots, varying legend sizes can result in mesaligned plots
+# Standardising the size of the plot and the space allocated to the legend by extractig the legend and then combining the legend-less plot and the legend in a standardised way
+
+legend_b_0.033_ml = get_legend(p_b_0.033_ml)
+p_b_0.033_ml = plot_grid(p_b_0.033_ml + theme(legend.position = "none"),
+                           legend_b_0.033_ml,
+                           ncol = 2,
+                           rel_widths = c(1, 0.3))
+
+p_b_0.033_ml
 
 ```
 
@@ -579,7 +649,19 @@ p_all.gp = ggplot(d_all.gp, aes(y = vA_est, x = vA_true, color = all.gp)) +
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
   theme(plot.title = element_text(hjust = 0.5))
-  
+
+# When combining such plots, varying legend sizes can result in mesaligned plots
+# Standardising the size of the plot and the space allocated to the legend by extractig the legend and then combining the legend-less plot and the legend in a standardised way
+
+legend_all.gp = get_legend(p_all.gp)
+
+p_all.gp = plot_grid(p_all.gp + theme(legend.position = "none"),
+                     legend_all.gp,
+                     ncol = 2,
+                     rel_widths = c(1, 0.3))
+
+p_all.gp
+
 
 
 ```
@@ -604,7 +686,7 @@ for(i in 1:length(Ne_type)){
   if(Ne_type_labs[i]==nind_exp){
     Ne_type_labs[i] = paste("Fixed:", Ne_type_labs[i])
   }else{
-      Ne_type_labs[i] = paste("Estimated:", Ne_type_labs[i])
+      Ne_type_labs[i] = paste("True:", Ne_type_labs[i])
       }
 }
 
@@ -619,6 +701,13 @@ p_Ne = ggplot(d_9_Ne, aes(y = vA_est, x = vA_true, color = Ne_exp)) +
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
   theme(plot.title = element_text(hjust = 0.5))
+
+legend_Ne = get_legend(p_Ne)
+
+p_Ne = plot_grid(p_Ne + theme(legend.position = "none"),
+                 legend_Ne,
+                 ncol = 2,
+                 rel_widths = c(1, 0.3))
 
 # plot residual variance
 
@@ -642,7 +731,7 @@ ggsave(p_Ne_res, width = 5, height = 5, file = "manuscript_figures/FigS3.jpg")
 ```{r}
 p_b_0.033_combined = plot_grid(p_ml_exp_0.033, p_b_0.033_ml, p_ben_0.033, p_scale, p_all.gp, p_Ne, ncol = 2, labels = "AUTO")
 
-title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 20)
+title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
 
 # Add title
 p_b_0.033_combined = plot_grid(title, p_b_0.033_combined, ncol = 1, rel_heights = c(0.1,1))
