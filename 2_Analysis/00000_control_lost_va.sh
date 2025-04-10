@@ -3,7 +3,7 @@
 #$ -V
 #$ -cwd
 #$ -N New_V_A
-#$ -t 1-300
+#$ -t 1-200
 #$ -tc 15
 #$ -l mem_free=50g,s_vmem=65g,h_vmem=75g
 #$ -pe smp64 9

@@ -519,7 +519,7 @@ Needs data from set_12 as well as set_9
 ```{r}
 d_9 = read.csv("../combined_data/Set_9_output.csv") # Data for the standard set
 d_9_std = d_9[d_9$all.gp==FALSE&d_9$Ne_exp!="1000_1000",]
-d_12 = read.csv("../combined_data/Set_12_output.csv") # Data when mu_exp was varied
+d_12 = read.csv("../combined_data/Set_12_output.csv") # Data when ml_exp was varied
 d_ml_exp = rbind(d_9_std, d_12)
 
 p_ml_exp_0.033 = ggplot(d_ml_exp , aes(y=vA_est, x = vA_true, color = factor(sequence_length*r_expt))) +
