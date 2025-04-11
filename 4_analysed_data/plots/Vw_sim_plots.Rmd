@@ -346,6 +346,8 @@ p_b_large_std
 
 ### Set_N1 (scale = 0.045): ml = c (5, 50, 250), ml_exp = 2, mut_ratio = 0 
 
+Varying map length in history, but for \eta_{scale} = 0.045
+
 ```{r}
 d_N1 = read.csv("../combined_data/Set_N1_output.csv")
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
@@ -386,7 +388,7 @@ p_b_large_ben_std$combined
 
 # Combined plot for proportion of beneficial mutations
 
-p_ben_0.033 = ggplot(rbind(d_9_std, d_11, d_14), aes(y = vA_est, x = vA_true, color = factor(format(mut_ratio, scientific = FALSE)))) +
+p_ben_0.033 = ggplot(rbind(d_9_std, d_11, d_14), aes(y = vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(format(mut_ratio, scientific = FALSE)))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
