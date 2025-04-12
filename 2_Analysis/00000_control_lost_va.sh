@@ -2,8 +2,8 @@
 
 #$ -V
 #$ -cwd
-#$ -N New_V_A_set_5
-#$ -t 1-900
+#$ -N New_V_A_set_N1
+#$ -t 1-200
 #$ -tc 15
 #$ -l mem_free=50g,s_vmem=65g,h_vmem=75g
 #$ -pe smp64 9
