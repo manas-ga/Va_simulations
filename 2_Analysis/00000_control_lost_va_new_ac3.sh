@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#SBATCH --job-name=lost_va
+#SBATCH --job-name=lost_va_N1
 #SBATCH --output=/mnt/hel/obbard/Va_simulations/analyses/b_Interim_files/std_out/job_%A_%a.log   # Store logs in a custom directory
 #SBATCH --open-mode=append                                                                       # Append output if the file already exists
-#SBATCH --array=157-176%12                                                                       # Run replicate tasks
+#SBATCH --array=201-396%12                                                                       # Run replicate tasks
 #SBATCH --ntasks=10
 #SBATCH --mem=65G
 #SBATCH --nodelist=ac3-n6
