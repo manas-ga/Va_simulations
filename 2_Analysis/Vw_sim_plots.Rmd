@@ -15,6 +15,18 @@ library(cowplot)
 library(latex2exp)
 ```
 
+The following code loads outputs of simulation analyses and makes Figures for the manuscript. Simulation data is classified into sets, with the sets that are useful for the manuscript being  as follows (the number of simulations within each set are indicated inside brackets):
+
+- Set_5 (900 simulations): All simplified simulations 
+- Set_9 (100 simulations, each analysed in three different ways): The standard set for full simulations 
+- Set_11 (100): Full simulations with 0.02 % beneficial mutations
+- Set_14 (100): Full simulations with 2 % beneficial mutations
+- Set_12 (200): Full simulations varying map length in th experiment
+- Set_13 (176): Full simulations varying map length in history
+- Set_15 (200): Full simulations varying the scale
+- Set_N1 (396): Full simulations varying the map length in history (for simulations in which scale = 0.045)
+
+
 ## Set paths
 
 ```{r paths}
@@ -218,6 +230,7 @@ Load the dataframe storing information on calculations of vA_true_new, va_true_n
 ```{r}
 d_new_va = read.csv(file.path(data_path, "combined_data/new_va_calculation_combined.csv"))
 alpha = TRUE # If alpha = TRUE, alpha = eta + (1 - 2p)eta is used to calculate vA_true, i.e. vA_true_new is used in the plots. Otherwise, vA_true is used in the plots
+cumulative = FALSE # Should plots of va_lost vs cumulative |alpha| be mmade (time consuming)?
 ```
 
 
@@ -244,7 +257,7 @@ d_5_std = d_5[d_5$r_expt*d_5$sequence_length==2&d_5$n_ind_exp==1000&d_5$n_cages=
 ####### Standard plots (Set_0: ml_expt = 2, n_indxpt = 1000, n_cages = 10, ngen2 = 4) ############
 ##################################################################################################
 
-p_nb_2_std = make_std_plots(d_5_std, alpha = FALSE)$combined
+p_nb_2_std = make_std_plots(d_5_std, alpha = alpha)$combined
 p_nb_2_std
 
 title = ggdraw() + draw_label("Simplified simulations", hjust = 0.5, size = 30)
@@ -262,7 +275,7 @@ We then vary ml_expt, n_ind_exp, n_cages, and ngen2 one at a time while keeping 
 ### ml_expt ###
 
 d_5_ml = d_5[d_5$n_ind_exp==1000&d_5$n_cages==10&d_5$ngen2==4,]
-p_nb_2_ml = ggplot(d_5_ml , aes(y=vA_est, x = vA_true, color = factor(sequence_length*r_expt))) +
+p_nb_2_ml = ggplot(d_5_ml , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(sequence_length*r_expt))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -281,7 +294,7 @@ p_nb_2_ml
 
 ### n_ind_exp ###
 d_5_nind = d_5[d_5$r_exp==2e-6&d_5$n_cages==10&d_5$ngen2==4,]
-p_nb_2_nind = ggplot(d_5_nind , aes(y=vA_est, x = vA_true, color = factor(n_ind_exp))) +
+p_nb_2_nind = ggplot(d_5_nind , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(n_ind_exp))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -301,7 +314,7 @@ p_nb_2_nind
 ### n_cages ###
 
 d_5_ncages = d_5[d_5$r_exp==2e-6&d_5$n_ind_exp==1000&d_5$ngen2==4,]
-p_nb_2_ncages = ggplot(d_5_ncages , aes(y=vA_est, x = vA_true, color = factor(n_cages))) +
+p_nb_2_ncages = ggplot(d_5_ncages , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(n_cages))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -321,12 +334,12 @@ p_nb_2_ncages
 ### ngen_expt ###
 
 d_5_ngen2 = d_5[d_5$r_exp==2e-6&d_5$n_ind_exp==1000&d_5$n_cages==10,]
-p_nb_2_ngen2 = ggplot(d_5_ngen2 , aes(y=vA_est, x = vA_true, color = factor(ngen2-ngen1))) +
+p_nb_2_ngen2 = ggplot(d_5_ngen2 , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(ngen2-ngen1))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Generations") + 
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($\tau - t$)")) + 
+  scale_color_manual(values = c("#0072B2", "#009E73", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) 
 p_nb_2_ngen2
@@ -396,7 +409,7 @@ p_b_0.045_ml = ggplot(d_N1 , aes(y=vA_est, x = vA_true, color = factor(sequence_
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans\n(history)", title = TeX(r"($\eta_{scale}$ = 0.045)")) + 
-  scale_color_manual(values = c("#D01C8B", "#0072B2", "#999999", "#009E73")) + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
   theme(plot.title = element_text(hjust = 0.5))
@@ -428,7 +441,7 @@ p_ben_0.033 = ggplot(rbind(d_9_std, d_11, d_14), aes(y = vA_est, x = if(alpha){v
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($\mu_{ben} : \mu_{del}$)")) + 
-  scale_color_manual(values = c("#0072B2", "#999999",  "#009E73")) + 
+  scale_color_manual(values = c("#009E73", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
   theme(plot.title = element_text(hjust = 0.5))
@@ -456,7 +469,7 @@ d_12 = add_new_va_data(d_new_va, d_12)
 
 d_ml_exp = rbind(d_9_std, d_12)
 
-p_ml_exp_0.033 = ggplot(d_ml_exp , aes(y=vA_est, x = vA_true, color = factor(sequence_length*r_expt))) +
+p_ml_exp_0.033 = ggplot(d_ml_exp , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(sequence_length*r_expt))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -481,7 +494,7 @@ p_ml_exp_0.033
 
 ## Simulations with burnin (varying the scale)
 
-Needs datasets for set 7, set 9, and set N1
+Needs datasets for set 9 and set 15
 
 ```{r}
 
@@ -505,7 +518,7 @@ p_scale = ggplot(d_scale , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($\eta_{scale}$)")) + 
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  scale_color_manual(values = c("#009E73", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
   theme(plot.title = element_text(hjust = 0.5)) 
@@ -536,12 +549,12 @@ d_13 = add_new_va_data(d_new_va, d_13)
 
 d_13 = rbind(d_9_std, d_13)
 
-p_b_0.033_ml = ggplot(d_13 , aes(y=vA_est, x = vA_true, color = factor(sequence_length*r))) +
+p_b_0.033_ml = ggplot(d_13 , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(sequence_length*r))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
-  scale_color_manual(values = c("#D01C8B", "#0072B2", "#999999", "#009E73")) + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
   theme(plot.title = element_text(hjust = 0.5))
@@ -581,7 +594,7 @@ p_all.gp = ggplot(d_all.gp, aes(y = vA_est, x = if(alpha){vA_true_new}else{vA_tr
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($\tilde{\bf L}_0$)")) + 
-  scale_color_manual(values = c("#D01C8B", "#0072B2"), labels = all.gp_labs) + 
+  scale_color_manual(values = c("#009E73", "#0072B2"), labels = all.gp_labs) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
   theme(plot.title = element_text(hjust = 0.5))
@@ -619,7 +632,7 @@ for(i in 1:length(Ne_type)){
   nind_exp = unique(d_9_Ne[d_9_Ne$Ne_exp==Ne_type[i],]$n_ind_exp)
   
   if(Ne_type_labs[i]==nind_exp){
-    Ne_type_labs[i] = paste("Fixed:", Ne_type_labs[i])
+    Ne_type_labs[i] = paste("N:", Ne_type_labs[i])
   }else{
       Ne_type_labs[i] = paste("True:", Ne_type_labs[i])
       }
@@ -632,7 +645,7 @@ p_Ne = ggplot(d_9_Ne, aes(y = vA_est, x = if(alpha){vA_true_new}else{vA_true}, c
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($N_E$)")) + 
-  scale_color_manual(values = c("#D01C8B", "#0072B2"), labels = Ne_type_labs) + 
+  scale_color_manual(values = c("#0072B2", "#009E73"), labels = Ne_type_labs) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
   theme(plot.title = element_text(hjust = 0.5))
@@ -688,11 +701,13 @@ Plot the fraction of the initial additive genic variance lost by the end of the 
 # Figure S2A #
 ##############
 
-plot_lost_va = ggplot(d_scale, aes(y = if(alpha){((va_true_new - va_left_new)/va_true_new)}else{((va_true - va_left)/va_true)}, x = factor(round(scale, digits = 4)))) +
+plot_lost_va = ggplot(d_scale, aes(y = if(alpha){((va_true_new - va_left_new)/va_true_new)}else{((va_true - va_left)/va_true)}, x = factor(round(scale, digits = 4)), fill = factor(round(scale, digits = 4)))) +
   theme_bw() +
   geom_boxplot() +
-  labs(y = TeX(r"(Fraction of the total $V_a(0)$ lost)"), x = TeX(r"($\eta_{scale}$)")) +
-  theme(text = element_text(size = 15)) 
+  labs(y = TeX(r"(Fraction of the total $V_a(0)$ lost)"), x = TeX(r"($\eta_{scale}$)"), fill  = TeX(r"($\eta_{scale}$)")) +
+  theme(text = element_text(size = 15)) +
+  scale_fill_manual(values = c("#009E73", "#0072B2", "#999999"))  +
+  theme(legend.position = "bottom")
 
 ##############
 # Figure S2B #
@@ -708,7 +723,7 @@ plot_lost_va_bias = ggplot(d_scale, aes(y = if(alpha){vA_est - vA_true_new}else{
   labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"),x = TeX(r"(Total $V_a$ lost)"), color = TeX(r"($\eta_{scale}$)")) +
   theme(text = element_text(size = 15)) +
   geom_abline(slope = -1, intercept = 0) + 
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
+  scale_color_manual(values = c("#009E73", "#0072B2", "#999999"))  +
   theme(legend.position = "bottom")
 
 ##############
@@ -716,21 +731,29 @@ plot_lost_va_bias = ggplot(d_scale, aes(y = if(alpha){vA_est - vA_true_new}else{
 ##############
 
 # Identify the simulation with the greatest absolute loss in V_a
-message("Simulation with the geratest absolute loss in initial additive genic variance:")
+# However, limit only to simulations for which vA_true (or vA_true_new) is close to 0.075
+d_scale1 = d_scale[if(alpha){which(0.074 <= d_scale$vA_true_new & d_scale$vA_true_new<= 0.076)}else{which(0.074 <= d_scale$vA_true & d_scale$vA_true_new <= 0.076)},]
 
 if(alpha){
-  max_loss_sim = d_scale[which((d_scale$va_true_new - d_scale$va_left_new) == max(d_scale$va_true_new - d_scale$va_left_new)),]$Set_ID}else{
-  max_loss_sim = d_scale[which((d_scale$va_true - d_scale$va_left) == max(d_scale$va_true - d_scale$va_left)),]$Set_ID  
+  max_loss_sim = d_scale1[which((d_scale1$va_true_new - d_scale1$va_left_new) == max(d_scale1$va_true_new - d_scale1$va_left_new)),]$Set_ID}else{
+  max_loss_sim = d_scale1[which((d_scale1$va_true - d_scale1$va_left) == max(d_scale1$va_true - d_scale1$va_left)),]$Set_ID  
   }
 
+message("Simulation with the geratest absolute loss in initial additive genic variance:")
+max_loss_sim
+message(paste("True V_A =", if(alpha){d_scale[d_scale$Set_ID==max_loss_sim,]$vA_true_new}else{d_scale[d_scale$Set_ID==max_loss_sim,]$vA_true}))
+message(paste("Lost V_a =", if(alpha){d_scale[d_scale$Set_ID==max_loss_sim,]$va_true_new - d_scale[d_scale$Set_ID==max_loss_sim,]$va_left_new}else{d_scale[d_scale$Set_ID==max_loss_sim,]$va_true - d_scale[d_scale$Set_ID==max_loss_sim,]$va_left}))
 
 # Identify the simulation with the smallest absolute loss in V_a
-message("Simulation with the smallest absolute loss in initial additive genic variance:")
 
 if(alpha){
-  min_loss_sim = d_scale[which((d_scale$va_true_new - d_scale$va_left_new) == min(d_scale$va_true_new - d_scale$va_left_new)),]$Set_ID}else{
-  min_loss_sim = d_scale[which((d_scale$va_true - d_scale$va_left) == min(d_scale$va_true - d_scale$va_left)),]$Set_ID  
+  min_loss_sim = d_scale1[which((d_scale1$va_true_new - d_scale1$va_left_new) == min(d_scale1$va_true_new - d_scale1$va_left_new)),]$Set_ID}else{
+  min_loss_sim = d_scale1[which((d_scale1$va_true - d_scale1$va_left) == min(d_scale1$va_true - d_scale1$va_left)),]$Set_ID  
   }
+message("Simulation with the smallest absolute loss in initial additive genic variance:")
+min_loss_sim
+message(paste("True V_A =", if(alpha){d_scale[d_scale$Set_ID==min_loss_sim,]$vA_true_new}else{d_scale[d_scale$Set_ID==min_loss_sim,]$vA_true}))
+message(paste("Lost V_a =", if(alpha){d_scale[d_scale$Set_ID==min_loss_sim,]$va_true_new - d_scale[d_scale$Set_ID==min_loss_sim,]$va_left_new}else{d_scale[d_scale$Set_ID==min_loss_sim,]$va_true - d_scale[d_scale$Set_ID==min_loss_sim,]$va_left}))
 
 # Load finescale data for these two simulations
 
@@ -749,36 +772,39 @@ d_finescale_max$locuswise_va_lost_new = d_finescale_max$locuswise_va_true_new - 
 d_finescale_min$locuswise_va_lost = d_finescale_min$locuswise_va_true - d_finescale_min$locuswise_va_left
 d_finescale_min$locuswise_va_lost_new = d_finescale_min$locuswise_va_true_new - d_finescale_min$locuswise_va_left_new
 
-# Sort by abs|\alpha| and calculate cumulative locuswise_va_lost_new
-
-  d_finescale_max = d_finescale_max[order(abs(d_finescale_max$list_alpha_new)),]
-  d_finescale_min = d_finescale_min[order(abs(d_finescale_min$list_alpha_new)),]
+if(cumulative){
   
-  d_finescale_max$cumulative_va_lost_new = NA
-  for(i in 1:nrow(d_finescale_max)){
-    d_finescale_max$cumulative_va_lost_new[i] = sum(d_finescale_max$locuswise_va_lost_new[1:i])
-  }
+  # Sort by abs|\alpha| and calculate cumulative locuswise_va_lost_new
   
-  d_finescale_min$cumulative_va_lost_new = NA
-  for(i in 1:nrow(d_finescale_min)){
-    d_finescale_min$cumulative_va_lost_new[i] = sum(d_finescale_min$locuswise_va_lost_new[1:i])
-  }
+    d_finescale_max = d_finescale_max[order(abs(d_finescale_max$list_alpha_new)),]
+    d_finescale_min = d_finescale_min[order(abs(d_finescale_min$list_alpha_new)),]
+    
+    d_finescale_max$cumulative_va_lost_new = NA
+    for(i in 1:nrow(d_finescale_max)){
+      d_finescale_max$cumulative_va_lost_new[i] = sum(d_finescale_max$locuswise_va_lost_new[1:i])
+    }
+    
+    d_finescale_min$cumulative_va_lost_new = NA
+    for(i in 1:nrow(d_finescale_min)){
+      d_finescale_min$cumulative_va_lost_new[i] = sum(d_finescale_min$locuswise_va_lost_new[1:i])
+    }
+    
+  # Sort by abs|\eta| and calculate cumulative locuswise_va_lost  
   
-# Sort by abs|\eta| and calculate cumulative locuswise_va_lost  
-
-  d_finescale_max = d_finescale_max[order(abs(d_finescale_max$list_alpha)),]
-  d_finescale_min = d_finescale_min[order(abs(d_finescale_min$list_alpha)),]
+    d_finescale_max = d_finescale_max[order(abs(d_finescale_max$list_alpha)),]
+    d_finescale_min = d_finescale_min[order(abs(d_finescale_min$list_alpha)),]
+    
+    d_finescale_max$cumulative_va_lost = NA
+    for(i in 1:nrow(d_finescale_max)){
+     d_finescale_max$cumulative_va_lost[i] = sum(d_finescale_max$locuswise_va_lost[1:i])
+    }
+    
+    d_finescale_min$cumulative_va_lost = NA
+    for(i in 1:nrow(d_finescale_min)){
+      d_finescale_min$cumulative_va_lost[i] = sum(d_finescale_min$locuswise_va_lost[1:i])
+    }
   
-  d_finescale_max$cumulative_va_lost = NA
-  for(i in 1:nrow(d_finescale_max)){
-   d_finescale_max$cumulative_va_lost[i] = sum(d_finescale_max$locuswise_va_lost[1:i])
-  }
-  
-  d_finescale_min$cumulative_va_lost = NA
-  for(i in 1:nrow(d_finescale_min)){
-    d_finescale_min$cumulative_va_lost[i] = sum(d_finescale_min$locuswise_va_lost[1:i])
-  }
-
+}
 
 d_finescale = rbind(d_finescale_max, d_finescale_min)
 
@@ -798,31 +824,79 @@ plot_finescale_va_lost = ggplot(d_finescale_sel, aes(y = if(alpha){locuswise_va_
   labs(y = TeX(r"($V_a$ lost at a locus$)"), x = if(alpha){TeX(r"($|\alpha|$)")}else{TeX(r"($|\eta|$)")}, color = "Simulation type") +
   theme(text = element_text(size = 15)) +   
   theme(legend.position = "bottom") +
-  scale_color_manual(values = c("Min." = "#00BFC4", "Max." = "#F8766D"),
+  scale_color_manual(values = c("Min." = "#009E73", "Max." = "#999999"),
     labels = c("Min." = TeX(r"(Min. $V_a$ lost)"), "Max." = TeX(r"(Max. $V_a$ lost)"))  # Custom legend labels
   ) +
   geom_line(aes(x = seq(0, 1.2, length = nrow(d_finescale_sel)), y = 0.5*(1/2000)*(1999/2000)*seq(0, 1.2, length = nrow(d_finescale_sel))^2), linewidth = 0.1, color = "black")
+
+plot_finescale_va_lost  
+
+if(cumulative){
+    
+  # Plot cumulative V_a lost vs |alpha| for the two simulations
   
+  plot_cumulative_va_lost = ggplot(d_finescale_sel, aes(y = if(alpha){cumulative_va_lost_new}else{cumulative_va_lost},                                                      x = if(alpha){abs(list_alpha_new)}else{abs(list_alpha)}, 
+                                                       color = lost_va_type)) +
+    theme_bw() +
+    geom_point() +
+    labs(y = TeX(r"(Cumulative $V_a$ lost$)"), x = if(alpha){TeX(r"($|\alpha|$)")}else{TeX(r"($|\eta|$)")}, color = "Simulation type") +
+    theme(text = element_text(size = 15)) +   
+    theme(legend.position = "bottom") +
+    scale_color_manual(values = c("Min." = "#009E73", "Max." = "#999999"),
+      labels = c("Min." = TeX(r"(Min. $V_a$ lost)"), "Max." = TeX(r"(Max. $V_a$ lost)"))  # Custom legend labels
+    ) 
+  plot_cumulative_va_lost
+  
+}
+
+
 ##############
 # Figure S2D #
 ##############
 
-# Plot cumulative V_a lost vs |alpha| for the two simulations
+d_finescale_sel$list_alpha_cat = abs(round(d_finescale_sel$list_alpha, 2))
+d_finescale_sel$list_alpha_new_cat = abs(round(d_finescale_sel$list_alpha_new, 2))
 
-plot_cumulative_va_lost = ggplot(d_finescale_sel, aes(y = if(alpha){cumulative_va_lost_new}else{cumulative_va_lost},                                                      x = if(alpha){abs(list_alpha_new)}else{abs(list_alpha)}, 
-                                                     color = lost_va_type)) +
-  theme_bw() +
-  geom_point() +
-  labs(y = TeX(r"(Cumulative $V_a$ lost$)"), x = if(alpha){TeX(r"($|\alpha|$)")}else{TeX(r"($|\eta|$)")}, color = "Simulation type") +
-  theme(text = element_text(size = 15)) +   
-  theme(legend.position = "bottom") +
-  scale_color_manual(values = c("Min." = "#00BFC4", "Max." = "#F8766D"),
-    labels = c("Min." = TeX(r"(Min. $V_a$ lost)"), "Max." = TeX(r"(Max. $V_a$ lost)"))  # Custom legend labels
-  ) 
+if(alpha){
+  d_summed_lost_va = aggregate(cbind(locuswise_va_true_new, locuswise_va_lost_new) ~ list_alpha_new_cat*lost_va_type, data = d_finescale_sel, FUN = "sum")
+  
+  d_summed_lost_va$fract_va_lost = d_summed_lost_va$locuswise_va_lost_new/d_summed_lost_va$locuswise_va_true_new
+  
+}else{
+  d_summed_lost_va = aggregate(cbind(locuswise_va, locuswise_va_lost) ~ list_alpha_cat*lost_va_type, data = d_finescale_sel, FUN = "sum")
+}
+
+
+plot_categoriwise_va_lost = ggplot(d_summed_lost_va, aes(y = locuswise_va_lost_new,                                                      x = if(alpha){list_alpha_new_cat}else{list_alpha_cat}, 
+                                                       fill = lost_va_type)) +
+    theme_bw() +
+    geom_bar(stat = "Identity", position = position_dodge(preserve = "single")) +
+    labs(y = TeX(r"(Total $V_a$ lost at groups of loci)"), x = if(alpha){TeX(r"($|\alpha|$)")}else{TeX(r"($|\eta|$)")}, fill = "Simulation type") +
+    theme(text = element_text(size = 15)) +   
+    theme(legend.position = "bottom") +
+    scale_fill_manual(values = c("Min." = "#009E73", "Max." = "#999999"),
+      labels = c("Min." = TeX(r"(Min. $V_a$ lost)"), "Max." = TeX(r"(Max. $V_a$ lost)"))  # Custom legend labels
+    ) 
+  plot_categoriwise_va_lost
+  
+  plot_categoriwise_fract_va_lost = ggplot(d_summed_lost_va, aes(y = fract_va_lost,                                                      x = if(alpha){list_alpha_new_cat}else{list_alpha_cat}, 
+                                                       fill = lost_va_type)) +
+    theme_bw() +
+    geom_bar(stat = "Identity", position = position_dodge(preserve = "single")) +
+    labs(y = TeX(r"(Fraction $V_a$ lost at groups of loci)"), x = if(alpha){TeX(r"($|\alpha|$)")}else{TeX(r"($|\eta|$)")}, fill = "Simulation type") +
+    theme(text = element_text(size = 15)) +   
+    theme(legend.position = "bottom") +
+    scale_fill_manual(values = c("Min." = "#009E73", "Max." = "#999999"),
+      labels = c("Min." = TeX(r"(Min. $V_a$ lost)"), "Max." = TeX(r"(Max. $V_a$ lost)"))  # Custom legend labels
+    ) 
+  plot_categoriwise_fract_va_lost
+  
+  
+
 
 ### Combine the three plots ###
 
-va_lost_combined_plot = plot_grid(plot_lost_va, plot_lost_va_bias, plot_finescale_va_lost, ncol = 2, nrow = 2, labels = "AUTO")
+va_lost_combined_plot = plot_grid(plot_lost_va, plot_lost_va_bias, plot_finescale_va_lost, plot_categoriwise_va_lost, ncol = 2, nrow = 2, labels = "AUTO")
 
 ggsave(va_lost_combined_plot, width = 10, height = 10, file = file.path(output_path, "FigS2.jpg"))
 
@@ -836,7 +910,7 @@ ggsave(va_lost_combined_plot, width = 10, height = 10, file = file.path(output_p
 
 ```{r}
 
-plot_palpha_bias = ggplot(d_scale, aes(y = vA_est - vA_true,x = palpha_est, color = factor(round(scale, digits = 4)))) +
+plot_palpha_bias = ggplot(d_scale, aes(y = vA_est - if(alpha){vA_true_new}else{vA_true},x = palpha_est, color = factor(round(scale, digits = 4)))) +
   theme_bw() +
   geom_point() +
   labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"), color = TeX(r"($\eta_{scale}$)")) +
@@ -844,7 +918,7 @@ plot_palpha_bias = ggplot(d_scale, aes(y = vA_est - vA_true,x = palpha_est, colo
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
   theme(legend.position = "bottom")
   
-plot_balpha_slope_bias = ggplot(d_scale, aes(y = vA_est - vA_true,x = balpha_slope_est, color = factor(round(scale, digits = 4)))) +
+plot_balpha_slope_bias = ggplot(d_scale, aes(y = vA_est - if(alpha){vA_true_new}else{vA_true},x = balpha_slope_est, color = factor(round(scale, digits = 4)))) +
   theme_bw() +
   geom_point() +
   labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"), color = TeX(r"($\eta_{scale}$)")) +
@@ -852,7 +926,7 @@ plot_balpha_slope_bias = ggplot(d_scale, aes(y = vA_est - vA_true,x = balpha_slo
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
   theme(legend.position = "bottom")
 
-plot_balpha_intercept_bias = ggplot(d_scale, aes(y = vA_est - vA_true,x = balpha_intercept_est, color = factor(round(scale, digits = 4)))) +
+plot_balpha_intercept_bias = ggplot(d_scale, aes(y = vA_est - if(alpha){vA_true_new}else{vA_true},x = balpha_intercept_est, color = factor(round(scale, digits = 4)))) +
   theme_bw() +
   geom_point() +
   labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"), color = TeX(r"($\eta_{scale}$)")) +
@@ -860,7 +934,7 @@ plot_balpha_intercept_bias = ggplot(d_scale, aes(y = vA_est - vA_true,x = balpha
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
   theme(legend.position = "bottom")
 
-plot_palphaemp_bias = ggplot(d_scale, aes(y = vA_est - vA_true,x = palpha_emp, color = factor(round(scale, digits = 4)))) +
+plot_palphaemp_bias = ggplot(d_scale, aes(y = vA_est - if(alpha){vA_true_new}else{vA_true},x = palpha_emp, color = factor(round(scale, digits = 4)))) +
   theme_bw() +
   geom_point() +
   labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"), color = TeX(r"($\eta_{scale}$)")) +
