@@ -2,7 +2,7 @@
 
 #$ -V
 #$ -cwd
-#$ -N New_V_A_set_N1
+#$ -N BC_V_A
 #$ -t 1-150
 #$ -tc 15
 #$ -l mem_free=50g,s_vmem=65g,h_vmem=75g
