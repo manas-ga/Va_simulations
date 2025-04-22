@@ -16,4 +16,4 @@ conda activate marun
 
 Param=`cat lost_va_IDs.txt | awk "NR==${SLURM_ARRAY_TASK_ID}"`
 
-Rscript ba_va_script.R $Param
+Rscript bc_va_script.R $Param
