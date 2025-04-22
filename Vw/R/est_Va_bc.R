@@ -1,4 +1,4 @@
-est_Va_bc<-function(pbar1, pbar2, L, nR){
+est_Va_bc<-function(pbar1, pbar2, L, nR, selected=NULL){
   
   # Equations 20 and 21 in Buffalo & Coop
   # should also scale a by the change in SSH
@@ -6,7 +6,7 @@ est_Va_bc<-function(pbar1, pbar2, L, nR){
   nrep = nrow(pbar1)
   
   Q<-Q(pbar1, pbar2)
-  A<-averageLD(L, nR, nrep=nrep)
+  A<-averageLD(L, nR, nrep=nrep, selected=selected)
   
   q<-Q[upper.tri(Q, diag=TRUE)]
   a<-0.5*A[upper.tri(A, diag=TRUE)]
