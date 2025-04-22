@@ -1,10 +1,24 @@
 
-averageLD<-function(L, nR, nrep){
+averageLD<-function(L, nR, nrep, selected=NULL){
   
   # Equation 55 in Buffalo & Coop
+
+  if(any(dim(L)!=dim(nR))){
+    stop("L and nR should have the same dimensions")
+  }
+
   n<-nrow(L)
   
-  s<-(sum((cov2cor(L)^2)*nR)-n)/(n*(n-1))
+  LD<-(cov2cor(L)^2)*nR
+
+  if(is.null(selected)){
+    s<-sum(LD-n)/(n*(n-1))
+  }else{
+    if(min(selected)<1 | max(selected)>nrow(L)){
+      stop("selected should be loci between 1 and the dimension of L")
+    }
+    s<-mean(LD[selected, -selected])
+  }  
 
   A<-matrix(s, nrep, nrep)
   
