@@ -26,6 +26,9 @@ The following code loads outputs of simulation analyses and makes Figures for th
 - Set_15 (200): Full simulations varying the scale
 - Set_N1 (396): Full simulations varying the map length in history (for simulations in which scale = 0.045)
 
+Total = 2172
+
+
 
 ## Set paths
 
@@ -98,7 +101,7 @@ deduplicate_sim_analyses = function(data_frame){
 
 ## Function to add recalculated true V_A (V_A_true_new), lost_va to a dataframe
 
-These calculations were performed at a later stage and are stored in a separate file ("<data_path>/combined_data/new_va_calculation_combined.csv"). For every simulation in the input dataframem this functions looks up the row with the appropriate Set_ID in "new_va_calculation_combined.csv" and adds the V_A_true new and other data pertaining to lost_va to the inputted dataframe.
+These calculations were performed at a later stage and are stored in a separate file ("<data_path>/combined_data/new_va_calculation_combined.csv"). For every simulation in the input dataframe this functions looks up the row with the appropriate Set_ID in "new_va_calculation_combined.csv" and adds the V_A_true_new and other data pertaining to lost_va to the input dataframe.
 
 ```{r}
 add_new_va_data = function(new_va_data,    # Data frame storing the calculations of vA_true_new, lost_va, etc
@@ -137,6 +140,12 @@ add_new_va_data = function(new_va_data,    # Data frame storing the calculations
 
 
 ## Function to make "standard" plot
+
+Creates plots with four panels:
+A. Estimate of V_A vs True V_A
+B. Hisotgram of the estimates pf p_{\alpha}
+C. Histogram of the estimates of (\beta)_{\alpha}^{(0)}
+D. Histogram of the estimates of (\beta)_{\alpha}^{(1)}
 
 ```{r}
 make_std_plots = function(data, 
@@ -236,7 +245,7 @@ cumulative = FALSE # Should plots of va_lost vs cumulative |alpha| be mmade (tim
 
 ## Simplified simulations (simulations without burnin) (Set_5)
 
-Selection coefficients were drawn from a gamma distribution (shape = 0.3, scale = 0.033) and assigned to mutations randomly. The recombination rate in the msprime simulation was 5.32e-07. Map length in the burnin phase of just 1 generation (eng_gen = 2) was 5.
+Selection coefficients were drawn from a gamma distribution (shape = 0.3, scale = 0.033) and assigned to mutations randomly. The recombination rate in the msprime simulation was 5.32e-07. Map length in the history phase of just 1 generation (eng_gen = 2) was 5.
 
 
 Standard parameters:
@@ -250,7 +259,7 @@ ngen2 = 4
 ```{r}
 d_5 = read.csv(file.path(data_path, "combined_data/Set_5_output.csv"))
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
-d_5 = add_new_va_data(d_new_va, d_5)
+d_5 = add_new_va_data(d_new_va, d_5, TRUE)
 d_5_std = d_5[d_5$r_expt*d_5$sequence_length==2&d_5$n_ind_exp==1000&d_5$n_cages==10&d_5$ngen2==4,] # Data for the standard set
 
 ##################################################################################################
@@ -373,11 +382,19 @@ ggsave(p_nb_2_combined, width = 12, height = 10, file = file.path(output_path, "
 
 The standard set for full simulations. 
 
+Selection coefficients were drawn from a gamma distribution (shape = 0.3, scale = -0.033) and assigned to mutations randomly. No beneficial mutations. The forward simulation in the history phase was run for 25000 generations. The recombination rate in the msprime simulation was 5.32e-07. Map length in the history phase was 0.5 M, and the map length in the experiment was 2 M.
+
+Number of individuals in the experiment (n_ind_exp) = 1000
+Number of cages (n_cages) = 10
+ngen2 = 4
+
+The analyses for this set were performed using all.gp = FALSE and using the true N_E (i.e. using predict_Ne = TRUE)
+
 ```{r}
 d_9 = read.csv(file.path(data_path, "combined_data/Set_9_output.csv")) # Data for the standard set
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
-d_9 = add_new_va_data(d_new_va, d_9)
+d_9 = add_new_va_data(d_new_va, d_9, TRUE)
 d_9_std = d_9[d_9$all.gp==FALSE&d_9$Ne_exp!="1000_1000",]
 
 p_b_large_std = make_std_plots(d_9_std, alpha = alpha)$combined
@@ -391,44 +408,17 @@ p_b_large_std
 
 ```
 
-
-
-### Set_N1 (scale = 0.045): ml = c (5, 50, 250), ml_exp = 2, mut_ratio = 0 
-
-Varying map length in history, but for \eta_{scale} = 0.045
-
-```{r}
-d_N1 = read.csv(file.path(data_path, "combined_data/Set_N1_output.csv"))
-# Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
-d_N1 = add_new_va_data(d_new_va, d_N1)
-
-### ml ###
-
-p_b_0.045_ml = ggplot(d_N1 , aes(y=vA_est, x = vA_true, color = factor(sequence_length*r))) +
-  theme_bw() + 
-  geom_point() + 
-  geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans\n(history)", title = TeX(r"($\eta_{scale}$ = 0.045)")) + 
-  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
-  theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
-  theme(plot.title = element_text(hjust = 0.5))
-
-p_b_0.045_ml
-
-ggsave(p_b_0.045_ml, width = 6, height = 5, file = file.path(output_path, "FigS1.jpg"))
-
-```
+We then vary various parameters one at a time while keeping the others fixed to their values for the previous set.
 
 ### Varying the ratio of beneficial:deleterious mutations (scale = 0.033)
 
 ```{r}
 d_11 = read.csv(file.path(data_path, "combined_data/Set_11_output.csv")) # Data for the set with mut_ratio = 0.0002
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
-d_11 = add_new_va_data(d_new_va, d_11)
+d_11 = add_new_va_data(d_new_va, d_11, TRUE)
 d_14 = read.csv(file.path(data_path, "combined_data/Set_14_output.csv")) # Data for the set with mut_ratio = 0.02
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
-d_14 = add_new_va_data(d_new_va, d_14)
+d_14 = add_new_va_data(d_new_va, d_14, TRUE)
 
 
 p_b_large_ben_std = make_std_plots(d_11, alpha = FALSE)
@@ -459,13 +449,11 @@ p_ben_0.033
 
 ### Set_12 Varyingthe map length in the experiment phase (scale = 0.033): ml_exp = c(0.01, 0.2, 2), mut_ratio = 0
 
-Needs data from set_12 as well as set_9
-
 ```{r}
 
 d_12 = read.csv(file.path(data_path, "combined_data/Set_12_output.csv")) # Data when ml_exp was varied
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
-d_12 = add_new_va_data(d_new_va, d_12)
+d_12 = add_new_va_data(d_new_va, d_12, TRUE)
 
 d_ml_exp = rbind(d_9_std, d_12)
 
@@ -494,18 +482,16 @@ p_ml_exp_0.033
 
 ## Simulations with burnin (varying the scale)
 
-Needs datasets for set 9 and set 15
-
 ```{r}
 
 d_15 = read.csv(file.path(data_path, "combined_data/Set_15_output.csv"))
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
-d_15 = add_new_va_data(d_new_va, d_15)
+d_15 = add_new_va_data(d_new_va, d_15, TRUE)
 
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 
-d_15 = add_new_va_data(d_new_va, d_15)
+d_15 = add_new_va_data(d_new_va, d_15, TRUE)
 
 d_scale = rbind(d_9_std, d_15)
 
@@ -543,7 +529,7 @@ p_scale
 
 d_13 = read.csv(file.path(data_path, "combined_data/Set_13_output.csv"))
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
-d_13 = add_new_va_data(d_new_va, d_13)
+d_13 = add_new_va_data(d_new_va, d_13, TRUE)
 
 # Combine with the standard data set
 
@@ -572,7 +558,7 @@ p_b_0.033_ml
 
 ```
 
-## Simulations with burnin (scale = 0.033) analysed with all.gp = FALSE (standard) or all.gp = TRUE (gametic phase LD not used)
+## The standard set of full simulations (with burnin) (scale = 0.033) analysed with all.gp = FALSE (standard) or all.gp = TRUE (gametic phase LD not used)
 
 ```{r}
 
@@ -615,7 +601,7 @@ p_all.gp
 
 ```
 
-## Simulations with burnin (scale = 0.033) analysed with Ne = nind = 1000
+## The standard set of full simulations (with burnin) (scale = 0.033) analysed with Ne = nind = 1000
 
 ```{r}
 
@@ -675,7 +661,7 @@ p_Ne_res
 ```
 
 
-## Combine plots for large (scale = 0.033) simulations with burnin
+## Combine plots for large (scale = 0.033) full simulations (with burnin)
 
 ```{r}
 p_b_0.033_combined = plot_grid(p_ml_exp_0.033, p_b_0.033_ml, p_ben_0.033, p_scale, p_all.gp, p_Ne, ncol = 2, labels = "AUTO")
@@ -691,9 +677,36 @@ ggsave(p_b_0.033_combined, width = 12, height = 12, file = file.path(output_path
 
 ```
 
+### Set_N1 (scale = 0.045): ml = c (5, 50, 250), ml_exp = 2, mut_ratio = 0 
+
+Varying map length in history, but for \eta_{scale} = 0.045
+
+```{r}
+d_N1 = read.csv(file.path(data_path, "combined_data/Set_N1_output.csv"))
+# Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
+d_N1 = add_new_va_data(d_new_va, d_N1, TRUE)
+
+### ml ###
+
+p_b_0.045_ml = ggplot(d_N1 , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(sequence_length*r))) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans\n(history)", title = TeX(r"($\eta_{scale}$ = 0.045)")) + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+p_b_0.045_ml
+
+ggsave(p_b_0.045_ml, width = 6, height = 5, file = file.path(output_path, "FigS1.jpg"))
+
+```
+
 ## Additive genic variance lost during the experiment
 
-Plot the fraction of the initial additive genic variance lost by the end of the experiment as a function of non-neutral \eta_{scale}. Then, identify the simulations with the greatest and smallest losses and plot locuswise fraction V_a lost vs abs(\alpha) for these simulations. Finally, plot the error in our estimates of V_A as a function of the V_a lost in the simulations, colour-coded by \eta_{scale}.
+Plot the fraction of the initial additive genic variance lost by the end of the experiment as a function of non-neutral \eta_{scale}. Plot the error in our estimates of V_A as a function of the V_a lost in the simulations, colour-coded by \eta_{scale}. Then, identify the simulations with the greatest and smallest losses and plot locuswise V_a lost vs abs(\alpha) for these simulations. Finally, divide \alpha into intervals of 0.01, for each interval calculate the cumulative loss in V_a for the simulations with the minimum and maximum losses.
 
 ```{r va_lost}
 
@@ -731,20 +744,23 @@ plot_lost_va_bias = ggplot(d_scale, aes(y = if(alpha){vA_est - vA_true_new}else{
 ##############
 
 # Identify the simulation with the greatest absolute loss in V_a
-# However, limit only to simulations for which vA_true (or vA_true_new) is close to 0.075
-d_scale1 = d_scale[if(alpha){which(0.074 <= d_scale$vA_true_new & d_scale$vA_true_new<= 0.076)}else{which(0.074 <= d_scale$vA_true & d_scale$vA_true_new <= 0.076)},]
 
 if(alpha){
-  max_loss_sim = d_scale1[which((d_scale1$va_true_new - d_scale1$va_left_new) == max(d_scale1$va_true_new - d_scale1$va_left_new)),]$Set_ID}else{
-  max_loss_sim = d_scale1[which((d_scale1$va_true - d_scale1$va_left) == max(d_scale1$va_true - d_scale1$va_left)),]$Set_ID  
+  max_loss_sim = d_scale[which((d_scale$va_true_new - d_scale$va_left_new) == max(d_scale$va_true_new - d_scale$va_left_new)),]$Set_ID}else{
+  max_loss_sim = d_scale[which((d_scale$va_true - d_scale$va_left) == max(d_scale$va_true - d_scale$va_left)),]$Set_ID  
   }
 
 message("Simulation with the geratest absolute loss in initial additive genic variance:")
 max_loss_sim
-message(paste("True V_A =", if(alpha){d_scale[d_scale$Set_ID==max_loss_sim,]$vA_true_new}else{d_scale[d_scale$Set_ID==max_loss_sim,]$vA_true}))
+max_loss_sim_vA_true = if(alpha){d_scale[d_scale$Set_ID==max_loss_sim,]$vA_true_new}else{d_scale[d_scale$Set_ID==max_loss_sim,]$vA_true}
+message(paste("True V_A =", max_loss_sim_vA_true))
+
 message(paste("Lost V_a =", if(alpha){d_scale[d_scale$Set_ID==max_loss_sim,]$va_true_new - d_scale[d_scale$Set_ID==max_loss_sim,]$va_left_new}else{d_scale[d_scale$Set_ID==max_loss_sim,]$va_true - d_scale[d_scale$Set_ID==max_loss_sim,]$va_left}))
 
 # Identify the simulation with the smallest absolute loss in V_a
+# However, limit only to simulations for which vA_true (or vA_true_new) is close to max_loss_sim_vA_true
+
+d_scale1 = d_scale[if(alpha){which((max_loss_sim_vA_true - 0.001) <= d_scale$vA_true_new & d_scale$vA_true_new<= (max_loss_sim_vA_true + 0.001))}else{which((max_loss_sim_vA_true - 0.001) <= d_scale$vA_true & d_scale$vA_true_new <= (max_loss_sim_vA_true + 0.001))},]
 
 if(alpha){
   min_loss_sim = d_scale1[which((d_scale1$va_true_new - d_scale1$va_left_new) == min(d_scale1$va_true_new - d_scale1$va_left_new)),]$Set_ID}else{
@@ -879,6 +895,10 @@ plot_categoriwise_va_lost = ggplot(d_summed_lost_va, aes(y = locuswise_va_lost_n
     ) 
   plot_categoriwise_va_lost
   
+##############
+# Figure S2E #
+##############
+  
   plot_categoriwise_fract_va_lost = ggplot(d_summed_lost_va, aes(y = fract_va_lost,                                                      x = if(alpha){list_alpha_new_cat}else{list_alpha_cat}, 
                                                        fill = lost_va_type)) +
     theme_bw() +
@@ -900,13 +920,38 @@ va_lost_combined_plot = plot_grid(plot_lost_va, plot_lost_va_bias, plot_finescal
 
 ggsave(va_lost_combined_plot, width = 10, height = 10, file = file.path(output_path, "FigS2.jpg"))
 
+### Calculate the the fraction of total amount of V_a lost at loci for alpha > 0.3 in the "Max." (V_a lost) simulation
 
+message("The fraction of V_a lost in the 'Max.' simulation at loci with alphas larger than 0.3 = ")
 
+if(alpha){
+  sum(d_summed_lost_va[d_summed_lost_va$lost_va_type=="Max."&d_summed_lost_va$list_alpha_new_cat>0.3,]$locuswise_va_lost_new)/sum(d_summed_lost_va[d_summed_lost_va$lost_va_type=="Max.",]$locuswise_va_lost_new)
+}else{
+  sum(d_summed_lost_va[d_summed_lost_va$lost_va_type=="Max."&d_summed_lost_va$list_alpha_cat>0.3,]$locuswise_va_lost)/sum(d_summed_lost_va[d_summed_lost_va$lost_va_type=="Max.",]$locuswise_va_lost)
+}
+
+message("The fraction of non-neutral loci in the 'Max.' simulation with alphas larger than 0.3 = ")
+
+if(alpha){
+  nrow(d_finescale_sel[d_finescale_sel$lost_va_type=="Max."&d_finescale_sel$list_alpha_new>0.3,])/nrow(d_finescale_sel[d_finescale_sel$lost_va_type=="Max.",])
+}else{
+   nrow(d_finescale_sel[d_finescale_sel$lost_va_type=="Max."&d_finescale_sel$list_alpha>0.3,])/nrow(d_finescale_sel[d_finescale_sel$lost_va_type=="Max.",]) 
+  }
+
+message("Mean |alpha| for non neutral loci in the 'Max.' simulation = ")
+
+if(alpha){
+    mean(abs(d_finescale_sel[d_finescale_sel$lost_va_type=="Max.",]$list_alpha_new))
+}else{
+    mean(abs(d_finescale_sel[d_finescale_sel$lost_va_type=="Max.",]$list_alpha))
+  }
 
 
 ```
 
 ## Relationship between addetive genic variance lost and B_alpha(1) and p_alpha
+
+Miscellaneous plots.
 
 ```{r}
 
@@ -958,6 +1003,15 @@ plot_balpha_slopeemp = ggplot(d_scale, aes(y = balpha_slope_est,x = balpha_slope
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
   theme(legend.position = "bottom") + geom_abline(slope = 0.5, intercept = 0)
   
+
+plot_lost_va_ml = ggplot(d_N1, aes(y = if(alpha){((va_true_new - va_left_new)/va_true_new)}else{((va_true - va_left)/va_true)}, x = factor(round(scale, digits = 4)), fill = factor(round(r*sequence_length, digits = 4)))) +
+  theme_bw() +
+  geom_boxplot() +
+  labs(y = TeX(r"(Fraction of the total $V_a(0)$ lost)"), x = TeX(r"($\eta_{scale}$)"), fill  = TeX(r"($Map length$)")) +
+  theme(text = element_text(size = 15)) +
+  scale_fill_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999"))  +
+  theme(legend.position = "bottom")
+
 
 ```
 
