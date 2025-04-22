@@ -12,7 +12,7 @@ averageLD<-function(L, nR, nrep, selected=NULL){
   LD<-(cov2cor(L)^2)*nR
 
   if(is.null(selected)){
-    s<-sum(LD-n)/(n*(n-1))
+    s<-(sum(LD)-n)/(n*(n-1))
   }else{
     if(min(selected)<1 | max(selected)>nrow(L)){
       stop("selected should be loci between 1 and the dimension of L")

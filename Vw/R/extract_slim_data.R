@@ -1,7 +1,8 @@
 
 extract_slim_data = function(Set_ID,                # The unique ID of the set of simulations that are controlled by a single R script
                              sim = 1,               # Each set can have multiple sims, but - on the cluster sim must always 1
-                             unzip = FALSE,          # Should the SLiM output file be unzipped, read, and then zipped back?
+                             ngen2_optional = NULL, # Allows del_P to be calculated between ngen1 and manually specified ngen2 (which can be different from the last generation)
+                             unzip = FALSE,         # Should the SLiM output file be unzipped, read, and then zipped back?
                              slim_output_path,      # The directory where the SLiM outputs (for parents and experimental replicates) are stored (as .txt files)
                              sim_param_path,        # The path to the directory where the .csv file containing simulation parameters is stored
                              extract_genomes_path,  # The path to the python script that extracts genomes and mutations from SLim outputs (3_Extract_genomes.py)
@@ -31,6 +32,11 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
   if("ngen2"%in%colnames(sim_params)){ngen2 = sim_params$ngen2}else{ngen2 = sim_params$ngen_expt + 1}
   ngen_expt = ngen2 - ngen1     # Number of generations over which allele frequency changes are calculated
   end_gen = sim_params$end_gen         # The generation number of the parents' generation
+  
+  if(!is.null(ngen2_optional)){
+    if(ngen2_optional<=ngen1 | ngen2_optional>ngen2){stop("ngen2_optional must be greater than ngen1 and less than or equal to ngen2")}
+    ngen2 = ngen2_optional
+  }
   
   
   # If n_sample is not provided extract the genomes of all individuals in the parents' generation

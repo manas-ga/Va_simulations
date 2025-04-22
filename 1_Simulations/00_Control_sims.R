@@ -134,13 +134,13 @@ trim_exp_files = FALSE                 # Should the SLiM output files for the ex
 del_files = TRUE                       # Should the .trees files be deleted at the end to save space?
 compress_files = TRUE                  # Should .txt and .trees files be compressed using gzip
 
-Job_ID = "Set_16"                    # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
+Job_ID = "bc_test"                    # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
 
-nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
+nsims = 10                              # Number of simulations - MUST be 1 if running on a cluster
 
 if(Sys.info()["nodename"]!="SCE-BIO-C06645"&nsims>1)stop("nsims must be 1 when running on the cluster")
 
-n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 1, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
+n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
 end_gen = 2                            # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
 
@@ -148,7 +148,7 @@ if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
 output_freq = 100                      # The frequency with which summary stats are to be recorded in the history phase 
 ngen1 = 1                              # How many generations between the 1st expt generation and the parents
-ngen2 = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 2, (as.numeric(commandArgs(trailingOnly = TRUE)[6])))       # How many generations between the last expt generatio and the parents                        # How many generations should allele frequency changes be calculated over in the experiment
+ngen2 = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 4, (as.numeric(commandArgs(trailingOnly = TRUE)[6])))       # How many generations between the last expt generatio and the parents                        # How many generations should allele frequency changes be calculated over in the experiment
 flip_sel_coef = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 0, as.numeric(commandArgs(trailingOnly = TRUE)[7])) # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
 
 ###########################################
@@ -180,7 +180,7 @@ r_msp = if(end_gen==2){r}else{1e-9*Dmel_Ne/Ne}          # Recombination rate for
 
 # Mutation rate in the msprime simulation
 
-mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(2.0e-8, 2.0e-8, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
+mu_msp_list= if(Sys.info()["nodename"]=="SCE-BIO-C06645"){seq(3.0e-9, 2.0e-8, length = nsims)}else{seq(commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[1], length = nsims)}  # If mu is to be varied in order to vary true Vw 
 
 # Mutation rate of non_neutral mutations during the forward simulation of the history
 
@@ -208,7 +208,7 @@ shape = 0.3                                 # Shape of the gamma DFE ##### mean 
 scale_list = if(end_gen==2){seq(0.033, 0.033, length = nsims)}else{seq(0.033, 0.033, length = nsims)}  # Vector of Scale of the gamma DFE
 
 # The ratio of beneficial:deleterious mutations 
-mut_ratio = if(Sys.info()["nodename"]=="SCE-BIO-C06645"){0.02}else{as.numeric(commandArgs(trailingOnly = TRUE)[8])}
+mut_ratio = if(Sys.info()["nodename"]=="SCE-BIO-C06645"){1}else{as.numeric(commandArgs(trailingOnly = TRUE)[8])}
 
 # If DFE is "n" need to specify the mean and the variance of the normal distribution
 mean_alpha = 0

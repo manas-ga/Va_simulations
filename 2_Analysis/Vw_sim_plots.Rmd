@@ -68,7 +68,7 @@ if(Sys.info()["nodename"]=="sce-bio-c04553"){
 
 ## Function to remove duplication
 
-Some simulations were erroneously analysed twice. The following function takes a data frame for a set of simulations as input and if there are any simulations analysed twice, retains the analysis performed earlier in time.
+Some simulations were erroneously analysed twice. The following function takes a data frame for a set of simulations as input, and if there are any simulations analysed twice, retains the analysis performed earlier in time.
 
 ```{r}
 
