@@ -179,6 +179,8 @@ for(sim in 1:nsims){
   
   L<-cov(c0)*(n0_individuals-1)/n0_individuals
   
+  rm("c0")
+  
   
   message("Calculating the true levels of V_A...")
   
