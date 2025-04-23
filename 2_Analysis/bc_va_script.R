@@ -258,7 +258,7 @@ for(sim in 1:nsims){
                         "time_stamp_va_left" = unique_stamp)
   new_data = cbind(sim_params, new_data)
   
-  write.table(rbind(names(new_data), new_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_bc_va_", unique_stamp, ".csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
+  write.table(rbind(names(new_data), new_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_bc_va_corrected_", unique_stamp, ".csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
   message(paste("V_A estimated using the Buffalo & Coop (2019) method for", Set_ID, "sim", sim))
   
 }

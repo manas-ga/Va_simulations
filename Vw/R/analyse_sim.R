@@ -3,6 +3,7 @@
 
 analyse_sim = function(Set_ID,                # The unique ID of the set of simulations that are controlled by a single R script
                        sim = 1,               # Each set can have multiple sims, but - on the cluster sim must always 1
+                       ngen2_optional = NULL, # Allows del_P to be calculated between ngen1 and manually specified ngen2 (which can be different from the last generation)
                        unzip = FALSE,         # Should the SLiM output file be unzipped, read, and then zipped back?
                        slim_output_path,      # The directory where the SLiM outputs (for parents and experimental replicates) are stored (as .txt files)
                        sim_param_path,        # The path to the directory where the .csv file containing simulation parameters is stored
@@ -34,6 +35,7 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
   
   sim_data = extract_slim_data(Set_ID = Set_ID,
                                sim = sim,
+                               ngen2_optional = ngen2_optional,
                                unzip = unzip,
                                slim_output_path = slim_output_path, 
                                sim_param_path = sim_param_path,
