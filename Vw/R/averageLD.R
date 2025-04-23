@@ -9,7 +9,7 @@ averageLD<-function(L, nR, nrep, selected=NULL){
 
   n<-nrow(L)
   
-  LD<-(cov2cor(L)^2)*nR
+  LD<-(cov2cor(L)^2)*nR^2
 
   if(is.null(selected)){
     s<-(sum(LD)-n)/(n*(n-1))
