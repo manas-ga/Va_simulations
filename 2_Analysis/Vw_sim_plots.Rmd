@@ -949,6 +949,49 @@ if(alpha){
 
 ```
 
+## Calculating V_A using Buffalo and Coop's (2019) method
+
+```{r}
+d_bc = read.csv(file.path(data_path, "combined_data/BC_V_A_combined.csv"))
+
+# Create a new data frame for simplified simulations with estimates using different BC approaches one below the other
+
+d_bc_smpl = data.frame("vA_BC" = c(d_bc[d_bc$end_gen==2,]$vA_BC_1, d_bc[d_bc$end_gen==2,]$vA_BC_2, d_bc[d_bc$end_gen==2,]$vA_BC_3),
+                       "vA_true" = rep(d_bc[d_bc$end_gen==2,]$vA_true, 3),
+                       "vA_true_new" = rep(d_bc[d_bc$end_gen==2,]$vA_true_new, 3),
+                       "BC_approach" = c(rep("Approach 1", nrow(d_bc[d_bc$end_gen==2,])), rep("Approach 2", nrow(d_bc[d_bc$end_gen==2,])), rep("Approach 3", nrow(d_bc[d_bc$end_gen==2,]))))
+
+p_bc_smpl = ggplot(d_bc_smpl, aes(x = if(alpha){vA_true_new}else{vA_true}, y = vA_BC, color = BC_approach)) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$ using B&C)"), color = " ") + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE)
+
+p_bc_smpl
+
+d_bc_full = data.frame("vA_BC" = c(d_bc[d_bc$end_gen==25000,]$vA_BC_1, d_bc[d_bc$end_gen==25000,]$vA_BC_2, d_bc[d_bc$end_gen==25000,]$vA_BC_3),
+                       "vA_true" = rep(d_bc[d_bc$end_gen==25000,]$vA_true, 3),
+                       "vA_true_new" = rep(d_bc[d_bc$end_gen==25000,]$vA_true_new, 3),
+                       "BC_approach" = c(rep("Approach 1", nrow(d_bc[d_bc$end_gen==25000,])), rep("Approach 2", nrow(d_bc[d_bc$end_gen==25000,])), rep("Approach 3", nrow(d_bc[d_bc$end_gen==25000,]))))
+
+p_bc_full = ggplot(d_bc_full, aes(x = if(alpha){vA_true_new}else{vA_true}, y = vA_BC, color = BC_approach)) +
+  theme_bw() + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$ using B&C)"), color = " ") + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE)
+
+p_bc_full
+
+
+```
+
+
 ## Relationship between addetive genic variance lost and B_alpha(1) and p_alpha
 
 Miscellaneous plots.
