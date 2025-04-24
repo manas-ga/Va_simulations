@@ -8,10 +8,6 @@ est_Va_bc<-function(pbar1, pbar2, L, nR, selected=NULL){
   if(any(dim(pbar1)!=dim(pbar2))){
     stop("pbar1 and pbar2 should have the same dimension")
   }
-
-  if(ncol(pbar1)!=nrow(L)){
-    stop("The number of columns in pbar should equal the number of loci")
-  }
   
   if(any(dim(L)!=dim(nR))){
     stop("L and nR should have the same dimensions")
