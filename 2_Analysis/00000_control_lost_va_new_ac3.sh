@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#SBATCH --job-name=lost_va_N1
+#SBATCH --job-name=BC_V_A
 #SBATCH --output=/mnt/hel/obbard/Va_simulations/analyses/b_Interim_files/std_out/job_%A_%a.log   # Store logs in a custom directory
 #SBATCH --open-mode=append                                                                       # Append output if the file already exists
-#SBATCH --array=169-176%8                                                                       # Run replicate tasks
+#SBATCH --array=1-200%8                                                                       # Run replicate tasks
 #SBATCH --ntasks=10
-#SBATCH --mem=65G
+#SBATCH --mem=180G
 
 # Path to Conda (if Conda isn't initialized by default)
 CONDA_PATH="/home/msamant/miniconda3"  # Update to where Miniconda/Anaconda is installed
@@ -16,4 +16,4 @@ conda activate marun
 
 Param=`cat lost_va_IDs.txt | awk "NR==${SLURM_ARRAY_TASK_ID}"`
 
-Rscript lost_va_script.R $Param
+Rscript bc_va_script.R $Param

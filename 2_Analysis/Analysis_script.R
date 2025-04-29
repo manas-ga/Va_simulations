@@ -137,13 +137,14 @@ library(Vw)
 ########################
 
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "Set_7_SCE-BIO-C06645_2024-12-19_13-29-52.263491", commandArgs(trailingOnly = TRUE)[1])
-nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "Sanity_check_2_SCE-BIO-C06645_2025-04-28_18-13-21.638291", commandArgs(trailingOnly = TRUE)[1])
+nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553",20, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
 
 for(sim in 1:nsims){
   message(paste("Analysing simulation", sim, "of set", Set_ID, "..."))
   analysed_data = analyse_sim(Set_ID = Set_ID,                            # The unique ID of the set of simulations that are controlled by a single R script
-                              sim = sim,                                  # Each set can have multiple sims, but - on the cluster sim must always 1
+                              sim = sim,                                  # Each set can have multiple sims, but - on the cluster sim must always 1,
+                              ngen2_optional = NULL,                      # Allows del_P to be calculated between ngen1 and manually specified ngen2 (which can be different from the last generation)
                               unzip = TRUE,                               # Should the SLiM output file be unzipped, read, and then zipped back?
                               slim_output_path = slim_output_path,        # The directory where the SLiM outputs (for parents and experimental replicates) are stored (as .txt files)
                               sim_param_path = sim_param_path,            # The path to the directory where the .csv file containing simulation parameters is stored
@@ -159,8 +160,8 @@ for(sim in 1:nsims){
                               pa = 1,
                               Vs = "LoNL",                                # "L" or "LoNL"
                               method="REML",                              # Can be "REML" or "MCMC"
-                              palpha = NA,                                # If NA pdelta is estimated using optim()
-                              balpha = c(NA, NA),                         # If c(NA,NA) both bedelta intercept and slope are estimated
+                              palpha = 0,                                # If NA pdelta is estimated using optim()
+                              balpha = c(0, 0),                         # If c(NA,NA) both bedelta intercept and slope are estimated
                               AtleastOneRecomb=FALSE,
                               Ne = c(1000, 1000),
                               predict_Ne =  TRUE,                         # If true, this overwrites the Ne supplied above by Ne = c(nind_expt, predict_Ne(nind_expt, Ve_w_expt))
