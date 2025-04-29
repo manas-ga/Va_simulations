@@ -111,7 +111,7 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                          pbar2 = sim_data$pbar2,
                          L = parents_info$L,
                          nR = parents_info$nR,
-                         extact = TRUE)
+                         exact = TRUE)
     
     ### Approach 2: del_P for neutral sites and average LD using all segregating sites
     message("Calculating Vw using Buffalo and Coop's (2019) method (approach 2) ...")
