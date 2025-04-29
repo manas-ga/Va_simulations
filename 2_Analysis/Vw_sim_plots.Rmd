@@ -1132,8 +1132,7 @@ p_sanity_us = ggplot(d_sanity, aes(y = vA_est, x = vA_true, color = as.factor(se
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin history") + 
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)
-p_sanity_us
+  geom_smooth(method = "lm", se=FALSE) 
 
 p_sanity_bc = ggplot(d_sanity, aes(y = vA_BC_est, x = vA_true, color = as.factor(sequence_length*r_msp))) +
   theme_bw() +
@@ -1142,7 +1141,13 @@ p_sanity_bc = ggplot(d_sanity, aes(y = vA_BC_est, x = vA_true, color = as.factor
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$ using B&C)"), color = "Map length \nin history") + 
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)
-p_sanity_bc
+  geom_smooth(method = "lm", se=FALSE)  
+
+legend_sanity = get_legend(p_sanity_us)
+
+p_sanity_combined = plot_grid(p_sanity_us + theme(legend.position = "none"),
+                              p_sanity_bc + theme(legend.position = "none"), nrow = 2)
+p_sanity_combined = plot_grid(p_sanity_combined, legend_sanity, ncol = 2, rel_widths = c(1, 0.35))
+
 ```
 

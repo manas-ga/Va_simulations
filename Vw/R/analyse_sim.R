@@ -105,13 +105,22 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
     
     message("Calculating Vw using Buffalo and Coop's (2019) method (approach 1) ...")
     
+    # Three different approaches
+    # In each approach either actual (using the approximation of B&C) or exact
+    
     ### Approach 1: del_P for all segregating sites and average LD using all segregating sites
     
-    BC_fit_1 = est_Va_bc(pbar1 = sim_data$pbar1,
+    BC_fit_1_exact = est_Va_bc(pbar1 = sim_data$pbar1,
                          pbar2 = sim_data$pbar2,
                          L = parents_info$L,
                          nR = parents_info$nR,
                          exact = TRUE)
+    
+    BC_fit_1 = est_Va_bc(pbar1 = sim_data$pbar1,
+                               pbar2 = sim_data$pbar2,
+                               L = parents_info$L,
+                               nR = parents_info$nR,
+                               exact = FALSE)
     
     ### Approach 2: del_P for neutral sites and average LD using all segregating sites
     message("Calculating Vw using Buffalo and Coop's (2019) method (approach 2) ...")
@@ -119,26 +128,44 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
     
     selected = which(sim_data$list_alpha!=0)
     
-    BC_fit_2 = est_Va_bc(pbar1 = sim_data$pbar1[,-selected],
+    BC_fit_2_exact = est_Va_bc(pbar1 = sim_data$pbar1[,-selected],
                          pbar2 = sim_data$pbar2[,-selected],
                          L = parents_info$L,
                          nR = parents_info$nR,
                          exact = TRUE)
     
+    BC_fit_2 = est_Va_bc(pbar1 = sim_data$pbar1[,-selected],
+                               pbar2 = sim_data$pbar2[,-selected],
+                               L = parents_info$L,
+                               nR = parents_info$nR,
+                               exact = FALSE)
+    
     
     # Approach 3: del_P for neutral sites and average LD using the LD between selected and neutral sites only
+    
     message("Calculating Vw using Buffalo and Coop's (2019) method (approach 3) ...")
-    BC_fit_3 = est_Va_bc(pbar1 = sim_data$pbar1[,-selected],
+    BC_fit_3_exact = est_Va_bc(pbar1 = sim_data$pbar1[,-selected],
                          pbar2 = sim_data$pbar2[,-selected],
                          L = parents_info$L,
                          nR = parents_info$nR,
                          selected = selected,
                          exact = TRUE)
     
+    BC_fit_3 = est_Va_bc(pbar1 = sim_data$pbar1[,-selected],
+                               pbar2 = sim_data$pbar2[,-selected],
+                               L = parents_info$L,
+                               nR = parents_info$nR,
+                               selected = selected,
+                               exact = FALSE)
+    
     # Combine the results from the three methods separated by "_"
     
-    vA_BC = paste(BC_fit_1$vA_BC, BC_fit_2$vA_BC, BC_fit_3$vA_BC, sep = "_")
-    Ne_BC = paste(BC_fit_1$Ne_BC, BC_fit_2$Ne_BC, BC_fit_3$Ne_BC, sep = "_")
+    vA_BC = paste("actual", BC_fit_1$vA_BC, BC_fit_2$vA_BC, BC_fit_3$vA_BC,
+                  "exact", BC_fit_1_exact$vA_BC, BC_fit_2_exact$vA_BC, BC_fit_3_exact$vA_BC,
+                  sep = "_")
+    Ne_BC = paste("actual", BC_fit_1$Ne_BC, BC_fit_2$Ne_BC, BC_fit_3$Ne_BC, 
+                  "exact", BC_fit_1_exact$Ne_BC, BC_fit_2_exact$Ne_BC, BC_fit_3_exact$Ne_BC, 
+                  sep = "_")
   }
   
   ### Save file ###
