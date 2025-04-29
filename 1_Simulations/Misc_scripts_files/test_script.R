@@ -136,9 +136,8 @@ library(Vw)
 ### Perform analyses ###
 ########################
 
-
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "Sanity_check_SCE-BIO-C06645_2025-04-28_16-53-17.511082", commandArgs(trailingOnly = TRUE)[1])
-nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553",20, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
+d = read.table(file.path("~", "analysis_param_grid.txt"))
+nsims = nrow(d)
 test_list = c()
 for (i in 1:nsims) {
   list_name <- paste0("list", i)
@@ -147,11 +146,13 @@ for (i in 1:nsims) {
 verbose = TRUE
 
 for(sim in 1:nsims){
+  
+  Set_ID = d[sim, 1]
 
   if(verbose){message("Extracting simulation data...")}
   
   sim_data = extract_slim_data(Set_ID = Set_ID,
-                               sim = sim,
+                               sim = d[sim, 2],
                                ngen2_optional = NULL,
                                unzip = TRUE,
                                slim_output_path = slim_output_path, 
