@@ -103,14 +103,39 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
   
   if(sim_data$ngen2-sim_data$ngen1==1){
     
-    message("Calculating Vw using Buffalo and Coop's (2019) method ...")
+    message("Calculating Vw using Buffalo and Coop's (2019) method (approach 1) ...")
+    
+    ### Approach 1: del_P for all segregating sites and average LD using all segregating sites
+    
+    BC_fit_1 = est_Va_bc(pbar1 = sim_data$pbar1,
+                         pbar2 = sim_data$pbar2,
+                         L = parents_info$L,
+                         nR = parents_info$nR)
+    
+    ### Approach 2: del_P for neutral sites and average LD using all segregating sites
+    message("Calculating Vw using Buffalo and Coop's (2019) method (approach 2) ...")
+    # Identify selected loci
+    
+    selected = which(sim_data$list_alpha!=0)
+    
+    BC_fit_2 = est_Va_bc(pbar1 = sim_data$pbar1[,-selected],
+                         pbar2 = sim_data$pbar2[,-selected],
+                         L = parents_info$L,
+                         nR = parents_info$nR)
     
     
-    BC_fit = est_Va_bc(pbar1 = sim_data$pbar1,
-                       pbar2 = sim_data$pbar2,
-                       L = parents_info$L,
-                       nR = parents_info$nR)
+    # Approach 3: del_P for neutral sites and average LD using the LD between selected and neutral sites only
+    message("Calculating Vw using Buffalo and Coop's (2019) method (approach 3) ...")
+    BC_fit_3 = est_Va_bc(pbar1 = sim_data$pbar1[,-selected],
+                         pbar2 = sim_data$pbar2[,-selected],
+                         L = parents_info$L,
+                         nR = parents_info$nR,
+                         selected = selected)
     
+    # Combine the results from the three methods separated by "_"
+    
+    vA_BC = paste(BC_fit_1$vA_BC, BC_fit_2$vA_BC, BC_fit_3$vA_BC, sep = "_")
+    Ne_BC = paste(BC_fit_1$Ne_BC, BC_fit_2$Ne_BC, BC_fit_3$Ne_BC, sep = "_")
   }
   
   ### Save file ###
@@ -126,7 +151,7 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
   sim_params = sim_data$sim_params
   
   if(is.null(Ne)){Ne = sim_params$n_ind_exp}
-  analysis_data = data.frame("proj"=proj, "LDalpha"=LDalpha, "pa"=pa, "Vs"=Vs, "randomise"=randomise, "palpha_method"=palpha, "balpha_method"=paste(balpha[1], balpha[2], sep="_"), "Ne_exp" = paste(Ne, collapse = "_"), "va_true"=parents_info$va_true, "vA_true"=parents_info$vA_true, "vA_est"=vA_est, "vA_alpha_emp"=parents_info$vA_alpha_emp, "vA_BC" = if(sim_data$ngen2-sim_data$ngen1==1){BC_fit$vA_BC}else{NA}, "Ne_BC" = if(sim_data$ngen2-sim_data$ngen1==1){BC_fit$Ne_BC}else{NA}, "Residual_var" = summary(m1$model)$varcomp[2,1], "palpha_emp"=parents_info$parameters$palpha, "balpha_intercept_emp"=parents_info$parameters$balpha_0, "balpha_slope_emp"=parents_info$parameters$balpha_1, "sigma2alpha_emp"=parents_info$parameters$sigma2alpha, "palpha_est"=palpha_est, "palpha_var_est"=palpha_var_est, "balpha_intercept_est"=balpha_intercept_est, "balpha_slope_est"=balpha_slope_est, "balpha_var_est"=balpha_var_est, "sigma2alpha_est"=sigma2alpha_est, "seg_sites"=parents_info$seg_sites, "seg_sites_neu"=parents_info$seg_sites_neu, "seg_sites_ben"=parents_info$seg_sites_ben, "seg_sites_del"=parents_info$seg_sites_del, "mean_diversity"=parents_info$mean_diversity, "theta" = parents_info$theta, "all.gp" = all.gp, "analysis_stamp" = unique_stamp)
+  analysis_data = data.frame("proj"=proj, "LDalpha"=LDalpha, "pa"=pa, "Vs"=Vs, "randomise"=randomise, "palpha_method"=palpha, "balpha_method"=paste(balpha[1], balpha[2], sep="_"), "Ne_exp" = paste(Ne, collapse = "_"), "va_true"=parents_info$va_true, "vA_true"=parents_info$vA_true, "vA_est"=vA_est, "vA_alpha_emp"=parents_info$vA_alpha_emp, "vA_BC" = if(sim_data$ngen2-sim_data$ngen1==1){vA_BC}else{NA}, "Ne_BC" = if(sim_data$ngen2-sim_data$ngen1==1){Ne_BC}else{NA}, "Residual_var" = summary(m1$model)$varcomp[2,1], "palpha_emp"=parents_info$parameters$palpha, "balpha_intercept_emp"=parents_info$parameters$balpha_0, "balpha_slope_emp"=parents_info$parameters$balpha_1, "sigma2alpha_emp"=parents_info$parameters$sigma2alpha, "palpha_est"=palpha_est, "palpha_var_est"=palpha_var_est, "balpha_intercept_est"=balpha_intercept_est, "balpha_slope_est"=balpha_slope_est, "balpha_var_est"=balpha_var_est, "sigma2alpha_est"=sigma2alpha_est, "seg_sites"=parents_info$seg_sites, "seg_sites_neu"=parents_info$seg_sites_neu, "seg_sites_ben"=parents_info$seg_sites_ben, "seg_sites_del"=parents_info$seg_sites_del, "mean_diversity"=parents_info$mean_diversity, "theta" = parents_info$theta, "all.gp" = all.gp, "analysis_stamp" = unique_stamp)
   
   analysis_data = cbind(sim_params, analysis_data)
   write.table(rbind(names(analysis_data), analysis_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_Data_analysis_", unique_stamp, ".csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")

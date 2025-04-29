@@ -533,9 +533,9 @@ d_13 = add_new_va_data(d_new_va, d_13, TRUE)
 
 # Combine with the standard data set
 
-d_13 = rbind(d_9_std, d_13)
+d_ml_history = rbind(d_9_std, d_13)
 
-p_b_0.033_ml = ggplot(d_13 , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(sequence_length*r))) +
+p_b_0.033_ml = ggplot(d_ml_history , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(sequence_length*r))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -952,7 +952,7 @@ if(alpha){
 ## Calculating V_A using Buffalo and Coop's (2019) method
 
 ```{r}
-d_bc = read.csv(file.path(data_path, "combined_data/BC_V_A_combined.csv"))
+d_bc = read.csv(file.path(data_path, "combined_data/BC_V_A_corrected_combined.csv"))
 
 # Create a new data frame for simplified simulations with estimates using different BC approaches one below the other
 
@@ -1054,6 +1054,63 @@ plot_lost_va_ml = ggplot(d_N1, aes(y = if(alpha){((va_true_new - va_left_new)/va
   theme(text = element_text(size = 15)) +
   scale_fill_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999"))  +
   theme(legend.position = "bottom")
+
+
+
+#######
+
+p_ml_palpha_emp = ggplot(d_ml_history, aes(y = palpha_emp, x = factor(r*sequence_length))) +
+  theme_bw() +
+  geom_boxplot() +
+  theme(text = element_text(size = 15)) +
+  labs(x = "Map length in morgans (history)")
+
+p_ml_palpha_emp
+
+p_ml_palpha_est = ggplot(d_ml_history, aes(y = palpha_est, x = factor(r*sequence_length))) +
+  theme_bw() +
+  geom_boxplot() +
+  theme(text = element_text(size = 15)) +
+  labs(x = "Map length in morgans (history)")
+
+p_ml_palpha_est
+
+p_ml_balpha_slope_emp = ggplot(d_ml_history, aes(y = balpha_slope_emp, x = factor(r*sequence_length))) +
+  theme_bw() +
+  geom_boxplot() +
+  theme(text = element_text(size = 15)) +
+  labs(x = "Map length in morgans (history)")
+
+p_ml_balpha_slope_emp
+
+p_ml_balpha_slope_est = ggplot(d_ml_history, aes(y = balpha_slope_est, x = factor(r*sequence_length))) +
+  theme_bw() +
+  geom_boxplot() +
+  theme(text = element_text(size = 15)) +
+  labs(x = "Map length in morgans (history)")
+
+p_ml_balpha_slope_est
+  
+
+d_ml_palpha_balpha = data.frame("palpha" = c(d_ml_history$palpha_emp, d_ml_history$palpha_est),
+                       "balpha_slope" = c(d_ml_history$balpha_slope_emp, d_ml_history$balpha_slope_est),
+                       "type" = c(rep("emp", nrow(d_ml_history)), rep("est", nrow(d_ml_history))),
+                       "r" = c(d_ml_history$r, d_ml_history$r),
+                       "sequence_length" = c(d_ml_history$sequence_length, d_ml_history$sequence_length))
+
+p_ml_palpha = ggplot(d_ml_palpha_balpha, aes(y = palpha, x = factor(r*sequence_length), fill = type)) +
+  theme_bw() +
+  geom_boxplot() +
+  theme(text = element_text(size = 15)) +
+  labs(x = "Map length in morgans (history)")
+p_ml_palpha
+
+p_ml_balpha_slope = ggplot(d_ml_palpha_balpha, aes(y = balpha_slope, x = factor(r*sequence_length), fill = type)) +
+  theme_bw() +
+  geom_boxplot() +
+  theme(text = element_text(size = 15)) +
+  labs(x = "Map length in morgans (history)")
+p_ml_balpha_slope
 
 
 ```

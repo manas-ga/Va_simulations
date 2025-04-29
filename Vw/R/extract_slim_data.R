@@ -35,7 +35,9 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
   
   if(!is.null(ngen2_optional)){
     if(ngen2_optional<=ngen1 | ngen2_optional>ngen2){stop("ngen2_optional must be greater than ngen1 and less than or equal to ngen2")}
+    message(paste("Manually setting ngen2 to", ngen2_optional, "..."))
     ngen2 = ngen2_optional
+    sim_params$ngen2 = ngen2 # Alsi change ngen2 in the sim_params
   }
   
   
@@ -84,6 +86,8 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
   
   n0_individuals = nrow(c_genome)/2
   
+  if(n0_individuals!=n_ind_exp){stop("The number of individuals obtained from c_genome do not match with n_ind_exp as logged during the simulation")}
+  
   # If one samples individuals from the parents' generation while building the c matrix (i.e. when sample_size is less than n_ind_exp), the sample may not contain some low frequency mutations, i.e. some loci are not segregating in the sample, but are in the parents' population
   
   # identify the loci that are missing in the sample
@@ -112,6 +116,11 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
   # Trim mutations to contain only the retained loci, i.e. the loci that are segregating in the sample
   
   mutations_0 = mutations_0[retained_loci,]
+  
+  # Check if allele frequencies calculated from c_genome match allele frequencies in mutations_0
+  
+  if(sum(pbar0 != mutations_0$Number/(2*n0_individuals)) == 0){message("Allele frequencies in c_genome match with allele frequencies from mutations_0")}else{stop("Allele frequencies in c_genome do not match with allele frequencies from mutations_0")}
+  
   
   list_alpha = 2*(mutations_0$s)   # Vector of alphas
   SNPs = mutations_0$Position      # Vector of positions of mutations in the parents
