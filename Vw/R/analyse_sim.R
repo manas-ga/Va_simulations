@@ -110,7 +110,8 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
     BC_fit_1 = est_Va_bc(pbar1 = sim_data$pbar1,
                          pbar2 = sim_data$pbar2,
                          L = parents_info$L,
-                         nR = parents_info$nR)
+                         nR = parents_info$nR,
+                         extact = TRUE)
     
     ### Approach 2: del_P for neutral sites and average LD using all segregating sites
     message("Calculating Vw using Buffalo and Coop's (2019) method (approach 2) ...")
@@ -121,7 +122,8 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
     BC_fit_2 = est_Va_bc(pbar1 = sim_data$pbar1[,-selected],
                          pbar2 = sim_data$pbar2[,-selected],
                          L = parents_info$L,
-                         nR = parents_info$nR)
+                         nR = parents_info$nR,
+                         exact = TRUE)
     
     
     # Approach 3: del_P for neutral sites and average LD using the LD between selected and neutral sites only
@@ -130,7 +132,8 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                          pbar2 = sim_data$pbar2[,-selected],
                          L = parents_info$L,
                          nR = parents_info$nR,
-                         selected = selected)
+                         selected = selected,
+                         exact = TRUE)
     
     # Combine the results from the three methods separated by "_"
     

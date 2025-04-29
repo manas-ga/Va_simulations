@@ -1113,5 +1113,36 @@ p_ml_balpha_slope = ggplot(d_ml_palpha_balpha, aes(y = balpha_slope, x = factor(
 p_ml_balpha_slope
 
 
+
+
+```
+
+## Sanity check
+
+To perform sanity checks on our method, and our implementation of BC's method, we ran (simplified, i.e. no burnin) simulations with free recombination in the experiment (r_exp = 0.005). The recombiantion rate in the history (including msprime) was either 5e-7 (the default) or 1e-5.
+
+```{r}
+d_sanity = read.csv(file.path(data_path, "combined_data/sanity_check_output.csv"))
+d_sanity$vA_BC_est = unlist(lapply(d_sanity$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_", 2))[2])}))
+
+p_sanity_us = ggplot(d_sanity, aes(y = vA_est, x = vA_true, color = as.factor(sequence_length*r_msp))) +
+  theme_bw() +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin history") + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE)
+p_sanity_us
+
+p_sanity_bc = ggplot(d_sanity, aes(y = vA_BC_est, x = vA_true, color = as.factor(sequence_length*r_msp))) +
+  theme_bw() +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$ using B&C)"), color = "Map length \nin history") + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE)
+p_sanity_bc
 ```
 
