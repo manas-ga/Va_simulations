@@ -1,4 +1,3 @@
-
 Q<-function(pbar1, pbar2, exact=FALSE){
   
   # Equation 16 in Buffalo & Coop

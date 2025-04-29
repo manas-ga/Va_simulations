@@ -1,4 +1,3 @@
-est_Va_bc<-function(pbar1, pbar2, L, nR, selected=NULL){
 est_Va_bc<-function(pbar1, pbar2, L, nR, selected=NULL, exact=FALSE){
   
   # Equations 20 and 21 in Buffalo & Coop
