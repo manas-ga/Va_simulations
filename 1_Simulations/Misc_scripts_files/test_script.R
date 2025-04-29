@@ -152,7 +152,7 @@ for(sim in 1:nsims){
   if(verbose){message("Extracting simulation data...")}
   
   sim_data = extract_slim_data(Set_ID = Set_ID,
-                               sim = sim,
+                               sim = 1,
                                ngen2_optional = NULL,
                                unzip = TRUE,
                                slim_output_path = slim_output_path, 
