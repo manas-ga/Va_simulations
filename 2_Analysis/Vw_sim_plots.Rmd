@@ -1123,31 +1123,44 @@ To perform sanity checks on our method, and our implementation of BC's method, w
 
 ```{r}
 d_sanity = read.csv(file.path(data_path, "combined_data/sanity_check_output.csv"))
-d_sanity$vA_BC_est = unlist(lapply(d_sanity$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_", 2))[2])}))
+d_sanity$vA_BC_est_actual = unlist(lapply(d_sanity$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[3])}))
+d_sanity$vA_BC_est_exact = unlist(lapply(d_sanity$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[7])}))
 
 p_sanity_us = ggplot(d_sanity, aes(y = vA_est, x = vA_true, color = as.factor(sequence_length*r_msp))) +
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin history") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$ from Vw_model())"), color = "Map length in history") + 
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) 
+  geom_smooth(method = "lm", se=FALSE) + ylim(0, 0.35) + xlim(0, 0.13)
 
-p_sanity_bc = ggplot(d_sanity, aes(y = vA_BC_est, x = vA_true, color = as.factor(sequence_length*r_msp))) +
+p_sanity_bc_actual = ggplot(d_sanity, aes(y = vA_BC_est_actual, x = vA_true, color = as.factor(sequence_length*r_msp))) +
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$ using B&C)"), color = "Map length \nin history") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$ using B&C (actual))"), color = "Map length in history") + 
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)  
+  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13)
+
+p_sanity_bc_exact = ggplot(d_sanity, aes(y = vA_BC_est_exact, x = vA_true, color = as.factor(sequence_length*r_msp))) +
+  theme_bw() +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$ using B&C (exact))"), color = "Map length in history") + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) + ylim(0, 0.35) + xlim(0, 0.13)
 
 legend_sanity = get_legend(p_sanity_us)
 
-p_sanity_combined = plot_grid(p_sanity_us + theme(legend.position = "none"),
-                              p_sanity_bc + theme(legend.position = "none"), nrow = 2)
-p_sanity_combined = plot_grid(p_sanity_combined, legend_sanity, ncol = 2, rel_widths = c(1, 0.35))
+p_sanity_combined = plot_grid(p_sanity_bc_actual + theme(legend.position = "none"), 
+                              p_sanity_bc_exact + theme(legend.position = "none"), 
+                              p_sanity_us + theme(legend.position = "none"), ncol = 3)
+p_sanity_combined = plot_grid(p_sanity_combined, legend_sanity, nrow = 2, rel_heights = c(1, 0.35))
+
+ggsave(p_sanity_combined, file = file.path(output_path, "sanity.jpg"), w = 12, h = 6)
 
 ```
 
