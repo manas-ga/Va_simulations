@@ -169,7 +169,7 @@ sequence_length = 1e+06               # Just have a single continuous chromosome
 
 ##################
 
-map_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))
+map_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 11, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))
 map_length_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 0.005*sequence_length, (as.numeric(commandArgs(trailingOnly = TRUE)[3])))
 
 r = map_length/sequence_length                          # Recombination rate (per site per generation) during the forward simulation of history
