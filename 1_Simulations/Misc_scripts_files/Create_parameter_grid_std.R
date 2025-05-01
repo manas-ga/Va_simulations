@@ -14,11 +14,11 @@
 # Col 7 = flip_sel_coef
 # Col 8 = mut_ratio
 
-standard_only = TRUE
+standard_only = FALSE
 
 ## The standard set (to be used as a reference to compare)
 
-nsims = 20 # number of simulations for each set
+nsims = 25 # number of simulations for each set
 end_gen = 2
 
 mu_msp_list = if(end_gen==2){seq(3e-9, 2.35e-8, length = nsims)}else{seq(3.6e-8, 3.6e-7, length = nsims)}
@@ -28,8 +28,8 @@ mut_ratio = if(end_gen==2){1}else{0.00}
 param_matrix = data.frame(matrix(NA, nrow = nsims, ncol  = 8))
 
 param_matrix[,1] = mu_msp_list
-param_matrix[,2] = 100
-param_matrix[,3] = 0.005*1e+6
+param_matrix[,2] = 0.5
+param_matrix[,3] = 2
 param_matrix[,4] = 1000
 param_matrix[,5] = 50
 param_matrix[,6] = 2
@@ -40,7 +40,7 @@ param_matrix[,8] = mut_ratio
 
 if(!standard_only){
 
-  if(TRUE==FALSE){
+  
     # Vary map_length (sequence_length*r)
     
     param_matrix_ml_v1 = param_matrix
@@ -50,10 +50,10 @@ if(!standard_only){
     param_matrix_ml_v2[,2] = 50
     
     param_matrix_ml_v3 = param_matrix
-    param_matrix_ml_v3[,2] = 250
+    param_matrix_ml_v3[,2] = 100
     
-  }
   
+if(TRUE==FALSE){
       
     # Vary map_length_expt (sequence_length*r_expt)
     
@@ -97,9 +97,10 @@ if(!standard_only){
                        param_matrix_nind_100, param_matrix_nind_500,
                        param_matrix_cage_3, param_matrix_cage_5,
                        param_matrix_ngen2_2, param_matrix_ngen2_6)
+}
   
   
-  #param_matrix = rbind(param_matrix_ml_v1, param_matrix_ml_v2, param_matrix_ml_v3)
+  param_matrix = rbind(param_matrix, param_matrix_ml_v1, param_matrix_ml_v2, param_matrix_ml_v3)
   
 }
 
