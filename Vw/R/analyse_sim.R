@@ -158,10 +158,19 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                                selected = selected,
                                exact = FALSE)
     
+    # We think B&C might not perform well when recombination rate is low in the history phase because Assumption G might get violated
+    # To test this calculate the following
+    
+    F = (cov2cor(parents_info$L)*parents_info$nR)^2
+    sumr2<-sapply(selected, function(x){sum(F[x,-selected])})
+    assumption_G_test = cor(diag(parents_info$L)[selected], sumr2)
+    
+    
     # Combine the results from the three methods separated by "_"
     
     vA_BC = paste("actual", BC_fit_1$vA_BC, BC_fit_2$vA_BC, BC_fit_3$vA_BC,
                   "exact", BC_fit_1_exact$vA_BC, BC_fit_2_exact$vA_BC, BC_fit_3_exact$vA_BC,
+                  "assumption_G_test", assumption_G_test,
                   sep = "_")
     Ne_BC = paste("actual", BC_fit_1$Ne_BC, BC_fit_2$Ne_BC, BC_fit_3$Ne_BC, 
                   "exact", BC_fit_1_exact$Ne_BC, BC_fit_2_exact$Ne_BC, BC_fit_3_exact$Ne_BC, 

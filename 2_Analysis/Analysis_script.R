@@ -138,7 +138,7 @@ library(Vw)
 
 
 Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "Sanity_check_2_SCE-BIO-C06645_2025-04-28_18-13-21.638291", commandArgs(trailingOnly = TRUE)[1])
-nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553",20, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
+nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553",1, as.numeric(commandArgs(trailingOnly = TRUE)[2]))
 
 for(sim in 1:nsims){
   message(paste("Analysing simulation", sim, "of set", Set_ID, "..."))
