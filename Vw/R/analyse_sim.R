@@ -161,9 +161,11 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
     # We think B&C might not perform well when recombination rate is low in the history phase because Assumption G might get violated
     # To test this calculate the following
     
+    list_alpha_new = sim_data$list_alpha + 0.25*(1 - 2*sim_data$pbar0)*(sim_data$list_alpha)^2
+    
     F = (cov2cor(parents_info$L)*parents_info$nR)^2
     sumr2<-sapply(selected, function(x){sum(F[x,-selected])})
-    assumption_G_test = cor(diag(parents_info$L)[selected], sumr2)
+    assumption_G_test = cor(diag(parents_info$L)[selected]*list_alpha_new[selected]^2, sumr2)
     
     
     # Combine the results from the three methods separated by "_"
