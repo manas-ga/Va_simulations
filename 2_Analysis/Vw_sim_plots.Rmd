@@ -999,120 +999,103 @@ Miscellaneous plots.
 
 ```{r}
 
-plot_palpha_bias = ggplot(d_scale, aes(y = vA_est - if(alpha){vA_true_new}else{vA_true},x = palpha_est, color = factor(round(scale, digits = 4)))) +
-  theme_bw() +
-  geom_point() +
-  labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"), color = TeX(r"($\eta_{scale}$)")) +
-  theme(text = element_text(size = 15)) +
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
-  theme(legend.position = "bottom")
-  
-plot_balpha_slope_bias = ggplot(d_scale, aes(y = vA_est - if(alpha){vA_true_new}else{vA_true},x = balpha_slope_est, color = factor(round(scale, digits = 4)))) +
-  theme_bw() +
-  geom_point() +
-  labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"), color = TeX(r"($\eta_{scale}$)")) +
-  theme(text = element_text(size = 15)) +
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
-  theme(legend.position = "bottom")
-
-plot_balpha_intercept_bias = ggplot(d_scale, aes(y = vA_est - if(alpha){vA_true_new}else{vA_true},x = balpha_intercept_est, color = factor(round(scale, digits = 4)))) +
-  theme_bw() +
-  geom_point() +
-  labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"), color = TeX(r"($\eta_{scale}$)")) +
-  theme(text = element_text(size = 15)) +
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
-  theme(legend.position = "bottom")
-
-plot_palphaemp_bias = ggplot(d_scale, aes(y = vA_est - if(alpha){vA_true_new}else{vA_true},x = palpha_emp, color = factor(round(scale, digits = 4)))) +
-  theme_bw() +
-  geom_point() +
-  labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"), color = TeX(r"($\eta_{scale}$)")) +
-  theme(text = element_text(size = 15)) +
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
-  theme(legend.position = "bottom")
-
-plot_palphaemp = ggplot(d_scale, aes(y = palpha_est,x = palpha_emp, color = factor(round(scale, digits = 4)))) +
-  theme_bw() +
-  geom_point() +
-  labs( color = TeX(r"($\eta_{scale}$)")) +
-  theme(text = element_text(size = 15)) +
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
-  theme(legend.position = "bottom") + geom_abline(slope = 1, intercept = 0)
-
-plot_balpha_slopeemp = ggplot(d_scale, aes(y = balpha_slope_est,x = balpha_slope_emp, color = factor(round(scale, digits = 4)))) +
-  theme_bw() +
-  geom_point() +
-  labs( color = TeX(r"($\eta_{scale}$)")) +
-  theme(text = element_text(size = 15)) +
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73"))  +
-  theme(legend.position = "bottom") + geom_abline(slope = 0.5, intercept = 0)
-  
-
-plot_lost_va_ml = ggplot(d_N1, aes(y = if(alpha){((va_true_new - va_left_new)/va_true_new)}else{((va_true - va_left)/va_true)}, x = factor(round(scale, digits = 4)), fill = factor(round(r*sequence_length, digits = 4)))) +
-  theme_bw() +
-  geom_boxplot() +
-  labs(y = TeX(r"(Fraction of the total $V_a(0)$ lost)"), x = TeX(r"($\eta_{scale}$)"), fill  = TeX(r"($Map length$)")) +
-  theme(text = element_text(size = 15)) +
-  scale_fill_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999"))  +
-  theme(legend.position = "bottom")
-
-
-
 #######
-
-p_ml_palpha_emp = ggplot(d_ml_history, aes(y = palpha_emp, x = factor(r*sequence_length))) +
-  theme_bw() +
-  geom_boxplot() +
-  theme(text = element_text(size = 15)) +
-  labs(x = "Map length in morgans (history)")
-
-p_ml_palpha_emp
-
-p_ml_palpha_est = ggplot(d_ml_history, aes(y = palpha_est, x = factor(r*sequence_length))) +
-  theme_bw() +
-  geom_boxplot() +
-  theme(text = element_text(size = 15)) +
-  labs(x = "Map length in morgans (history)")
-
-p_ml_palpha_est
-
-p_ml_balpha_slope_emp = ggplot(d_ml_history, aes(y = balpha_slope_emp, x = factor(r*sequence_length))) +
-  theme_bw() +
-  geom_boxplot() +
-  theme(text = element_text(size = 15)) +
-  labs(x = "Map length in morgans (history)")
-
-p_ml_balpha_slope_emp
-
-p_ml_balpha_slope_est = ggplot(d_ml_history, aes(y = balpha_slope_est, x = factor(r*sequence_length))) +
-  theme_bw() +
-  geom_boxplot() +
-  theme(text = element_text(size = 15)) +
-  labs(x = "Map length in morgans (history)")
-
-p_ml_balpha_slope_est
-  
 
 d_ml_palpha_balpha = data.frame("palpha" = c(d_ml_history$palpha_emp, d_ml_history$palpha_est),
                        "balpha_slope" = c(d_ml_history$balpha_slope_emp, d_ml_history$balpha_slope_est),
-                       "type" = c(rep("emp", nrow(d_ml_history)), rep("est", nrow(d_ml_history))),
+                       "type" = c(rep("True", nrow(d_ml_history)), rep("Estimate", nrow(d_ml_history))),
                        "r" = c(d_ml_history$r, d_ml_history$r),
                        "sequence_length" = c(d_ml_history$sequence_length, d_ml_history$sequence_length))
 
 p_ml_palpha = ggplot(d_ml_palpha_balpha, aes(y = palpha, x = factor(r*sequence_length), fill = type)) +
   theme_bw() +
-  geom_boxplot() +
+  geom_boxplot() + labs(y = TeX(r"($p_{\alpha} $)")) +
   theme(text = element_text(size = 15)) +
-  labs(x = "Map length in morgans (history)")
+  labs(x = "Map length in morgans (history)", fill = "")
 p_ml_palpha
 
 p_ml_balpha_slope = ggplot(d_ml_palpha_balpha, aes(y = balpha_slope, x = factor(r*sequence_length), fill = type)) +
   theme_bw() +
-  geom_boxplot() +
+  geom_boxplot() + labs(y = TeX(r"($\beta^{(1)}_{\bar{\alpha}}$)"), fill = "") +
   theme(text = element_text(size = 15)) +
   labs(x = "Map length in morgans (history)")
 p_ml_balpha_slope
 
+p_ml_diversity = ggplot(d_ml_history, aes(y = mean_diversity, x = factor(r*sequence_length))) +
+  theme_bw() +
+  geom_boxplot() + labs(y = "Mean diversity at segregating sites") +
+  theme(text = element_text(size = 15)) +
+  labs(x = "Map length in morgans (history)")
+p_ml_diversity
+
+
+
+p_ml_issues = plot_grid(p_ml_palpha, 
+                        p_ml_balpha_slope, 
+                        p_ml_diversity, 
+                        nrow = 2, labels = "AUTO")
+
+ggsave(p_ml_issues, file = file.path(output_path, "ml_issues.jpg"), w = 9, h = 9)
+
+p_ml_seg_sites_sel = ggplot(d_ml_history, aes(y = seg_sites-seg_sites_neu, x = vA_true_new, color = factor(r*sequence_length))) +
+  theme_bw() +
+  geom_point() + labs(y = "Number of non-neutral segregating sites") +
+  theme(text = element_text(size = 15)) +
+  labs(color = "Map length in morgans (history)", x = TeX(r"(True $V_A$)")) + theme(legend.position = "bottom") +
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999"))
+p_ml_seg_sites_sel
+
+p_ml_diversity_vA = ggplot(d_ml_history, aes(y = mean_diversity, x = vA_true_new, color = factor(r*sequence_length))) +
+  theme_bw() +
+  geom_point() + labs(y = "Mean diversity at segregating sites") +
+  theme(text = element_text(size = 15)) +
+  labs(color = "Map length in morgans (history)", x = TeX(r"(True $V_A$)")) + theme(legend.position = "bottom") +
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999"))
+p_ml_diversity_vA
+
+### Separate plot of diversity vs vA_true for neutral and non-neutral sites
+
+d_diversity_ml = data.frame("Set_ID" = rep(d_ml_history$Set_ID, 2), "vA_true_new" = rep(d_ml_history$vA_true_new, each = 2), "locus_type" = c(rep(c("selected", "neutral"), nrow(d_ml_history))), "diversity" = rep(NA, 2*nrow(d_ml_history)))
+
+count = 0
+for(set_id in d_ml_history$Set_ID){
+  count = count + 1
+  # Read finecsale data
+  print(set_id)
+  d = read.csv(list.files(pattern = paste(set_id, ".*finescale.*.csv$", sep = ""), full.names = TRUE, path = data_path)[1])
+  
+  d_selected = d[d$list_alpha!=0,]
+  d_neutral = d[d$list_alpha==0,]
+  
+  # Calculate selected and neutral diversities
+  
+  pi_selected = mean(0.5*d_selected$pbar0*(1-d_selected$pbar0))
+  pi_neutral = mean(0.5*d_neutral$pbar0*(1-d_neutral$pbar0))
+  
+  d_diversity_ml$diversity[2*count - 1] = pi_selected
+  d_diversity_ml$diversity[2*count] = pi_neutral
+  
+  message(paste(count/nrow(d_ml_history)*100), "% done")
+}
+
+write.table(d_diversity_ml, file = file.path(output_path, "ml_diversity.csv"))
+
+# make figure
+
+d_diversity_ml$r = rep(d_ml_history$r, each = 2)
+d_diversity_ml$sequence_length = rep(d_ml_history$sequence_length, each = 2)
+d_diversity_ml$vA_true_new = rep(d_ml_history$vA_true_new, each = 2)
+
+p_ml_diversity_vA_separate = ggplot(d_diversity_ml, aes(y = diversity, x = vA_true_new, shape = locus_type, color = factor(r*sequence_length))) +
+  theme_bw() +
+  geom_point(size = 2) + labs(y = "Mean diversity at segregating sites") +
+  theme(text = element_text(size = 15)) +
+  labs(color = "ML (history)", x = TeX(r"(True $V_A$)")) + theme(legend.position = "bottom") +
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999"))
+p_ml_diversity_vA_separate
+
+p_ml_issues_2 = plot_grid(p_ml_seg_sites_sel, p_ml_diversity_vA, p_ml_diversity_vA_separate, nrow = 3)
+ggsave(p_ml_issues_2, file = file.path(output_path, "ml_issues_2.jpg"), w = 8, h = 15)
 
 
 
