@@ -26,8 +26,9 @@ The following code loads outputs of simulation analyses and makes Figures for th
 - Set_15 (200): Full simulations varying the scale
 - Set_N1 (396): Full simulations varying the map length in history (for simulations in which scale = 0.045)
 - sanity_check (80): Simplified simulations with nearly free recombination in the experiment
+- Set_16 (100): Testing B&C - simplified simulations with 50 replicate populations and map length in history = c(0.5, 5, 50, 100)
 
-Total = 2252
+Total = 2352
 
 
 
@@ -1090,12 +1091,12 @@ p_ml_diversity_vA_separate = ggplot(d_diversity_ml, aes(y = diversity, x = vA_tr
   theme_bw() +
   geom_point(size = 2) + labs(y = "Mean diversity at segregating sites") +
   theme(text = element_text(size = 15)) +
-  labs(color = "ML (history)", x = TeX(r"(True $V_A$)")) + theme(legend.position = "bottom") +
+  labs(shape = "", color = "ML (history)", x = TeX(r"(True $V_A$)")) + theme(legend.position = "bottom") +
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999"))
 p_ml_diversity_vA_separate
 
-p_ml_issues_2 = plot_grid(p_ml_seg_sites_sel, p_ml_diversity_vA, p_ml_diversity_vA_separate, nrow = 3)
-ggsave(p_ml_issues_2, file = file.path(output_path, "ml_issues_2.jpg"), w = 8, h = 15)
+p_ml_issues_2 = plot_grid(p_ml_seg_sites_sel, p_ml_diversity_vA, p_ml_diversity_vA_separate, nrow = 2)
+ggsave(p_ml_issues_2, file = file.path(output_path, "ml_issues_2.jpg"), w = 12, h = 10)
 
 
 
