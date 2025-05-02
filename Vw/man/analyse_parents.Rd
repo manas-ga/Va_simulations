@@ -7,7 +7,9 @@ Obtain useful information about the parents' generation
 Obtain useful information about the parents' generation
 }
 \usage{
-analyse_parents(c_genome, list_alpha, compute_svdL = FALSE, LDalpha = FALSE, SNPs, RecombRate, HapLength, tol = sqrt(.Machine$double.eps), AtleastOneRecomb = FALSE, calc_nR = TRUE, verbose = TRUE)
+analyse_parents(c_genome, list_alpha, compute_svdL = FALSE, LDalpha = FALSE, SNPs, 
+  RecombRate, HapLength, tol = sqrt(.Machine$double.eps), AtleastOneRecomb = FALSE, 
+  calc_nR = TRUE, verbose = TRUE)
 }
 \arguments{
   \item{c_genome}{Matrix of gametic contributions with rows being gametes and columns being loci. Elements should be one (has the reference allele) or zero (has the alternate allele). Gametes should be ordered within individuals (i.e. gametes 1 and 2 are from individual A, gametes 3 and 4 are from individual B)}

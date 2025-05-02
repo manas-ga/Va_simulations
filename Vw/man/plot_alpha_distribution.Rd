@@ -1,11 +1,10 @@
 \name{plot_alpha_distribution}
 \alias{plot_alpha_distribution}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Plot properties of the joint distribution of alphas and allele frequencies
+Plot the joint distribution of alphas and allele frequencies
 }
 \description{
-Plot properties of the joint distribution of alphas and allele frequencies
+Plot the joint distribution of alphas and allele frequencies with estimates overlaid.
 }
 \usage{
 plot_alpha_distribution(alpha = NULL, p = NULL, tprojp = NULL, parameters, ...)

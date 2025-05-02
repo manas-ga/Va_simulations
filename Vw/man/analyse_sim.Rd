@@ -7,7 +7,12 @@ Analyse a SLiM simulation.
 Performs a set of analyses on a SLiM simulation including estimating Va for fitness. 
 }
 \usage{
-analyse_sim(Set_ID, sim = 1, ngen2_optional=NULL, unzip = FALSE, slim_output_path, sim_param_path, extract_genomes_path, extract_mut_path, mutations_path, c_matrix_path, output_path, n_sample = NULL, randomise = TRUE, delete_temp_files = TRUE, proj = "BLoM", LDalpha = FALSE, pa = 1, Vs = "LoNL", method = "REML", palpha = NA, balpha = c(NA, NA), AtleastOneRecomb = FALSE, Ne=NULL, NE=Ne, predict_Ne = FALSE, all.gp = FALSE, verbose = TRUE)
+analyse_sim(Set_ID, sim = 1, ngen2_optional=NULL, unzip = FALSE, slim_output_path, 
+  sim_param_path, extract_genomes_path, extract_mut_path, mutations_path, 
+  c_matrix_path, output_path, n_sample = NULL, randomise = TRUE, 
+  delete_temp_files = TRUE, proj = "BLoM", LDalpha = FALSE, pa = 1, Vs = "LoNL", 
+  method = "REML", palpha = NA, balpha = c(NA, NA), AtleastOneRecomb = FALSE, 
+  Ne=NULL, NE=Ne, predict_Ne = FALSE, all.gp = FALSE, verbose = TRUE)
 }
 \arguments{
   \item{Set_ID}{Unique ID of the set of simulations that are controlled by a single R script.}

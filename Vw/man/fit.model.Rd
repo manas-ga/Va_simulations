@@ -7,7 +7,8 @@ Fit a linear mixed model to allele frequency changes conditional on palpha.
 Fit a linear mixed model to allele frequency changes conditional on palpha.
 }
 \usage{
-fit.model(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tprojp, pbar0, pbar1, pbar2, nrep, Selec, LLonly = FALSE, method = "REML", verbose = TRUE)
+fit.model(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tprojp, pbar0, 
+  pbar1, pbar2, nrep, Selec, LLonly = FALSE, method = "REML", verbose = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

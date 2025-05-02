@@ -7,7 +7,9 @@ Function for estimating the additive genetic variance in fitness
 Function for estimating the additive genetic variance in fitness from allele frequency change data.
 }
 \usage{
-Vw_model(c_genome=NULL, nR, pbar0, pbar1, ngen1 = 1, pbar2, ngen2, nind=NULL, proj, LDalpha, pa, palpha, balpha, Vs, method, L, Ltilde, svdL = NULL, Ne = NULL, NE=Ne, tol = sqrt(.Machine$double.eps), save_tprojp = FALSE, verbose = TRUE)
+Vw_model(c_genome=NULL, nR, pbar0, pbar1, ngen1 = 1, pbar2, ngen2, nind=NULL,
+ proj, LDalpha, pa, palpha, balpha, Vs, method, L, Ltilde, svdL = NULL, Ne = NULL, 
+ NE=Ne, tol = sqrt(.Machine$double.eps), save_tprojp = FALSE, verbose = TRUE)
 }
 \arguments{
   \item{c_genome}{Optional matrix of gametic contributions in the base population with rows being gametes and columns being loci. Elements are one (has the reference allele) or zero (has the alternate allele). Gametes are ordered within individuals (i.e. gametes 1 and 2 are from individual A, gametes 3 and 4 are from individual B)}

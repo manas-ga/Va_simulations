@@ -7,7 +7,9 @@ Extract useful information from SLiM outputs
 Extract useful information from SLiM outputs
 }
 \usage{
-extract_slim_data(Set_ID, sim = 1, ngen2_optional=NULL, unzip = FALSE, slim_output_path, sim_param_path, extract_genomes_path, extract_mut_path, mutations_path, c_matrix_path, n_sample = NULL, randomise = TRUE, delete_temp_files = TRUE, verbose = TRUE)
+extract_slim_data(Set_ID, sim = 1, ngen2_optional=NULL, unzip = FALSE, slim_output_path, 
+  sim_param_path, extract_genomes_path, extract_mut_path, mutations_path, c_matrix_path, 
+  n_sample = NULL, randomise = TRUE, delete_temp_files = TRUE, verbose = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
