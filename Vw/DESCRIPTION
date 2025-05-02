@@ -1,9 +1,10 @@
 Package: Vw
 Type: Package
-Title: What the package does (short line)
+Title: Estimating the Additive Genetic Variance in Fitness from Allele Frequency Change.
+Depends: Matrix, asreml
 Version: 1.0
-Date: 2024-10-25
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Date: 2025-05-02
+Author: Manas Geeta Arun and Jarrod Hadfield
+Maintainer: Manas Geeta Arun <manas.geetaarun@ed.ac.uk>
+Description: Estimating the Additive Genetic Variance in Fitness from Allele Frequency Change.
+License:  GPL (>= 2)
