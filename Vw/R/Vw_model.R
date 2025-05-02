@@ -36,6 +36,7 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
       if(nind!=nrow(c_genome)/2){
         stop("nind is not equal to half the number of rows in c_genome ")
       }
+    }  
   } 
 
   if(is.null(Ne)){Ne = nind}   # If Ne is not provided, Ne should be nind
