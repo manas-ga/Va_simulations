@@ -43,13 +43,8 @@ If \code{logit=FALSE}, the average effects are modelled with mean \code{balpha_0
 
 }
 \references{
+Manas Geeta Arun, Aidan Angus-Henry, Darren J. Obbard & Jarrod D. Hadfield (2015) "Estimating the additive genetic variance for relative fitness from changes in allele frequency".
 }
 \author{
-}
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
-\examples{
-
+Manas Geeta Arun and Jarrod Hadfield
 }

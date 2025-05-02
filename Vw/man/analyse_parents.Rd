@@ -4,7 +4,7 @@
 Obtain useful information about the parents' generation
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Obtain useful information about the parents' generation
 }
 \usage{
 analyse_parents(c_genome, list_alpha, compute_svdL = FALSE, LDalpha = FALSE, SNPs, RecombRate, HapLength, tol = sqrt(.Machine$double.eps), AtleastOneRecomb = FALSE, calc_nR = TRUE, verbose = TRUE)
@@ -22,8 +22,7 @@ analyse_parents(c_genome, list_alpha, compute_svdL = FALSE, LDalpha = FALSE, SNP
   \item{calc_nR}{Should \code{nR}, a matrix of non-recombinant probabilities between loci, be calculated?}
   \item{verbose}{Should progress be printed to screen?}
 }
-\details{
-}
+
 \value{
 \item{L}{Covariance matrix of genotypes}
 \item{Ltilde}{Preserved covariance matrix of genotypes.}
@@ -37,29 +36,16 @@ analyse_parents(c_genome, list_alpha, compute_svdL = FALSE, LDalpha = FALSE, SNP
 \item{theta}{Watterson's theta.}
 \item{va_true}{True additive genic variance.}
 \item{vA_true}{True additive genetic variance.}
-\item{vA_alpha_emp}{Estimate of the additive genetic variance using a model of the average effects on genetic diversity: see \link{alpha_distribution}}
-\item{parameters}{Parameter estimates from a model of the average effects on genetic diversity: see \link{alpha_distribution}}
+\item{vA_alpha_emp}{Estimate of the additive genetic variance using a model of the average effects on genetic diversity: see \code{\link{alpha_distribution}}}
+\item{parameters}{Parameter estimates from a model of the average effects on genetic diversity: see \code{\link{alpha_distribution}}}
 }
 \references{
+Manas Geeta Arun, Aidan Angus-Henry, Darren J. Obbard & Jarrod D. Hadfield (2015) "Estimating the additive genetic variance for relative fitness from changes in allele frequency".
 }
 \author{
+Manas Geeta Arun and Jarrod Hadfield
 }
-\note{
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{alpha_distribution}}
 }
-\examples{
-}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory (show via RShowDoc("KEYWORDS")):
-% \keyword{ ~kwd1 }
-% \keyword{ ~kwd2 }
-% Use only one keyword per line.
-% For non-standard keywords, use \concept instead of \keyword:
-% \concept{ ~cpt1 }
-% \concept{ ~cpt2 }
-% Use only one concept per line.

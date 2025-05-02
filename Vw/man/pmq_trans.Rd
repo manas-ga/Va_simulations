@@ -14,26 +14,18 @@ pmq_trans(pmq, balpha_0)
   \item{pmq}{vector of p-q}
   \item{balpha_0}{power parameter: only values greater than one make biological sense.}
 }
-\details{
-}
+
 \value{
 \code{logit((sign(p-q) * abs(p-q)^balpha_0 + 1)/2)}
 }
+
 \references{
-%% ~put references to the literature/web site here ~
+Manas Geeta Arun, Aidan Angus-Henry, Darren J. Obbard & Jarrod D. Hadfield (2015) "Estimating the additive genetic variance for relative fitness from changes in allele frequency".
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+Manas Geeta Arun and Jarrod Hadfield
 }
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
 pmq<-seq(-1, 1, length=100)
 balpha_0<-seq(1, 10, length=10)

@@ -7,12 +7,12 @@ Analyse a SLiM simulation.
 Performs a set of analyses on a SLiM simulation including estimating Va for fitness. 
 }
 \usage{
-analyse_sim(Set_ID, sim = 1, unzip = FALSE, slim_output_path, sim_param_path, extract_genomes_path, extract_mut_path, mutations_path, c_matrix_path, output_path, n_sample = NULL, randomise = TRUE, delete_temp_files = TRUE, proj = "BLoM", LDalpha = FALSE, pa = 1, Vs = "LoNL", method = "REML", palpha = NA, balpha = c(NA, NA), AtleastOneRecomb = FALSE, all.gp = FALSE, verbose = TRUE)
+analyse_sim(Set_ID, sim = 1, ngen2_optional=NULL, unzip = FALSE, slim_output_path, sim_param_path, extract_genomes_path, extract_mut_path, mutations_path, c_matrix_path, output_path, n_sample = NULL, randomise = TRUE, delete_temp_files = TRUE, proj = "BLoM", LDalpha = FALSE, pa = 1, Vs = "LoNL", method = "REML", palpha = NA, balpha = c(NA, NA), AtleastOneRecomb = FALSE, Ne=NULL, NE=Ne, predict_Ne = FALSE, all.gp = FALSE, verbose = TRUE)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{Set_ID}{Unique ID of the set of simulations that are controlled by a single R script.}
   \item{sim}{integer: the simulation within the set to be analysed.}
+  \item{ngen2_optional}{Optional generation at which final allele frequencies are obtained. Otherwise the final generation is used.}
   \item{unzip}{logical: if \code{TRUE}, the SLiM output is unzipped, read, and then rezipped}
   \item{slim_output_path}{File path to directory where the SLiM outputs (for parents and experimental replicates) are stored (as .txt files).}
   \item{sim_param_path}{File path to directory where the .csv file containing simulation parameters is stored.}
@@ -32,30 +32,24 @@ analyse_sim(Set_ID, sim = 1, unzip = FALSE, slim_output_path, sim_param_path, ex
   \item{palpha}{Covariance structure for loci effects are modelled as \code{L^palpha}. If NA, palpha is estimated using optim().}
   \item{balpha}{Mean loci effects are modelled as \code{balpha[1]+(p-q)*balpha[2]}. If NA, balpha is estimated.}
   \item{AtleastOneRecomb}{When calculating nR should it be assumed there is a minimum  of one cross-over per meiosis?}
+  \item{Ne}{Effective population size: if \code{NULL} set to \code{nind}, if length 1, same Ne assumed throughout, if length 2 different Ne's in the neutral 0:ngen1 (Ne[1]) and selected ngen1:ngen2 (Ne[2]) parts of the experiment, and if a vector of length ngen2 different Ne in each generation.}
+  \item{NE}{Effective population size accounting for environmental variation in fitness only: same options as for \code{Ne}.}
+  \item{predict_Ne}{logical: if \code{TRUE} Ne and NE computed using \code{predict_Ne(c(0,Ve_w_expt), n=nind_expt)}}
   \item{all.gp}{logical, if \code{TRUE} non-gametic phase disequilibrium is assumed to be zero when calculating Ltilde.} 
   \item{verbose}{logical, if \code{TRUE} progress printed to screen.}
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
 A matrix of 
 }
 \references{
-%% ~put references to the literature/web site here ~
+Manas Geeta Arun, Aidan Angus-Henry, Darren J. Obbard & Jarrod D. Hadfield (2015) "Estimating the additive genetic variance for relative fitness from changes in allele frequency".
 }
 \author{
-%%  ~~who you are~~
+Manas Geeta Arun and Jarrod Hadfield
 }
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{alpha_distribution}}
+\code{\link{analyse_parents}}
+\code{\link{Vw_model}}
 }
-\examples{
 
-}

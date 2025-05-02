@@ -26,13 +26,13 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
 {
  
   if(is.null(nind)){
-    if(is.null(genome)){
+    if(is.null(c_genome)){
       stop("nind must be specified if c_genome is null")
     }else{
       nind<-nrow(c_genome)/2
     }
   }else{
-    if(!is.null(genome)){
+    if(!is.null(c_genome)){
       if(nind!=nrow(c_genome)/2){
         stop("nind is not equal to half the number of rows in c_genome ")
       }
@@ -300,7 +300,7 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
       message("Performing eigendecomposition of t(U)%*%(L*M)%*%U...")
     }
     
-    sdLoM<-RSpectra::eigs(t(UL)%*%Drift%*%UL, retain)
+    sdLoM<-RSpectra::eigs(t(UL)%*%Drift%*%UL, min(nind, nsnps))
     retain<-sum(sqrt(sdLoM$values)>tol)
     U<-UL%*%sdLoM$vectors[,1:retain]
     D<-sqrt(sdLoM$values[1:retain])

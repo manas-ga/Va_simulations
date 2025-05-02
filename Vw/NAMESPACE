@@ -1,5 +1,13 @@
 import(Matrix)
+import(asreml)
 export("alpha_distribution", "analyse_parents", "analyse_sim",
        "est_Va_bc", "extract_slim_data", "fit.model", "form_nR",
        "logit", "plot_alpha_distribution", "pmq_trans", "predict_Ne",
        "prob_novelA", "prob_novelB", "Q", "sample_gamete", "averageLD","summaryG", "Vw_model")
+importFrom("graphics", "lines")
+importFrom("methods", "as")
+importFrom("stats", "coef", "cor", "cov", "dbinom", "dist", "lm", "logLik", "model.matrix", "optim", "qnorm", "rbinom")
+importFrom("utils", "read.csv", "read.table", "write.table")
+importFrom("RSpectra", "eigs")
+importFrom("actuar", "pztpois")
+importFrom("MCMCglmm", "MCMCglmm", "posterior.mode")

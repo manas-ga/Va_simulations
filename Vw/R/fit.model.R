@@ -102,8 +102,8 @@ fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tpr
     
     invSC<-solve(SC)
     invSC <- as(invSC, "sparseMatrix") 
-    attr(invSC, "rowNames") <- 1:retain
-    attr(invSC, "colNames") <- 1:retain
+    attr(invSC, "rowNames") <- 1:ncol(SC)
+    attr(invSC, "colNames") <- 1:ncol(SC)
     
     prior<-list(B=list(mu=balpha, V=diag(2)*1e+10))
     diag(prior$B$V)[which(!is.na(balpha))]<-1e-10
