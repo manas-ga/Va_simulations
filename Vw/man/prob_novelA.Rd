@@ -1,39 +1,27 @@
 \name{prob_novelA}
 \alias{prob_novelA}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-\prob_novelA
+Probability of a novel recombinant sequence.
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Calculating the probability that a recombinant sequence produced through gametes pairing up at random according to their frequencies is not present in a random sample of the parental haplotypes.
 }
 \usage{
 prob_novelA(pA, pB, rD, nH)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{pA}{
-%%     ~~Describe \code{pA} here~~
+  \item{pA}{Reference allele frequencies at locus A}
 }
-  \item{pB}{
-%%     ~~Describe \code{pB} here~~
-}
-  \item{rD}{
-%%     ~~Describe \code{rD} here~~
-}
-  \item{nH}{
-%%     ~~Describe \code{nH} here~~
-}
+  \item{pB}{Reference allele frequencies at locus B}
+  \item{rD}{Linkage-disequilibirum measured as a correlation}
+  \item{nH}{Number of parental haplotypes}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+Probability of a novel recombinant sequence.
 }
 \references{
 %% ~put references to the literature/web site here ~

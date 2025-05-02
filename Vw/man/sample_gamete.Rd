@@ -1,34 +1,24 @@
 \name{sample_gamete}
 \alias{sample_gamete}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-\sample_gamete
+Samples gametic 2-locus haplotypes from an individual
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Samples gametic 2-locus haplotypes from an individual
 }
 \usage{
-sample_gamete(xi, r)
+sample_gamete(xi, r, n=1)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{xi}{
-%%     ~~Describe \code{xi} here~~
-}
-  \item{r}{
-%%     ~~Describe \code{r} here~~
-}
+  \item{xi}{Vector of length two indicating the individual's two haplotypes: 1 = reference allele at both loci, 2 = reference allele at locus A and alternate allele at locus B,  3 = alternate allele at locus A and reference allele at locus B and  4  = alternate allele at both loci.}
+  \item{r}{Recombination rate between the two loci}
+  \item{n}{Number of gametes to sample}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
+Gametic 2-locus haplotype: 1 = reference allele at both loci, 2 = reference allele at locus A and alternate allele at locus B,  3 = alternate allele at locus A and reference allele at locus B and  4  = alternate allele at both loci.}
 \references{
 %% ~put references to the literature/web site here ~
 }
@@ -45,30 +35,6 @@ sample_gamete(xi, r)
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (xi, r) 
-{
-    r_event <- rbinom(1, size = 1, prob = r)
-    if (r_event & all(c(1, 4) \%in\% xi)) {
-        xi <- c(2, 3)
-    }
-    if (r_event & all(c(2, 3) \%in\% xi)) {
-        xi <- c(1, 4)
-    }
-    h_event <- rbinom(1, size = 1, prob = 1/2) + 1
-    return(xi[h_event])
-  }
+table(sample_gamete(c(1,4), r=1/4, n=10000))/10000
+# AA with BB and r=1/4 expect  AA (0.375) BB (0.375), Ab (0.125) and aB (0.125)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory (show via RShowDoc("KEYWORDS")):
-% \keyword{ ~kwd1 }
-% \keyword{ ~kwd2 }
-% Use only one keyword per line.
-% For non-standard keywords, use \concept instead of \keyword:
-% \concept{ ~cpt1 }
-% \concept{ ~cpt2 }
-% Use only one concept per line.

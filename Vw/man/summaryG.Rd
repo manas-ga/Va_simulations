@@ -13,18 +13,18 @@ summaryG(x)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
+Matrix with two columns with individuals in rows and haplotypes in columns: 1 = reference allele at both loci, 2 = reference allele at locus A and alternate allele at locus B,  3 = alternate allele at locus A and reference allele at locus B and  4  = alternate allele at both loci.
 }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+  \item{pA}{Reference allele frequency at locus A}
+  \item{pB}{Reference allele frequency at locus A}
+  \item{Lgp}{Gametic phase disequilibrium: 2L'}
+  \item{Lngp}{Non-gametic phase disequilibrium: 2L''}
+
 }
 \references{
 %% ~put references to the literature/web site here ~

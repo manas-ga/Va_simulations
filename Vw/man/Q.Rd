@@ -1,33 +1,26 @@
 \name{Q}
 \alias{Q}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-\Function to perform analyses by Buffalo and Coop
+Allele frequency change covariances 
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Function to obtain (scaled) allele frequency change covariances (Q) from Buffalo and Coop (2019)
 }
 \usage{
-Q(pbar1, pbar2)
+Q(pbar1, pbar2, exact=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{pbar1}{
-%%     ~~Describe \code{pbar1} here~~
-}
-  \item{pbar2}{
-%%     ~~Describe \code{pbar2} here~~
-}
+\item{pbar1}{Matrix of allele frequencies in generation t with loci in columns and replicate populations in rows.}
+\item{pbar2}{Matrix of allele frequencies in generation t+1 with loci in columns and replicate populations in rows.}
+\item{exact}{logical: if \code{TRUE} the original implementation is used, otherwise allele frequencies are projected before taking the covariances in allele frequency chages. 
+
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+Matrix of (scaled) allele frequency change covariances. 
 }
 \references{
 %% ~put references to the literature/web site here ~

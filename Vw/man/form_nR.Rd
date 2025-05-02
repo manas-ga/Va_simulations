@@ -2,38 +2,26 @@
 \alias{form_nR}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-\Calculate the matrix of non-recombinant fractions
+Calculates the matrix of non-recombinant probabilities
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Calculates the matrix of non-recombinant probabilities
 }
 \usage{
 form_nR(SNPs, RecombRate, HapLength, AtleastOneRecomb)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{SNPs}{
-%%     ~~Describe \code{SNPs} here~~
-}
-  \item{RecombRate}{
-%%     ~~Describe \code{RecombRate} here~~
-}
-  \item{HapLength}{
-%%     ~~Describe \code{HapLength} here~~
-}
-  \item{AtleastOneRecomb}{
-%%     ~~Describe \code{AtleastOneRecomb} here~~
-}
+  \item{SNPs}{Vector of loci positions.}
+  \item{RecombRate}{Recombination rate between adjacent sites.}
+  \item{HapLength}{Genome size in base-pairs.}
+  \item{AtleastOneRecomb}{When calculating nR should it be assumed there is a minimum  of one cross-over per meiosis?}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+matrix of non-recombinant probabilities
 }
 \references{
 %% ~put references to the literature/web site here ~
