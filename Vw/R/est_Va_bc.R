@@ -1,4 +1,4 @@
-est_Va_bc<-function(pbar1, pbar2, L, nR, selected=NULL, exact=FALSE){
+est_Va_bc<-function(pbar1, pbar2, L, nR, selected=NULL, exact=FALSE, ngen=1){
   
   # Equations 20 and 21 in Buffalo & Coop
   # should also scale a by the change in SSH
@@ -15,7 +15,7 @@ est_Va_bc<-function(pbar1, pbar2, L, nR, selected=NULL, exact=FALSE){
     stop("L and nR should have the same dimensions")
   }
 
-  A<-averageLD(L, nR, nrep=nrep, selected=selected)
+  A<-averageLD(L, nR, nrep=nrep, selected=selected, ngen=ngen)
   
   q<-Q[upper.tri(Q, diag=TRUE)]
   a<-0.5*A[upper.tri(A, diag=TRUE)]

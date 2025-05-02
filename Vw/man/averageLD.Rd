@@ -1,39 +1,25 @@
 \name{averageLD}
 \alias{averageLD}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-\sigma
+Average persistent associations between sites across replicate popalations.
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Calculates the average (over pairs of loci) expected products of linkage-disequilibria (LD) for pairs of replicates.  
 }
 \usage{
-averageLD(L, nR, N = Inf, nrep)
+averageLD(L, nR, nrep, selected=NULL, ngen=1)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{L}{
-%%     ~~Describe \code{L} here~~
-}
-  \item{nR}{
-%%     ~~Describe \code{nR} here~~
-}
-  \item{N}{
-%%     ~~Describe \code{N} here~~
-}
-  \item{nrep}{
-%%     ~~Describe \code{nrep} here~~
-}
+  \item{L}{Matrix with elements proportional to the LD between sites in the base population. For the most accurate result Ltilde should be used: see \link{}}
+  \item{nR}{Matrix of non-recombination probabilities}
+  \item{nrep}{The number of replicate populations}
+  \item{selected}{Optional indices for selected sites. If null the LD between all sites is used, if not null the LD between selected and neutral sites is used.}
+  \item{ngen}{Number of generations that separate replicates from the base-population. \code{ngen=1} is for a situation where replicates have been initiated from the offspring of the base-population.}
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+A nrep by nrep matrix with one among the diagonal and the average (over pairs of loci) expected products of linkage-disequilibria (LD) for pairs of replicates o the off-diagonal.
 }
 \references{
 %% ~put references to the literature/web site here ~

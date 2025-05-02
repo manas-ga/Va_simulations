@@ -1,5 +1,5 @@
 
-averageLD<-function(L, nR, nrep, selected=NULL){
+averageLD<-function(L, nR, nrep, selected=NULL, ngen=1){
   
   # Equation 55 in Buffalo & Coop
 
@@ -9,7 +9,7 @@ averageLD<-function(L, nR, nrep, selected=NULL){
 
   n<-nrow(L)
   
-  LD<-(cov2cor(L)^2)*nR^2
+  LD<-(cov2cor(L)^2)*nR^(2*ngen)
 
   if(is.null(selected)){
     s<-(sum(LD)-n)/(n*(n-1))

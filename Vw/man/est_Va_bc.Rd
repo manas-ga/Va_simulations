@@ -1,42 +1,40 @@
 \name{est_Va_bc}
 \alias{est_Va_bc}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-\est_Va_bc
+Estimate of the additive genetic variance for fitness using the method of Buffalo and Coop (2019).
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Estimate of the additive genetic variance for fitness using the method of Buffalo and Coop (2019).
 }
 \usage{
-est_Va_bc(pbar1, pbar2, L, nR, nrep)
+est_Va_bc(pbar1, pbar2, L, nR, nrep, selected=NULL, exact=FALSE, ngen=1)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{pbar1}{
-%%     ~~Describe \code{pbar1} here~~
+Matrix of allele frequencies in generation t with loci in columns and replicate populations in rows.
 }
   \item{pbar2}{
-%%     ~~Describe \code{pbar2} here~~
+Matrix of allele frequencies in generation t+1 with loci in columns and replicate populations in rows.
 }
   \item{L}{
-%%     ~~Describe \code{L} here~~
+Matrix with elements proportional to the LD between sites in the population at time t=0. For the most accurate result Ltilde should be used: see \link{}
 }
-  \item{nR}{
-%%     ~~Describe \code{nR} here~~
+  \item{nrep}{The number of replicate populations}
+  \item{selected}{Optional indices for selected sites. If null the LD between all sites is used, if not null the LD between selected and neutral sites is used.}
+  \item{ngen}{Number of generations that separate the replicates from the base-population: t. \code{ngen=1} is for a situation where replicates have been initiated from the offspring of the base-population.}
+\item{exact}{logil: if \code{TRUE} the original implementation is used, otherwise allele frequencies are projected before taking the covariances in allele frequency chages. 
 }
-  \item{nrep}{
-%%     ~~Describe \code{nrep} here~~
-}
+
+
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+
+\item{Ne_BC}{Estimate of the effective population size.}
+\item{vA_BC}{Estimate of the additive genetic variation for fitness.}
+
 }
 \references{
 %% ~put references to the literature/web site here ~
