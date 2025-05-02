@@ -26,8 +26,9 @@ The following code loads outputs of simulation analyses and makes Figures for th
 - Set_15 (200): Full simulations varying the scale
 - Set_N1 (396): Full simulations varying the map length in history (for simulations in which scale = 0.045)
 - sanity_check (80): Simplified simulations with nearly free recombination in the experiment
+- Set_16 (100): Testing B&C - simplified simulations with 50 replicate populations and map length in history = c(0.5, 5, 50, 100)
 
-Total = 2252
+Total = 2352
 
 
 
