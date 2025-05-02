@@ -1,13 +1,13 @@
 
 
-Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 individual 1, rows 3 & 4 individual 2 ...., columns loci) 
+Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 2 individual 1, rows 3 & 4 individual 2 ...., columns loci) 
                    nR,          # matrix of non-recombinant probabilities between loci
                    pbar0,       # vector of allele frequencies at time-point 0
                    pbar1,       # vector of allele frequencies at time-point 1
                    ngen1=1,     # number of generations between parents and time-point 1
                    pbar2,       # vector of allele frequencies at time-point 2
                    ngen2,       # number of generations between parents and time-point 2
-                   nind,        # population size in each replicate
+                   nind=NULL,
                    proj,        # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
                    LDalpha,
                    pa,
@@ -18,15 +18,32 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
                    L,           # between individual covariance in allele proportion
                    Ltilde,      # between gamete covariance in half allele proportion
                    svdL=NULL,   # list with elements UL and DL,
-                   Ne=NULL,          # Can be a scalar (same Ne throughout), a vector of length 2 (different Ne's in the neutral (Ne[1]) and selected (Ne[2]) parts of the experiment), or a vector of length ngen2 (different Ne in each generation)
+                   Ne=NULL,     # Can be a scalar (same Ne throughout), a vector of length 2 (different Ne's in the neutral (Ne[1]) and selected (Ne[2]) parts of the experiment), or a vector of length ngen2 (different Ne in each generation)
+                   NE=Ne,
                    tol=sqrt(.Machine$double.eps),
                    save_tprojp=FALSE, 
                    verbose=TRUE)
 {
+ 
+  if(is.null(nind)){
+    if(is.null(genome)){
+      stop("nind must be specified if c_genome is null")
+    }else{
+      nind<-nrow(c_genome)/2
+    }
+  }else{
+    if(!is.null(genome)){
+      if(nind!=nrow(c_genome)/2){
+        stop("nind is not equal to half the number of rows in c_genome ")
+      }
+  } 
+
+  if(is.null(Ne)){Ne = nind}   # If Ne is not provided, Ne should be nind
+
+  if(is.null(NE)){NE = Ne}
   
-  # If Ne is not provided, Ne should be nind
-  if(is.null(Ne)){Ne = nind}
-  
+  if(length(NE)!=length(Ne)){stop("NE and Ne should be the same length")}
+
   if(!length(Ne)%in%c(1, 2, ngen2)){stop("Ne must be a vector of length either 1, 2, or ngen2")}
   
   asreml.options(Cfixed = TRUE)
@@ -37,11 +54,9 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
       stop("c_genome is required if L, Ltilde or svdL are NULL")
     }
     
-    n0_individuals<-nrow(c_genome)/2
-    
     if(is.null(L) | (is.null(svdL) & (proj=="BLoM" | LDalpha))){
       
-      paternal<-seq(1, 2*n0_individuals, 2)
+      paternal<-seq(1, 2*nind, 2)
       maternal<-paternal+1
       
       c0<-(c_genome[paternal,]+c_genome[maternal,])/2
@@ -50,12 +65,12 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
         if(verbose){
           message("Computing L in the parents' generation...")
         }
-        L<-cov(c0)*(n0_individuals-1)/n0_individuals
+        L<-cov(c0)*(nind-1)/nind
       }  
     }
     
     if(is.null(Ltilde)){
-      Lgp<-(cov(c_genome[paternal,])+cov(c_genome[maternal,]))*(n0_individuals-1)/(4*n0_individuals) 
+      Lgp<-(cov(c_genome[paternal,])+cov(c_genome[maternal,]))*(nind-1)/(4*nind) 
       Ltilde<-Lgp+(1-nR)*(L-Lgp)/nR
       rm("Lgp")
     }
@@ -120,13 +135,13 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
     
     if (length(Ne) == 1){
             
-      M = ((1-1/(2*Ne))^ngen1)*(1/Ne)*nR^(1+ngen1)
+      M = ((1-1/(2*Ne))^ngen1)*(1/NE)*nR^(1+ngen1)
       
       # Only perform further summations if (ngen2-ngen1 > 1)
       
       if((ngen2 - ngen1) > 1){
         for (x in (ngen1 + 1):(ngen2 - 1)){
-          M = M + ((1-1/(2*Ne))^x)*(1/Ne)*nR^(x+1)
+          M = M + ((1-1/(2*Ne))^x)*(1/NE)*nR^(x+1)
         }       
       }
       
@@ -134,13 +149,13 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
     
     if(length(Ne)==2){
       
-      M = ((1-1/(2*Ne[1]))^ngen1)*(1/Ne[2])*nR^(1+ngen1)
+      M = ((1-1/(2*Ne[1]))^ngen1)*(1/NE[2])*nR^(1+ngen1)
       
       # Only perform further summations if (ngen2-ngen1 > 1)
       
       if((ngen2 - ngen1) > 1){
         for (x in (ngen1 + 1):(ngen2 - 1)){
-          M = M + ((1-1/(2*Ne[1]))^ngen1)*((1-1/(2*Ne[2]))^(x-ngen1))*(1/Ne[2])*nR^(x+1)
+          M = M + ((1-1/(2*Ne[1]))^ngen1)*((1-1/(2*Ne[2]))^(x-ngen1))*(1/NE[2])*nR^(x+1)
         }       
       }
       
@@ -150,13 +165,13 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
     if(length(Ne)==ngen2){
       
       
-      M = (prod(1-1/(2*Ne[1:ngen1])))*(1/Ne[ngen1+1])*nR^(1+ngen1)
+      M = (prod(1-1/(2*Ne[1:ngen1])))*(1/NE[ngen1+1])*nR^(1+ngen1)
            
       # Only perform further summations if (ngen2-ngen1 > 1)
      
       if((ngen2 - ngen1) > 1){
         for (x in (ngen1 + 1):(ngen2 - 1)){
-          M = M + (prod(1-1/(2*Ne[1:x])))*(1/Ne[x+1])*nR^(1+x)
+          M = M + (prod(1-1/(2*Ne[1:x])))*(1/NE[x+1])*nR^(1+x)
         }       
      }     
       
@@ -184,7 +199,7 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
       
       
       if(ngen1!=0){  
-        N = {((1-1/(2*nind*Ne))^ngen1)*nR^ngen1}
+        N = {((1-1/(2*Ne))^ngen1)*nR^ngen1}
       }else{
         if(ngen2>1){
           N = matrix(0, ncol(nR), ncol(nR))
@@ -196,7 +211,7 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
       if((ngen2 - ngen1) > 1){
         
         for (x in (ngen1 + 1):(ngen2-1)){
-          N = N + ((1-1/(2*nind*Ne))^x)*nR^x
+          N = N + ((1-1/(2*Ne))^x)*nR^x
         }
         
       }
@@ -206,7 +221,7 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
     if(length(Ne)==2){
       
       if(ngen1!=0){  
-        N = {((1-1/(2*nind*Ne[1]))^ngen1)*nR^(ngen1)}
+        N = {((1-1/(2*Ne[1]))^ngen1)*nR^(ngen1)}
       }else{
         if(ngen2>1){
           N = matrix(0, ncol(nR), ncol(nR))
@@ -217,7 +232,7 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
       
       if((ngen2 - ngen1) > 1){
         for (x in (ngen1 + 1):(ngen2-1)){
-          N = N + ((1-1/(2*nind*Ne[1]))^ngen1)*((1-1/(2*nind*Ne[2]))^(x-ngen1))*nR^x
+          N = N + ((1-1/(2*Ne[1]))^ngen1)*((1-1/(2*Ne[2]))^(x-ngen1))*nR^x
           
         }
         
@@ -228,7 +243,7 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
     if(length(Ne)==ngen2){
       
       if(ngen1!=0){  
-        N = (prod(1-1/(2*nind*Ne[1:ngen1])))*nR^ngen1
+        N = (prod(1-1/(2*Ne[1:ngen1])))*nR^ngen1
       }else{
         if(ngen2>1){
           N = matrix(0, ncol(nR), ncol(nR))
@@ -240,7 +255,7 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
       if((ngen2 - ngen1) > 1){
         
         for (x in (ngen1 + 1):(ngen2-1)){
-          N = N + (prod(1-1/(2*nind*Ne[1:x])))*nR^x
+          N = N + (prod(1-1/(2*Ne[1:x])))*nR^x
         }
       }
       
@@ -320,7 +335,7 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
       message("Estimating palpha...")
     }
     
-    palpha<-optim(0, fit.model, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, Selec=Selec, verbose=verbose, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1, factr = 1e+11), hessian=TRUE)
+    palpha<-optim(0, fit.model, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, Selec=Selec, verbose=verbose, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1, factr = 1e+11), hessian=TRUE)
     
     palpha_var<--1/palpha$hessian
     palpha<-palpha$par
@@ -333,7 +348,7 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
     message("Fitting the final model...")
   }
   
-  output<-fit.model(palpha=palpha, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, nind=nind, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, Selec=Selec, verbose=verbose)
+  output<-fit.model(palpha=palpha, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, Selec=Selec, verbose=verbose)
   
   if(verbose){
     message("Calculating the estimate of Vw...")
@@ -377,6 +392,6 @@ Vw_model<-function(c_genome,    # gamete genotypes (rows gametes (rows 1 & 2 ind
   
   
   
-  return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, palpha=output$palpha, balpha=balpha, palpha_var=palpha_var, balpha_var=S, tprojp=if(save_tprojp){tprojp}else{NULL}, S=S, X=X, DL=ifelse(exists("DL"), DL, NA)))
+  return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, palpha=output$palpha, balpha=balpha, palpha_var=palpha_var, balpha_var=S, tprojp=if(save_tprojp){tprojp}else{NULL}, X=X, DL=ifelse(exists("DL"), DL, NA)))
   
 }

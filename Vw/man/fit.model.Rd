@@ -1,86 +1,43 @@
 \name{fit.model}
 \alias{fit.model}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-\Fit (generalised) linear mixed model
+Fit a linear mixed model to allele frequency changes conditional on palpha.
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Fit a linear mixed model to allele frequency changes conditional on palpha.
 }
 \usage{
-fit.model(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, nind, tprojp, pbar0, pbar1, pbar2, nrep, Selec, Ne_factor = 1, LLonly = FALSE, method = "REML", verbose = TRUE)
+fit.model(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tprojp, pbar0, pbar1, pbar2, nrep, Selec, LLonly = FALSE, method = "REML", verbose = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{palpha}{
-%%     ~~Describe \code{palpha} here~~
-}
-  \item{balpha}{
-%%     ~~Describe \code{balpha} here~~
-}
-  \item{LDalpha}{
-%%     ~~Describe \code{LDalpha} here~~
-}
-  \item{nsnps}{
-%%     ~~Describe \code{nsnps} here~~
-}
-  \item{UL}{
-%%     ~~Describe \code{UL} here~~
-}
-  \item{DL}{
-%%     ~~Describe \code{DL} here~~
-}
-  \item{L}{
-%%     ~~Describe \code{L} here~~
-}
-  \item{ngen2}{
-%%     ~~Describe \code{ngen2} here~~
-}
-  \item{ngen1}{
-%%     ~~Describe \code{ngen1} here~~
-}
-  \item{nind}{
-%%     ~~Describe \code{nind} here~~
-}
-  \item{tprojp}{
-%%     ~~Describe \code{tprojp} here~~
-}
-  \item{pbar0}{
-%%     ~~Describe \code{pbar0} here~~
-}
-  \item{pbar1}{
-%%     ~~Describe \code{pbar1} here~~
-}
-  \item{pbar2}{
-%%     ~~Describe \code{pbar2} here~~
-}
-  \item{nrep}{
-%%     ~~Describe \code{nrep} here~~
-}
-  \item{Selec}{
-%%     ~~Describe \code{Selec} here~~
-}
-  \item{Ne_factor}{
-%%     ~~Describe \code{Ne_factor} here~~
-}
-  \item{LLonly}{
-%%     ~~Describe \code{LLonly} here~~
-}
-  \item{method}{
-%%     ~~Describe \code{method} here~~
-}
-  \item{verbose}{
-%%     ~~Describe \code{verbose} here~~
-}
+  \item{palpha}{Covariance structure for loci effects are modelled as \code{L^palpha}.}
+  \item{balpha}{Mean loci effects are modelled as \code{balpha[1]+(p-q)*balpha[2]}. If NA, balpha is estimated.}
+  \item{LDalpha}{logical, if \code{TRUE} L is considered while modelling distribution of alphas rather than diag(L).}
+  \item{nsnps}{Number of loci}
+  \item{UL}{Eigenvectors of L}
+  \item{DL}{Eigenvectors of L square-rooted}
+  \item{L}{Matrix with elements proportional to the LD between sites in the base population. For the most accurate result Ltilde should be used: see \link{}}
+  \item{ngen2}{Generation at which allele frequencies are last sampled. Generation 0 is the base population.}
+  \item{ngen1}{Generation at which allele frequencies are first sampled. Generation 0 is the base population.}
+  \item{tprojp}{Transpose of the projection matrix for allele frequencies.}
+  \item{pbar0}{Vector of allele frequencies in the base population.}
+  \item{pbar1}{Matrix of allele frequencies in generation ngen1 with loci in columns and replicate populations in rows.}
+  \item{pbar2}{Matrix of allele frequencies in generation ngen2 with loci in columns and replicate populations in rows.}
+  \item{nrep}{The number of replicate populations}
+  \item{Selec}{Matrix, when post-multiplied by the average effects, gives the expected allele frequency change: Lmathcal}
+  \item{LLonly}{logical: if \code{TRUE} only the (restricted) likelihood is returned}
+  \item{method}{"REML" or "MCMC"}
+  \item{verbose}{logical, if \code{TRUE} progress printed to screen.}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
+\item{data}{Formatted data for analysis.}
+\item{model}{Model object.}
+\item{SC}{Covariance structure for locus effects.}
+\item{palpha}{Value of palpha used}
 %% ...
 }
 \references{

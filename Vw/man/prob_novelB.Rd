@@ -1,42 +1,27 @@
 \name{prob_novelB}
 \alias{prob_novelB}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-\Probability novelB
+Probability of a novel recombinant sequence.
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Calculating the probability that a recombinant sequence produced through gametes pairing up at random according to their frequencies is not present in a random sample of the parental haplotypes.
 }
 \usage{
 prob_novelB(P, Q, R, S, nH)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{P}{
-%%     ~~Describe \code{P} here~~
-}
-  \item{Q}{
-%%     ~~Describe \code{Q} here~~
-}
-  \item{R}{
-%%     ~~Describe \code{R} here~~
-}
-  \item{S}{
-%%     ~~Describe \code{S} here~~
-}
-  \item{nH}{
-%%     ~~Describe \code{nH} here~~
-}
+  \item{P}{Frequency of the haplotype with reference alleles at both loci}
+  \item{Q}{Frequency of the haplotype with reference allele at locus A and alternate allele at locus B}
+  \item{R}{Frequency of the haplotype with alternate allele at locus A and reference allele at locus B}
+  \item{S}{Frequency of the haplotype with alternate alleles at both loci}
+  \item{nH}{Number of parental haplotypes}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+Probability of a novel recombinant sequence.
 }
 \references{
 %% ~put references to the literature/web site here ~

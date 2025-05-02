@@ -1,36 +1,27 @@
 \name{predict_Ne}
 \alias{predict_Ne}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-\Predict the Ne of the population
+Predict the Ne of the population
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Predict the Ne of the population given environmental variance in fitness only.
 }
 \usage{
 predict_Ne(Ve, n, fitness_model = "Exp")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{Ve}{
-%%     ~~Describe \code{Ve} here~~
+  \item{Ve}{Environmental variance in fitness on some scale (log if \code{fitness_model = "Exp"} identity if \code{fitness_model = "I"}  )
 }
-  \item{n}{
-%%     ~~Describe \code{n} here~~
+  \item{n}{Census population size
 }
-  \item{fitness_model}{
-%%     ~~Describe \code{fitness_model} here~~
+  \item{fitness_model}{Either \code{"Exp"} where fitness is log normal with a meanlog of zero or \code{"I"} where fitness is normal with a mean of one}
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+predicted N_e given environmental variance in fitness only.
 }
 \references{
 %% ~put references to the literature/web site here ~

@@ -22,7 +22,7 @@ Matrix with elements proportional to the LD between sites in the population at t
   \item{nrep}{The number of replicate populations}
   \item{selected}{Optional indices for selected sites. If null the LD between all sites is used, if not null the LD between selected and neutral sites is used.}
   \item{ngen}{Number of generations that separate the replicates from the base-population: t. \code{ngen=1} is for a situation where replicates have been initiated from the offspring of the base-population.}
-\item{exact}{logil: if \code{TRUE} the original implementation is used, otherwise allele frequencies are projected before taking the covariances in allele frequency chages. 
+\item{exact}{logical: if \code{TRUE} the original implementation is used, otherwise allele frequencies are projected before taking the covariances in allele frequency chages. 
 }
 
 
