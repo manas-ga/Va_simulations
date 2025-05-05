@@ -9,6 +9,6 @@ predict_NE<-function(Ve, n, fitness_model = "Exp"){
     # assuming mean=1
     Vo<-4*Ve+2
   }
-  Ne<-4*n/(2+Vo)
+  NE<-4*n/(2+Vo)
   return(NE)
 }

@@ -62,7 +62,7 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
   ### Predict Ne in the experiment ###
   
   if(predict_NE){
-    NE<- c(sim_data$sim_params$n_ind_exp, predict_Ne(n=sim_data$sim_params$n_ind_exp, Ve=sim_data$sim_params$Ve_w_expt))
+    NE<- c(sim_data$sim_params$n_ind_exp, predict_NE(n=sim_data$sim_params$n_ind_exp, Ve=sim_data$sim_params$Ve_w_expt))
   }
 
   ### Fit model ###

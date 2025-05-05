@@ -17,7 +17,7 @@ predict_NE(Ve, n, fitness_model = "Exp")
 }
 
 \value{
-predicted Ne given environmental variance in fitness only: NE
+predicted NE given environmental variance in fitness only: NE
 }
 
 \references{
