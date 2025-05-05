@@ -358,8 +358,10 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
   if(method=="REML"){
     
     sigma2alpha<-summary(output$model)$varcomp[1,1]
-    S<-matrix(0,2,2)
     
+    S<-matrix(0,2,2)
+    colnames(S)<-rownames(S)<-c("int", "pmq")
+
     if(is.na(balpha[1]) & is.na(balpha[2])){
       balpha<-summary(output$model, coef=TRUE)$coef.fixed[c("int", "pmq"),1]
       S<-output$model$Cfixed[c("int", "pmq"),c("int", "pmq")]
