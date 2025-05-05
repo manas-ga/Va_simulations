@@ -300,7 +300,7 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
       message("Performing eigendecomposition of t(U)%*%(L*M)%*%U...")
     }
     
-    sdLoM<-RSpectra::eigs(t(UL)%*%Drift%*%UL, ncol(UL))
+    sdLoM<-eigen(t(UL)%*%Drift%*%UL)
     retain<-sum(sqrt(sdLoM$values)>tol)
     U<-UL%*%sdLoM$vectors[,1:retain]
     D<-sqrt(sdLoM$values[1:retain])
@@ -366,11 +366,11 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
     }
     if(is.na(balpha[1]) & !is.na(balpha[2])){
       balpha[1]<-summary(output$model, coef=TRUE)$coef.fixed["int",1]
-      S["int","int"]<-output$model$Cfixed
+      S[1,1]<-output$model$Cfixed
     }
     if(!is.na(balpha[1]) & is.na(balpha[2])){
       balpha[2]<-summary(output$model, coef=TRUE)$coef.fixed["pmq",1]
-      S["pmq","pmq"]<-output$model$Cfixed
+      S[2,2]<-output$model$Cfixed
     }
   }
   if(method=="MCMC"){
