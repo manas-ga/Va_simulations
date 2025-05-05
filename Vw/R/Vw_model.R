@@ -358,7 +358,7 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
   if(method=="REML"){
     
     sigma2alpha<-summary(output$model)$varcomp[1,1]
-    
+
     S<-matrix(0,2,2)
     colnames(S)<-rownames(S)<-c("int", "pmq")
 
@@ -368,11 +368,11 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
     }
     if(is.na(balpha[1]) & !is.na(balpha[2])){
       balpha[1]<-summary(output$model, coef=TRUE)$coef.fixed["int",1]
-      S[1,1]<-output$model$Cfixed
+      S[1,1]<-output$model$Cfixed["int", "int"]
     }
     if(!is.na(balpha[1]) & is.na(balpha[2])){
       balpha[2]<-summary(output$model, coef=TRUE)$coef.fixed["pmq",1]
-      S[2,2]<-output$model$Cfixed
+      S[2,2]<-output$model$Cfixed["pmq", "pmq"]
     }
   }
   if(method=="MCMC"){
