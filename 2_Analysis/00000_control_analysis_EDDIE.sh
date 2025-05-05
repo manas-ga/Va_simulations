@@ -2,12 +2,12 @@
 
 #$ -V
 #$ -cwd
-#$ -N Vw_al_Set_10
-#$ -t 1-100
-#$ -tc 10
+#$ -N Vw_al_TEST
+#$ -t 1-3
+#$ -tc 3
 #$ -l h_rt=10:05:00
-#$ -l h_vmem=750G
-#$ -pe sharedmem 50
+#$ -l h_vmem=1G
+#$ -pe sharedmem 10
 #$ -j y
 #$ -o /exports/eddie/scratch/msamant/b_Interim_files/std_out/
 

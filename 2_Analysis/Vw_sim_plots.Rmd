@@ -951,47 +951,64 @@ if(alpha){
 
 ```
 
-## Calculating V_A using Buffalo and Coop's (2019) method
+## Comparison to B&C
+
+### Simplified simulations
 
 ```{r}
-d_bc = read.csv(file.path(data_path, "combined_data/BC_V_A_corrected_combined.csv"))
+d_16 = read.csv(file.path(data_path, "combined_data/Set_16_output.csv"))
+d_16 = add_new_va_data(d_new_va, d_16)
+d_16$vA_BC_est_actual = unlist(lapply(d_16$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[3])}))
+d_16$vA_BC_est_exact = unlist(lapply(d_16$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[7])}))
+d_16$assumption_G_test = unlist(lapply(d_16$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[12])}))
 
-# Create a new data frame for simplified simulations with estimates using different BC approaches one below the other
-
-d_bc_smpl = data.frame("vA_BC" = c(d_bc[d_bc$end_gen==2,]$vA_BC_1, d_bc[d_bc$end_gen==2,]$vA_BC_2, d_bc[d_bc$end_gen==2,]$vA_BC_3),
-                       "vA_true" = rep(d_bc[d_bc$end_gen==2,]$vA_true, 3),
-                       "vA_true_new" = rep(d_bc[d_bc$end_gen==2,]$vA_true_new, 3),
-                       "BC_approach" = c(rep("Approach 1", nrow(d_bc[d_bc$end_gen==2,])), rep("Approach 2", nrow(d_bc[d_bc$end_gen==2,])), rep("Approach 3", nrow(d_bc[d_bc$end_gen==2,]))))
-
-p_bc_smpl = ggplot(d_bc_smpl, aes(x = if(alpha){vA_true_new}else{vA_true}, y = vA_BC, color = BC_approach)) +
-  theme_bw() + 
-  geom_point() + 
+p_bc_simplified_us = ggplot(d_16, aes(y = vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r_msp))) +
+  theme_bw() +
+  geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$ using B&C)"), color = " ") + 
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$ using our method)"), color = "Map length \nin history") + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)
+  geom_smooth(method = "lm", se=FALSE) + ylim(0, 0.35) + xlim(0, 0.13)
 
-p_bc_smpl
-
-d_bc_full = data.frame("vA_BC" = c(d_bc[d_bc$end_gen==25000,]$vA_BC_1, d_bc[d_bc$end_gen==25000,]$vA_BC_2, d_bc[d_bc$end_gen==25000,]$vA_BC_3),
-                       "vA_true" = rep(d_bc[d_bc$end_gen==25000,]$vA_true, 3),
-                       "vA_true_new" = rep(d_bc[d_bc$end_gen==25000,]$vA_true_new, 3),
-                       "BC_approach" = c(rep("Approach 1", nrow(d_bc[d_bc$end_gen==25000,])), rep("Approach 2", nrow(d_bc[d_bc$end_gen==25000,])), rep("Approach 3", nrow(d_bc[d_bc$end_gen==25000,]))))
-
-p_bc_full = ggplot(d_bc_full, aes(x = if(alpha){vA_true_new}else{vA_true}, y = vA_BC, color = BC_approach)) +
-  theme_bw() + 
-  geom_point() + 
+p_bc_simplified_bc_actual = ggplot(d_16, aes(y = vA_BC_est_actual, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r_msp))) +
+  theme_bw() +
+  geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$ using B&C)"), color = " ") + 
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$ using B&C (actual))"), color = "Map length \nin history") + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)
+  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13)
 
-p_bc_full
+p_bc_simplified_bc_exact = ggplot(d_16, aes(y = vA_BC_est_exact, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r_msp))) +
+  theme_bw() +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$ using B&C (improved))"), color = "Map length \nin history") + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) + ylim(0, 0.35) + xlim(0, 0.13)
+
+p_bc_simplified_assumption_G_test = ggplot(d_16, aes(y = assumption_G_test, x = as.factor(sequence_length*r_msp), fill = as.factor(sequence_length*r_msp))) +
+  theme_bw() +
+  geom_boxplot() + 
+  labs(y = "Deviation from Assumption G in B&C", x = "Map length in history") + 
+  scale_fill_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
+  theme(text = element_text(size = 15)) 
+
+legend_16 = get_legend(p_bc_simplified_us)
+
+p_bc_simplified_combined = plot_grid(p_bc_simplified_bc_actual + theme(legend.position = "none"), 
+                              p_bc_simplified_bc_exact + theme(legend.position = "none"), 
+                              p_bc_simplified_us + theme(legend.position = "none"), 
+                              p_bc_simplified_assumption_G_test + theme(legend.position = "none"), ncol = 2, labels = "AUTO")
+p_bc_simplified_combined = plot_grid(p_bc_simplified_combined, legend_16, ncol = 2, rel_widths = c(1, 0.15))
+
+ggsave(p_bc_simplified_combined, file = file.path(output_path, "Fig5.jpg"), w = 9, h = 9)
 
 
 ```
+
 
 
 ## Relationship between addetive genic variance lost and B_alpha(1) and p_alpha
