@@ -3,10 +3,10 @@
 #$ -V
 #$ -cwd
 #$ -N Vw_sim
-#$ -t 1-1
-#$ -tc 1
-#$ -l mem_free=250g,s_vmem=350g,h_vmem=450g
-#$ -pe sharedmem 10
+#$ -t 1-3
+#$ -tc 3
+#$ -l h_vmem=4g
+#$ -pe sharedmem 2
 #$ -j y
 #$ -o /exports/eddie/scratch/msamant/Va_simulations/b_Interim_files/std_out/
 
