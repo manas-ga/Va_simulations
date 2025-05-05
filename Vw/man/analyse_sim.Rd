@@ -12,7 +12,7 @@ analyse_sim(Set_ID, sim = 1, ngen2_optional=NULL, unzip = FALSE, slim_output_pat
   c_matrix_path, output_path, n_sample = NULL, randomise = TRUE, 
   delete_temp_files = TRUE, proj = "BLoM", LDalpha = FALSE, pa = 1, Vs = "LoNL", 
   method = "REML", palpha = NA, balpha = c(NA, NA), AtleastOneRecomb = FALSE, 
-  Ne=NULL, NE=Ne, predict_Ne = FALSE, all.gp = FALSE, verbose = TRUE)
+  NE=NULL, Ne=NE, predict_Ne = FALSE, all.gp = FALSE, verbose = TRUE)
 }
 \arguments{
   \item{Set_ID}{Unique ID of the set of simulations that are controlled by a single R script.}
@@ -37,8 +37,8 @@ analyse_sim(Set_ID, sim = 1, ngen2_optional=NULL, unzip = FALSE, slim_output_pat
   \item{palpha}{Covariance structure for loci effects are modelled as \code{L^palpha}. If NA, palpha is estimated using optim().}
   \item{balpha}{Mean loci effects are modelled as \code{balpha[1]+(p-q)*balpha[2]}. If NA, balpha is estimated.}
   \item{AtleastOneRecomb}{When calculating nR should it be assumed there is a minimum  of one cross-over per meiosis?}
-  \item{Ne}{Effective population size: if \code{NULL} set to \code{nind}, if length 1, same Ne assumed throughout, if length 2 different Ne's in the neutral 0:ngen1 (Ne[1]) and selected ngen1:ngen2 (Ne[2]) parts of the experiment, and if a vector of length ngen2 different Ne in each generation.}
-  \item{NE}{Effective population size accounting for environmental variation in fitness only: same options as for \code{Ne}.}
+  \item{NE}{Effective population size accounting for environmental variation in fitness only: if \code{NULL} set to \code{nind}, if length 1, same NE assumed throughout, if length 2 different NE's in the neutral 0:ngen1 (NE[1]) and selected ngen1:ngen2 (NE[2]) parts of the experiment, and if a vector of length ngen2 different NE in each generation.}
+  \item{Ne}{Effective population size: same options as for \code{NE}.}
   \item{predict_Ne}{logical: if \code{TRUE} Ne and NE computed using \code{predict_Ne(c(0,Ve_w_expt), n=nind_expt)}}
   \item{all.gp}{logical, if \code{TRUE} non-gametic phase disequilibrium is assumed to be zero when calculating Ltilde.} 
   \item{verbose}{logical, if \code{TRUE} progress printed to screen.}

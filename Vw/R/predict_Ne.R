@@ -1,5 +1,5 @@
 
-predict_Ne<-function(Ve, n, fitness_model = "Exp"){
+predict_NE<-function(Ve, n, fitness_model = "Exp"){
   
   if(fitness_model == "Exp"){
     # assuming meanlog=0
@@ -10,5 +10,5 @@ predict_Ne<-function(Ve, n, fitness_model = "Exp"){
     Vo<-4*Ve+2
   }
   Ne<-4*n/(2+Vo)
-  return(Ne)
+  return(NE)
 }

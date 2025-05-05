@@ -1,13 +1,13 @@
-\name{predict_Ne}
-\alias{predict_Ne}
+\name{predict_NE}
+\alias{predict_NE}
 \title{
-Predict the Ne of the population
+Predict the NE of the population
 }
 \description{
-Predict the Ne of the population given environmental variance in fitness only.
+Predict the NE of the population given environmental variance in fitness only.
 }
 \usage{
-predict_Ne(Ve, n, fitness_model = "Exp")
+predict_NE(Ve, n, fitness_model = "Exp")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

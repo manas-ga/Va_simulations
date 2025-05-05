@@ -18,8 +18,8 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
                    L,           # between individual covariance in allele proportion
                    Ltilde,      # between gamete covariance in half allele proportion
                    svdL=NULL,   # list with elements UL and DL,
-                   Ne=NULL,     # Can be a scalar (same Ne throughout), a vector of length 2 (different Ne's in the neutral (Ne[1]) and selected (Ne[2]) parts of the experiment), or a vector of length ngen2 (different Ne in each generation)
-                   NE=Ne,
+                   NE=NULL,     # Can be a scalar (same Ne throughout), a vector of length 2 (different Ne's in the neutral (Ne[1]) and selected (Ne[2]) parts of the experiment), or a vector of length ngen2 (different Ne in each generation)
+                   Ne=NE,
                    tol=sqrt(.Machine$double.eps),
                    save_tprojp=FALSE, 
                    verbose=TRUE)
@@ -39,9 +39,9 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
     }  
   } 
 
-  if(is.null(Ne)){Ne = nind}   # If Ne is not provided, Ne should be nind
+  if(is.null(NE)){NE = nind}   # If Ne is not provided, Ne should be nind
 
-  if(is.null(NE)){NE = Ne}
+  if(is.null(Ne)){Ne = NE}
   
   if(length(NE)!=length(Ne)){stop("NE and Ne should be the same length")}
 

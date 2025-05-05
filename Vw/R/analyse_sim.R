@@ -23,9 +23,9 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                        palpha = NA,           # If NA palpha is estimated using optim()
                        balpha = c(NA, NA),    # If c(NA,NA) both bedelta intercept and slope are estimated
                        AtleastOneRecomb=FALSE, 
-                       Ne=NULL,               # Can be a scalar (same Ne throughout), a vector of length 2 (different Ne's in the neutral (Ne[1]) and selected (Ne[2]) parts of the experiment), or a vector of length ngen2 (different Ne in each generation)
-                       NE=Ne,
-                       predict_Ne = FALSE,    # Should Ne and NE in the experiment be computed using predict_Ne()? If TRUE, provided Ne is replaced by Ne = c(nind_expt, predict_Ne(nind_expt, Ve_w_expt))
+                       NE=NULL,               # Can be a scalar (same Ne throughout), a vector of length 2 (different Ne's in the neutral (Ne[1]) and selected (Ne[2]) parts of the experiment), or a vector of length ngen2 (different Ne in each generation)
+                       Ne=NE,
+                       predict_NE = FALSE,    # Should Ne and NE in the experiment be computed using predict_Ne()? If TRUE, provided Ne is replaced by Ne = c(nind_expt, predict_Ne(nind_expt, Ve_w_expt))
                        all.gp = FALSE,        # Ltilde = L'+L''(r/(1-r)) if all.gp=T L'' is assumed 0 and L'=L. 
                        verbose = TRUE
 ){
@@ -61,8 +61,8 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
   
   ### Predict Ne in the experiment ###
   
-  if(predict_Ne){
-    Ne <- NE<- c(sim_data$sim_params$n_ind_exp, predict_Ne(n=sim_data$sim_params$n_ind_exp, Ve=sim_data$sim_params$Ve_w_expt))
+  if(predict_NE){
+    NE<- c(sim_data$sim_params$n_ind_exp, predict_Ne(n=sim_data$sim_params$n_ind_exp, Ve=sim_data$sim_params$Ve_w_expt))
   }
 
   ### Fit model ###
@@ -88,7 +88,7 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                Ltilde = if(all.gp){parents_info$L}else{parents_info$Ltilde},      
                svdL = parents_info$svdL,           # list with elements UL and DL
                Ne = Ne,
-               NE = Ne,
+               NE = NE,
                tol = sqrt(.Machine$double.eps))
   
   
