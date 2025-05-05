@@ -300,7 +300,7 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
       message("Performing eigendecomposition of t(U)%*%(L*M)%*%U...")
     }
     
-    sdLoM<-RSpectra::eigs(t(UL)%*%Drift%*%UL, min(nind, nsnps))
+    sdLoM<-RSpectra::eigs(t(UL)%*%Drift%*%UL, ncol(UL))
     retain<-sum(sqrt(sdLoM$values)>tol)
     U<-UL%*%sdLoM$vectors[,1:retain]
     D<-sqrt(sdLoM$values[1:retain])

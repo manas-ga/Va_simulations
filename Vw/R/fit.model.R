@@ -88,8 +88,12 @@ fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tpr
       m1<-asreml(delta~int+offset(pmq)-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
     }
     if(!is.na(balpha[1]) & is.na(balpha[2])){
-      m1<-asreml(delta~offset(int)+pmq-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
-    }
+      if(balpha[1]==0){
+        m1<-asreml(delta~pmq-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
+      }else{
+        m1<-asreml(delta~offset(int)+pmq-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
+      }
+    }  
     if(!is.na(balpha[1]) & !is.na(balpha[2])){
       warning("asreml doesn't allow models without fixed effects, so intercept fitted but replaced with balpha[1]!")
       m1<-asreml(delta~offset(pmq + int), random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
