@@ -5,8 +5,8 @@
 #$ -N Vw_al_TEST
 #$ -t 1-10
 #$ -tc 10
-#$ -l h_rt=00:03:00
-#$ -l h_vmem=1G
+#$ -l h_rt=07:03:00
+#$ -l h_vmem=24G
 #$ -pe sharedmem 10
 #$ -j y
 #$ -o /exports/eddie/scratch/msamant/b_Interim_files/std_out/
