@@ -140,7 +140,7 @@ nsims = 1                              # Number of simulations - MUST be 1 if ru
 
 if(Sys.info()["nodename"]!="SCE-BIO-C06645"&nsims>1)stop("nsims must be 1 when running on the cluster")
 
-n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 50, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
+n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
 end_gen = 2                            # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
 
@@ -169,8 +169,8 @@ sequence_length = 1e+06               # Just have a single continuous chromosome
 
 ##################
 
-map_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 11, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))
-map_length_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 0.005*sequence_length, (as.numeric(commandArgs(trailingOnly = TRUE)[3])))
+map_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 5, (as.numeric(commandArgs(trailingOnly = TRUE)[2])))
+map_length_expt = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 2, (as.numeric(commandArgs(trailingOnly = TRUE)[3])))
 
 r = map_length/sequence_length                          # Recombination rate (per site per generation) during the forward simulation of history
 r_expt = map_length_expt/sequence_length                # Recombination rate to be used during during the experiment (Drosophila melanogaster ~ 1.4e-08)

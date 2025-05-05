@@ -172,10 +172,9 @@ for(sim in 1:nsims){
                               Vs = "LoNL",                                # "L" or "LoNL"
                               method="REML",                              # Can be "REML" or "MCMC"
                               palpha = NA,                                # If NA pdelta is estimated using optim()
-                              balpha = c(NA, NA),                         # If c(NA,NA) both bedelta intercept and slope are estimated
+                              balpha = c(0, NA),                         # If c(NA,NA) both bedelta intercept and slope are estimated
                               AtleastOneRecomb=FALSE,
-                              Ne = c(1000, 1000),
-                              predict_Ne =  TRUE,                         # If true, this overwrites the Ne supplied above by Ne = c(nind_expt, predict_Ne(nind_expt, Ve_w_expt))
+                              predict_NE =  TRUE,                         # If true, this overwrites the Ne supplied above by Ne = c(nind_expt, predict_Ne(nind_expt, Ve_w_expt))
                               verbose = TRUE,
                               all.gp = FALSE)
   
