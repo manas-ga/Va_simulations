@@ -3,9 +3,9 @@
 #$ -V
 #$ -cwd
 #$ -N Vw_al_TEST
-#$ -t 1-3
-#$ -tc 3
-#$ -l h_rt=10:05:00
+#$ -t 1-10
+#$ -tc 10
+#$ -l h_rt=00:03:00
 #$ -l h_vmem=1G
 #$ -pe sharedmem 10
 #$ -j y
