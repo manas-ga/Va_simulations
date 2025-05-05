@@ -3,8 +3,8 @@
 #$ -V
 #$ -cwd
 #$ -N Vw_sim
-#$ -t 1-3
-#$ -tc 3
+#$ -t 1-10
+#$ -tc 10
 #$ -l h_vmem=4g
 #$ -pe sharedmem 2
 #$ -j y
