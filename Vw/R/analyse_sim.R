@@ -111,13 +111,13 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
     # In each approach either actual (using the approximation of B&C) or exact
     
     ### Approach 1: del_P for all segregating sites and average LD using all segregating sites
-    
+    ## Approach i-b
     BC_fit_1_exact = est_Va_bc(pbar1 = sim_data$pbar1,
                          pbar2 = sim_data$pbar2,
                          L = parents_info$L,
                          nR = parents_info$nR,
                          exact = TRUE)
-    
+    ## Approach i-a
     BC_fit_1 = est_Va_bc(pbar1 = sim_data$pbar1,
                                pbar2 = sim_data$pbar2,
                                L = parents_info$L,
@@ -129,13 +129,13 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
     # Identify selected loci
     
     selected = which(sim_data$list_alpha!=0)
-    
+    ## Approach ii-b
     BC_fit_2_exact = est_Va_bc(pbar1 = sim_data$pbar1[,-selected],
                          pbar2 = sim_data$pbar2[,-selected],
                          L = parents_info$L,
                          nR = parents_info$nR,
                          exact = TRUE)
-    
+    ## Approach ii-a
     BC_fit_2 = est_Va_bc(pbar1 = sim_data$pbar1[,-selected],
                                pbar2 = sim_data$pbar2[,-selected],
                                L = parents_info$L,
@@ -146,13 +146,14 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
     # Approach 3: del_P for neutral sites and average LD using the LD between selected and neutral sites only
     
     message("Calculating Vw using Buffalo and Coop's (2019) method (approach 3) ...")
+    ## Approach iii-b
     BC_fit_3_exact = est_Va_bc(pbar1 = sim_data$pbar1[,-selected],
                          pbar2 = sim_data$pbar2[,-selected],
                          L = parents_info$L,
                          nR = parents_info$nR,
                          selected = selected,
                          exact = TRUE)
-    
+    ## Approach iii-a
     BC_fit_3 = est_Va_bc(pbar1 = sim_data$pbar1[,-selected],
                                pbar2 = sim_data$pbar2[,-selected],
                                L = parents_info$L,
