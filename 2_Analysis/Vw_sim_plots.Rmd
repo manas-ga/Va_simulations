@@ -953,7 +953,7 @@ if(alpha){
 
 ## Comparison to B&C
 
-### Simplified simulations
+### Simplified simulations (Figure 5)
 
 ```{r}
 d_16 = read.csv(file.path(data_path, "combined_data/Set_16_output.csv"))
@@ -1099,6 +1099,156 @@ title = ggdraw() + draw_label("Simplified simulations", hjust = 0.5, size = 30)
 p_bc_simplified_combined = plot_grid(title, p_bc_simplified_combined, ncol = 1, rel_heights = c(0.05,1))
 
 ggsave(p_bc_simplified_combined, file = file.path(output_path, "Fig5.jpg"), w = 8, h = 12)
+
+
+```
+
+### Full simulations (Figure 6)
+
+```{r}
+d_17 = read.csv(file.path(data_path, "combined_data/Set_17_output.csv"))
+#d_17 = add_new_va_data(d_new_va, d_17)
+d_17$vA_BC_est_ia = unlist(lapply(d_17$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[2])}))
+d_17$vA_BC_est_iia = unlist(lapply(d_17$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[3])}))
+d_17$vA_BC_est_iiia = unlist(lapply(d_17$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[4])}))
+
+d_17$vA_BC_est_ib = unlist(lapply(d_17$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[6])}))
+d_17$vA_BC_est_iib = unlist(lapply(d_17$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[7])}))
+d_17$vA_BC_est_iiib = unlist(lapply(d_17$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[8])}))
+
+d_17$assumption_G_test = unlist(lapply(d_17$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[12])}))
+
+###############################
+### vA_est using our method ###
+###############################
+
+p_bc_full_us = ggplot(d_17, aes(y = vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r))) +
+  theme_bw() +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin history") + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) + ylim(0, 0.35) + xlim(0, 0.13) +
+  ggtitle("Our method") + theme(plot.title = element_text(hjust = 0.5))
+
+#####################################
+### vA_est using B&C Approach i-a ###
+#####################################
+
+p_bc_full_bc_ia = ggplot(d_17, aes(y = vA_BC_est_ia, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r))) +
+  theme_bw() +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin history") + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  ggtitle("B&C (Approach i-a)") + theme(plot.title = element_text(hjust = 0.5)) 
+
+######################################
+### vA_est using B&C Approach ii-a ###
+######################################
+
+p_bc_full_bc_iia = ggplot(d_17, aes(y = vA_BC_est_iia, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r))) +
+  theme_bw() +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin history") + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  ggtitle("B&C (Approach ii-a)") + theme(plot.title = element_text(hjust = 0.5))
+
+#######################################
+### vA_est using B&C Approach iii-a ###
+#######################################
+
+p_bc_full_bc_iiia = ggplot(d_17, aes(y = vA_BC_est_iiia, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r))) +
+  theme_bw() +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin history") + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  ggtitle("B&C (Approach iii-a)") + theme(plot.title = element_text(hjust = 0.5))
+
+
+#####################################
+### vA_est using B&C Approach i-b ###
+#####################################
+
+p_bc_full_bc_ib = ggplot(d_17, aes(y = vA_BC_est_ib, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r))) +
+  theme_bw() +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin history") + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  ggtitle("B&C (Approach i-b)") + theme(plot.title = element_text(hjust = 0.5))
+
+######################################
+### vA_est using B&C Approach ii-b ###
+######################################
+
+p_bc_full_bc_iib = ggplot(d_17, aes(y = vA_BC_est_iib, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r))) +
+  theme_bw() +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin history") + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  ggtitle("B&C (Approach ii-b)") + theme(plot.title = element_text(hjust = 0.5))
+
+#######################################
+### vA_est using B&C Approach iii-b ###
+#######################################
+
+p_bc_full_bc_iiib = ggplot(d_17, aes(y = vA_BC_est_iiib, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r))) +
+  theme_bw() +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin history") + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  ggtitle("B&C (Approach iii-b)") + theme(plot.title = element_text(hjust = 0.5))
+
+###################################
+### Departure from Assumption G ###
+###################################
+
+p_bc_full_assumption_G_test = ggplot(d_17, aes(y = assumption_G_test, x = as.factor(sequence_length*r), fill = as.factor(sequence_length*r))) +
+  theme_bw() +
+  geom_boxplot() + 
+  labs(y = "Deviation from Assumption G", x = "Map length in history") + 
+  scale_fill_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
+  theme(text = element_text(size = 12)) + ggtitle(" ")
+
+
+### Capture the legend and combine the plots
+
+legend_17 = get_legend(p_bc_full_us)
+
+p_bc_full_combined = plot_grid(p_bc_full_bc_ia + theme(legend.position = "none"), 
+                              p_bc_full_bc_ib + theme(legend.position = "none"), 
+                              p_bc_full_bc_iia + theme(legend.position = "none"), 
+                              p_bc_full_bc_iib + theme(legend.position = "none"),
+                              p_bc_full_bc_iiia + theme(legend.position = "none"), 
+                              p_bc_full_bc_iiib + theme(legend.position = "none"),
+                              p_bc_full_us + theme(legend.position = "none"), 
+                              p_bc_full_assumption_G_test + theme(legend.position = "none"), ncol = 2, labels = "AUTO")
+p_bc_full_combined = plot_grid(p_bc_full_combined, legend_17, ncol = 2, rel_widths = c(1, 0.18))
+
+title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
+
+# Add title
+p_bc_full_combined = plot_grid(title, p_bc_full_combined, ncol = 1, rel_heights = c(0.05,1))
+
+ggsave(p_bc_full_combined, file = file.path(output_path, "Fig6.jpg"), w = 8, h = 12)
 
 
 ```
