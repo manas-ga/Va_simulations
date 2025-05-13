@@ -939,7 +939,7 @@ p_bc_simplified_us = ggplot(d_16, aes(y = vA_est, x = if(alpha){vA_true_new}else
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) + ylim(0, 0.35) + xlim(0, 0.13) +
-  ggtitle("Our method") + theme(plot.title = element_text(hjust = 0.5))
+  ggtitle("Our method") + theme(plot.title = element_text(hjust = 0.5)) 
 
 #####################################
 ### vA_est using B&C Approach i-a ### (B+Ib+N+)
@@ -1043,21 +1043,21 @@ p_bc_simplified_assumption_G_test = ggplot(d_16, aes(y = assumption_G_test, x = 
 legend_16 = get_legend(p_bc_simplified_us)
 
 p_bc_simplified_combined = plot_grid(p_bc_simplified_bc_ia + theme(legend.position = "none"), 
-                              p_bc_simplified_bc_ib + theme(legend.position = "none"), 
-                              p_bc_simplified_bc_iia + theme(legend.position = "none"), 
-                              p_bc_simplified_bc_iib + theme(legend.position = "none"),
-                              p_bc_simplified_bc_iiia + theme(legend.position = "none"), 
-                              p_bc_simplified_bc_iiib + theme(legend.position = "none"),
-                              p_bc_simplified_us + theme(legend.position = "none"), 
-                              p_bc_simplified_assumption_G_test + theme(legend.position = "none"), ncol = 2, labels = "AUTO")
-p_bc_simplified_combined = plot_grid(p_bc_simplified_combined, legend_16, ncol = 2, rel_widths = c(1, 0.18))
+                                     p_bc_simplified_bc_iia + theme(legend.position = "none"),
+                                     p_bc_simplified_bc_iiia + theme(legend.position = "none"), 
+                                     p_bc_simplified_us + theme(legend.position = "none"),
+                                     p_bc_simplified_bc_ib + theme(legend.position = "none"), 
+                                     p_bc_simplified_bc_iib + theme(legend.position = "none"),
+                                     p_bc_simplified_bc_iiib + theme(legend.position = "none"),
+                                     p_bc_simplified_assumption_G_test + theme(legend.position = "none"), nrow = 2, labels = c("A", "C", "E", "G", "B", "D", "F", "H"))
+p_bc_simplified_combined = plot_grid(p_bc_simplified_combined, legend_16, ncol = 2, rel_widths = c(1, 0.08))
 
 title = ggdraw() + draw_label("Simplified simulations", hjust = 0.5, size = 30)
 
 # Add title
 p_bc_simplified_combined = plot_grid(title, p_bc_simplified_combined, ncol = 1, rel_heights = c(0.05,1))
 
-ggsave(p_bc_simplified_combined, file = file.path(output_path, "Fig5.jpg"), w = 8, h = 12)
+ggsave(p_bc_simplified_combined, file = file.path(output_path, "Fig5.jpg"), w = 15, h = 9)
 
 
 ```
@@ -1193,21 +1193,21 @@ p_bc_full_assumption_G_test = ggplot(d_17, aes(y = assumption_G_test, x = as.fac
 legend_17 = get_legend(p_bc_full_us)
 
 p_bc_full_combined = plot_grid(p_bc_full_bc_ia + theme(legend.position = "none"), 
-                              p_bc_full_bc_ib + theme(legend.position = "none"), 
-                              p_bc_full_bc_iia + theme(legend.position = "none"), 
-                              p_bc_full_bc_iib + theme(legend.position = "none"),
-                              p_bc_full_bc_iiia + theme(legend.position = "none"), 
-                              p_bc_full_bc_iiib + theme(legend.position = "none"),
-                              p_bc_full_us + theme(legend.position = "none"), 
-                              p_bc_full_assumption_G_test + theme(legend.position = "none"), ncol = 2, labels = "AUTO")
-p_bc_full_combined = plot_grid(p_bc_full_combined, legend_17, ncol = 2, rel_widths = c(1, 0.18))
+                               p_bc_full_bc_iia + theme(legend.position = "none"),
+                               p_bc_full_bc_iiia + theme(legend.position = "none"), 
+                               p_bc_full_us + theme(legend.position = "none"), 
+                               p_bc_full_bc_ib + theme(legend.position = "none"), 
+                               p_bc_full_bc_iib + theme(legend.position = "none"),
+                               p_bc_full_bc_iiib + theme(legend.position = "none"),
+                               p_bc_full_assumption_G_test + theme(legend.position = "none"), nrow = 2, labels = c("A", "C", "E", "G", "B", "D", "F", "H"))
+p_bc_full_combined = plot_grid(p_bc_full_combined, legend_17, ncol = 2, rel_widths = c(1, 0.08))
 
 title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
 
 # Add title
 p_bc_full_combined = plot_grid(title, p_bc_full_combined, ncol = 1, rel_heights = c(0.05,1))
 
-ggsave(p_bc_full_combined, file = file.path(output_path, "Fig6.jpg"), w = 8, h = 12)
+ggsave(p_bc_full_combined, file = file.path(output_path, "Fig6.jpg"), w = 15, h = 9)
 
 
 ```
