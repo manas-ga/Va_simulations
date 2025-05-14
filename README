@@ -1,0 +1,52 @@
+##################################################################################################################################################################################################
+
+# GENERAL INFORMATION
+
+## Title of project: 
+"Estimating the additive genetic variance for relative fitness from changes in allele frequency"
+
+## Author Information:
+A. Corresponding Author Contact Information
+	Name: Manas Geeta Arun
+	Institution: Instutute of Ecology and Evolution, the University of Edinburgh
+	Address: Ashworth Laboratories, Charlotte Auerbach Road, Edinburgh - EH9 3FL, United Kingdom.
+	Email: manas.geetaarun@ed.ac.uk, manassamant2000@gmail.com
+
+B. Principal Investigator Contact Information
+	Name: Jarrid Hadfield
+	Institution: Instutute of Ecology and Evolution, the University of Edinburgh
+	Address: Ashworth Laboratories, Charlotte Auerbach Road, Edinburgh - EH9 3FL, United Kingdom.
+	Email: j.hadfield@ed.ac.uk
+
+## Abstract:
+The rate of adaptation is equal to the additive genetic variance for relative fitness ($V_A$) in the population. Estimating $V_A$ typically involves measuring fitness proxies on a large number of individuals from a known pedigree. Such data are hard to collect and the results are often sensitive to the definition of fitness used. Here, we present a new method for estimating $V_A$ that does not involve making measurements of fitness proxies on individuals, but instead tracks changes in the genetic composition of the population. First, we show that $V_A$ can readily be expressed as a function of the genome-wide diversity/linkage disequilibrium matrix and genome-wide expected change in allele frequency due to selection. We then show how independent experimental replicates can be used to infer the expected change in allele frequency due to selection and then estimate $V_A$ via a linear mixed model. Finally, using individual-based simulations, we demonstrate that our approach yields precise and unbiased estimates over a range of biologically plausible levels of $V_A$. 
+
+## Preprint link:
+https://www.biorxiv.org/content/10.1101/2025.05.13.653886v1
+
+
+##################################################################################################################################################################################################
+
+# List of files and directories
+
+## 1_Simulations
+Contains scripts to perform individual based simulations using msprime and SLiM
+
+## 2_Analysis
+Contains scripts to parse the output files generated in the simulations, perform analyses, and generate
+
+## 3_logs
+Logs of job arrays run on the AC3 cluster to run simulations and analyses
+
+## 5_Manuscript_files
+Manuscript figures and other files useful for manuscript submission
+
+## Old and trial stuff
+Rendundant and old code
+
+## Va_anal.yml
+A .yml file storing the conda environment used for the analyses
+
+## Va_env.yml
+A .yml file storing the conda environment used for the simulations and the analyses
+
