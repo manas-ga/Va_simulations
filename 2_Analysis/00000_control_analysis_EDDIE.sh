@@ -2,11 +2,11 @@
 
 #$ -V
 #$ -cwd
-#$ -N Set_5_re
-#$ -t 1-900
-#$ -tc 15
-#$ -l h_rt=0:5:00
-#$ -l h_vmem=2G
+#$ -N Set_11_re
+#$ -t 1-100
+#$ -tc 10
+#$ -l h_rt=7:00:00
+#$ -l h_vmem=22G
 #$ -pe sharedmem 12
 #$ -j y
 #$ -o /exports/eddie/scratch/msamant/b_Interim_files/std_out/
