@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#SBATCH --job-name=Set_16
+#SBATCH --job-name=Set_18
 #SBATCH --output=/mnt/hel/obbard/Va_simulations/analyses/b_Interim_files/std_out/job_%A_%a.log   # Store logs in a custom directory
 #SBATCH --open-mode=append                                                                       # Append output if the file already exists
-#SBATCH --array=1-73%8                                                                          # Run replicate tasks
+#SBATCH --array=1-900%15                                                                          # Run replicate tasks
 #SBATCH --ntasks=2
-#SBATCH --mem=200G
+#SBATCH --mem=10G
 
 # Path to Conda (if Conda isn't initialized by default)
 CONDA_PATH="/home/msamant/miniconda3"  # Update to where Miniconda/Anaconda is installed

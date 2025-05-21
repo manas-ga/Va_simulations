@@ -14,11 +14,11 @@
 # Col 7 = flip_sel_coef
 # Col 8 = mut_ratio
 
-standard_only = TRUE
+standard_only = FALSE
 
 ## The standard set (to be used as a reference to compare)
 
-nsims = 10 # number of simulations for each set
+nsims = 100 # number of simulations for each set
 end_gen = 2
 
 mu_msp_list = if(end_gen==2){seq(3e-9, 2.35e-8, length = nsims)}else{seq(5.56e-8, 5.56e-7, length = nsims)}
@@ -53,7 +53,6 @@ if(!standard_only){
     param_matrix_ml_v3[,2] = 100
     
   
-if(TRUE==FALSE){
       
     # Vary map_length_expt (sequence_length*r_expt)
     
@@ -97,10 +96,7 @@ if(TRUE==FALSE){
                        param_matrix_nind_100, param_matrix_nind_500,
                        param_matrix_cage_3, param_matrix_cage_5,
                        param_matrix_ngen2_2, param_matrix_ngen2_6)
-}
-  
-  
-  param_matrix = rbind(param_matrix, param_matrix_ml_v1, param_matrix_ml_v2, param_matrix_ml_v3)
+
   
 }
 
