@@ -89,6 +89,12 @@ extract_mut_path = file.path(analysis_path, "2_Extract_mutations.py")           
 temp_files_path = file.path(file_storage_path, "b_Interim_files")  
 output_path = paste(file_storage_path, "/c_Output", sep = "")                                                     ## Path where .csv file(s) containing final data are to be stored 
 
+# On Eddie use a different output path (since files in /scracth are deleted after a months)
+
+if(grepl("ecdf.ed.ac.uk", Sys.info()["nodename"])){
+  output_path = paste("~", "/c_Output", sep = "")  
+}
+
 ###########################
 ### Path to SLiM output ###
 ###########################
