@@ -182,7 +182,7 @@ for(sim in 1:nsims){
                               AtleastOneRecomb=FALSE,
                               predict_NE =  TRUE,                         # If true, this overwrites the Ne supplied above by Ne = c(nind_expt, predict_Ne(nind_expt, Ve_w_expt))
                               verbose = TRUE,
-                              all.gp = FALSE)
+                              all.gp = TRUE)
   
   message("Final output:")
   print(analysed_data)

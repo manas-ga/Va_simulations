@@ -2,9 +2,9 @@
 
 #$ -V
 #$ -cwd
-#$ -N Set_N1_re
-#$ -t 1-400
-#$ -tc 40
+#$ -N Set_9_re_all.gp
+#$ -t 1-100
+#$ -tc 20
 #$ -l h_rt=4:00:00
 #$ -l h_vmem=22G
 #$ -pe sharedmem 12
