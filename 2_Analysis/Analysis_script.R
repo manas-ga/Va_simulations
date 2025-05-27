@@ -180,9 +180,10 @@ for(sim in 1:nsims){
                               palpha = NA,                                # If NA pdelta is estimated using optim()
                               balpha = c(0, NA),                         # If c(NA,NA) both bedelta intercept and slope are estimated
                               AtleastOneRecomb=FALSE,
-                              predict_NE =  TRUE,                         # If true, this overwrites the Ne supplied above by Ne = c(nind_expt, predict_Ne(nind_expt, Ve_w_expt))
+                              NE = c(1000, 1000),
+                              predict_NE =  FALSE,                         # If true, this overwrites the Ne supplied above by Ne = c(nind_expt, predict_Ne(nind_expt, Ve_w_expt))
                               verbose = TRUE,
-                              all.gp = TRUE)
+                              all.gp = FALSE)
   
   message("Final output:")
   print(analysed_data)

@@ -2,7 +2,7 @@
 
 #$ -V
 #$ -cwd
-#$ -N Set_9_re_all.gp
+#$ -N Set_9_re_NE
 #$ -t 1-100
 #$ -tc 20
 #$ -l h_rt=4:00:00
