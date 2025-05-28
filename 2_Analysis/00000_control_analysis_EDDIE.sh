@@ -3,10 +3,10 @@
 #$ -V
 #$ -cwd
 #$ -N Set_9_re_NE
-#$ -t 1-100
-#$ -tc 20
-#$ -l h_rt=4:00:00
-#$ -l h_vmem=22G
+#$ -t 1-4
+#$ -tc 4
+#$ -l h_rt=6:00:00
+#$ -l h_vmem=24G
 #$ -pe sharedmem 12
 #$ -j y
 #$ -o ~/std_out/
