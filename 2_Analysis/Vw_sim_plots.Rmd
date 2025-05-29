@@ -242,6 +242,7 @@ Load the dataframe storing information on calculations of vA_true_new, va_true_n
 ```{r load_new_va_data}
 d_new_va = read.csv(file.path(data_path, "combined_data/new_va_calculation_combined.csv"))
 alpha = TRUE # If alpha = TRUE, alpha = eta + (1 - 2p)eta is used to calculate vA_true, i.e. vA_true_new is used in the plots. Otherwise, vA_true is used in the plots
+corrected = TRUE
 ```
 
 
@@ -259,9 +260,15 @@ ngen2 = 4
 
 
 ```{r simplified_standard}
-d_5 = read.csv(file.path(data_path, "combined_data/Set_5_output.csv"))
+if(corrected){
+  d_5 = read.csv(file.path(data_path, "combined_data/Set_5_corrected_output.csv"))
+}else{
+  d_5 = read.csv(file.path(data_path, "combined_data/Set_5_output.csv"))
+}
+
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_5 = add_new_va_data(new_va_data=d_new_va, target_data=d_5, verbose=TRUE)
+d_5 = deduplicate_sim_analyses(d_5)
 
 # Select data for the standard plot for simplified simulations
 d_5_std = d_5[d_5$r_expt*d_5$sequence_length==2&d_5$n_ind_exp==1000&d_5$n_cages==10&d_5$ngen2==4,] # Data for the standard set
@@ -279,7 +286,8 @@ p_nb_2_std = make_std_plots(d_5_std, alpha = alpha)$combined
 title = ggdraw() + draw_label("Simplified simulations", hjust = 0.5, size = 30)
 p_nb_2_std = plot_grid(title, p_nb_2_std, ncol = 1, rel_heights = c(0.1,1))
 
-ggsave(p_nb_2_std, width = 8, height = 8, file = file.path(output_path, "Fig1.jpg"))
+
+ggsave(p_nb_2_std, width = 8, height = 8, file = file.path(output_path, if(corrected){"Fig1_corrected.jpg"}else{"Fig1.jpg"}))
 p_nb_2_std
 
 
@@ -380,7 +388,7 @@ title = ggdraw() + draw_label("Simplified simulations", hjust = 0.5, size = 30)
 p_nb_2_combined = plot_grid(title, p_nb_2_combined, ncol = 1, rel_heights = c(0.1,1))
 
 p_nb_2_combined
-ggsave(p_nb_2_combined, width = 12, height = 10, file = file.path(output_path, "Fig2.jpg"))
+ggsave(p_nb_2_combined, width = 12, height = 10, file = file.path(output_path, if(corrected){"Fig2_corrected.jpg"}else{"Fig2.jpg"}))
 ```
 
 
@@ -406,7 +414,12 @@ The analyses for this set were performed using all.gp = FALSE and using the true
 ### Figure 3 ###
 ################
 
-d_9 = read.csv(file.path(data_path, "combined_data/Set_9_output.csv")) # Data for the standard set
+if(corrected){
+  d_9 = read.csv(file.path(data_path, "combined_data/Set_9_corrected_output.csv")) # Data for the standard set
+}else{
+  d_9 = read.csv(file.path(data_path, "combined_data/Set_9_output.csv")) # Data for the standard set
+}
+
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_9 = add_new_va_data(new_va_data=d_new_va, target_data=d_9, verbose=TRUE)
@@ -419,7 +432,7 @@ title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
 
 p_b_std = plot_grid(title, p_b_std, ncol = 1, rel_heights = c(0.1,1))
 
-ggsave(plot = p_b_std, width = 8, height = 8, file = file.path(output_path, "Fig3.jpg"))
+ggsave(plot = p_b_std, width = 8, height = 8, file = file.path(output_path, if(corrected){"Fig3_corrected.jpg"}else{"Fig3.jpg"}))
 p_b_std
 
 
@@ -430,10 +443,18 @@ We then vary various parameters one at a time while keeping the others fixed to 
 ### Varying the ratio of beneficial:deleterious mutations (scale = 0.033) (Figure 4C)
 
 ```{r full_varying_mut_ratio}
-d_11 = read.csv(file.path(data_path, "combined_data/Set_11_output.csv")) # Data for the set with mut_ratio = 0.0002
+if(corrected){
+  d_11 = read.csv(file.path(data_path, "combined_data/Set_11_corrected_output.csv")) # Data for the set with mut_ratio = 0.0002
+  d_14 = read.csv(file.path(data_path, "combined_data/Set_14_corrected_output.csv")) # Data for the set with mut_ratio = 0.02
+  
+}else{
+  d_11 = read.csv(file.path(data_path, "combined_data/Set_11_output.csv")) # Data for the set with mut_ratio = 0.0002
+  d_14 = read.csv(file.path(data_path, "combined_data/Set_14_output.csv")) # Data for the set with mut_ratio = 0.02
+}
+
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_11 = add_new_va_data(new_va_data=d_new_va, target_data=d_11, verbose=TRUE)
-d_14 = read.csv(file.path(data_path, "combined_data/Set_14_output.csv")) # Data for the set with mut_ratio = 0.02
+
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_14 = add_new_va_data(new_va_data=d_new_va, target_data=d_14, verbose=TRUE)
 
@@ -461,8 +482,12 @@ p_ben_0.033
 ### Varying the map length in the experiment phase (scale = 0.033): ml_exp = c(0.01, 0.2, 2), mut_ratio = 0 (Figure 4A)
 
 ```{r full_varying_ml_exp}
+if(corrected){
+  d_12 = read.csv(file.path(data_path, "combined_data/Set_12_corrected_output.csv")) # Data when ml_exp was varied for scale = 0.033
+}else{
+  d_12 = read.csv(file.path(data_path, "combined_data/Set_12_output.csv")) # Data when ml_exp was varied for scale = 0.033
+}
 
-d_12 = read.csv(file.path(data_path, "combined_data/Set_12_output.csv")) # Data when ml_exp was varied for scale = 0.033
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_12 = add_new_va_data(new_va_data=d_new_va, target_data=d_12, verbose=TRUE)
 
@@ -494,8 +519,13 @@ p_ml_exp_0.033
 ### Varying the scale of the gamma distribution from which mutations are drawn in the simulation (deleterious mutations only) (scale = c(0.033, 0.045, 0.1)) (Figure 4D)
 
 ```{r full_varying_scale}
-# Load the data for Set_15 in which mut_ratio was 0.0002 and 0.02
-d_15 = read.csv(file.path(data_path, "combined_data/Set_15_output.csv"))
+if(corrected){
+  # Load the data for Set_15 in which mut_ratio was 0.0002 and 0.02
+  d_15 = read.csv(file.path(data_path, "combined_data/Set_15_corrected_output.csv"))
+}else{
+  # Load the data for Set_15 in which mut_ratio was 0.0002 and 0.02
+  d_15 = read.csv(file.path(data_path, "combined_data/Set_15_output.csv"))  
+}
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_15 = add_new_va_data(new_va_data=d_new_va, target_data=d_15, verbose=TRUE)
@@ -532,7 +562,12 @@ p_scale
 
 ```{r full_varying_ml_history}
 
-d_13 = read.csv(file.path(data_path, "combined_data/Set_13_output.csv"))
+if(corrected){
+  d_13 = read.csv(file.path(data_path, "combined_data/Set_13_corrected_output.csv"))
+}else{
+  d_13 = read.csv(file.path(data_path, "combined_data/Set_13_output.csv"))
+}
+
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_13 = add_new_va_data(new_va_data=d_new_va, target_data=d_13, verbose=TRUE)
 
@@ -663,7 +698,7 @@ p_Ne_res = ggplot(d_9_Ne, aes(y = Residual_var, x = Ne_exp)) +
   scale_x_discrete(labels = Ne_type_labs) +
   theme(text = element_text(size = 15))
   
-ggsave(p_Ne_res, width = 5, height = 5, file = file.path(output_path, "FigS3.jpg"))
+ggsave(p_Ne_res, width = 5, height = 5, file = file.path(output_path, if(corrected){"FigS3_corrected.jpg"}else{"FigS3.jpg"}))
 
 p_Ne
 p_Ne_res
@@ -687,7 +722,7 @@ title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
 p_b_0.033_combined = plot_grid(title, p_b_0.033_combined, ncol = 1, rel_heights = c(0.1,1))
 p_b_0.033_combined
 
-ggsave(p_b_0.033_combined, width = 12, height = 12, file = file.path(output_path, "Fig4.jpg"))
+ggsave(p_b_0.033_combined, width = 12, height = 12, file = file.path(output_path, if(corrected){"Fig4_corrected.jpg"}else{"Fig4.jpg"}))
 
 
 ```
@@ -700,8 +735,12 @@ Varying map length in history, but for \eta_{scale} = 0.045
 #################
 ### Figure S1 ###
 #################
+if(corrected){
+  d_N1 = read.csv(file.path(data_path, "combined_data/Set_N1_corrected_output.csv"))
+}else{
+  d_N1 = read.csv(file.path(data_path, "combined_data/Set_N1_output.csv"))
+}
 
-d_N1 = read.csv(file.path(data_path, "combined_data/Set_N1_output.csv"))
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_N1 = add_new_va_data(new_va_data=d_new_va, target_data=d_N1, verbose=TRUE)
 
@@ -719,7 +758,7 @@ p_b_0.045_ml = ggplot(d_N1 , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_tru
 
 p_b_0.045_ml
 
-ggsave(p_b_0.045_ml, width = 6, height = 5, file = file.path(output_path, "FigS1.jpg"))
+ggsave(p_b_0.045_ml, width = 6, height = 5, file = file.path(output_path, if(corrected){"FigS1_corrected.jpg"}else{"FigS1.jpg"}))
 
 ```
 
