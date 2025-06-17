@@ -27,8 +27,8 @@ simulate_pool_seq = function(c_genome,              # Matrix of haploid genomes 
     ind_reads = rnbinom(n = n_ind, mu = n_reads/n_ind, size = (n_reads/n_ind)*(1/(OD-1)))
   }
   
-  # Create an empty vector to record how many times each segregating site is hit by a read
-  count_total = rep(0, length(SNPs))
+  # Create an empty matrix having the same dimensions as c_genome to record how many reads mapped to each segregating site on each genome
+  n_mapped_reads  = matrix(0, nrow = nrow(c_genome), ncol = ncol(c_genome))
   
   # Create an empty vector to record how many times each segregating site is hit by a read and is recorded to have the reference allele
   count_ref = rep(0, length(SNPs))
@@ -39,40 +39,62 @@ simulate_pool_seq = function(c_genome,              # Matrix of haploid genomes 
   
   for(ind in 1:n_ind){
     print(ind)
-    # Loop over the total number of reads for this individual (stored within ind_reads)
     
-    for (read in 1:ind_reads[ind]){
-      # Randomly chose either of the two genomes of this individual (0 or 1)
-      genome = sample(c(1,2), size = 1) # This genome will be [2*(n_ind - 1) + genome]th row in c_genome
-      
-      # Randomly sample a starting position on the genome
-      start_pos = sample(read_range, size = 1)
-      end_pos = start_pos + read_length - 1
-      
-      # Identify how many segregating sites are covered by this read
-      read_sites = which(SNPs>=start_pos&SNPs<=end_pos)
-      
-      # Perform subsequent operations only if at least one segregating site is covered by the read
-      if(length(read_sites)>0){
-        count_total[read_sites] = count_total[read_sites] + 1
-        count_ref[read_sites] = count_ref[read_sites] + c_genome[2*(ind - 1) + genome, read_sites] 
-      }
+    # Decide from a binomial, how many of this individual's reads map to genome 1 and genome 2
+    
+    n_reads_g1 = rbinom(n = 1, size = ind_reads[ind], p = 0.5)
+    n_reads_g2 = ind_reads[ind] - n_reads_g1
+    
+    # Randomly sample a vector of starting positions on genome 1 and genome 2
+    
+    start_pos_g1 = sample(read_range, size = n_reads_g1, replace = TRUE)
+    start_pos_g2 = sample(read_range, size = n_reads_g2, replace = TRUE)
+    
+    # Explicitly write down positions covered by each read
+    # start_pos_g1 on row1
+    # start_pos_g1 + 1 on row 2
+    # start_pos_g1 + 2 on row 3
+    mapped_pos_g1 = matrix(NA, nrow = read_length, ncol = n_reads_g1)
+    mapped_pos_g2 = matrix(NA, nrow = read_length, ncol = n_reads_g2)
+    
+    for(row in 1:nrow(mapped_pos_g1)){
+      mapped_pos_g1[row,] = start_pos_g1 + row - 1
+      mapped_pos_g2[row,] = start_pos_g2 + row - 1
+    }
+    
+    mapped_pos_g1 = c(mapped_pos_g1)
+    mapped_pos_g2 = c(mapped_pos_g2)
+
+    
+    # Retain only those positions which correspond to segregating sites (i.e. are included in SNPs)
+    mapped_pos_g1 = mapped_pos_g1[which(mapped_pos_g1%in%SNPs)]
+    mapped_pos_g2 = mapped_pos_g2[which(mapped_pos_g2%in%SNPs)]
+    
+    # Populate n_mapped_reads for the two genomes of the current individual
+    
+    for(site in 1:n_sites){
+      # genome 1
+      n_mapped_reads[2*ind - 1, site] = sum(mapped_pos_g1 == SNPs[site])
+      # genome 2
+      n_mapped_reads[2*ind, site] = sum(mapped_pos_g2 == SNPs[site])
       
     }
     
   }
   
+  count_total = colSums(n_mapped_reads)
+  
   # identify sites that are not covered at all
-  
   uncovered_sites = which(count_total == 0)
-  
   
   if(length(uncovered_sites>0)){
     warning("Some segregating sites were not covered by any reads")
     count_total[uncovered_sites] = NA
     }
   
-  return(list("p" = count_ref/count_total, "coverage" = count_total))
+  p = colSums(c_genome*n_mapped_reads)/count_total
+  
+  return(list("p" = p, "coverage" = count_total))
   
   
   
