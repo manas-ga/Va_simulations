@@ -261,7 +261,7 @@ ngen2 = 4
 
 ```{r simplified_standard}
 if(corrected){
-  d_5 = read.csv(file.path(data_path, "combined_data/Set_5_corrected_output.csv"))
+  d_5 = read.csv(file.path(data_path, "combined_data/Set_18_corrected_output.csv"))
 }else{
   d_5 = read.csv(file.path(data_path, "combined_data/Set_5_output.csv"))
 }
@@ -918,7 +918,7 @@ plot_categoriwise_va_lost = ggplot(d_summed_lost_va, aes(y = locuswise_va_lost_n
 
 va_lost_combined_plot = plot_grid(plot_lost_va, plot_lost_va_bias, plot_finescale_va_lost, plot_categoriwise_va_lost, ncol = 2, nrow = 2, labels = "AUTO")
 va_lost_combined_plot
-ggsave(va_lost_combined_plot, width = 10, height = 10, file = file.path(output_path, "FigS2.jpg"))
+ggsave(va_lost_combined_plot, width = 10, height = 10, file = file.path(output_path, if(corrected){"FigS2_corrected.jpg"}else{"FigS2.jpg"}))
 
 ### Calculate the the fraction of total amount of V_a lost at loci for alpha > 0.3 in the "Max." (V_a lost) simulation
 
@@ -954,7 +954,12 @@ if(alpha){
 ### Simplified simulations (Figure 5)
 
 ```{r simplified_comparison_BC}
-d_16 = read.csv(file.path(data_path, "combined_data/Set_16_output.csv"))
+if(corrected){
+  d_16 = read.csv(file.path(data_path, "combined_data/Set_16_corrected_output.csv"))
+}else{
+  d_16 = read.csv(file.path(data_path, "combined_data/Set_16_output.csv"))
+}
+
 d_16 = add_new_va_data(new_va_data=d_new_va, target_data=d_16, verbose=TRUE)
 d_16$vA_BC_est_ia = unlist(lapply(d_16$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[2])}))
 d_16$vA_BC_est_iia = unlist(lapply(d_16$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[3])}))
@@ -1096,7 +1101,7 @@ title = ggdraw() + draw_label("Simplified simulations", hjust = 0.5, size = 30)
 # Add title
 p_bc_simplified_combined = plot_grid(title, p_bc_simplified_combined, ncol = 1, rel_heights = c(0.05,1))
 
-ggsave(p_bc_simplified_combined, file = file.path(output_path, "Fig5.jpg"), w = 15, h = 9)
+ggsave(p_bc_simplified_combined, file = file.path(output_path, if(corrected){"Fig5_corrected.jpg"}else{"Fig5.jpg"}), w = 15, h = 9)
 
 
 ```
@@ -1104,7 +1109,12 @@ ggsave(p_bc_simplified_combined, file = file.path(output_path, "Fig5.jpg"), w = 
 ### Full simulations (Figure 6)
 
 ```{r full_comparison_BC}
-d_17 = read.csv(file.path(data_path, "combined_data/Set_17_output.csv"))
+if(corrected){
+  d_17 = read.csv(file.path(data_path, "combined_data/Set_17_corrected_output.csv"))
+}else{
+  d_17 = read.csv(file.path(data_path, "combined_data/Set_17_output.csv"))
+}
+
 d_17 = add_new_va_data(new_va_data=d_new_va, target_data=d_17, verbose=FALSE)
 d_17$vA_BC_est_ia = unlist(lapply(d_17$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[2])}))
 d_17$vA_BC_est_iia = unlist(lapply(d_17$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[3])}))
@@ -1246,7 +1256,7 @@ title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
 # Add title
 p_bc_full_combined = plot_grid(title, p_bc_full_combined, ncol = 1, rel_heights = c(0.05,1))
 
-ggsave(p_bc_full_combined, file = file.path(output_path, "Fig6.jpg"), w = 15, h = 9)
+ggsave(p_bc_full_combined, file = file.path(output_path, if(corrected){"Fig6_corrected.jpg"}else{"Fig6.jpg"}), w = 15, h = 9)
 
 
 ```
