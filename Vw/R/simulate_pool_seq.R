@@ -1,15 +1,16 @@
-simulate_pool_seq = function(c_genome,              # Matrix of haploid genomes of all individuals with only segregating sites (0 for non-reference allele, 1 for reference allele); rows = genomes - the two genomes of an individual are together, columns = sites 
-                    SNPs,                   # positions of segregating sites, in the same order as in c_genome
+simulate_pool_seq = function(c_genome,    # Matrix of haploid genomes of all individuals with only segregating sites (0 for non-reference allele, 1 for reference allele); rows = genomes - the two genomes of an individual are together, columns = sites 
+                    SNPs,                 # positions of segregating sites, in the same order as in c_genome
                     sequence_length,
                     read_length,
                     coverage,
-                    OD = 2){                # The ratio of variance:mean (if OD==1 rpois is used to map reads to individuals, if OD>1 rnbinom is used
+                    V_logmean = 0){       # n_reads mapping to an individual are drawn from a poisson whose means are lognormal with variance = V_logmean (defaults to regular poisson)
   
   # Sanity checks
   
   #if(!is.integer(sequence_length)){stop("sequence_length must be an integer")}
   if(ncol(c_genome)>sequence_length){stop("c_genome cannot have more columns (sites) than sequence_length")}
   if(length(SNPs)!=ncol(c_genome)){stop("the length of SNPs must equal the number of columns in c_genome")}
+  if(read_length<1|read_length>sequence_length){stop("read_length must be a positive integer not greater than sequence_length")}
   
   # Calculate expected number of reads to be sampled
   n_reads = round(sequence_length*coverage/read_length, 1)
@@ -19,13 +20,15 @@ simulate_pool_seq = function(c_genome,              # Matrix of haploid genomes 
   # Permissible range for starting points for reads
   read_range = 1:(sequence_length - read_length + 1)
   
-  # Number of reads to be mapped to each individual drawn from a a poisson (if OD = 1) or negative binomial distribution (OD >1)
+  # Number of reads to be mapped to each individual drawn from a a poisson whose means are lognormal
+  # i.e. the logged means are normal with variance = V_logmean, and mean mu_logmean = log(n_reads/n_ind) - V_logmean/2
   
-  if(OD == 1){
-    ind_reads = rpois(n = n_ind, lambda = n_reads/n_ind)
-  }else{
-    ind_reads = rnbinom(n = n_ind, mu = n_reads/n_ind, size = (n_reads/n_ind)*(1/(OD-1)))
-  }
+  # sample the means of the poisson from a lognormal
+  pois_means = exp(rnorm(n = n_ind, mean = log(n_reads/n_ind) - V_logmean/2, sd = sqrt(V_logmean)))
+  
+  # Sample the reads from a poisson providing the vector "logmeans" as lambda
+  ind_reads = rpois(n = n_ind, lambda = pois_means)
+ 
   
   # Create an empty matrix having the same dimensions as c_genome to record how many reads mapped to each segregating site on each genome
   n_mapped_reads  = matrix(0, nrow = nrow(c_genome), ncol = ncol(c_genome))

@@ -3,7 +3,7 @@ import(asreml)
 export("alpha_distribution", "analyse_parents", "analyse_sim",
        "est_Va_bc", "extract_slim_data", "fit.model", "form_nR",
        "logit", "plot_alpha_distribution", "pmq_trans", "predict_NE",
-       "prob_novelA", "prob_novelB", "Q", "sample_gamete", "averageLD","summaryG", "Vw_model")
+       "prob_novelA", "prob_novelB", "Q", "sample_gamete", "averageLD","summaryG", "Vw_model", "simulate_pool_seq")
 importFrom("graphics", "lines")
 importFrom("methods", "as")
 importFrom("stats", "coef", "cor", "cov", "dbinom", "dist", "lm", "logLik", "model.matrix", "optim", "qnorm", "rbinom")

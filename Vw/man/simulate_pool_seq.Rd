@@ -7,7 +7,7 @@ Sample allele frequencies from a population by simulating pool-seq.
 Read the genotypes of all the genomes within a population, simulate pool-seq on the population, and return sampled allele frequencies and the coverage for each segregating site.
 }
 \usage{
-  simulate_pool_seq(c_genome, pos, sequence_length, read_length, coverage, OD = 2)
+  simulate_pool_seq(c_genome, pos, sequence_length, read_length, coverage, V_logmean = 0)
 }
 \arguments{
   \item{c_genome}{Matrix of gametic contributions with rows being gametes and columns being loci. Elements should be one (has the reference allele) or zero (has the alternate allele). Gametes should be ordered
@@ -16,7 +16,7 @@ Read the genotypes of all the genomes within a population, simulate pool-seq on 
   \item{sequence_length}{Genome size in base-pairs.}
   \item{read_length}{The length of each read in base-pairs.}
   \item{coverage}{How many times on average should each site be covered.}
-  \item{OD}{The ratio of variance:mean for the distribution of the number of reads mapping to an individual. If \code{OD==1} rpois is used to map reads to individuals, \code{if OD>1} rnbinom is used.}
+  \item{V_logmean}{The number of reads mapping to an individual are drawn from a poisson whose means are lognormal; i.e. the logged means are normal with variance = V_logmean (defaults to regular poisson) and mean = log(n_reads/n_ind) - V_logmean/2}
 }
 
 \value{

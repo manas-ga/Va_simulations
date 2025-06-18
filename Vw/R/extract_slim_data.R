@@ -12,6 +12,7 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
                              n_sample=NULL,         # Number of individuals sampled from the parents' generation (useful if n_ind_exp is large)
                              randomise = TRUE,      # Optionally the reference allele can be randomised
                              delete_temp_files = TRUE, 
+                             pool_seq = FALSE, # Should the function simulate_pool_seq be used to sample allele frequencies in the experiment?
                              verbose=TRUE){     
   
   ################################
@@ -137,8 +138,6 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
   # 3. Cage ID (replicate)
   # 4. Locus ID
   
-  d_proj = c()
-  d_raw = c()
   P_matrix = c()  
   
   for (cage in (1:n_cages)){
@@ -163,10 +162,21 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
         system(paste("gunzip", paste(slim_output_path, "/", Set_ID, "_sim", sim, "_cage", cage, "_output_experiment_", as.integer(gen), ".txt", sep = "")))
       }
       
-      system(paste("python", 
-                   extract_mut_path, 
-                   paste(slim_output_path, "/", Set_ID, "_sim", sim, "_cage", cage, "_output_experiment_", as.integer(gen), ".txt", sep = ""), 
-                   paste(mutations_path, "/", Set_ID, "_sim", sim, "_cage", cage, "_mutations_", as.integer(gen), ".txt", sep = ""))) # as.integer done to avoid scientific notation
+      # If pool_seq = TRUE extract both mutations and genomes, otherwise only extract mutations
+      if(pool_seq){
+        system(paste("python", 
+                     extract_genomes_path,                        # Path of the python script (3_Extract_genomes.py)
+                     paste(slim_output_path, "/", Set_ID, "_sim", sim, "_cage", cage, "_output_experiment_", as.integer(gen), ".txt", sep = ""),  # Path of the .txt file containing the SLiM output for the current cage and the current generation 
+                     paste(mutations_path, "/", Set_ID, "_sim", sim, "_cage", cage, "_mutations_", as.integer(gen), ".txt", sep = ""), # Path of the .txt output file containing the mutations for the current cage and the current generation 
+                     paste(c_matrix_path,"/", Set_ID, "_sim", sim, "_cage", cage, "_c_matrix_", as.integer(gen), ".csv", sep = ""),    # Path of the .csv output file containing the c matrix for genomes for the current cage and the current generation
+                     n_sample)) 
+        
+      }else{
+        system(paste("python", 
+                     extract_mut_path, 
+                     paste(slim_output_path, "/", Set_ID, "_sim", sim, "_cage", cage, "_output_experiment_", as.integer(gen), ".txt", sep = ""), 
+                     paste(mutations_path, "/", Set_ID, "_sim", sim, "_cage", cage, "_mutations_", as.integer(gen), ".txt", sep = ""))) # as.integer done to avoid scientific notation
+      }
       
       # Re-zip unzipped SLiM files
       if(unzip){
@@ -202,6 +212,26 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
       # Sort mutations based on the Temp_ID, so that the order of loci matches the order in the C and L matrices
       
       mut = mut[order(mut$Temp_ID),]
+      
+      #####################################################################
+      ### Optionally resample allele frequencies by simulating pool-seq ###
+      #####################################################################
+      
+      if(pool_seq){
+        message(paste("Simulating pool-seq on cage ", cage, ", generation ",  gen, "...", sep = ""))
+        # Load the genomes of the current cage
+        
+        c_genome_cage_gen = read.csv(paste(c_matrix_path,"/", Set_ID, "_sim", sim, "_cage", cage, "_c_matrix_", as.integer(gen), ".csv", sep = ""), header = F)
+        pool_seq_data = simulate_pool_seq(c_genome = c_genome_cage_gen,
+                                       SNPs = mut$Position,      
+                                       sequence_length = sim_params$sequence_length,
+                                       read_length = read_length,
+                                       coverage = coverage,
+                                       OD = OD)
+        
+        # Modify the Numbers column in mut based on the sampled frequencies
+        mut$Number = pool_seq_data*(2*n_ind_exp)
+      }
       
       # Create an empty vector to store frequencies of mutations in the current generation
       freq = c()
