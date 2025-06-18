@@ -41,7 +41,10 @@ simulate_pool_seq = function(c_genome,    # Matrix of haploid genomes of all ind
   # Update count_total and count_ref
   
   for(ind in 1:n_ind){
-    print(ind)
+    if(ind==round(n_ind/4, 0)){message("25% done")}
+    if(ind==round(2*n_ind/4, 0)){message("50% done")}
+    if(ind==round(3*n_ind/4, 0)){message("75% done")}
+    if(ind==round(4*n_ind/4, 0)){message("100% done")}
     
     # Decide from a binomial, how many of this individual's reads map to genome 1 and genome 2
     

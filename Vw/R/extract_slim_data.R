@@ -13,7 +13,17 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
                              randomise = TRUE,      # Optionally the reference allele can be randomised
                              delete_temp_files = TRUE, 
                              pool_seq = FALSE, # Should the function simulate_pool_seq be used to sample allele frequencies in the experiment?
-                             verbose=TRUE){     
+                             read_length = NULL,
+                             coverage = NULL,
+                             V_logmean = NULL,
+                             verbose=TRUE
+                             ){     
+  
+  ### Checks
+  
+  if(pool_seq){
+    if(is.null(read_length)|is.null(coverage)|is.null(V_logmean)){stop("If poos_seq is true, read_length, coverage, and V_logmean must be provided")}
+  }
   
   ################################
   ## Read simulation parameters ##
@@ -227,10 +237,10 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
                                        sequence_length = sim_params$sequence_length,
                                        read_length = read_length,
                                        coverage = coverage,
-                                       OD = OD)
+                                       V_logmean = V_logmean)
         
         # Modify the Numbers column in mut based on the sampled frequencies
-        mut$Number = pool_seq_data*(2*n_ind_exp)
+        mut$Number = pool_seq_data$p*(2*n_ind_exp)
       }
       
       # Create an empty vector to store frequencies of mutations in the current generation
