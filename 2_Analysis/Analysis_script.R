@@ -156,12 +156,12 @@ library(Vw)
 
 Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "poo_seq_test_SCE-BIO-C06645_2025-06-20_15-07-33.504375", commandArgs(trailingOnly = TRUE)[1])
 
-pool_seq = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", FALSE, commandArgs(trailingOnly = TRUE)[2])
+pool_seq = TRUE
 
 if(pool_seq){
-  read_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 150, as.numeric(commandArgs(trailingOnly = TRUE)[3]))
-  coverage = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1000, as.numeric(commandArgs(trailingOnly = TRUE)[4]))
-  V_logmean = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 0, as.numeric(commandArgs(trailingOnly = TRUE)[5]))
+  read_length = 150
+  coverage = 1000
+  V_logmean = log(2)
 }else{
   read_length = NULL
   coverage = NULL

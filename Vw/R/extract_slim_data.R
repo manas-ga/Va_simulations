@@ -239,6 +239,9 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
                                        coverage = coverage,
                                        V_logmean = V_logmean)
         
+        # Delete the .csv file
+        if(delete_temp_files){system(paste("rm ", c_matrix_path,"/", Set_ID, "_sim", sim, "_cage", cage, "_c_matrix_", as.integer(gen), ".csv", sep = ""))}
+        
         # Modify the Numbers column in mut based on the sampled frequencies
         mut$Number = pool_seq_data$p*(2*n_ind_exp)
       }
