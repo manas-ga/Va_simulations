@@ -160,8 +160,8 @@ pool_seq = TRUE
 
 if(pool_seq){
   read_length = 150
-  coverage = 1000
-  V_logmean = log(2)
+  coverage = 100
+  V_logmean = 0
 }else{
   read_length = NULL
   coverage = NULL
