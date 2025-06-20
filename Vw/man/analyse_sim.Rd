@@ -10,7 +10,8 @@ Performs a set of analyses on a SLiM simulation including estimating Va for fitn
 analyse_sim(Set_ID, sim = 1, ngen2_optional=NULL, unzip = FALSE, slim_output_path, 
   sim_param_path, extract_genomes_path, extract_mut_path, mutations_path, 
   c_matrix_path, output_path, n_sample = NULL, randomise = TRUE, 
-  delete_temp_files = TRUE, proj = "BLoM", LDalpha = FALSE, pa = 1, Vs = "LoNL", 
+  delete_temp_files = TRUE, pool_seq = FALSE, read_length = NULL, coverage = NULL, V_
+logmean = NULL, proj = "BLoM", LDalpha = FALSE, pa = 1, Vs = "LoNL", 
   method = "REML", palpha = NA, balpha = c(NA, NA), AtleastOneRecomb = FALSE, 
   NE=NULL, Ne=NE, predict_NE = FALSE, all.gp = FALSE, verbose = TRUE)
 }
@@ -29,6 +30,12 @@ analyse_sim(Set_ID, sim = 1, ngen2_optional=NULL, unzip = FALSE, slim_output_pat
   \item{n_sample}{Number of individuals sampled from the parents' generation (useful if n_ind_exp is large).}
   \item{randomise}{logical: if \code{TRUE}, the reference allele is randomised.}
   \item{delete_temp_files}{logical: if \code{TRUE}, temporary files are deleted.}
+  \item{pool_seq}{logical, if \code{TRUE} allele frequencies in the experiment are sampled by simulating pool_seq using s
+imulate_pool_seq()}
+  \item{read_length}{integer, the length of reads to be mapped in simulate_pool_seq()}
+  \item{coverage}{integer, the expected number of reads mapping to every site in simulate_pool_seq()}
+  \item{V_logmean}{the variance of log means of poisson distributions used to model the number of reads mapping to indiv
+iduals in simulate_pool_seq(). The log means are modeled to be normal with variance V_logmean}
   \item{proj}{projection type for allele frequencies: "LoM", "BLoM", "L" or "N".}
   \item{LDalpha}{logical, if \code{TRUE} L is considered while modelling distribution of alphas rather than diag(L).}
   \item{pa}{Power to which the singular values are taken when projecting.}

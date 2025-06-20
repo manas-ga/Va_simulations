@@ -15,6 +15,10 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                        n_sample=NULL,         # Number of individuals sampled from the parents' generation (useful if n_ind_exp is large)
                        randomise = TRUE,      # Optionally the reference allele can be randomised
                        delete_temp_files = TRUE,
+                       pool_seq = FALSE, # Should the function simulate_pool_seq be used to sample allele frequencies in the experiment?
+                       read_length = NULL,
+                       coverage = NULL,
+                       V_logmean = NULL,
                        proj = "BLoM",         # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
                        LDalpha = FALSE,       # Should L or diag(L) be considered while modelling distribution of alphas
                        pa = 1,
@@ -29,6 +33,12 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                        all.gp = FALSE,        # Ltilde = L'+L''(r/(1-r)) if all.gp=T L'' is assumed 0 and L'=L. 
                        verbose = TRUE
 ){
+  
+  ### Checks
+  
+  if(pool_seq){
+    if(is.null(read_length)|is.null(coverage)|is.null(V_logmean)){stop("If poos_seq is true, read_length, coverage, and V_logmean must be provided")}
+  }
   
   ### Extract sim data ###
   
@@ -45,7 +55,11 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                                mutations_path = mutations_path, 
                                c_matrix_path = c_matrix_path, 
                                randomise = randomise,
-                               delete_temp_files = delete_temp_files)
+                               delete_temp_files = delete_temp_files,
+                               pool_seq = pool_seq,
+                               read_length = read_length,
+                               coverage = coverage,
+                               V_logmean = V_logmean)
   ### Analyse parents ###
   
   if(verbose){message("Analysing the parents' generation...")}
@@ -189,6 +203,8 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
   unique_stamp = as.character(paste(Sys.info()["nodename"], Sys.time()))
   unique_stamp = gsub(" ", "_", unique_stamp)
   unique_stamp = gsub(":", "-", unique_stamp)
+  
+  if(pool_seq){unique_stamp = paste("pool_seq", pool_seq, "read_length", read_length, "coverage", coverage, "V_logmean", V_logmean, unique_stamp, sep = "_")}
   
   if(verbose){message("Saving data...")}
   

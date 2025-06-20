@@ -219,7 +219,7 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
       # Delete the .txt file
       if(delete_temp_files){system(paste("rm ", mutations_path, "/", Set_ID, "_sim", sim, "_cage", cage, "_mutations_", as.integer(gen), ".txt", sep = ""))}
       
-      # Sort mutations based on the Temp_ID, so that the order of loci matches the order in the C and L matrices
+      # Sort mutations based on the Temp_ID, so that the order of loci matches the order in the C and L matrices for this gen
       
       mut = mut[order(mut$Temp_ID),]
       

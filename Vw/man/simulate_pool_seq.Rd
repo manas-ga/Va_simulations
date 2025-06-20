@@ -22,6 +22,7 @@ Read the genotypes of all the genomes within a population, simulate pool-seq on 
 \value{
 \item{p}{Vector of sampled allele frequencies for the segregating sites.}
 \item{coverage}{Vector of the number of reads mapping to the segregating sites.}
+\item{ind_reads}{Vector of the number of reads mapped to the individuals in the population.}
 }
 \references{
 Manas Geeta Arun, Aidan Angus-Henry, Darren J. Obbard & Jarrod D. Hadfield (2015) "Estimating the additive genetic variance for relative fitness from changes in allele frequency".

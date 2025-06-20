@@ -154,9 +154,22 @@ library(Vw)
 ########################
 
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "Sanity_check_2_SCE-BIO-C06645_2025-04-28_18-13-21.638291", commandArgs(trailingOnly = TRUE)[1])
-nsims = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553",1 , as.numeric(commandArgs(trailingOnly = TRUE)[2]))
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "poo_seq_test_SCE-BIO-C06645_2025-06-19_16-24-01.001934", commandArgs(trailingOnly = TRUE)[1])
 
+pool_seq = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", TRUE, commandArgs(trailingOnly = TRUE)[2])
+
+if(pool_seq){
+  read_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 150, commandArgs(trailingOnly = TRUE)[3])
+  coverage = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1000, commandArgs(trailingOnly = TRUE)[4])
+  V_logmean = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 0, commandArgs(trailingOnly = TRUE)[5])
+}else{
+  read_length = NULL
+  coverage = NULL
+  V_logmean = NULL
+}
+
+nsims = 10
+  
 for(sim in 1:nsims){
   message(paste("Analysing simulation", sim, "of set", Set_ID, "..."))
   analysed_data = analyse_sim(Set_ID = Set_ID,                            # The unique ID of the set of simulations that are controlled by a single R script
@@ -172,13 +185,17 @@ for(sim in 1:nsims){
                               output_path = output_path,                  # The path where the final data file is to be stored
                               randomise = TRUE,                           # Optionally the reference allele can be randomised
                               delete_temp_files = TRUE,
+                              pool_seq = pool_seq,                        # Should the function simulate_pool_seq be used to sample allele frequencies in the experiment?
+                              read_length = read_length,
+                              coverage = coverage,
+                              V_logmean = V_logmean,
                               proj = "BLoM",                              # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
                               LDalpha = FALSE,                            # Should L or diag(L) be considered while modelling distribution of alphas
                               pa = 1,
                               Vs = "LoNL",                                # "L" or "LoNL"
                               method="REML",                              # Can be "REML" or "MCMC"
-                              palpha = NA,                                # If NA pdelta is estimated using optim()
-                              balpha = c(0, NA),                         # If c(NA,NA) both bedelta intercept and slope are estimated
+                              palpha = 0,                                # If NA pdelta is estimated using optim()
+                              balpha = c(0, NA),                          # If c(NA,NA) both bedelta intercept and slope are estimated
                               AtleastOneRecomb=FALSE,
                               NE = c(1000, 1000),
                               predict_NE =  FALSE,                         # If true, this overwrites the Ne supplied above by Ne = c(nind_expt, predict_Ne(nind_expt, Ve_w_expt))

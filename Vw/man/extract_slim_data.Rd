@@ -26,11 +26,11 @@ extract_slim_data(Set_ID, sim = 1, ngen2_optional=NULL, unzip = FALSE, slim_outp
   \item{n_sample}{Number of individuals sampled from the parents' generation (useful if n_ind_exp is large).}
   \item{randomise}{logical: if \code{TRUE}, the reference allele is randomised.}
   \item{delete_temp_files}{logical: if \code{TRUE}, temporary files are deleted.}
-  \item{pool_seq}{logical, if \code{TRUE allele frequencies in the experiment are sampled by simulating pool_seq using simulate_pool_seq()}
-  \item{read_length}{integer, the length of reads to be mapped in simulate_pool_seq()}
-  \item{coverage}{integer, the expected number of reads mapping to every site in simulate_pool_seq()}
+  \item{pool_seq}{logical: if \code{TRUE} allele frequencies in the experiment are sampled by simulating pool_seq using simulate_pool_seq()}
+  \item{read_length}{integer: the length of reads to be mapped in simulate_pool_seq()}
+  \item{coverage}{integer: the expected number of reads mapping to every site in simulate_pool_seq()}
   \item{V_logmean}{the variance of log means of poisson distributions used to model the number of reads mapping to individuals in simulate_pool_seq(). The log means are modeled to be normal with variance V_logmean}
-  \item{verbose}{logical, if \code{TRUE} progress printed to screen.}
+  \item{verbose}{logical: if \code{TRUE} progress printed to screen.}
 }
 
 \value{
