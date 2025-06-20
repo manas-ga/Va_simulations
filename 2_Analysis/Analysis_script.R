@@ -137,7 +137,7 @@ library(pryr) ## For tracking memory usage using mem_used()
 library(RhpcBLASctl)
 
 # Control the number of BLAS threads if running on a cluster
-if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(12)}
+if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(5)}
 
 
 ################################################
@@ -168,7 +168,7 @@ if(pool_seq){
   V_logmean = NULL
 }
 
-nsims = 10
+nsims = 1
   
 for(sim in 1:nsims){
   message(paste("Analysing simulation", sim, "of set", Set_ID, "..."))
@@ -194,7 +194,7 @@ for(sim in 1:nsims){
                               pa = 1,
                               Vs = "LoNL",                                # "L" or "LoNL"
                               method="REML",                              # Can be "REML" or "MCMC"
-                              palpha = 0,                                # If NA pdelta is estimated using optim()
+                              palpha = NA,                                # If NA pdelta is estimated using optim()
                               balpha = c(0, NA),                          # If c(NA,NA) both bedelta intercept and slope are estimated
                               AtleastOneRecomb=FALSE,
                               NE = c(1000, 1000),
