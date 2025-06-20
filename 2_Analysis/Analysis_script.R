@@ -154,9 +154,9 @@ library(Vw)
 ########################
 
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "poo_seq_test_SCE-BIO-C06645_2025-06-19_16-24-01.001934", commandArgs(trailingOnly = TRUE)[1])
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "poo_seq_test_SCE-BIO-C06645_2025-06-20_15-07-33.504375", commandArgs(trailingOnly = TRUE)[1])
 
-pool_seq = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", TRUE, commandArgs(trailingOnly = TRUE)[2])
+pool_seq = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", FALSE, commandArgs(trailingOnly = TRUE)[2])
 
 if(pool_seq){
   read_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 150, commandArgs(trailingOnly = TRUE)[3])
