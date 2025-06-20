@@ -159,9 +159,9 @@ Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=
 pool_seq = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", FALSE, commandArgs(trailingOnly = TRUE)[2])
 
 if(pool_seq){
-  read_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 150, commandArgs(trailingOnly = TRUE)[3])
-  coverage = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1000, commandArgs(trailingOnly = TRUE)[4])
-  V_logmean = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 0, commandArgs(trailingOnly = TRUE)[5])
+  read_length = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 150, as.numeric(commandArgs(trailingOnly = TRUE)[3]))
+  coverage = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 1000, as.numeric(commandArgs(trailingOnly = TRUE)[4]))
+  V_logmean = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", 0, as.numeric(commandArgs(trailingOnly = TRUE)[5]))
 }else{
   read_length = NULL
   coverage = NULL
