@@ -159,8 +159,8 @@ Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=
 pool_seq = TRUE
 
 if(pool_seq){
-  read_length = 150
-  coverage = 100
+  read_length = 75
+  coverage = 1000
   V_logmean = 0
 }else{
   read_length = NULL
