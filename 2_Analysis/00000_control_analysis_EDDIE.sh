@@ -2,12 +2,12 @@
 
 #$ -V
 #$ -cwd
-#$ -N Simplified_sims_pool_seq
+#$ -N Full_sims_pool_seq
 #$ -t 1-100
 #$ -tc 50
-#$ -l h_rt=2:30:00
-#$ -l h_vmem=2G
-#$ -pe sharedmem 5
+#$ -l h_rt=7:30:00
+#$ -l h_vmem=24G
+#$ -pe sharedmem 12
 #$ -j y
 #$ -o ~/std_out/
 
