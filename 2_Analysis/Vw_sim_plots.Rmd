@@ -246,7 +246,7 @@ corrected = TRUE
 ```
 
 
-## Simplified simulations (simulations without burnin) (Set_5) (Figure 1, Figure 2)
+## Simplified simulations (simulations without burnin) (Set_5/Set_18) (Figure 1, Figure 2)
 
 Selection coefficients were drawn from a gamma distribution (shape = 0.3, scale = 0.033) and assigned to mutations randomly. The recombination rate in the msprime simulation was 5.32e-07. Map length in the history phase of just 1 generation (eng_gen = 2) was 5.
 
@@ -268,6 +268,10 @@ if(corrected){
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_5 = add_new_va_data(new_va_data=d_new_va, target_data=d_5, verbose=TRUE)
+
+# Filter out the data where allele frequencies are sampled using simulate_pool_seq()
+
+d_5 = d_5[grep("pool_seq", d_5$analysis_stamp, invert = TRUE, value = FALSE),]
 d_5 = deduplicate_sim_analyses(d_5)
 
 # Select data for the standard plot for simplified simulations
@@ -390,7 +394,7 @@ p_nb_2_combined = plot_grid(title, p_nb_2_combined, ncol = 1, rel_heights = c(0.
 p_nb_2_combined
 ggsave(p_nb_2_combined, width = 12, height = 10, file = file.path(output_path, if(corrected){"Fig2_corrected.jpg"}else{"Fig2.jpg"}))
 ```
-
+### Simplified simulations analysed after simulated_pool_seq sampling of allele frequencies (Figure S4)
 
 
 ## Full simulations with a burnin phase of 25000 generations 
