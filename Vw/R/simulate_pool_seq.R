@@ -78,13 +78,12 @@ simulate_pool_seq = function(c_genome,    # Matrix of haploid genomes of all ind
     
     # Populate n_mapped_reads for the two genomes of the current individual
     
-    for(site in 1:n_sites){
-      # genome 1
-      n_mapped_reads[2*ind - 1, site] = sum(mapped_pos_g1 == SNPs[site])
-      # genome 2
-      n_mapped_reads[2*ind, site] = sum(mapped_pos_g2 == SNPs[site])
-      
-    }
+
+    # genome 1
+    n_mapped_reads[2*ind - 1,] = tabulate(match(mapped_pos_g1, SNPs), nbins = length(SNPs))
+    # genome 2
+    n_mapped_reads[2*ind,] = tabulate(match(mapped_pos_g2, SNPs), nbins = length(SNPs))
+
     
   }
   
