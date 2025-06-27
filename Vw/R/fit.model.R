@@ -52,6 +52,13 @@ fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tpr
     message("Projecting allele frequencies...")
   }
   
+  # Before projecting allele frequencies, the positions where either pbar1 or pbar2 has an NA, need to be turned into 0s in both pbar1 and pbar2
+  # Identify the positions to be turned into zeros
+  
+  zeros = is.na(pbar1*pbar2)
+  pbar1[zeros] = 0
+  pbar2[zeros] = 0
+  
   pbar1_proj<-pbar1%*%tprojp
   pbar2_proj<-pbar2%*%tprojp
   pmq_proj<-t(matrix(pmq, nsnps,nrep))%*%tprojp

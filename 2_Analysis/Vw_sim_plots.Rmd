@@ -395,6 +395,27 @@ p_nb_2_combined
 ggsave(p_nb_2_combined, width = 12, height = 10, file = file.path(output_path, if(corrected){"Fig2_corrected.jpg"}else{"Fig2.jpg"}))
 ```
 ### Simplified simulations analysed after simulated_pool_seq sampling of allele frequencies (Figure S4)
+```{r simplified_polseq}
+d_nb_poolseq = read.csv(file.path(data_path, "combined_data/Set_18_corrected_output.csv"))
+
+# retain only the dataset with pool_seq
+d_nb_poolseq = d_nb_poolseq[grep("pool_seq", d_nb_poolseq$analysis_stamp, invert = FALSE, value = FALSE),]
+
+# Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
+d_nb_poolseq = add_new_va_data(new_va_data=d_new_va, target_data=d_nb_poolseq, verbose=TRUE)
+
+# Add the standard dataset
+d_nb_poolseq = rbind(d_5_std, d_nb_poolseq)
+
+d_nb_poolseq$Type = ifelse(grepl("poo", d_nb_poolseq$analysis_stamp),
+                sapply(strsplit(d_nb_poolseq$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
+                "Exact")
+
+p_nb_poolseq = ggplot(d_nb_poolseq, aes(y = vA_est, x = vA_true_new, color = Type)) +
+  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0)
+
+```
+
 
 
 ## Full simulations with a burnin phase of 25000 generations 

@@ -154,13 +154,13 @@ library(Vw)
 ########################
 
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "poo_seq_test_SCE-BIO-C06645_2025-06-20_15-07-33.504375", commandArgs(trailingOnly = TRUE)[1])
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "Set_18_ac3-n5_2025-05-21_17-12-17.33309_2.10151515151515e-08_0.5_2_1000_10_4_0_1", commandArgs(trailingOnly = TRUE)[1])
 
 pool_seq = TRUE
 
 if(pool_seq){
   read_length = 75
-  coverage = 1000
+  coverage = 100
   V_logmean = 0
 }else{
   read_length = NULL
@@ -198,7 +198,7 @@ for(sim in 1:nsims){
                               balpha = c(0, NA),                          # If c(NA,NA) both bedelta intercept and slope are estimated
                               AtleastOneRecomb=FALSE,
                               NE = c(1000, 1000),
-                              predict_NE =  FALSE,                         # If true, this overwrites the Ne supplied above by Ne = c(nind_expt, predict_Ne(nind_expt, Ve_w_expt))
+                              predict_NE =  TRUE,                         # If true, this overwrites the Ne supplied above by Ne = c(nind_expt, predict_Ne(nind_expt, Ve_w_expt))
                               verbose = TRUE,
                               all.gp = FALSE)
   
