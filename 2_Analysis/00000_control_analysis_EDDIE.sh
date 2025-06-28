@@ -3,8 +3,8 @@
 #$ -V
 #$ -cwd
 #$ -N Full_sims_pool_seq
-#$ -t 1-100
-#$ -tc 50
+#$ -t 88
+#$ -tc 1
 #$ -l h_rt=8:00:00
 #$ -l h_vmem=24G
 #$ -pe sharedmem 12
