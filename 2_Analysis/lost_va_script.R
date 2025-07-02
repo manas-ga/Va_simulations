@@ -146,7 +146,7 @@ verbose = TRUE
 ########################
 
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "Set_5_c3_2024-12-17_02-56-59.533089_4.65656565656566e-09_5_2_1000_10_4_0_1", commandArgs(trailingOnly = TRUE)[1])
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "poo_seq_test_SCE-BIO-C06645_2025-07-01_15-15-58.05243", commandArgs(trailingOnly = TRUE)[1])
 nsims = 1
 
 for(sim in 1:nsims){
@@ -171,7 +171,22 @@ for(sim in 1:nsims){
   n0_individuals = nrow(c_genome)/2
   
   list_alpha = sim_data$list_alpha
-  list_alpha_new = list_alpha + 0.25*(1 - 2*pbar0)*list_alpha^2
+  
+  # If the simulation was additive
+  # "sim" in sim_data$sim_params does not contain information on dominance ("k")
+  
+  if(!grepl("k=", sim_data$sim_params$sim)){
+    message("Computing the alphas...")
+    list_alpha_new = list_alpha + 0.25*(1 - 2*pbar0)*list_alpha^2
+  }else{ # If dominance related information is contained
+    message("Computing the alphas with dominance...")
+    k = as.integer(unlist(strsplit(sim_data$sim_params$sim, "="))[2])
+    d = k*list_alpha
+    qbar0 = 1 - pbar0
+    list_alpha_new = list_alpha + d*(qbar0 - pbar0) + 0.25*(qbar0 - pbar0)*(list_alpha^2 + d*(2*list_alpha + d)) - 0.5*d*pbar0*((2*qbar0 - pbar0)*(2*list_alpha + qbar0*d) - pbar0*qbar0*d)
+    
+  }
+  
   
   
   if(verbose){

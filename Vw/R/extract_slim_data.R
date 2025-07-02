@@ -31,7 +31,7 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
   
   sim_params = read.csv(paste(sim_param_path, "/", Set_ID, "_Data.csv", sep = ""), header = T)
   # Restrict the data to current sim if the data frame has data from multiple sims
-  if("sim"%in%colnames(sim_params)){sim_params = sim_params[sim_params$sim==sim,]}
+  if("sim"%in%colnames(sim_params)){sim_params = sim_params[as.integer(sub("_.*", "", sim_params$sim))==sim,]}
   
   if(nrow(sim_params)==0){stop("No data found!")}
   

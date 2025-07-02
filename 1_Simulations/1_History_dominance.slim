@@ -1,0 +1,181 @@
+initialize()
+{
+	initializeSLiMModelType("WF");
+	initializeTreeSeq();
+	
+	// Set default parameters if running on SLiMgui
+	if (exists("slimgui")){
+		defineConstant("DFE", "g");
+		defineConstant("mu", 5.56e-7);
+		defineConstant("shape", 0.3);
+		defineConstant("scale", 0.033);
+		defineConstant("mut_ratio", 0);
+		defineConstant("sequence_length", 1e+6);
+		defineConstant("r", 1e-7);
+		defineConstant("msprime_output_path", "C:/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/b_Interim_files/SLiM_outputs");
+		defineConstant("slim_output_path", "C:/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/b_Interim_files/SLiM_outputs");
+		defineConstant("Set_ID", "NA");
+		defineConstant("simulation", 1);
+		defineConstant("end_gen", 25000);
+		defineConstant("n_ind_exp", 1000);
+		defineConstant("Ve_w", 1);
+		defineConstant("output_freq", 500);
+		defineConstant("use_dominance", 1);
+		defineConstant("k", 0.1); // Dominance coefficient; heterozygote phenotype = (1 + k)eta/2 where eta = 2*s; d = k*eta
+	}
+	
+	initializeMutationRate(mu);
+	
+	if (DFE == "g"){
+		initializeMutationType("m2", 0.5, "g", -shape*scale, shape);
+		initializeMutationType("m3", 0.5, "g", shape*scale, shape);
+		initializeGenomicElementType("g1", c(m2, m3), c(1.0, mut_ratio));
+	}
+	
+	if (DFE == "n"){
+		initializeMutationType("m2", 0.5, "n", mean_alpha, var_alpha);
+		initializeGenomicElementType("g1", m2, 1.0);
+	}
+	
+	initializeGenomicElement(g1, 0, sequence_length-1);
+	initializeRecombinationRate(r);
+
+}
+
+
+mutationEffect(m2) { return 1.0; }
+mutationEffect(m3) { return 1.0; }
+
+1 early(){
+	if(exists("slimgui")){
+		sim.addSubpop("p0", 2500);
+	}
+}
+
+1 late() {
+	
+	if(!exists("slimgui")){
+		// Read from the msprime simulation 
+		sim.readFromPopulationFile(msprime_output_path + "/" + Set_ID + "_sim" + simulation + "_neutral_burnin.trees");
+	
+	}
+
+}
+
+1:150000 early(){
+	
+	if (sim.cycle == (end_gen)){
+		p0.setSubpopulationSize(n_ind_exp); // Reduce the population size to 1000
+	}
+
+
+}
+
+1:150000 late() {
+	
+	
+	if (sim.cycle<end_gen){
+		
+		inds = sim.subpopulations.individuals; // Vector of all individuals
+		
+		if(use_dominance == 1){
+			//catn("Simulating dominance ...");
+			
+			for (ind in inds){
+				
+				if (DFE == "n"){
+					g1_m2 = ind.genome1.mutationsOfType(m2);
+					g2_m2 = ind.genome2.mutationsOfType(m2);
+					
+					hom = setIntersection(g1_m2, g2_m2);
+					het = setSymmetricDifference(g1_m2, g2_m2);
+					
+					phenotype = 0.0;
+					if (size(hom))
+						phenotype = sum(hom.selectionCoeff * 2.0);
+					if (size(het))
+						phenotype = phenotype + sum(het.selectionCoeff * (1 + het.getValue("dom")*k));
+					ind.tagF = phenotype;
+				}
+				
+				if (DFE == "g"){
+					g1_m2 = ind.genome1.mutationsOfType(m2);
+					g2_m2 = ind.genome2.mutationsOfType(m2);
+					
+					g1_m3 = ind.genome1.mutationsOfType(m3);
+					g2_m3 = ind.genome2.mutationsOfType(m3);
+					
+					hom_m2 = setIntersection(g1_m2, g2_m2);
+					het_m2 = setSymmetricDifference(g1_m2, g2_m2);
+					
+					hom_m3 = setIntersection(g1_m3, g2_m3);
+					het_m3 = setSymmetricDifference(g1_m3, g2_m3);
+					
+					hom = c(hom_m2, hom_m3);
+					het = c(het_m2, het_m3);
+					
+					phenotype = 0.0;
+					if (size(hom))
+						phenotype = phenotype + sum(hom.selectionCoeff * 2.0);
+					if (size(het))
+						phenotype = phenotype + sum(het.selectionCoeff * (1 + k));
+					ind.tagF = phenotype;
+				}
+			
+			}
+			
+			phenotypes = inds.tagF;
+		
+		}
+		
+		if(use_dominance!=1){
+			//catn("Simulating additivity ...");
+			
+			if(DFE == "g"){
+				phenotypes = inds.sumOfMutationsOfType(m2) + inds.sumOfMutationsOfType(m3); // Sum of all the selection coefficients (both m2 and m3) in each individuals genomes	
+			}
+			
+			if (DFE == "n"){
+				phenotypes = inds.sumOfMutationsOfType(m2); // Sum of all the selection coefficients (of type m2) in each individuals genomes
+			}
+		
+		}
+		phenotypes = phenotypes + rnorm(length(inds), 0, Ve_w); // Add environmental noise
+		inds.fitnessScaling = exp(phenotypes); // Calculate absolute fitness
+	}
+	
+	if ((sim.cycle%output_freq == 1)&(sim.cycle != end_gen)){
+		// Caculate summary stats to be printed out 
+		seg_sites = size(sim.mutations);
+		p = sim.mutationFrequencies(p0);
+		diversity = p*(1-p)/2;
+		list_alpha = 2*sim.mutations.selectionCoeff;
+		va_true = sum(diversity*list_alpha^2);
+		//sim.outputFull(slim_output_path + "/sim" + simulation + "_output_history_" + sim.cycle + ".txt");
+		if(sim.cycle == 1){
+			catn("Gen" + " seg_sites" + " diversity" + " va_true");
+			writeFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_summary_stats" + ".txt", "Gen" + " seg_sites" + " diversity" + " va_true", append = F);}
+		
+		catn(sim.cycle + " " + seg_sites + " " + mean(diversity) + " " + va_true);
+		writeFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_summary_stats" + ".txt", sim.cycle + " " + seg_sites + " " + mean(diversity) + " " + va_true, append = T);
+	}
+	
+	if (sim.cycle == end_gen){
+		// Caculate summary stats to be printed out to std_out
+		seg_sites = size(sim.mutations);
+		p = sim.mutationFrequencies(p0);
+		diversity = p*(1-p)/2;
+		list_alpha = 2*sim.mutations.selectionCoeff;
+		va_true = sum(diversity*list_alpha^2);
+		catn(sim.cycle + " " + seg_sites + " " + mean(diversity) + " " + va_true);
+		writeFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_summary_stats" + ".txt", sim.cycle + " " + seg_sites + " " + mean(diversity) + " " + va_true, append = T);
+		
+		catn("The last generation of the burnin phase is " + sim.cycle);
+		catn("History phase (without neutral mutations) done.");
+		
+		sim.treeSeqOutput(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history.trees");
+		
+		sim.simulationFinished();
+	}
+
+}

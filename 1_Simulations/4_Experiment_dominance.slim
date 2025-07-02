@@ -1,0 +1,149 @@
+initialize()
+{
+	initializeSLiMModelType("WF");
+	initializeTreeSeq();
+	initializeMutationRate(mu_expt);
+	
+	if (DFE == "g"){
+		initializeMutationType("m1", 0.5, "f", 0.0);
+		initializeMutationType("m2", 0.5, "g", -shape*scale, shape);
+		initializeMutationType("m3", 0.5, "g", shape*scale, shape);
+		initializeGenomicElementType("g1", c(m1, m2, m3), c(0.33, 1.0, mut_ratio));
+	}
+	
+	if (DFE == "n"){
+		initializeMutationType("m1", 0.5, "f", 0.0);
+		initializeMutationType("m2", 0.5, "n", mean_alpha, var_alpha);
+		initializeGenomicElementType("g1", c(m1, m2), c(0.33, 1.0));
+	}
+	
+	initializeGenomicElement(g1, 0, sequence_length-1);
+	initializeRecombinationRate(r);
+
+}
+
+mutationEffect(m2) { return 1.0; }  // Ensures no selection by default, unless fitness effects are specified manually
+mutationEffect(m3) { return 1.0; }
+
+
+1 late(){
+	
+	// Read from the "..._output_history.trees" file
+	
+	sim.readFromPopulationFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_with_neutral.trees");
+	
+	sim.treeSeqRememberIndividuals(p0.individuals);
+	catn(sim.cycle + " (parents' generation)");
+	
+	// if(flip_sel_coef==1) load metadata to load the changes in selection coefficients made manualy in 1_History.slim
+	// These changes are not recorded automatically in the .trees file
+	// Must be retrieved from the user generated metadata Dictionary() 
+	
+	if(flip_sel_coef==1){
+		
+		sel_coef = treeSeqMetadata(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_output_history_with_neutral.trees");
+		
+		// Apply these changed selection coefficients
+		
+		muts = sim.mutations;
+		
+		for (mut in muts){
+			
+			mut.setSelectionCoeff(sel_coef.getValue(asString(mut.id)));
+		}
+	}
+}
+
+
+1:150000 late() { //15000 is just a random large number that is higher than all the generations of interest
+	
+	
+	// Experiment (and therefore selection) starts from end_gen + ngen1 + 1
+	
+	if (sim.cycle>=(end_gen+ngen1)){ // Since this is a late() event, its effects will only be applied *after* progeny production in end_gen + 1 (hence no selection in end_gen + 1 to end_gen + ngen1 generations)
+		// But selection will be applied according to fitnesses defined below starting from gen (end_gen + gen1 + 1) 
+		
+		inds = sim.subpopulations.individuals; // Vector of all individuals
+		
+		if(use_dominance == 1){
+			for (ind in inds){
+				
+				if (DFE == "n"){
+					g1_m2 = ind.genome1.mutationsOfType(m2);
+					g2_m2 = ind.genome2.mutationsOfType(m2);
+					
+					hom = setIntersection(g1_m2, g2_m2);
+					het = setSymmetricDifference(g1_m2, g2_m2);
+					
+					phenotype = 0.0;
+					if (size(hom))
+						phenotype = sum(hom.selectionCoeff * 2.0);
+					if (size(het))
+						phenotype = phenotype + sum(het.selectionCoeff * (1 + het.getValue("dom")*k));
+					ind.tagF = phenotype;
+				}
+				
+				if (DFE == "g"){
+					g1_m2 = ind.genome1.mutationsOfType(m2);
+					g2_m2 = ind.genome2.mutationsOfType(m2);
+					
+					g1_m3 = ind.genome1.mutationsOfType(m3);
+					g2_m3 = ind.genome2.mutationsOfType(m3);
+					
+					hom_m2 = setIntersection(g1_m2, g2_m2);
+					het_m2 = setSymmetricDifference(g1_m2, g2_m2);
+					
+					hom_m3 = setIntersection(g1_m3, g2_m3);
+					het_m3 = setSymmetricDifference(g1_m3, g2_m3);
+					
+					hom = c(hom_m2, hom_m3);
+					het = c(het_m2, het_m3);
+					
+					phenotype = 0.0;
+					if (size(hom))
+						phenotype = phenotype + sum(hom.selectionCoeff * 2.0);
+					if (size(het))
+						phenotype = phenotype + sum(het.selectionCoeff * (1 + k));
+					ind.tagF = phenotype;
+				}
+			
+			}
+			
+			phenotypes = inds.tagF;
+		
+		}
+		
+		if(use_dominance !=1){
+			
+			if(DFE == "g"){
+				phenotypes = inds.sumOfMutationsOfType(m2) + inds.sumOfMutationsOfType(m3) + rnorm(length(inds), 0, Ve_w_expt); // Sum of all the selection coefficients (both m2 and m3) in each individuals genomes
+			}
+			
+			if (DFE == "n"){
+				phenotypes = inds.sumOfMutationsOfType(m2); // Sum of all the selection coefficients (of type m2) in each individuals genomes
+			}
+		
+		}
+		
+		phenotypes = phenotypes + rnorm(length(inds), 0, Ve_w_expt); // Add environmental noise
+		inds.fitnessScaling = exp(phenotypes); // Calculate absolute fitness
+	
+	}
+	
+	sim.outputFull(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_cage" + cage + "_output_experiment_" + sim.cycle + ".txt");
+	
+	if(sim.cycle > end_gen){
+		catn(sim.cycle);
+	}
+	
+	if(sim.cycle == (end_gen + ngen1)){
+		catn("Experiment starts...");
+	}
+	
+	// Stop the experiment (last generation)
+	
+	if (sim.cycle == (end_gen + ngen2)){
+		catn("Experiment ends.");
+		sim.simulationFinished();
+	}
+}
