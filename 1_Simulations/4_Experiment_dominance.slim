@@ -75,11 +75,17 @@ mutationEffect(m3) { return 1.0; }
 					hom = setIntersection(g1_m2, g2_m2);
 					het = setSymmetricDifference(g1_m2, g2_m2);
 					
+					// We want deleterious (beneficial) alleles to be recessive (dominance)
+					// k must be positive (negative) when selectionCoeff is positive (negative). Immaterial what happens when selectionCoeff = 0
+					// create a vector of 1s and -1s
+					
+					sign = ifelse(het.selectionCoeff>0, 1, -1);  
+					
 					phenotype = 0.0;
 					if (size(hom))
 						phenotype = sum(hom.selectionCoeff * 2.0);
 					if (size(het))
-						phenotype = phenotype + sum(het.selectionCoeff * (1 + het.getValue("dom")*k));
+						phenotype = phenotype + sum(het.selectionCoeff * (1 + sign*k));
 					ind.tagF = phenotype;
 				}
 				
@@ -99,11 +105,17 @@ mutationEffect(m3) { return 1.0; }
 					hom = c(hom_m2, hom_m3);
 					het = c(het_m2, het_m3);
 					
+					// We want deleterious (beneficial) alleles to be recessive (dominance)
+					// k must be positive (negative) when selectionCoeff is positive (negative). Immaterial what happens when selectionCoeff = 0
+					// create a vector of 1s and -1s
+					
+					sign = ifelse(het.selectionCoeff>0, 1, -1);  
+					
 					phenotype = 0.0;
 					if (size(hom))
 						phenotype = phenotype + sum(hom.selectionCoeff * 2.0);
 					if (size(het))
-						phenotype = phenotype + sum(het.selectionCoeff * (1 + k));
+						phenotype = phenotype + sum(het.selectionCoeff * (1 + sign*k));
 					ind.tagF = phenotype;
 				}
 			
