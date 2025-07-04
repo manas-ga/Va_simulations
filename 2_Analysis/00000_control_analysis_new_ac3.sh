@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#SBATCH --job-name=pool_seq_sims
+#SBATCH --job-name=Test_dom
 #SBATCH --output=/mnt/hel/obbard/Va_simulations/analyses/b_Interim_files/std_out/job_%A_%a.log   # Store logs in a custom directory
 #SBATCH --open-mode=append                                                                       # Append output if the file already exists
-#SBATCH --array=1-100%10                                                                          # Run replicate tasks
-#SBATCH --ntasks=12
-#SBATCH --mem=250G
+#SBATCH --array=1-40%20                                                                          # Run replicate tasks
+#SBATCH --ntasks=2
+#SBATCH --mem=5G
 
 # Path to Conda (if Conda isn't initialized by default)
 CONDA_PATH="/home/msamant/miniconda3"  # Update to where Miniconda/Anaconda is installed
