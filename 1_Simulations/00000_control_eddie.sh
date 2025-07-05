@@ -2,10 +2,10 @@
 
 #$ -V
 #$ -cwd
-#$ -N Vw_sim
-#$ -t 1-10
-#$ -tc 10
-#$ -l h_vmem=4g
+#$ -N Set_22
+#$ -t 1-100
+#$ -tc 50
+#$ -l h_vmem=125g
 #$ -pe sharedmem 2
 #$ -j y
 #$ -o /exports/eddie/scratch/msamant/b_Interim_files/std_out/
