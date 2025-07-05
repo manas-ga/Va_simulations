@@ -5,6 +5,7 @@
 #$ -N Set_22
 #$ -t 1-100
 #$ -tc 50
+#$ -l h_rt=2:00:00
 #$ -l h_vmem=125g
 #$ -pe sharedmem 2
 #$ -j y
