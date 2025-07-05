@@ -6,8 +6,8 @@
 #$ -t 1-100
 #$ -tc 50
 #$ -l h_rt=2:00:00
-#$ -l h_vmem=125g
-#$ -pe sharedmem 2
+#$ -l h_vmem=24g
+#$ -pe sharedmem 12
 #$ -j y
 #$ -o ~/std_out/
 
