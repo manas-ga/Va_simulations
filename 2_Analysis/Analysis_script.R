@@ -156,7 +156,7 @@ library(Vw)
 
 Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "poo_seq_test_SCE-BIO-C06645_2025-07-04_12-53-13.067883", commandArgs(trailingOnly = TRUE)[1])
 
-pool_seq = TRUE
+pool_seq = FALSE
 
 if(pool_seq){
   read_length = 75
