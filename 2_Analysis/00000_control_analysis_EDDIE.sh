@@ -5,7 +5,7 @@
 #$ -N Full_sims_pool_seq
 #$ -t 1-100
 #$ -tc 100
-#$ -l h_rt=10:30:00
+#$ -l h_rt=8:00:00
 #$ -l h_vmem=24G
 #$ -pe sharedmem 12
 #$ -j y
