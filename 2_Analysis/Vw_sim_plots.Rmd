@@ -412,7 +412,10 @@ d_nb_poolseq$Type = ifelse(grepl("poo", d_nb_poolseq$analysis_stamp),
                 "Exact")
 
 p_nb_poolseq = ggplot(d_nb_poolseq, aes(y = vA_est, x = vA_true_new, color = Type)) +
-  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0)
+  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#999999", "#0072B2", "#E59866")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Pool-seq") +
+  theme(text = element_text(size = 15))
 
 ```
 
@@ -462,6 +465,33 @@ p_b_std
 
 
 ```
+### Full simulations analysed after simulated_pool_seq sampling of allele frequencies (Figure S4)
+
+```{r full_poolseq}
+d_b_poolseq = read.csv(file.path(data_path, "combined_data/Set_9_corrected_output.csv"))
+
+# retain only the dataset with pool_seq
+d_b_poolseq = d_b_poolseq[grep("pool_seq", d_b_poolseq$analysis_stamp, invert = FALSE, value = FALSE),]
+
+# Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
+d_b_poolseq = add_new_va_data(new_va_data=d_new_va, target_data=d_b_poolseq, verbose=TRUE)
+
+# Add the standard dataset
+d_b_poolseq = rbind(d_9_std, d_b_poolseq)
+
+d_b_poolseq$Type = ifelse(grepl("poo", d_b_poolseq$analysis_stamp),
+                sapply(strsplit(d_b_poolseq$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
+                "Exact")
+
+p_b_poolseq = ggplot(d_b_poolseq, aes(y = vA_est, x = vA_true_new, color = Type)) +
+  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#999999", "#0072B2", "#E59866")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Pool-seq") +
+  theme(text = element_text(size = 15))
+
+
+```
+
 
 We then vary various parameters one at a time while keeping the others fixed to their values for the previous set.
 
