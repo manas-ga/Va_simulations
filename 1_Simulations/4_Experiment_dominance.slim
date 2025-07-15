@@ -23,11 +23,12 @@ initialize()
 		defineConstant("n_ind_exp", 1000);
 		defineConstant("Ve_w_expt", 1);
 		defineConstant("output_freq", 500);
-		defineConstant("use_dominance", 1);
+		defineConstant("use_dominance", 0);
 		defineConstant("k", 0); // Dominance coefficient; heterozygote phenotype = (1 + k)eta/2 where eta = 2*s; d = k*eta
 		defineConstant("flip_sel_coef", 0);
+		
 	}
-	
+	setSeed(seed^cage + cage^2);
 	initializeMutationRate(mu_expt);
 	
 	if (DFE == "g"){

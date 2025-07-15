@@ -24,6 +24,9 @@ mean_alpha = float(sys.argv[11])
 SD_alpha = float(sys.argv[12])
 Set_ID = sys.argv[13]
 sim = sys.argv[14]
+seed = int(sys.argv[14])
+
+numpy.random.seed(seed)
 
 ###### Simulate a neutral ancestry using msprime ######
 
@@ -32,7 +35,7 @@ demog_model.add_population(initial_size=Ne) # Ne
 
 print("Simulating a tree sequence with recombination rate", r_msp)
 
-ots = msprime.sim_ancestry(samples=n_ind, sequence_length=sequence_length, demography=demog_model, recombination_rate=r_msp)
+ots = msprime.sim_ancestry(samples=n_ind, sequence_length=sequence_length, demography=demog_model, recombination_rate=r_msp, random_seed = seed)
 
 # Add annotations for SLiM
 
@@ -49,7 +52,7 @@ print("Adding mutations to the tree sequence using rate", mu_msp)
 
 mut_model = msprime.SLiMMutationModel(type=2)
 
-ots = msprime.sim_mutations(ots, rate = mu_msp, model = mut_model, keep = True)
+ots = msprime.sim_mutations(ots, rate = mu_msp, model = mut_model, keep = True, random_seed = seed)
 
 print(f"The tree sequence now has {ots.num_mutations} mutations, at "
       f"{ots.num_sites} distinct sites.")

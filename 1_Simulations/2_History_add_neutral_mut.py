@@ -15,6 +15,7 @@ slim_output_path = sys.argv[1]
 neutral_sites = float(sys.argv[2])
 Set_ID = sys.argv[3]
 sim = sys.argv[4]
+seed = int(sys.argv[5])
 
 #############################################################
 
@@ -59,7 +60,7 @@ next_id = pyslim.next_slim_mutation_id(ts) # Makes the SLiM IDs of these mutatio
 
 neutral_mut_model = msprime.SLiMMutationModel(type=1, next_id=next_id)
 
-ts = msprime.sim_mutations(ts, rate = float(mu_neutral), model = neutral_mut_model, keep = True) 
+ts = msprime.sim_mutations(ts, rate = float(mu_neutral), model = neutral_mut_model, keep = True, random_seed = seed) 
 
 print(f"The tree sequence now has {ts.num_mutations} mutations, at "
       f"{ts.num_sites} distinct sites.")

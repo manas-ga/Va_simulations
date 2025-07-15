@@ -134,8 +134,8 @@ trim_exp_files = FALSE                 # Should the SLiM output files for the ex
 del_files = TRUE                       # Should the .trees files be deleted at the end to save space?
 compress_files = TRUE                  # Should .txt and .trees files be compressed using gzip
 
-Job_ID = "no_dominance_1"                    # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
-
+Job_ID = "domTEST_A"                   # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
+seed = sample(1:10000000, size = 1)    # random seed
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
 
 if(Sys.info()["nodename"]!="SCE-BIO-C06645"&nsims>1)stop("nsims must be 1 when running on the cluster")
@@ -287,7 +287,7 @@ for (sim in 1:nsims){
       message("Running msprime...")
       message(Sys.time())
       
-      system(paste("python", msprime_burnin_path, Ne, n_ind, sequence_length, r_msp, mu_msp, shape, scale, slim_output_path, mut_ratio, DFE, mean_alpha, sqrt(var_alpha), Set_ID, sim))
+      system(paste("python", msprime_burnin_path, Ne, n_ind, sequence_length, r_msp, mu_msp, shape, scale, slim_output_path, mut_ratio, DFE, mean_alpha, sqrt(var_alpha), Set_ID, sim, seed))
       
       ###############################################################
       ################# Simulate the history in SLim ################
@@ -319,8 +319,9 @@ for (sim in 1:nsims){
       arg18 = paste("-d Ve_w=", Ve_w, sep = "")
       arg19 = paste("-d use_dominance=", use_dominance, sep = "")
       arg20 = paste("-d k=", k, sep = "")
+      arg21 = paste("-d seed=", seed, sep = "")
       
-      system(paste("slim", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, slim_history_path))
+      system(paste("slim", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, slim_history_path))
 
       ###################################################################
       ############### Add neutral mutations using msprime ###############
@@ -340,7 +341,7 @@ for (sim in 1:nsims){
       
       message(paste("Choosing a mutation rate so that the expected number of neutral sites to be added is ", neutral_sites, sep = ""))
       
-      system(paste("python", msprime_add_neutral_path, slim_output_path, neutral_sites, Set_ID, sim))
+      system(paste("python", msprime_add_neutral_path, slim_output_path, neutral_sites, Set_ID, sim, seed))
 
       ######################################################################
       ##### Randomly swap selection coefficients (if flip_sel_coef==T) #####
@@ -373,8 +374,9 @@ for (sim in 1:nsims){
       flip_arg9 = paste("-d ", shQuote(paste("Set_ID=", "'", Set_ID, "'", sep = "")), sep = "")
       flip_arg10 = paste("-d simulation=", sim, sep = "")
       flip_arg11 = paste("-d flip_sel_coef=", flip_sel_coef, sep = "")
+      flip_arg12 = paste("-d seed=", seed, sep = "")
       
-      system(paste("slim", flip_arg1, flip_arg2, flip_arg3, flip_arg4, flip_arg5, flip_arg6, flip_arg7, flip_arg8, flip_arg9, flip_arg10, flip_arg11, slim_flip_sel_coef_path))
+      system(paste("slim", flip_arg1, flip_arg2, flip_arg3, flip_arg4, flip_arg5, flip_arg6, flip_arg7, flip_arg8, flip_arg9, flip_arg10, flip_arg11, flip_arg12, slim_flip_sel_coef_path))
       
       ###################################################
       ######### Simulate the experiment in SLiM #########
@@ -411,8 +413,9 @@ for (sim in 1:nsims){
         expt_arg17 = paste("-d Ve_w_expt=", Ve_w_expt, sep = "")
         expt_arg18 = paste("-d use_dominance=", use_dominance, sep = "")
         expt_arg19 = paste("-d k=", k, sep = "")
+        expt_arg20 = paste("-d seed=", seed, sep = "")
         
-        system(paste("slim", expt_arg1, expt_arg2, expt_arg3, expt_arg4, expt_arg5, expt_arg6, expt_arg7, expt_arg8, expt_arg9, expt_arg10, expt_arg11, expt_arg12a, expt_arg12b, expt_arg13, expt_arg14, expt_arg15, expt_arg16, expt_arg17, expt_arg18, expt_arg19, slim_expt_path))
+        system(paste("slim", expt_arg1, expt_arg2, expt_arg3, expt_arg4, expt_arg5, expt_arg6, expt_arg7, expt_arg8, expt_arg9, expt_arg10, expt_arg11, expt_arg12a, expt_arg12b, expt_arg13, expt_arg14, expt_arg15, expt_arg16, expt_arg17, expt_arg18, expt_arg19, expt_arg20, slim_expt_path))
         
         ### Trim the SLim outputs for the experiment to just include the information on mutations to make them smaller
         

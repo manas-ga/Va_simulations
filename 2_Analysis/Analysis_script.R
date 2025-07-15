@@ -154,7 +154,7 @@ library(Vw)
 ########################
 
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "Set_21c_SCE-BIO-C06645_2025-07-14_17-47-00.725259", commandArgs(trailingOnly = TRUE)[1])
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "domTEST_b_SCE-BIO-C06645_2025-07-15_22-26-42.4344", commandArgs(trailingOnly = TRUE)[1])
 
 pool_seq = FALSE
 
