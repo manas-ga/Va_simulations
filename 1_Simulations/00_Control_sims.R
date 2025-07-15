@@ -136,6 +136,7 @@ compress_files = TRUE                  # Should .txt and .trees files be compres
 
 Job_ID = "domTEST_A"                   # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
 seed = sample(1:10000000, size = 1)    # random seed
+message(paste("Random seed = ", seed, sep = ""))
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
 
 if(Sys.info()["nodename"]!="SCE-BIO-C06645"&nsims>1)stop("nsims must be 1 when running on the cluster")

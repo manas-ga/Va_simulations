@@ -28,7 +28,7 @@ initialize()
 		defineConstant("flip_sel_coef", 0);
 		
 	}
-	setSeed(seed^cage + cage^2);
+	setSeed(seed + product(1:cage));
 	initializeMutationRate(mu_expt);
 	
 	if (DFE == "g"){
