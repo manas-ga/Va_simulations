@@ -168,7 +168,7 @@ if(pool_seq){
   V_logmean = NULL
 }
 
-nsims = 10
+nsims = 1
   
 for(sim in 1:nsims){
   message(paste("Analysing simulation", sim, "of set", Set_ID, "..."))
