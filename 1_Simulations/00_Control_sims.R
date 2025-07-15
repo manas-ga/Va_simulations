@@ -216,7 +216,7 @@ var_alpha_list = seq(0.00015, 0.00015, length = nsims) # Vector to store varianc
 
 # Dominance
 use_dominance = 1
-k = 0 # Dominance coefficient; heterozygote phenotype = (1 + k)eta/2 where eta = 2*s; d = k*eta
+k = 0.5 # Dominance coefficient; heterozygote phenotype = (1 + k)eta/2 where eta = 2*s; d = k*eta
 
 # Environmental variance for relative fitness
 
