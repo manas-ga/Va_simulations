@@ -215,7 +215,7 @@ mean_alpha = 0
 var_alpha_list = seq(0.00015, 0.00015, length = nsims) # Vector to store variance of normal DFE
 
 # Dominance
-use_dominance = 0
+use_dominance = 1
 k = 0 # Dominance coefficient; heterozygote phenotype = (1 + k)eta/2 where eta = 2*s; d = k*eta
 
 # Environmental variance for relative fitness
