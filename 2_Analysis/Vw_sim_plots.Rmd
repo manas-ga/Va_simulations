@@ -89,7 +89,7 @@ deduplicate_sim_analyses = function(data_frame){
       max_time = max(sub(".*_2025-", "",  data_sim$analysis_stamp))
       analysis_to_be_deleted = data_sim$analysis_stamp[grep(max_time, data_sim$analysis_stamp)]
       
-      # Delete this analysis from d_9_nstd
+      # Delete this analysis
       
       data_frame = data_frame[data_frame$analysis_stamp!=analysis_to_be_deleted,]
       
@@ -394,30 +394,6 @@ p_nb_2_combined = plot_grid(title, p_nb_2_combined, ncol = 1, rel_heights = c(0.
 p_nb_2_combined
 ggsave(p_nb_2_combined, width = 12, height = 10, file = file.path(output_path, if(corrected){"Fig2_corrected.jpg"}else{"Fig2.jpg"}))
 ```
-### Simplified simulations analysed after simulated_pool_seq sampling of allele frequencies (Figure S5)
-```{r simplified_polseq}
-d_nb_poolseq = read.csv(file.path(data_path, "combined_data/Set_18_corrected_output.csv"))
-
-# retain only the dataset with pool_seq
-d_nb_poolseq = d_nb_poolseq[grep("pool_seq", d_nb_poolseq$analysis_stamp, invert = FALSE, value = FALSE),]
-
-# Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
-d_nb_poolseq = add_new_va_data(new_va_data=d_new_va, target_data=d_nb_poolseq, verbose=TRUE)
-
-# Add the standard dataset
-d_nb_poolseq = rbind(d_5_std, d_nb_poolseq)
-
-d_nb_poolseq$Type = ifelse(grepl("poo", d_nb_poolseq$analysis_stamp),
-                sapply(strsplit(d_nb_poolseq$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
-                "Exact")
-
-p_nb_poolseq = ggplot(d_nb_poolseq, aes(y = vA_est, x = vA_true_new, color = Type)) +
-  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
-  scale_color_manual(values = c("#009E73", "#D01C8B", "#999999", "#0072B2", "#E59866")) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Pool-seq") +
-  theme(text = element_text(size = 15))
-
-```
 
 ### Simplified simulations with dominance
 
@@ -433,7 +409,6 @@ p_nb_dom = ggplot(d_21, aes(y = vA_est, x = vA_true_new, color = k)) +
   theme(text = element_text(size = 15))+ 
   scale_color_manual(values = c("#0072B2", "#009E73", "#999999")) +
   geom_abline(slope = 1, intercept = 0)
-
 
 
 ```
@@ -485,9 +460,53 @@ p_b_std
 
 
 ```
-### Full simulations analysed after simulated_pool_seq sampling of allele frequencies (Figure S4)
+### Simplified & Full simulations analysed after simulated_pool_seq sampling of allele frequencies (Figure S4)
 
 ```{r full_poolseq}
+##################
+### Simplified ###
+##################
+
+d_nb_poolseq = read.csv(file.path(data_path, "combined_data/Set_18_corrected_output.csv"))
+
+# retain only the dataset with pool_seq
+d_nb_poolseq = d_nb_poolseq[grep("pool_seq", d_nb_poolseq$analysis_stamp, invert = FALSE, value = FALSE),]
+
+# Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
+d_nb_poolseq = add_new_va_data(new_va_data=d_new_va, target_data=d_nb_poolseq, verbose=TRUE)
+
+# Add the standard dataset
+d_nb_poolseq = rbind(d_5_std, d_nb_poolseq)
+
+d_nb_poolseq$Type = ifelse(grepl("poo", d_nb_poolseq$analysis_stamp),
+                sapply(strsplit(d_nb_poolseq$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
+                "Exact")
+
+labels_nb_poolseq = c("Exact" = "Exact",
+                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = expression(R[75]*C[1000]*V[0]),
+                     "pool_seq_TRUE_read_length_75_coverage_100_V_logmean_0" = expression(R[75]*C[100]*V[0]),
+                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945" = expression(R[75]*C[1000]*V[log(2)]),
+                     "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0" = expression(R[1]*C[1000]*V[0]))
+
+values_nb_poolseq = c("Exact" = "#009E73",
+                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = "#0072B2",
+                     "pool_seq_TRUE_read_length_75_coverage_100_V_logmean_0" ="#999999",
+                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945" = "#E59866",
+                     "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0" = "#D01C8B")
+
+p_nb_poolseq = ggplot(d_nb_poolseq, aes(y = vA_est, x = vA_true_new, color = Type)) +
+  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
+  scale_color_manual(values = values_nb_poolseq, labels = labels_nb_poolseq) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Pool-seq") +
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) +
+  theme(legend.position = "bottom") + ggtitle("Simplified simulations") + theme(plot.title = element_text(hjust = 0.5))
+
+
+############
+### Full ###
+############
+
 d_b_poolseq = read.csv(file.path(data_path, "combined_data/Set_9_corrected_output.csv"))
 
 # retain only the dataset with pool_seq
@@ -496,18 +515,62 @@ d_b_poolseq = d_b_poolseq[grep("pool_seq", d_b_poolseq$analysis_stamp, invert = 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_b_poolseq = add_new_va_data(new_va_data=d_new_va, target_data=d_b_poolseq, verbose=TRUE)
 
+# Analyses with a pool_seq coverage of 100 were accidentally analysed twice
+# Removing the analyses run on ac3
+
+d_b_poolseq = d_b_poolseq[grep(".ecdf.ed.ac.uk", d_b_poolseq$analysis_stamp),]
+
 # Add the standard dataset
 d_b_poolseq = rbind(d_9_std, d_b_poolseq)
 
 d_b_poolseq$Type = ifelse(grepl("poo", d_b_poolseq$analysis_stamp),
                 sapply(strsplit(d_b_poolseq$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
                 "Exact")
+labels_b_poolseq = c("Exact" = "Exact",
+                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = expression(R[75]*C[1000]*V[0]),
+                     "pool_seq_TRUE_read_length_75_coverage_100_V_logmean_0" = expression(R[75]*C[100]*V[0]),
+                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945" = expression(R[75]*C[1000]*V[log(2)]),
+                     "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0" = expression(R[1]*C[1000]*V[0]))
+
+values_b_poolseq = c("Exact" = "#009E73",
+                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = "#0072B2",
+                     "pool_seq_TRUE_read_length_75_coverage_100_V_logmean_0" ="#999999",
+                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945" = "#E59866",
+                     "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0" = "#D01C8B")
+
 
 p_b_poolseq = ggplot(d_b_poolseq, aes(y = vA_est, x = vA_true_new, color = Type)) +
   theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
-  scale_color_manual(values = c("#009E73", "#D01C8B", "#999999", "#0072B2", "#E59866")) + 
+  scale_color_manual(values = values_b_poolseq, labels = labels_b_poolseq) + 
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Pool-seq") +
-  theme(text = element_text(size = 15))
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) +
+ theme(legend.position = "bottom") + ggtitle("Full simulations") + theme(plot.title = element_text(hjust = 0.5))
+
+################
+### Combined ###
+################
+
+# Extract legend
+
+legend_poolseq = get_plot_component(p_b_poolseq + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
+
+# Combine without labels
+
+p_pool_seq_combined = plot_grid(p_nb_poolseq + theme(legend.position = "none"),
+                                p_b_poolseq + theme(legend.position = "none"),
+                                labels = "AUTO")
+
+# Add the legend
+
+p_pool_seq_combined = plot_grid(p_pool_seq_combined,
+                                legend_poolseq,
+                                nrow = 2, rel_heights = c(1, 0.1))
+
+# Save file
+
+ggsave(plot = p_pool_seq_combined, width = 8, height = 5, file = file.path(output_path, "FigS5.jpg"))
+p_pool_seq_combined
 
 
 ```

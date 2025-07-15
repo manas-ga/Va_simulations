@@ -18,8 +18,8 @@ standard_only = TRUE
 
 ## The standard set (to be used as a reference to compare)
 
-nsims = 100 # number of simulations for each set
-end_gen = 25000
+nsims = 20 # number of simulations for each set
+end_gen = 2
 
 mu_msp_list = if(end_gen==2){seq(3e-9, 2.35e-8, length = nsims)}else{seq(5.56e-8, 5.56e-7, length = nsims)}
 mut_ratio = if(end_gen==2){1}else{0}
@@ -100,4 +100,4 @@ if(!standard_only){
   
 }
 
-write.table(noquote(param_matrix), file = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/000_parameter_grid_eddie.txt", sep = " ", col.names = FALSE, row.names = FALSE, quote = FALSE)
+write.table(noquote(param_matrix), file = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/000_parameter_grid_ac3.txt", sep = " ", col.names = FALSE, row.names = FALSE, quote = FALSE)
