@@ -109,6 +109,10 @@ if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "bigga
   slim_output_path = file.path(file_storage_path, "b_Interim_files/SLiM_outputs")
 }
 
+if(grepl("ecdf.ed.ac.uk", Sys.info()["nodename"])){
+  slim_output_path = file.path(file_storage_path, "b_Interim_files/SLiM_outputs")
+}
+
 ##########################################
 ### Path to SLiM simulation parameters ###
 ##########################################
@@ -120,6 +124,11 @@ if(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04
 if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig", "c1", "c2", "c3", "c4", "c5", "c6", "ac3-n1", "ac3-n2", "ac3-n3", "ac3-n4", "ac3-n5", "ac3-n6")){
   sim_param_path = file.path(file_storage_path, "c_Output")
 }
+
+if(grepl("ecdf.ed.ac.uk", Sys.info()["nodename"])){
+  sim_param_path = file.path(file_storage_path, "c_Output")
+}
+
 
 # Load packages and functions
 
