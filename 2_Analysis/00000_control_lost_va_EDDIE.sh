@@ -2,7 +2,7 @@
 
 #$ -V
 #$ -cwd
-#$ -N Set_23_analysis
+#$ -N Set_23_new_va
 #$ -t 1-300
 #$ -tc 100
 #$ -l h_rt=00:12:00
@@ -13,4 +13,4 @@
 
 Param=`cat analysis_param_grid_eddie.txt | awk "NR==$SGE_TASK_ID"`
 
-Rscript Analysis_script.R $Param
+Rscript lost_va_script.R $Param
