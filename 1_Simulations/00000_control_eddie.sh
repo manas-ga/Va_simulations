@@ -5,8 +5,8 @@
 #$ -N TEST
 #$ -t 1
 #$ -tc 1
-#$ -l h_rt=24:10:00
-#$ -l h_vmem=100g
+#$ -l h_rt=2:10:00
+#$ -l h_vmem=10g
 #$ -pe sharedmem 2
 #$ -j y
 #$ -o ~/std_out/
