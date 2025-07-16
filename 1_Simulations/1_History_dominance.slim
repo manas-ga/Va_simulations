@@ -6,7 +6,7 @@ initialize()
 	// Set default parameters if running on SLiMgui
 	if (exists("slimgui")){
 		defineConstant("DFE", "g");
-		defineConstant("mu", 5.56e-6);
+		defineConstant("mu", 5.56e-9);
 		defineConstant("shape", 0.3);
 		defineConstant("scale", 0.033);
 		defineConstant("mut_ratio", 0);
@@ -16,13 +16,14 @@ initialize()
 		defineConstant("slim_output_path", "C:/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/b_Interim_files/SLiM_outputs");
 		defineConstant("Set_ID", "Set_21c_SCE-BIO-C06645_2025-07-14_11-20-13.251733");
 		defineConstant("simulation", 1);
-		defineConstant("end_gen", 25000);
+		defineConstant("end_gen", 2500);
 		defineConstant("n_ind_exp", 1000);
 		defineConstant("Ve_w", 1);
 		defineConstant("output_freq", 50);
 		defineConstant("use_dominance", 1);
-		defineConstant("k", 0); // Dominance coefficient; heterozygote phenotype = (1 + k)eta/2 where eta = 2*s; d = k*eta
+		defineConstant("k", 0.9); // Dominance coefficient; heterozygote phenotype = (1 + k)eta/2 where eta = 2*s; d = k*eta
 		defineConstant("seed", 12345);
+		defineConstant("additive_limit", 000);
 	}
 	setSeed(seed);
 	initializeMutationRate(mu);
@@ -79,7 +80,9 @@ mutationEffect(m3) { return 1.0; }
 		
 		inds = sim.subpopulations.individuals; // Vector of all individuals
 		
-		if(use_dominance == 1){
+		if(use_dominance == 1 & sim.cycle>additive_limit){
+			
+			dominance = T;
 			//catn("Simulating dominance ...");
 			
 			for (ind in inds){
@@ -94,17 +97,17 @@ mutationEffect(m3) { return 1.0; }
 				// k must be positive (negative) when selectionCoeff is positive (negative). Immaterial what happens when selectionCoeff = 0
 				// create a vector of 1s and -1s
 				
-				sign = ifelse(het.selectionCoeff>0, 1, -1);  
+				sign = ifelse(het.selectionCoeff>0, 1, -1);
 				
 				phenotype = 0.0;
 				if (size(hom)){
 					phenotype = phenotype + sum(hom.selectionCoeff * 2.0);
-					}
+				}
 				if (size(het)){
 					phenotype = phenotype + sum(het.selectionCoeff * (1 + sign*k));
 					//phenotype = phenotype + sum(het.selectionCoeff * (1 + k));
-					}
-				ind.tagF = phenotype;				
+				}
+				ind.tagF = phenotype;
 			
 			}
 			
@@ -112,7 +115,9 @@ mutationEffect(m3) { return 1.0; }
 		
 		}
 		
-		if(use_dominance!=1){
+		if(use_dominance!=1 | (use_dominance == 1 & sim.cycle<=additive_limit)){
+			
+			dominance = F;
 			//catn("Simulating additivity ...");
 			
 			if(DFE == "g"){
@@ -137,22 +142,32 @@ mutationEffect(m3) { return 1.0; }
 		va_true = sum(diversity*list_alpha^2);
 		//sim.outputFull(slim_output_path + "/sim" + simulation + "_output_history_" + sim.cycle + ".txt");
 		if(sim.cycle == 1){
-			catn("Gen" + " seg_sites" + " diversity" + " va_true");
-			writeFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_summary_stats" + ".txt", "Gen" + " seg_sites" + " diversity" + " va_true", append = F);}
+			catn("Gen" + " seg_sites" + " diversity" + " va_true" + " dominance");
+			writeFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_summary_stats" + ".txt", "Gen" + " seg_sites" + " diversity" + " va_true" + " dominance", append = F);}
 		
-		catn(sim.cycle + " " + seg_sites + " " + mean(diversity) + " " + va_true);
-		writeFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_summary_stats" + ".txt", sim.cycle + " " + seg_sites + " " + mean(diversity) + " " + va_true, append = T);
+		catn(sim.cycle + " " + seg_sites + " " + mean(diversity) + " " + va_true + " " + dominance);
+		writeFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_summary_stats" + ".txt", sim.cycle + " " + seg_sites + " " + mean(diversity) + " " + va_true + " " + dominance, append = T);
 	}
 	
 	if (sim.cycle == end_gen){
+		
+		if(use_dominance!=1 | (use_dominance == 1 & sim.cycle<=additive_limit)){
+			dominance = F;
+		}
+		
+		if(use_dominance == 1 & sim.cycle>additive_limit){
+			dominance = T;
+		}
+		
+		
 		// Caculate summary stats to be printed out to std_out
 		seg_sites = size(sim.mutations);
 		p = sim.mutationFrequencies(p0);
 		diversity = p*(1-p)/2;
 		list_alpha = 2*sim.mutations.selectionCoeff;
 		va_true = sum(diversity*list_alpha^2);
-		catn(sim.cycle + " " + seg_sites + " " + mean(diversity) + " " + va_true);
-		writeFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_summary_stats" + ".txt", sim.cycle + " " + seg_sites + " " + mean(diversity) + " " + va_true, append = T);
+		catn(sim.cycle + " " + seg_sites + " " + mean(diversity) + " " + va_true + " " + dominance);
+		writeFile(slim_output_path + "/" + Set_ID + "_sim" + simulation + "_summary_stats" + ".txt", sim.cycle + " " + seg_sites + " " + mean(diversity) + " " + va_true + " " + dominance, append = T);
 		
 		catn("The last generation of the burnin phase is " + sim.cycle);
 		catn("History phase (without neutral mutations) done.");

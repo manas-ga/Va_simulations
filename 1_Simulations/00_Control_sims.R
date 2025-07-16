@@ -143,11 +143,12 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"&nsims>1)stop("nsims must be 1 when r
 
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
-end_gen = 25000                            # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+end_gen = 25000                           # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+additive_limit = 0                     # In sims with use_dominance == 1, the history sim is run using additivity for the first additivity_limit generations
 
 if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
-output_freq = 1                      # The frequency with which summary stats are to be recorded in the history phase 
+output_freq = 2                      # The frequency with which summary stats are to be recorded in the history phase 
 ngen1 = 1                              # How many generations between the 1st expt generation and the parents
 ngen2 = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 4, (as.numeric(commandArgs(trailingOnly = TRUE)[6])))       # How many generations between the last expt generatio and the parents                        # How many generations should allele frequency changes be calculated over in the experiment
 flip_sel_coef = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 0, as.numeric(commandArgs(trailingOnly = TRUE)[7])) # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
@@ -321,8 +322,9 @@ for (sim in 1:nsims){
       arg19 = paste("-d use_dominance=", use_dominance, sep = "")
       arg20 = paste("-d k=", k, sep = "")
       arg21 = paste("-d seed=", seed, sep = "")
+      arg22 = paste("-d additive_limit=", additive_limit, sep = "")
       
-      system(paste("slim", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, slim_history_path))
+      system(paste("slim", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, slim_history_path))
 
       ###################################################################
       ############### Add neutral mutations using msprime ###############

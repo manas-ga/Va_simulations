@@ -176,14 +176,14 @@ p_palpha = ggplot(data, aes(x = palpha_est)) +
   geom_vline(xintercept = mean(data$palpha_est), linetype = "dashed") +
   theme(text = element_text(size = font_size)) 
 
-# balpha_intercept_est histogram
+# Residual variance
 
-p_balpha_int = ggplot(data, aes(x = balpha_intercept_est)) + 
+p_res_var = ggplot(data, aes(x = Residual_var)) + 
   theme_bw() + 
   geom_histogram(color = "black", fill = "white") + 
-  labs(x = TeX(r"(Estimate of $\beta^{(0)}_{\bar{\alpha}}$)"), y = "Frequency") + 
-  geom_vline(xintercept = 0, color = "red") + 
-  geom_vline(xintercept = mean(data$balpha_intercept_est), linetype = "dashed") +
+  labs(x = "Estimate of the residual variance", y = "Frequency") + 
+  geom_vline(xintercept = 1, color = "red") + 
+  geom_vline(xintercept = mean(data$Residual_var), linetype = "dashed") +
   theme(text = element_text(size = font_size)) 
 
 # balpha_slope_est histogram
@@ -198,7 +198,7 @@ p_balpha_slope = ggplot(data, aes(x = balpha_slope_est)) +
 
 # Combine the four plots
 
-p_combined = plot_grid(p_main, p_palpha, p_balpha_int, p_balpha_slope, labels = "AUTO")
+p_combined = plot_grid(p_main, p_palpha, p_res_var, p_balpha_slope, labels = "AUTO")
 
 if(data_in_title){
 
@@ -230,7 +230,7 @@ if(data_in_title){
     
 }
 
-return(list(main = p_main, palpha = p_palpha, balpha_int = p_balpha_int, balpha_slope = p_balpha_slope,
+return(list(main = p_main, palpha = p_palpha, res_var = p_res_var, balpha_slope = p_balpha_slope,
             combined = p_combined))
 
   
@@ -401,16 +401,55 @@ ggsave(p_nb_2_combined, width = 12, height = 10, file = file.path(output_path, i
 
 d_23 = read.csv(file.path(data_path, "combined_data/Set_23_corrected_output.csv"))
 d_23 = add_new_va_data(new_va_data=d_new_va, target_data=d_23, verbose=TRUE)
-d_23$k = gsub(".*_", x=d_23$sim, "")
+d_23$k = gsub(".*=", x=d_23$sim, "")
 
-p_nb_dom = ggplot(d_23, aes(y = vA_est, x = vA_true_new, color = k)) +
+p_nb_dom_main = ggplot(d_23, aes(y = vA_est, x = vA_true_new, color = k)) +
   theme_bw() + geom_point() + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Dominance") +
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Dominance (|k|)") +
   theme(text = element_text(size = 15))+ 
-  scale_color_manual(values = c("#0072B2", "#009E73", "#999999")) +
-  geom_abline(slope = 1, intercept = 0)
+  scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
+  geom_abline(slope = 1, intercept = 0) +
+ theme(legend.position = "bottom")
 
+p_nb_dom_palpha = ggplot(d_23, aes(y = palpha_est, x = k, fill = k)) +
+  theme_bw() + geom_boxplot() + 
+  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $p_{\alpha} $)"), fill = "Dominance (|k|)") +
+  theme(text = element_text(size = 15))+ 
+  scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
+  geom_abline(slope = 0, intercept = 0, linetype = "dotdash") +
+ theme(legend.position = "bottom")
 
+p_nb_dom_balpha_slope = ggplot(d_23, aes(y = balpha_slope_est, x = k, fill = k)) +
+  theme_bw() + geom_boxplot() + 
+  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $\beta^{(1)}_{\bar{\alpha}}$)"), fill = "Dominance (|k|)") +
+  theme(text = element_text(size = 15))+ 
+  scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
+  geom_abline(slope = 0, intercept = 0, linetype = "dotdash") +
+ theme(legend.position = "bottom")
+
+p_nb_dom_res_var = ggplot(d_23, aes(y = Residual_var, x = k, fill = k)) +
+  theme_bw() + geom_boxplot() + 
+  labs(x = "Dominance (|k|)", y = "Estimate of the residual variance", fill = "Dominance (|k|)") +
+  theme(text = element_text(size = 15))+ 
+  scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
+  geom_abline(slope = 0, intercept = 1, linetype = "dotdash") +
+ theme(legend.position = "bottom")
+
+legend_nb_dominance = get_plot_component(p_nb_dom_main + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
+
+p_nb_dominance_combined = plot_grid(p_nb_dom_main + theme(legend.position = "none"),
+                                    p_nb_dom_palpha + theme(legend.position = "none"),
+                                    p_nb_dom_res_var + theme(legend.position = "none"),
+                                    p_nb_dom_balpha_slope + theme(legend.position = "none"),
+                                    labels = "AUTO", nrow = 2)
+title_nb_dominance = ggdraw() + draw_label("Simplified simulations", hjust = 0.5, size = 30)
+
+p_nb_dominance_combined = plot_grid(title_nb_dominance,
+                                    p_nb_dominance_combined,
+                                    legend_nb_dominance,
+                                    nrow = 3, rel_heights = c(0.1, 1, 0.05))
+
+ggsave(p_nb_dominance_combined, width = 10, height = 10, file = file.path(output_path, "Fig_S4A.jpg"))
 ```
 
 
