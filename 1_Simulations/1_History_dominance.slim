@@ -6,23 +6,23 @@ initialize()
 	// Set default parameters if running on SLiMgui
 	if (exists("slimgui")){
 		defineConstant("DFE", "g");
-		defineConstant("mu", 5.56e-7);
+		defineConstant("mu", 5.56e-6);
 		defineConstant("shape", 0.3);
 		defineConstant("scale", 0.033);
 		defineConstant("mut_ratio", 0);
 		defineConstant("sequence_length", 1e+6);
-		defineConstant("r", 1e-7);
+		defineConstant("r", 5e-7);
 		defineConstant("msprime_output_path", "C:/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/b_Interim_files/SLiM_outputs");
 		defineConstant("slim_output_path", "C:/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/b_Interim_files/SLiM_outputs");
 		defineConstant("Set_ID", "Set_21c_SCE-BIO-C06645_2025-07-14_11-20-13.251733");
 		defineConstant("simulation", 1);
-		defineConstant("end_gen", 2);
+		defineConstant("end_gen", 25000);
 		defineConstant("n_ind_exp", 1000);
 		defineConstant("Ve_w", 1);
 		defineConstant("output_freq", 50);
-		defineConstant("use_dominance", 0);
+		defineConstant("use_dominance", 1);
 		defineConstant("k", 0); // Dominance coefficient; heterozygote phenotype = (1 + k)eta/2 where eta = 2*s; d = k*eta
-		
+		defineConstant("seed", 12345);
 	}
 	setSeed(seed);
 	initializeMutationRate(mu);

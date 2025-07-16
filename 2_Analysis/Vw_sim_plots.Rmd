@@ -399,11 +399,11 @@ ggsave(p_nb_2_combined, width = 12, height = 10, file = file.path(output_path, i
 
 ```{r dimplified_dominance}
 
-d_21 = read.csv(file.path(data_path, "combined_data/Set_21_corrected_output.csv"))
-d_21 = add_new_va_data(new_va_data=d_new_va, target_data=d_21, verbose=TRUE)
-d_21$k = gsub(".*_", x=unique(d_21$sim), "")
+d_23 = read.csv(file.path(data_path, "combined_data/Set_23_corrected_output.csv"))
+d_23 = add_new_va_data(new_va_data=d_new_va, target_data=d_23, verbose=TRUE)
+d_23$k = gsub(".*_", x=d_23$sim, "")
 
-p_nb_dom = ggplot(d_21, aes(y = vA_est, x = vA_true_new, color = k)) +
+p_nb_dom = ggplot(d_23, aes(y = vA_est, x = vA_true_new, color = k)) +
   theme_bw() + geom_point() + 
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Dominance") +
   theme(text = element_text(size = 15))+ 
