@@ -144,7 +144,7 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"&nsims>1)stop("nsims must be 1 when r
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
 end_gen = 25000                           # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
-additive_limit = 0                     # In sims with use_dominance == 1, the history sim is run using additivity for the first additivity_limit generations
+additive_limit = 20000                     # In sims with use_dominance == 1, the history sim is run using additivity for the first additivity_limit generations
 
 if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
@@ -475,7 +475,7 @@ for (sim in 1:nsims){
         system(paste("gzip ", slim_output_path, "/", Set_ID, "*.trees", sep = ""))
       }
       
-      message(paste("Simulation", sim, "of set", Set_ID, "completed...")) 
+      message(paste("Simulation", sim, "of set", Set_ID, "completed at", Sys.time())) 
        
 }
 

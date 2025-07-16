@@ -449,7 +449,7 @@ p_nb_dominance_combined = plot_grid(title_nb_dominance,
                                     legend_nb_dominance,
                                     nrow = 3, rel_heights = c(0.1, 1, 0.05))
 
-ggsave(p_nb_dominance_combined, width = 10, height = 10, file = file.path(output_path, "Fig_S4A.jpg"))
+ggsave(p_nb_dominance_combined, width = 10, height = 10, file = file.path(output_path, "FigS4A.jpg"))
 ```
 
 
