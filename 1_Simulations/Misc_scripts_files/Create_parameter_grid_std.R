@@ -100,4 +100,4 @@ if(!standard_only){
   
 }
 
-write.table(noquote(param_matrix), file = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/000_parameter_grid_ac3.txt", sep = " ", col.names = FALSE, row.names = FALSE, quote = FALSE)
+write.table(noquote(param_matrix), file = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/000_parameter_grid_eddie.txt", sep = " ", col.names = FALSE, row.names = FALSE, quote = FALSE)
