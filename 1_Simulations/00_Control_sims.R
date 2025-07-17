@@ -134,7 +134,7 @@ trim_exp_files = FALSE                 # Should the SLiM output files for the ex
 del_files = TRUE                       # Should the .trees files be deleted at the end to save space?
 compress_files = TRUE                  # Should .txt and .trees files be compressed using gzip
 
-Job_ID = "TEST"                   # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
+Job_ID = "Set_24_A"                   # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
 seed = sample(1:10000000, size = 1)    # random seed
 message(paste("Random seed = ", seed, sep = ""))
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
@@ -148,7 +148,7 @@ additive_limit = 20000                     # In sims with use_dominance == 1, th
 
 if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
-output_freq = 2                      # The frequency with which summary stats are to be recorded in the history phase 
+output_freq = 50                       # The frequency with which summary stats are to be recorded in the history phase 
 ngen1 = 1                              # How many generations between the 1st expt generation and the parents
 ngen2 = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 4, (as.numeric(commandArgs(trailingOnly = TRUE)[6])))       # How many generations between the last expt generatio and the parents                        # How many generations should allele frequency changes be calculated over in the experiment
 flip_sel_coef = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 0, as.numeric(commandArgs(trailingOnly = TRUE)[7])) # (1 for TRUE and 0 for FALSE) Multiply the selection coefficients in the parents' generation by -1 or 1 randomly (for testing purposes)
@@ -218,7 +218,7 @@ var_alpha_list = seq(0.00015, 0.00015, length = nsims) # Vector to store varianc
 
 # Dominance
 use_dominance = 1
-k = 0 # Dominance coefficient; heterozygote phenotype = (1 + k)eta/2 where eta = 2*s; d = k*eta
+k = 0.5 # Dominance coefficient; heterozygote phenotype = (1 + k)eta/2 where eta = 2*s; d = k*eta
 
 # Environmental variance for relative fitness
 

@@ -2,9 +2,9 @@
 
 #$ -V
 #$ -cwd
-#$ -N TEST
-#$ -t 1
-#$ -tc 1
+#$ -N Set_24_A
+#$ -t 1-100
+#$ -tc 100
 #$ -l h_rt=12:10:00
 #$ -l h_vmem=10g
 #$ -pe sharedmem 2
