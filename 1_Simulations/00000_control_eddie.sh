@@ -3,8 +3,8 @@
 #$ -V
 #$ -cwd
 #$ -N TEST
-#$ -t 1
-#$ -tc 1
+#$ -t 1-10
+#$ -tc 10
 #$ -l h_rt=12:10:00
 #$ -l h_vmem=10g
 #$ -pe sharedmem 2
