@@ -181,7 +181,7 @@ p_palpha = ggplot(data, aes(x = palpha_est)) +
 p_res_var = ggplot(data, aes(x = Residual_var)) + 
   theme_bw() + 
   geom_histogram(color = "black", fill = "white") + 
-  labs(x = "Estimate of the residual variance", y = "Frequency") + 
+  labs(x = "Residual variance", y = "Frequency") + 
   geom_vline(xintercept = 1, color = "red") + 
   geom_vline(xintercept = mean(data$Residual_var), linetype = "dashed") +
   theme(text = element_text(size = font_size)) 
@@ -403,6 +403,11 @@ d_23 = read.csv(file.path(data_path, "combined_data/Set_23_corrected_output.csv"
 d_23 = add_new_va_data(new_va_data=d_new_va, target_data=d_23, verbose=TRUE)
 d_23$k = gsub(".*=", x=d_23$sim, "")
 
+# Since the ylabels have different widths, the combined plot dows not have the four panels properly aligned
+# Draw the yabels separately to pre-specified dimensions and then combine the y_label-less plots with the custom y-labels
+
+### Main estimate vs true V_A ###
+
 p_nb_dom_main = ggplot(d_23, aes(y = vA_est, x = vA_true_new, color = k)) +
   theme_bw() + geom_point() + 
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Dominance (|k|)") +
@@ -410,6 +415,17 @@ p_nb_dom_main = ggplot(d_23, aes(y = vA_est, x = vA_true_new, color = k)) +
   scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
   geom_abline(slope = 1, intercept = 0) +
  theme(legend.position = "bottom")
+
+# Save the legend
+legend_nb_dominance = get_plot_component(p_nb_dom_main + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
+
+label_nb_dom_main = ggdraw() + draw_label(TeX(r"(Estimate of $V_A$)"), x = 0.5, y = 0.5, angle = 90, vjust = 0.5, hjust = 0.5, fontface = "bold", size = 15)
+
+p_nb_dom_main = plot_grid(label_nb_dom_main, 
+                          p_nb_dom_main + labs(y = NULL) + theme(legend.position = "none"), 
+                          ncol = 2, rel_widths = c(0.1, 1))
+
+### Boxplot for p_{alpha} ###
 
 p_nb_dom_palpha = ggplot(d_23, aes(y = palpha_est, x = k, fill = k)) +
   theme_bw() + geom_boxplot() + 
@@ -419,6 +435,14 @@ p_nb_dom_palpha = ggplot(d_23, aes(y = palpha_est, x = k, fill = k)) +
   geom_abline(slope = 0, intercept = 0, linetype = "dotdash") +
  theme(legend.position = "bottom")
 
+label_nb_dom_palpha = ggdraw() + draw_label(TeX(r"(Estimate of $p_{\alpha} $)"), x = 0.5, y = 0.5, angle = 90, vjust = 0.5, hjust = 0.5, fontface = "bold", size = 15)
+
+p_nb_dom_palpha = plot_grid(label_nb_dom_palpha, 
+                          p_nb_dom_palpha + labs(y = NULL) + theme(legend.position = "none"), 
+                          ncol = 2, rel_widths = c(0.1, 1))
+
+### Boxplot for B_{alpha}^{(1) ###
+
 p_nb_dom_balpha_slope = ggplot(d_23, aes(y = balpha_slope_est, x = k, fill = k)) +
   theme_bw() + geom_boxplot() + 
   labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $\beta^{(1)}_{\bar{\alpha}}$)"), fill = "Dominance (|k|)") +
@@ -427,15 +451,29 @@ p_nb_dom_balpha_slope = ggplot(d_23, aes(y = balpha_slope_est, x = k, fill = k))
   geom_abline(slope = 0, intercept = 0, linetype = "dotdash") +
  theme(legend.position = "bottom")
 
+label_nb_dom_balpha_slope = ggdraw() + draw_label(TeX(r"(Estimate of $\beta^{(1)}_{\bar{\alpha}}$)"), x = 0.5, y = 0.5, angle = 90, vjust = 0.5, hjust = 0.5, fontface = "bold", size = 15)
+
+p_nb_dom_balpha_slope = plot_grid(label_nb_dom_balpha_slope, 
+                          p_nb_dom_balpha_slope + labs(y = NULL) + theme(legend.position = "none"), 
+                          ncol = 2, rel_widths = c(0.1, 1))
+
+### Residual variance ###
+
 p_nb_dom_res_var = ggplot(d_23, aes(y = Residual_var, x = k, fill = k)) +
   theme_bw() + geom_boxplot() + 
-  labs(x = "Dominance (|k|)", y = "Estimate of the residual variance", fill = "Dominance (|k|)") +
+  labs(x = "Dominance (|k|)", y = "Residual variance", fill = "Dominance (|k|)") +
   theme(text = element_text(size = 15))+ 
   scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
   geom_abline(slope = 0, intercept = 1, linetype = "dotdash") +
  theme(legend.position = "bottom")
 
-legend_nb_dominance = get_plot_component(p_nb_dom_main + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
+label_nb_dom_res_var = ggdraw() + draw_label("Residual variance", x = 0.5, y = 0.5, angle = 90, vjust = 0.5, hjust = 0.5, size = 15)
+
+p_nb_dom_res_var = plot_grid(label_nb_dom_res_var, 
+                          p_nb_dom_res_var + labs(y = NULL) + theme(legend.position = "none"), 
+                          ncol = 2, rel_widths = c(0.1, 1))
+
+### Combine the four plots ###
 
 p_nb_dominance_combined = plot_grid(p_nb_dom_main + theme(legend.position = "none"),
                                     p_nb_dom_palpha + theme(legend.position = "none"),
@@ -449,7 +487,7 @@ p_nb_dominance_combined = plot_grid(title_nb_dominance,
                                     legend_nb_dominance,
                                     nrow = 3, rel_heights = c(0.1, 1, 0.05))
 
-ggsave(p_nb_dominance_combined, width = 10, height = 10, file = file.path(output_path, "FigS4A.jpg"))
+ggsave(p_nb_dominance_combined, width = 8, height = 8, file = file.path(output_path, "Fig7.jpg"))
 ```
 
 

@@ -134,7 +134,7 @@ trim_exp_files = FALSE                 # Should the SLiM output files for the ex
 del_files = TRUE                       # Should the .trees files be deleted at the end to save space?
 compress_files = TRUE                  # Should .txt and .trees files be compressed using gzip
 
-Job_ID = "Set_24_A"                   # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
+Job_ID = "TEST"                   # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
 seed = sample(1:10000000, size = 1)    # random seed
 message(paste("Random seed = ", seed, sep = ""))
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
@@ -207,7 +207,7 @@ DFE = "g"                                   # DFE can be "g" (gamma) or "n" (nor
 
 # If DFE is "g"
 shape = 0.3                                 # Shape of the gamma DFE ##### mean = shape*scale
-scale_list = if(end_gen==2){seq(0.033, 0.033, length = nsims)}else{seq(0.033, 0.033, length = nsims)}  # Vector of Scale of the gamma DFE
+scale_list = if(end_gen==2){seq(0.045, 0.045, length = nsims)}else{seq(0.033, 0.033, length = nsims)}  # Vector of Scale of the gamma DFE
 
 # The ratio of beneficial:deleterious mutations 
 mut_ratio = if(Sys.info()["nodename"]=="SCE-BIO-C06645"){1}else{as.numeric(commandArgs(trailingOnly = TRUE)[8])}
@@ -218,7 +218,7 @@ var_alpha_list = seq(0.00015, 0.00015, length = nsims) # Vector to store varianc
 
 # Dominance
 use_dominance = 1
-k = 0.5 # Dominance coefficient; heterozygote phenotype = (1 + k)eta/2 where eta = 2*s; d = k*eta
+k = 0.9 # Dominance coefficient; heterozygote phenotype = (1 + k)eta/2 where eta = 2*s; d = k*eta
 
 # Environmental variance for relative fitness
 
