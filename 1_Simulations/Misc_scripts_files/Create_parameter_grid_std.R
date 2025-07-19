@@ -21,7 +21,7 @@ standard_only = TRUE
 nsims = 10 # number of simulations for each set
 end_gen = 25000
 
-mu_msp_list = if(end_gen==2){seq(3e-9, 2.35e-8, length = nsims)}else{seq(1e-08, 1e-07, length = nsims)}
+mu_msp_list = if(end_gen==2){seq(3e-9, 2.35e-8, length = nsims)}else{seq(7e-08, 5e-07, length = nsims)}
 mut_ratio = if(end_gen==2){1}else{0}
 
 
