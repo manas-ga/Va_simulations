@@ -2,10 +2,10 @@
 
 #$ -V
 #$ -cwd
-#$ -N TEST
-#$ -t 1-10
-#$ -tc 10
-#$ -l h_rt=12:10:00
+#$ -N Set_25_A
+#$ -t 1-100
+#$ -tc 100
+#$ -l h_rt=24:10:00
 #$ -l h_vmem=10g
 #$ -pe sharedmem 2
 #$ -j y
