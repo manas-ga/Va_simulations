@@ -198,7 +198,7 @@ p_balpha_slope = ggplot(data, aes(x = balpha_slope_est)) +
 
 # Combine the four plots
 
-p_combined = plot_grid(p_main, p_palpha, p_res_var, p_balpha_slope, labels = "AUTO")
+p_combined = plot_grid(p_main, p_palpha, p_balpha_slope, p_res_var, labels = "AUTO")
 
 if(data_in_title){
 
