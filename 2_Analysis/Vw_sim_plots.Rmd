@@ -414,7 +414,8 @@ p_nb_dom_main = ggplot(d_23, aes(y = vA_est, x = vA_true_new, color = k)) +
   theme(text = element_text(size = 15))+ 
   scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
   geom_abline(slope = 1, intercept = 0) +
- theme(legend.position = "bottom")
+ theme(legend.position = "bottom") +
+  geom_smooth(method = "lm", se=FALSE) 
 
 # Save the legend
 legend_nb_dominance = get_plot_component(p_nb_dom_main + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
@@ -556,7 +557,8 @@ p_b_dom_main = ggplot(d_25, aes(y = vA_est, x = vA_true_new, color = k)) +
   theme(text = element_text(size = 15))+ 
   scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
   geom_abline(slope = 1, intercept = 0) +
- theme(legend.position = "bottom")
+ theme(legend.position = "bottom") +
+  geom_smooth(method = "lm", se=FALSE) 
 
 
 p_test = ggplot(d_25, aes(y = vA_true_new, x = va_true_new, color = k)) +
