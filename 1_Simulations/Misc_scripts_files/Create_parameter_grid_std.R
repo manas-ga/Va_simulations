@@ -19,15 +19,16 @@ standard_only = TRUE
 ## The standard set (to be used as a reference to compare)
 
 nsims = 100 # number of simulations for each set
-end_gen = 25000
+end_gen = 2
 
 mu_msp_list = if(end_gen==2){seq(3e-9, 2.35e-8, length = nsims)}else{seq(7.5e-08, 2.07e-07, length = nsims)}
 mut_ratio = if(end_gen==2){1}else{0}
 
+total_sites = round(seq(3000, 65000, length = nsims), 0)
 
-param_matrix = data.frame(matrix(NA, nrow = nsims, ncol  = 8))
+param_matrix = data.frame(matrix(NA, nrow = nsims, ncol  = 9))
 
-param_matrix[,1] = mu_msp_list
+param_matrix[,1] = mean(mu_msp_list)
 param_matrix[,2] = 0.5
 param_matrix[,3] = 2
 param_matrix[,4] = 1000
@@ -35,6 +36,7 @@ param_matrix[,5] = 10
 param_matrix[,6] = 4
 param_matrix[,7] = 0
 param_matrix[,8] = mut_ratio
+param_matrix[,9] = total_sites
 
 # Add to this matrix if simulations other than the standard set are also required
 

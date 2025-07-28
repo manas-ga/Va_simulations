@@ -117,6 +117,7 @@ system(paste("mkdir -p", paste(file_storage_path, "/b_Interim_files/SLiM_outputs
 # Arg 6 = ngen_expt
 # Arg 7 = flip_sel_coef
 # Arg 8 = mut_ratio
+# Arg 9 = total_sites
 
 #####################################################
 ############ Simulation Parameters ##################
@@ -134,7 +135,7 @@ trim_exp_files = FALSE                 # Should the SLiM output files for the ex
 del_files = TRUE                       # Should the .trees files be deleted at the end to save space?
 compress_files = TRUE                  # Should .txt and .trees files be compressed using gzip
 
-Job_ID = "Set_25_D"                   # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
+Job_ID = "Set_26"                   # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
 seed = sample(1:10000000, size = 1)    # random seed
 message(paste("Random seed = ", seed, sep = ""))
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
@@ -143,8 +144,8 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"&nsims>1)stop("nsims must be 1 when r
 
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
-end_gen = 25000                           # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
-additive_limit = 20000                     # In sims with use_dominance == 1, the history sim is run using additivity for the first additivity_limit generations
+end_gen = 2                           # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+additive_limit = 2                    # In sims with use_dominance == 1, the history sim is run using additivity for the first additivity_limit generations
 
 if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
@@ -193,7 +194,7 @@ mu_list = if(end_gen==2){seq(0, 0, length = nsims)}else{10*mu_msp_list}
 
 ## total number of permissible sites (to be used to set the neutral mutation rate)
 
-total_sites = if(end_gen==2){3000}else{67500}
+total_sites = as.numeric(commandArgs(trailingOnly = TRUE)[9])
 
 # Mutation rate during the experiment
 
@@ -207,7 +208,7 @@ DFE = "g"                                   # DFE can be "g" (gamma) or "n" (nor
 
 # If DFE is "g"
 shape = 0.3                                 # Shape of the gamma DFE ##### mean = shape*scale
-scale_list = if(end_gen==2){seq(0.033, 0.033, length = nsims)}else{seq(0.045, 0.045, length = nsims)}  # Vector of Scale of the gamma DFE
+scale_list = if(end_gen==2){seq(0.033, 0.033, length = nsims)}else{seq(0.033, 0.033, length = nsims)}  # Vector of Scale of the gamma DFE
 
 # The ratio of beneficial:deleterious mutations 
 mut_ratio = if(Sys.info()["nodename"]=="SCE-BIO-C06645"){1}else{as.numeric(commandArgs(trailingOnly = TRUE)[8])}
@@ -217,8 +218,8 @@ mean_alpha = 0
 var_alpha_list = seq(0.00015, 0.00015, length = nsims) # Vector to store variance of normal DFE
 
 # Dominance
-use_dominance = 1
-k = 0.75 # Dominance coefficient; heterozygote phenotype = (1 + k)eta/2 where eta = 2*s; d = k*eta
+use_dominance = 0
+k = 0 # Dominance coefficient; heterozygote phenotype = (1 + k)eta/2 where eta = 2*s; d = k*eta
 
 # Environmental variance for relative fitness
 
