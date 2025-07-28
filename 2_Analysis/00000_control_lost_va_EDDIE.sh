@@ -2,12 +2,12 @@
 
 #$ -V
 #$ -cwd
-#$ -N Set_23_new_va
+#$ -N Set_25_new_va
 #$ -t 1-300
 #$ -tc 100
-#$ -l h_rt=00:12:00
+#$ -l h_rt=03:30:00
 #$ -l h_vmem=5G
-#$ -pe sharedmem 2
+#$ -pe sharedmem 12
 #$ -j y
 #$ -o ~/std_out/
 
