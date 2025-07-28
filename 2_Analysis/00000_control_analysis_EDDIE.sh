@@ -2,10 +2,10 @@
 
 #$ -V
 #$ -cwd
-#$ -N Set_25_D_analysis
+#$ -N Set_26_analysis
 #$ -t 1-100
 #$ -tc 100
-#$ -l h_rt=8:00:00
+#$ -l h_rt=6:00:00
 #$ -l h_vmem=25G
 #$ -pe sharedmem 12
 #$ -j y
