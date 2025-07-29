@@ -561,12 +561,13 @@ p_b_dom_main = ggplot(d_25, aes(y = vA_est, x = vA_true_new, color = k)) +
   geom_smooth(method = "lm", se=FALSE) 
 
 
-p_test = ggplot(d_25, aes(y = vA_true_new - va_true_new, x = va_true_new, color = k)) +
+p_test = ggplot(d_25, aes(y = vA_true_new, x = va_true_new, color = k)) +
   theme_bw() + geom_point() + 
   theme(text = element_text(size = 15))+ 
   scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
   geom_abline(slope = 0, intercept = 0) +
- theme(legend.position = "bottom")
+ theme(legend.position = "bottom") +
+  geom_abline(slope = 1, intercept = 0)
 
 # Save the legend
 legend_b_dominance = get_plot_component(p_b_dom_main + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
@@ -755,6 +756,30 @@ p_pool_seq_combined = plot_grid(p_pool_seq_combined,
 ggsave(plot = p_pool_seq_combined, width = 8, height = 5, file = file.path(output_path, "Fig7.jpg"))
 p_pool_seq_combined
 
+###########################
+### Simplified by sites ###
+###########################
+
+d_26 = read.csv(file.path(data_path, "combined_data/Set_26_corrected_output.csv"))
+d_26 = add_new_va_data(new_va_data=d_new_va, target_data=d_26, verbose=TRUE)
+
+d_26$Type = ifelse(grepl("poo", d_26$analysis_stamp),
+                sapply(strsplit(d_26$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
+                "Exact")
+
+d_26$Error = d_26$vA_est - d_26$vA_true_new
+labels_sites_poolseq = c("Exact" = "Exact",
+                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = "Coverage: 1000x")
+
+p_pool_sites = ggplot(d_26, aes(y = vA_est, x = seg_sites, color = Type)) + 
+  theme_bw() + geom_point() + geom_abline(slope = 0, intercept = 0) + 
+  scale_color_manual(values = c("Exact" = "#009E73", "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = "#0072B2"), labels = labels_sites_poolseq) + 
+  labs(x = "Number of segregating sites", y = TeX(r"(Estimate of $V_A$)"), color = "Pool-seq") +
+  theme(text = element_text(size = 15)) + geom_smooth(method = "lm") +
+ theme(legend.position = "bottom") + ggtitle("Simplified simulations") + theme(plot.title = element_text(hjust = 0.5))
+
+ggsave(plot = p_pool_sites, width = 5, height = 5, file = file.path(output_path, "FigS5.jpg"))
+p_pool_sites
 
 ```
 
