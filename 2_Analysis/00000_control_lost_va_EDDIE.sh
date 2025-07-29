@@ -2,8 +2,8 @@
 
 #$ -V
 #$ -cwd
-#$ -N Set_25_new_va
-#$ -t 1-300
+#$ -N Set_26_new_va
+#$ -t 1-100
 #$ -tc 100
 #$ -l h_rt=03:30:00
 #$ -l h_vmem=5G
