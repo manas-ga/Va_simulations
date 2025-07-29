@@ -24,11 +24,11 @@ end_gen = 2
 mu_msp_list = if(end_gen==2){seq(3e-9, 2.35e-8, length = nsims)}else{seq(7.5e-08, 2.07e-07, length = nsims)}
 mut_ratio = if(end_gen==2){1}else{0}
 
-total_sites = round(seq(3000, 65000, length = nsims), 0)
+total_sites = round(seq(65000, 65000, length = nsims), 0)
 
 param_matrix = data.frame(matrix(NA, nrow = nsims, ncol  = 9))
 
-param_matrix[,1] = mean(mu_msp_list)
+param_matrix[,1] = mu_msp_list
 param_matrix[,2] = 0.5
 param_matrix[,3] = 2
 param_matrix[,4] = 1000
