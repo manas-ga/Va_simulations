@@ -2,7 +2,7 @@
 
 #$ -V
 #$ -cwd
-#$ -N Set_18_poolseq
+#$ -N Set_9_std_poolseq
 #$ -t 1-100
 #$ -tc 100
 #$ -l h_rt=8:30:00
