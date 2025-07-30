@@ -156,7 +156,7 @@ library(Vw)
 
 Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "TEST_SCE-BIO-C06645_2025-07-16_10-41-15.799234", commandArgs(trailingOnly = TRUE)[1])
 
-pool_seq = TRUE
+pool_seq = FALSE
 
 if(pool_seq){
   read_length = 75
@@ -190,7 +190,7 @@ for(sim in 1:nsims){
                               coverage = coverage,
                               V_logmean = V_logmean,
                               proj = "BLoM",                              # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
-                              LDalpha = FALSE,                            # Should L or diag(L) be considered while modelling distribution of alphas
+                              LDalpha = TRUE,                            # Should L or diag(L) be considered while modelling distribution of alphas
                               pa = 1,
                               Vs = "LoNL",                                # "L" or "LoNL"
                               method="REML",                              # Can be "REML" or "MCMC"

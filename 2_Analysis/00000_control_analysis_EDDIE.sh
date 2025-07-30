@@ -2,7 +2,7 @@
 
 #$ -V
 #$ -cwd
-#$ -N Set_9_std_poolseq
+#$ -N Set_25_D analysis
 #$ -t 1-100
 #$ -tc 100
 #$ -l h_rt=8:30:00
