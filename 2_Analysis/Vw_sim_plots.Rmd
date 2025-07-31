@@ -546,6 +546,19 @@ d_25 = read.csv(file.path(data_path, "combined_data/Set_25_corrected_output.csv"
 d_25 = add_new_va_data(new_va_data=d_new_va, target_data=d_25, verbose=TRUE)
 d_25$k = gsub(".*=", x=d_25$sim, "")
 
+## Testing LDalpha
+
+d_25_0.75 = d_25[d_25$k=="0.75",]
+
+p_dom_ldalpha = ggplot(d_25_0.75, aes(y = vA_est, x = vA_true_new, color = LDalpha)) +
+  theme_bw() + geom_point() + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)")) +
+  theme(text = element_text(size = 15))+ 
+  scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
+  geom_abline(slope = 1, intercept = 0) +
+ theme(legend.position = "bottom") +
+  geom_smooth(method = "lm", se=FALSE) 
+
 # Since the ylabels have different widths, the combined plot dows not have the four panels properly aligned
 # Draw the yabels separately to pre-specified dimensions and then combine the y_label-less plots with the custom y-labels
 
@@ -561,13 +574,13 @@ p_b_dom_main = ggplot(d_25, aes(y = vA_est, x = vA_true_new, color = k)) +
   geom_smooth(method = "lm", se=FALSE) 
 
 
-p_test = ggplot(d_25, aes(y = vA_true_new, x = vA_true, color = k)) +
+p_test = ggplot(d_25, aes(y = mean_diversity, x = mu_msp, color = k)) +
   theme_bw() + geom_point() + 
   theme(text = element_text(size = 15))+ 
   scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
-  geom_abline(slope = 0, intercept = 0) +
  theme(legend.position = "bottom") +
-  geom_abline(slope = 1, intercept = 0)
+  geom_abline(slope = 1, intercept = 0) 
+
 
 # Save the legend
 legend_b_dominance = get_plot_component(p_b_dom_main + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
@@ -668,12 +681,14 @@ d_nb_poolseq$Type = ifelse(grepl("poo", d_nb_poolseq$analysis_stamp),
 
 labels_nb_poolseq = c("Exact" = "Exact",
                      "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = expression(R[75]*C[1000]*V[0]),
+                     "pool_seq_TRUE_read_length_75_coverage_500_V_logmean_0" = expression(R[75]*C[500]*V[0]),
                      "pool_seq_TRUE_read_length_75_coverage_100_V_logmean_0" = expression(R[75]*C[100]*V[0]),
                      "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945" = expression(R[75]*C[1000]*V[log(2)]),
                      "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0" = expression(R[1]*C[1000]*V[0]))
 
 values_nb_poolseq = c("Exact" = "#009E73",
                      "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = "#0072B2",
+                     "pool_seq_TRUE_read_length_75_coverage_500_V_logmean_0" = "lightblue",
                      "pool_seq_TRUE_read_length_75_coverage_100_V_logmean_0" ="#999999",
                      "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945" = "#E59866",
                      "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0" = "#D01C8B")
@@ -712,12 +727,14 @@ d_b_poolseq$Type = ifelse(grepl("poo", d_b_poolseq$analysis_stamp),
                 "Exact")
 labels_b_poolseq = c("Exact" = "Exact",
                      "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = expression(R[75]*C[1000]*V[0]),
+                     "pool_seq_TRUE_read_length_75_coverage_500_V_logmean_0" = expression(R[75]*C[500]*V[0]),
                      "pool_seq_TRUE_read_length_75_coverage_100_V_logmean_0" = expression(R[75]*C[100]*V[0]),
                      "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945" = expression(R[75]*C[1000]*V[log(2)]),
                      "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0" = expression(R[1]*C[1000]*V[0]))
 
 values_b_poolseq = c("Exact" = "#009E73",
                      "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = "#0072B2",
+                     "pool_seq_TRUE_read_length_75_coverage_500_V_logmean_0" = "lightblue",
                      "pool_seq_TRUE_read_length_75_coverage_100_V_logmean_0" ="#999999",
                      "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945" = "#E59866",
                      "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0" = "#D01C8B")
