@@ -3,9 +3,9 @@
 #$ -V
 #$ -cwd
 #$ -N Test		
-#$ -t 1-10
-#$ -tc 10
-#$ -l h_rt=05:20:00
+#$ -t 1-21
+#$ -tc 21
+#$ -l h_rt=03:20:00
 #$ -l h_vmem=10g
 #$ -pe sharedmem 2
 #$ -j y

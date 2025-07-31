@@ -118,6 +118,8 @@ system(paste("mkdir -p", paste(file_storage_path, "/b_Interim_files/SLiM_outputs
 # Arg 7 = flip_sel_coef
 # Arg 8 = mut_ratio
 # Arg 9 = total_sites
+# Arg 10 = use_dominance
+# Arg 11 = k
 
 #####################################################
 ############ Simulation Parameters ##################
@@ -194,7 +196,7 @@ mu_list = if(end_gen==2){seq(0, 0, length = nsims)}else{10*mu_msp_list}
 
 ## total number of permissible sites (to be used to set the neutral mutation rate)
 
-total_sites = as.numeric(commandArgs(trailingOnly = TRUE)[9])
+total_sites = if(Sys.info()["nodename"]=="SCE-BIO-C06645"){3000}else{as.numeric(commandArgs(trailingOnly = TRUE)[9])}
 
 # Mutation rate during the experiment
 
@@ -218,8 +220,9 @@ mean_alpha = 0
 var_alpha_list = seq(0.00015, 0.00015, length = nsims) # Vector to store variance of normal DFE
 
 # Dominance
-use_dominance = 1
-k = 0.5 # Dominance coefficient; heterozygote phenotype = (1 + k)eta/2 where eta = 2*s; d = k*eta
+use_dominance = if(Sys.info()["nodename"]=="SCE-BIO-C06645"){0}else{as.numeric(commandArgs(trailingOnly = TRUE)[10])}
+# Dominance coefficient; heterozygote phenotype = (1 + k)eta/2 where eta = 2*s; d = k*eta
+k = if(Sys.info()["nodename"]=="SCE-BIO-C06645"){0.5}else{as.numeric(commandArgs(trailingOnly = TRUE)[11])}
 
 # Environmental variance for relative fitness
 
