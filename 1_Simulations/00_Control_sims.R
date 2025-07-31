@@ -208,7 +208,7 @@ DFE = "g"                                   # DFE can be "g" (gamma) or "n" (nor
 
 # If DFE is "g"
 shape = 0.3                                 # Shape of the gamma DFE ##### mean = shape*scale
-scale_list = if(end_gen==2){seq(0.033, 0.033, length = nsims)}else{seq(0.033, 0.033, length = nsims)}  # Vector of Scale of the gamma DFE
+scale_list = if(end_gen==2){seq(0.033, 0.033, length = nsims)}else{seq(0.045, 0.045, length = nsims)}  # Vector of Scale of the gamma DFE
 
 # The ratio of beneficial:deleterious mutations 
 mut_ratio = if(Sys.info()["nodename"]=="SCE-BIO-C06645"){1}else{as.numeric(commandArgs(trailingOnly = TRUE)[8])}
