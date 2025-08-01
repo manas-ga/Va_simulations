@@ -190,7 +190,7 @@ for(sim in 1:nsims){
                               coverage = coverage,
                               V_logmean = V_logmean,
                               proj = "BLoM",                              # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
-                              LDalpha = TRUE,                            # Should L or diag(L) be considered while modelling distribution of alphas
+                              LDalpha = FALSE,                            # Should L or diag(L) be considered while modelling distribution of alphas
                               pa = 1,
                               Vs = "LoNL",                                # "L" or "LoNL"
                               method="REML",                              # Can be "REML" or "MCMC"

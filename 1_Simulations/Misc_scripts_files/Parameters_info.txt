@@ -154,3 +154,47 @@ map_length = 0.5
 map_length_expt = 2
 r_msp = 1e-9*Dmel_Ne/Ne
 !!! Check Set_ID
+
+### k = 0.75 ###
+
+
+Ne = 2500
+n_ind = 2500
+sequence_length = 1e+06
+end_gen = 25000
+additive_limit = 24999
+DFE = "g"
+shape = 0.3
+scale = 0.045
+use_dominance = 1
+k = 0.5
+mut_ratio = 0
+mu_list = [1.9e-06, 6.7e-06]
+mu_msp = [1.9e-07, 6.7e-07]
+total_sites = 67500
+map_length = 0.5
+map_length_expt = 2
+r_msp = 1e-9*Dmel_Ne/Ne
+!!! Check Set_ID
+
+### k = 0.9 ###
+
+
+Ne = 2500
+n_ind = 2500
+sequence_length = 1e+06
+end_gen = 25000
+additive_limit = 24999
+DFE = "g"
+shape = 0.3
+scale = 0.045
+use_dominance = 1
+k = 0.5
+mut_ratio = 0
+mu_list = [1.9e-06, 6.7e-06]
+mu_msp = [1.9e-07, 6.7e-07]
+total_sites = 67500
+map_length = 0.5
+map_length_expt = 2
+r_msp = 1e-9*Dmel_Ne/Ne
+!!! Check Set_ID
