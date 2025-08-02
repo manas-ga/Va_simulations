@@ -2,9 +2,9 @@
 
 #$ -V
 #$ -cwd
-#$ -N TEST_dom
-#$ -t 1-30
-#$ -tc 30
+#$ -N Set_31_analysis
+#$ -t 1-300
+#$ -tc 100
 #$ -l h_rt=5:00:00
 #$ -l h_vmem=25G
 #$ -pe sharedmem 12
