@@ -243,7 +243,7 @@ Set_ID = paste(Job_ID, Set_ID, sep="_")
 
 ## Only attach command line parameters to the set id if not running on the PC
 if(Sys.info()["nodename"]!="SCE-BIO-C06645"){
-  Set_ID = paste(Set_ID, commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[2], commandArgs(trailingOnly = TRUE)[3], commandArgs(trailingOnly = TRUE)[4], commandArgs(trailingOnly = TRUE)[5], commandArgs(trailingOnly = TRUE)[6], commandArgs(trailingOnly = TRUE)[7], commandArgs(trailingOnly = TRUE)[8], commandArgs(trailingOnly = TRUE)[9], sep = "_")
+  Set_ID = paste(Set_ID, commandArgs(trailingOnly = TRUE)[1], commandArgs(trailingOnly = TRUE)[2], commandArgs(trailingOnly = TRUE)[3], commandArgs(trailingOnly = TRUE)[4], commandArgs(trailingOnly = TRUE)[5], commandArgs(trailingOnly = TRUE)[6], commandArgs(trailingOnly = TRUE)[7], commandArgs(trailingOnly = TRUE)[8], commandArgs(trailingOnly = TRUE)[9], commandArgs(trailingOnly = TRUE)[10], commandArgs(trailingOnly = TRUE)[11], sep = "_")
 }
 
 if(!file.exists(paste(output_path, "/", Set_ID, "_Data.csv", sep = ""))){
