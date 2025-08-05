@@ -574,12 +574,13 @@ p_b_dom_main = ggplot(d_25, aes(y = vA_est, x = vA_true_new, color = k)) +
   geom_smooth(method = "lm", se=FALSE) 
 
 
-p_test = ggplot(d_25, aes(y = mean_diversity, x = mu_msp, color = k)) +
+p_test = ggplot(d_25, aes(y = vA_true_new - va_true_new, x = mu_msp, color = k)) +
   theme_bw() + geom_point() + 
   theme(text = element_text(size = 15))+ 
   scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
  theme(legend.position = "bottom") +
-  geom_abline(slope = 1, intercept = 0) 
+  geom_abline(slope = 1, intercept = 0) +
+  geom_smooth(method = "lm", se=FALSE) 
 
 
 # Save the legend

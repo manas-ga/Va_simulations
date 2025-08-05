@@ -21,10 +21,10 @@ standard_only = TRUE
 
 ## The standard set (to be used as a reference to compare)
 
-nsims = 100 # number of simulations for each set
+nsims = 20 # number of simulations for each set
 end_gen = 25000
 
-mu_msp_list = if(end_gen==2){seq(3e-9, 2.35e-8, length = nsims)}else{seq(2e-07, 5.7e-07, length = nsims)}
+mu_msp_list = if(end_gen==2){seq(3e-9, 2.35e-8, length = nsims)}else{seq(3.6e-08, 3.6e-07, length = nsims)}
 mut_ratio = if(end_gen==2){1}else{0}
 
 total_sites = round(seq(67500, 67500, length = nsims), 0)
@@ -32,7 +32,7 @@ total_sites = round(seq(67500, 67500, length = nsims), 0)
 param_matrix = data.frame(matrix(NA, nrow = nsims, ncol  = 11))
 
 param_matrix[,1] = mu_msp_list
-param_matrix[,2] = 0.5
+param_matrix[,2] = 50
 param_matrix[,3] = 2
 param_matrix[,4] = 1000
 param_matrix[,5] = 10
@@ -41,7 +41,7 @@ param_matrix[,7] = 0
 param_matrix[,8] = mut_ratio
 param_matrix[,9] = total_sites
 param_matrix[,10] = 1
-param_matrix[,11] = 0.9
+param_matrix[,11] = 0.5
 
 # Add to this matrix if simulations other than the standard set are also required
 
@@ -107,4 +107,4 @@ if(!standard_only){
   
 }
 
-write.table(noquote(param_matrix), file = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/000_parameter_grid_eddie_k=0.9.txt", sep = " ", col.names = FALSE, row.names = FALSE, quote = FALSE)
+write.table(noquote(param_matrix), file = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/1_Simulations/000_parameter_grid_ac3.txt", sep = " ", col.names = FALSE, row.names = FALSE, quote = FALSE)

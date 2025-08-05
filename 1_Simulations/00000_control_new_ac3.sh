@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#SBATCH --job-name=Set_31
+#SBATCH --job-name=Test_dom
 #SBATCH --output=/mnt/hel/obbard/Va_simulations/analyses/b_Interim_files/std_out/job_%A_%a.log   # Store logs in a custom directory
 #SBATCH --open-mode=append                                                                       # Append output if the file already exists
-#SBATCH --array=1-300%30                                                                         # Run replicate tasks
+#SBATCH --array=1-20%20                                                                         # Run replicate tasks
 #SBATCH --ntasks=2
 #SBATCH --mem=10G
 
