@@ -3,9 +3,9 @@
 #$ -V
 #$ -cwd
 #$ -N Set_31_analysis
-#$ -t 1-300
+#$ -t 1-200
 #$ -tc 100
-#$ -l h_rt=5:00:00
+#$ -l h_rt=10:00:00
 #$ -l h_vmem=25G
 #$ -pe sharedmem 12
 #$ -j y

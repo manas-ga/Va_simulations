@@ -488,7 +488,7 @@ p_nb_dominance_combined = plot_grid(title_nb_dominance,
                                     legend_nb_dominance,
                                     nrow = 3, rel_heights = c(0.1, 1, 0.05))
 
-ggsave(p_nb_dominance_combined, width = 8, height = 8, file = file.path(output_path, "FigS4A.jpg"))
+ggsave(p_nb_dominance_combined, width = 8, height = 8, file = file.path(output_path, "FigS4.jpg"))
 ```
 
 
@@ -538,11 +538,15 @@ p_b_std
 
 
 ```
-### Full simulations with dominance
+### Full simulations with dominance (Figure S5)
 
 ```{r full_dominance}
 
 d_25 = read.csv(file.path(data_path, "combined_data/Set_25_corrected_output.csv"))
+
+# Remove analyses with LDalpha = TRUE
+d_25 = d_25[d_25$LDalpha==FALSE,]
+
 d_25 = add_new_va_data(new_va_data=d_new_va, target_data=d_25, verbose=TRUE)
 d_25$k = gsub(".*=", x=d_25$sim, "")
 
@@ -654,16 +658,19 @@ p_b_dominance_combined = plot_grid(title_b_dominance,
                                     legend_b_dominance,
                                     nrow = 3, rel_heights = c(0.1, 1, 0.05))
 
-ggsave(p_b_dominance_combined, width = 8, height = 8, file = file.path(output_path, "FigS4B.jpg"))
+ggsave(p_b_dominance_combined, width = 8, height = 8, file = file.path(output_path, "FigS5.jpg"))
 
 ```
 
-### Simplified & Full simulations analysed after simulated_pool_seq sampling of allele frequencies (Figure S4)
+### Simplified & Full simulations analysed after simulated_pool_seq sampling of allele frequencies (Figure Fig7, S6)
 
 ```{r full_poolseq}
-##################
+
+#################
+### Load data ###
+#################
+
 ### Simplified ###
-##################
 
 d_nb_poolseq = read.csv(file.path(data_path, "combined_data/Set_18_corrected_output.csv"))
 
@@ -680,32 +687,8 @@ d_nb_poolseq$Type = ifelse(grepl("poo", d_nb_poolseq$analysis_stamp),
                 sapply(strsplit(d_nb_poolseq$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
                 "Exact")
 
-labels_nb_poolseq = c("Exact" = "Exact",
-                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = expression(R[75]*C[1000]*V[0]),
-                     "pool_seq_TRUE_read_length_75_coverage_500_V_logmean_0" = expression(R[75]*C[500]*V[0]),
-                     "pool_seq_TRUE_read_length_75_coverage_100_V_logmean_0" = expression(R[75]*C[100]*V[0]),
-                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945" = expression(R[75]*C[1000]*V[log(2)]),
-                     "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0" = expression(R[1]*C[1000]*V[0]))
 
-values_nb_poolseq = c("Exact" = "#009E73",
-                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = "#0072B2",
-                     "pool_seq_TRUE_read_length_75_coverage_500_V_logmean_0" = "lightblue",
-                     "pool_seq_TRUE_read_length_75_coverage_100_V_logmean_0" ="#999999",
-                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945" = "#E59866",
-                     "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0" = "#D01C8B")
-
-p_nb_poolseq = ggplot(d_nb_poolseq, aes(y = vA_est, x = vA_true_new, color = Type)) +
-  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
-  scale_color_manual(values = values_nb_poolseq, labels = labels_nb_poolseq) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Pool-seq") +
-  theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
-  theme(legend.position = "bottom") + ggtitle("Simplified simulations") + theme(plot.title = element_text(hjust = 0.5))
-
-
-############
 ### Full ###
-############
 
 d_b_poolseq = read.csv(file.path(data_path, "combined_data/Set_9_corrected_output.csv"))
 
@@ -726,53 +709,63 @@ d_b_poolseq = rbind(d_9_std, d_b_poolseq)
 d_b_poolseq$Type = ifelse(grepl("poo", d_b_poolseq$analysis_stamp),
                 sapply(strsplit(d_b_poolseq$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
                 "Exact")
-labels_b_poolseq = c("Exact" = "Exact",
-                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = expression(R[75]*C[1000]*V[0]),
-                     "pool_seq_TRUE_read_length_75_coverage_500_V_logmean_0" = expression(R[75]*C[500]*V[0]),
-                     "pool_seq_TRUE_read_length_75_coverage_100_V_logmean_0" = expression(R[75]*C[100]*V[0]),
-                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945" = expression(R[75]*C[1000]*V[log(2)]),
-                     "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0" = expression(R[1]*C[1000]*V[0]))
-
-values_b_poolseq = c("Exact" = "#009E73",
-                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = "#0072B2",
-                     "pool_seq_TRUE_read_length_75_coverage_500_V_logmean_0" = "lightblue",
-                     "pool_seq_TRUE_read_length_75_coverage_100_V_logmean_0" ="#999999",
-                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945" = "#E59866",
-                     "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0" = "#D01C8B")
 
 
-p_b_poolseq = ggplot(d_b_poolseq, aes(y = vA_est, x = vA_true_new, color = Type)) +
+
+###################################
+### Coverage only for main text ###
+###################################
+
+# Restrict only to data where coverage is varied
+
+d_nb_coverage = d_nb_poolseq[d_nb_poolseq$Type%in%c("Exact", "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0", "pool_seq_TRUE_read_length_75_coverage_500_V_logmean_0", "pool_seq_TRUE_read_length_75_coverage_100_V_logmean_0"),]
+
+d_b_coverage = d_b_poolseq[d_b_poolseq$Type%in%c("Exact", "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0", "pool_seq_TRUE_read_length_75_coverage_500_V_logmean_0", "pool_seq_TRUE_read_length_75_coverage_100_V_logmean_0"),]
+
+d_nb_coverage$Coverage = ifelse(d_nb_coverage$Type=="Exact", "Exact",  sapply(strsplit(d_nb_coverage$analysis_stamp, "_"), function(x) paste(x[8], "x", sep = "")))
+
+d_nb_coverage$Coverage = factor(d_nb_coverage$Coverage, levels = c("Exact", "1000x", "500x", "100x"))
+
+d_b_coverage$Coverage = ifelse(d_b_coverage$Type=="Exact", "Exact",  sapply(strsplit(d_b_coverage$analysis_stamp, "_"), function(x) paste(x[8], "x", sep = "")))
+
+d_b_coverage$Coverage = factor(d_b_coverage$Coverage, levels = c("Exact", "1000x", "500x", "100x"))
+
+p_nb_coverage = ggplot(d_nb_coverage, aes(y = vA_est, x = vA_true_new, color = Coverage)) +
   theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
-  scale_color_manual(values = values_b_poolseq, labels = labels_b_poolseq) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Pool-seq") +
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Coverage", title = "Simplified simulations", subtitle = "(~3000 sites, 2 morgans)") +
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
- theme(legend.position = "bottom") + ggtitle("Full simulations") + theme(plot.title = element_text(hjust = 0.5))
+ theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12))
 
-################
-### Combined ###
-################
+p_b_coverage = ggplot(d_b_coverage, aes(y = vA_est, x = vA_true_new, color = Coverage)) +
+  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Coverage", title = "Full simulations", subtitle = "(~65000 sites, 2 morgans)") +
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) +
+ theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12))
 
 # Extract legend
 
-legend_poolseq = get_plot_component(p_b_poolseq + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
+legend_coverage = get_plot_component(p_b_coverage + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
 
 # Combine without labels
 
-p_pool_seq_combined = plot_grid(p_nb_poolseq + theme(legend.position = "none"),
-                                p_b_poolseq + theme(legend.position = "none"),
+p_coverage_combined = plot_grid(p_nb_coverage + theme(legend.position = "none"),
+                                p_b_coverage + theme(legend.position = "none"),
                                 labels = "AUTO")
 
 # Add the legend
 
-p_pool_seq_combined = plot_grid(p_pool_seq_combined,
-                                legend_poolseq,
+p_coverage_combined = plot_grid(p_coverage_combined,
+                                legend_coverage,
                                 nrow = 2, rel_heights = c(1, 0.1))
 
 # Save file
 
-ggsave(plot = p_pool_seq_combined, width = 8, height = 5, file = file.path(output_path, "Fig7.jpg"))
-p_pool_seq_combined
+ggsave(plot = p_coverage_combined, width = 8, height = 5, file = file.path(output_path, "Fig7.jpg"))
+p_coverage_combined
 
 ###########################
 ### Simplified by sites ###
@@ -796,8 +789,66 @@ p_pool_sites = ggplot(d_26, aes(y = vA_est, x = seg_sites, color = Type)) +
   theme(text = element_text(size = 15)) + geom_smooth(method = "lm") +
  theme(legend.position = "bottom") + ggtitle("Simplified simulations") + theme(plot.title = element_text(hjust = 0.5))
 
-ggsave(plot = p_pool_sites, width = 5, height = 5, file = file.path(output_path, "FigS5.jpg"))
+ggsave(plot = p_pool_sites, width = 5, height = 5, file = file.path(output_path, "FigS6.jpg"))
 p_pool_sites
+
+
+##############################################################
+### Supplementary figures (overdispersion and read length) ###
+##############################################################
+
+d_nb_OD = d_nb_poolseq[d_nb_poolseq$Type%in%c("Exact", "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0", "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0", "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945"),]
+
+d_b_OD = d_b_poolseq[d_b_poolseq$Type%in%c("Exact", "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0", "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0", "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945"),]
+
+
+labels_OD = c("Exact" = "Exact",
+                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = expression(R[75]*C[1000]*V[0]),
+                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945" = expression(R[75]*C[1000]*V[log(2)]),
+                     "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0" = expression(R[1]*C[1000]*V[0]))
+
+values_OD = c("Exact" = "#009E73",
+                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = "#D01C8B",
+                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945" = "#0072B2",
+                     "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0" = "#999999")
+
+p_nb_OD = ggplot(d_nb_OD, aes(y = vA_est, x = vA_true_new, color = Type)) +
+  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
+  scale_color_manual(values = values_OD, labels = labels_OD) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Pool-seq", title = "Simplified simulations", subtitle = "(~3000 sites, 2 morgans)") +
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) +
+  theme(legend.position = "bottom") + ggtitle("Simplified simulations") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(size = 12, hjust = 0.5))
+
+p_b_OD = ggplot(d_b_OD, aes(y = vA_est, x = vA_true_new, color = Type)) +
+  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
+  scale_color_manual(values = values_OD, labels = labels_OD) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Pool-seq", title = "Full simulations", subtitle = "(~65000 sites, 2 morgans)") +
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) +
+  theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(size = 12, hjust = 0.5))
+
+# Extract legend
+
+legend_OD = get_plot_component(p_b_OD + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
+
+# Combine without labels
+
+p_OD_combined = plot_grid(p_nb_OD + theme(legend.position = "none"),
+                                p_b_OD + theme(legend.position = "none"),
+                                labels = "AUTO")
+
+# Add the legend
+
+p_OD_combined = plot_grid(p_OD_combined,
+                                legend_OD,
+                                nrow = 2, rel_heights = c(1, 0.1))
+
+# Save file
+
+ggsave(plot = p_OD_combined, width = 8, height = 5, file = file.path(output_path, "FigS7.jpg"))
+p_OD_combined
+
 
 ```
 
