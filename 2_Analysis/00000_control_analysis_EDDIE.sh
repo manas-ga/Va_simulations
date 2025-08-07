@@ -2,7 +2,7 @@
 
 #$ -V
 #$ -cwd
-#$ -N Set_31_analysis
+#$ -N poolseq_100x
 #$ -t 1-200
 #$ -tc 100
 #$ -l h_rt=10:00:00
