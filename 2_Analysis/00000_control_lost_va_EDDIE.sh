@@ -2,9 +2,9 @@
 
 #$ -V
 #$ -cwd
-#$ -N dom_new_va
-#$ -t 1-30
-#$ -tc 30
+#$ -N Set_31_corr
+#$ -t 1-300
+#$ -tc 100
 #$ -l h_rt=03:30:00
 #$ -l h_vmem=5G
 #$ -pe sharedmem 12
