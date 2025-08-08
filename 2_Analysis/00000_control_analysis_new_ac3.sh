@@ -3,8 +3,8 @@
 #SBATCH --job-name=poolseq_100x
 #SBATCH --output=/mnt/hel/obbard/Va_simulations/analyses/b_Interim_files/std_out/job_%A_%a.log   # Store logs in a custom directory
 #SBATCH --open-mode=append                                                                       # Append output if the file already exists
-#SBATCH --array=1-100%25                                                                          # Run replicate tasks
-#SBATCH --ntasks=2
+#SBATCH --array=1-100%10                                                                          # Run replicate tasks
+#SBATCH --ntasks=12
 #SBATCH --mem=5G
 
 # Path to Conda (if Conda isn't initialized by default)
