@@ -542,18 +542,6 @@ d_25 = d_25[d_25$LDalpha==FALSE,]
 d_25 = add_new_va_data(new_va_data=d_new_va, target_data=d_25, verbose=TRUE)
 d_25$k = gsub(".*=", x=d_25$sim, "")
 
-## Testing LDalpha
-
-d_25_0.75 = d_25[d_25$k=="0.75",]
-
-p_dom_ldalpha = ggplot(d_25_0.75, aes(y = vA_est, x = vA_true_new, color = LDalpha)) +
-  theme_bw() + geom_point() + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)")) +
-  theme(text = element_text(size = 15))+ 
-  scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
-  geom_abline(slope = 1, intercept = 0) +
- theme(legend.position = "bottom") +
-  geom_smooth(method = "lm", se=FALSE) 
 
 # Since the ylabels have different widths, the combined plot dows not have the four panels properly aligned
 # Draw the yabels separately to pre-specified dimensions and then combine the y_label-less plots with the custom y-labels
@@ -653,6 +641,85 @@ p_b_dominance_combined = plot_grid(title_b_dominance,
 ggsave(p_b_dominance_combined, width = 8, height = 8, file = file.path(output_path, "full_dominance.jpg"))
 
 ```
+### Full simulations with 'sprinkled' dominance (Figure )
+
+Full simulations in which the history phase was simulated under additivity and dominance was switched off only during the experiment phase.
+
+```{r full_dominance_sprinkled}
+
+d_31 = read.csv(file.path(data_path, "combined_data/Set_31_corrected_output.csv"))
+
+d_31 = add_new_va_data(new_va_data=d_new_va, target_data=d_31, verbose=TRUE)
+d_31$k = gsub(".*=", x=d_31$sim, "")
+
+
+# Since the ylabels have different widths, the combined plot dows not have the four panels properly aligned
+# Draw the yabels separately to pre-specified dimensions and then combine the y_label-less plots with the custom y-labels
+
+### Main estimate vs true V_A ###
+
+p_b_dom_sprinkled_main = ggplot(d_31, aes(y = vA_est, x = vA_true_new, color = k)) +
+  theme_bw() + geom_point() + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Dominance (|k|)") +
+  theme(text = element_text(size = 15))+ 
+  scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
+  geom_abline(slope = 1, intercept = 0) +
+ theme(legend.position = "bottom") +
+  geom_smooth(method = "lm", se=FALSE) 
+
+### Boxplot for p_{alpha} ###
+
+p_b_dom_sprinkled_palpha = ggplot(d_31, aes(y = palpha_est, x = k, fill = k)) +
+  theme_bw() + geom_boxplot() + 
+  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $p_{\alpha} $)"), fill = "Dominance (|k|)") +
+  theme(text = element_text(size = 15))+ 
+  scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
+  geom_abline(slope = 0, intercept = 0, linetype = "dotdash") +
+ theme(legend.position = "bottom")
+
+### Boxplot for B_{alpha}^{(1) ###
+
+p_b_dom_sprinkled_balpha_slope = ggplot(d_31, aes(y = balpha_slope_est, x = k, fill = k)) +
+  theme_bw() + geom_boxplot() + 
+  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $\beta^{(1)}_{\bar{\alpha}}$)"), fill = "Dominance (|k|)") +
+  theme(text = element_text(size = 15))+ 
+  scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
+  geom_abline(slope = 0, intercept = 0, linetype = "dotdash") +
+ theme(legend.position = "bottom")
+
+### Residual variance ###
+
+p_b_dom_sprinkled_res_var = ggplot(d_31, aes(y = Residual_var, x = k, fill = k)) +
+  theme_bw() + geom_boxplot() + 
+  labs(x = "Dominance (|k|)", y = "Residual variance", fill = "Dominance (|k|)") +
+  theme(text = element_text(size = 15))+ 
+  scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
+  geom_abline(slope = 0, intercept = 1, linetype = "dotdash") +
+ theme(legend.position = "bottom")
+
+# Save the legend
+legend_b_dominance_sprinkled = get_plot_component(p_b_dom_sprinkled_main + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
+
+### Combine the four plots ###
+
+p_b_dominance_sprinkled_combined = plot_grid(p_b_dom_sprinkled_main + theme(legend.position = "none"),
+                                    p_b_dom_sprinkled_palpha + theme(legend.position = "none"),
+                                    p_b_dom_sprinkled_res_var + theme(legend.position = "none"),
+                                    p_b_dom_sprinkled_balpha_slope + theme(legend.position = "none"),
+                                    labels = "AUTO", nrow = 2)
+title_b_dominance_sprinkled = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
+subtitle_b_dominance_sprinkled = ggdraw() + draw_label("(with dominance in the experiment phase)", hjust = 0.5, size = 20)
+
+p_b_dominance_sprinkled_combined = plot_grid(title_b_dominance_sprinkled,
+                                   subtitle_b_dominance_sprinkled,
+                                   p_b_dominance_sprinkled_combined,
+                                   legend_b_dominance_sprinkled,
+                                   nrow = 4, rel_heights = c(0.1, 0.05, 1, 0.05))
+
+ggsave(p_b_dominance_sprinkled_combined, width = 8, height = 8, file = file.path(output_path, "full_dominance_sprinkled.jpg"))
+
+```
+
 
 ### Simplified & Full simulations analysed after simulated_pool_seq sampling of allele frequencies (Figure Fig7, S6)
 
