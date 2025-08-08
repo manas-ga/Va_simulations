@@ -242,11 +242,10 @@ Load the dataframe storing information on calculations of vA_true_new, va_true_n
 ```{r load_new_va_data}
 d_new_va = read.csv(file.path(data_path, "combined_data/new_va_calculation_combined.csv"))
 alpha = TRUE # If alpha = TRUE, alpha = eta + (1 - 2p)eta is used to calculate vA_true, i.e. vA_true_new is used in the plots. Otherwise, vA_true is used in the plots
-corrected = TRUE
 ```
 
 
-## Simplified simulations (simulations without burnin) (Set_5/Set_18) (Figure 1, Figure 2)
+## Simplified simulations (simulations without burnin) (Set_18) (Figure 1, Figure 2)
 
 Selection coefficients were drawn from a gamma distribution (shape = 0.3, scale = 0.033) and assigned to mutations randomly. The recombination rate in the msprime simulation was 5.32e-07. Map length in the history phase of just 1 generation (eng_gen = 2) was 5.
 
@@ -260,22 +259,20 @@ ngen2 = 4
 
 
 ```{r simplified_standard}
-if(corrected){
-  d_5 = read.csv(file.path(data_path, "combined_data/Set_18_corrected_output.csv"))
-}else{
-  d_5 = read.csv(file.path(data_path, "combined_data/Set_5_output.csv"))
-}
+
+d_18 = read.csv(file.path(data_path, "combined_data/Set_18_corrected_output.csv"))
+
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
-d_5 = add_new_va_data(new_va_data=d_new_va, target_data=d_5, verbose=TRUE)
+d_18 = add_new_va_data(new_va_data=d_new_va, target_data=d_18, verbose=TRUE)
 
 # Filter out the data where allele frequencies are sampled using simulate_pool_seq()
 
-d_5 = d_5[grep("pool_seq", d_5$analysis_stamp, invert = TRUE, value = FALSE),]
-d_5 = deduplicate_sim_analyses(d_5)
+d_18 = d_18[grep("pool_seq", d_18$analysis_stamp, invert = TRUE, value = FALSE),]
+d_18 = deduplicate_sim_analyses(d_18)
 
 # Select data for the standard plot for simplified simulations
-d_5_std = d_5[d_5$r_expt*d_5$sequence_length==2&d_5$n_ind_exp==1000&d_5$n_cages==10&d_5$ngen2==4,] # Data for the standard set
+d_18_std = d_18[d_18$r_expt*d_18$sequence_length==2&d_18$n_ind_exp==1000&d_18$n_cages==10&d_18$ngen2==4,] # Data for the standard set
 
 ##################################################################################################
 ####### Standard plots (Set_5: ml_expt = 2, n_indxpt = 1000, n_cages = 10, ngen2 = 4) ############
@@ -285,13 +282,13 @@ d_5_std = d_5[d_5$r_expt*d_5$sequence_length==2&d_5$n_ind_exp==1000&d_5$n_cages=
 ### Figure 1 ###
 ################
 
-p_nb_2_std = make_std_plots(d_5_std, alpha = alpha)$combined
+p_nb_2_std = make_std_plots(d_18_std, alpha = alpha)$combined
 
 title = ggdraw() + draw_label("Simplified simulations", hjust = 0.5, size = 30)
 p_nb_2_std = plot_grid(title, p_nb_2_std, ncol = 1, rel_heights = c(0.1,1))
 
 
-ggsave(p_nb_2_std, width = 8, height = 8, file = file.path(output_path, if(corrected){"Fig1_corrected.jpg"}else{"Fig1.jpg"}))
+ggsave(p_nb_2_std, width = 8, height = 8, file = file.path(output_path, "simplified_main.jpg"))
 p_nb_2_std
 
 
@@ -309,8 +306,8 @@ We then vary map length in the experiment (ml_exp), population size in the exper
 
 ### ml_exp ###
 
-d_5_ml_exp = d_5[d_5$n_ind_exp==1000&d_5$n_cages==10&d_5$ngen2==4,]
-p_nb_2_ml_exp = ggplot(d_5_ml_exp, aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(sequence_length*r_expt))) +
+d_18_ml_exp = d_18[d_18$n_ind_exp==1000&d_18$n_cages==10&d_18$ngen2==4,]
+p_nb_2_ml_exp = ggplot(d_18_ml_exp, aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(sequence_length*r_expt))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -327,8 +324,8 @@ p_nb_2_ml_exp = plot_grid(p_nb_2_ml_exp + theme(legend.position = "none"),
 p_nb_2_ml_exp
 
 ### n_ind_exp ###
-d_5_nind = d_5[d_5$r_exp==2e-6&d_5$n_cages==10&d_5$ngen2==4,]
-p_nb_2_nind = ggplot(d_5_nind , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(n_ind_exp))) +
+d_18_nind = d_18[d_18$r_exp==2e-6&d_18$n_cages==10&d_18$ngen2==4,]
+p_nb_2_nind = ggplot(d_18_nind , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(n_ind_exp))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -346,8 +343,8 @@ p_nb_2_nind
 
 ### n_cages ###
 
-d_5_ncages = d_5[d_5$r_exp==2e-6&d_5$n_ind_exp==1000&d_5$ngen2==4,]
-p_nb_2_ncages = ggplot(d_5_ncages , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(n_cages))) +
+d_18_ncages = d_18[d_18$r_exp==2e-6&d_18$n_ind_exp==1000&d_18$ngen2==4,]
+p_nb_2_ncages = ggplot(d_18_ncages , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(n_cages))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -365,8 +362,8 @@ p_nb_2_ncages
 
 ### ngen_expt ###
 
-d_5_ngen2 = d_5[d_5$r_exp==2e-6&d_5$n_ind_exp==1000&d_5$n_cages==10,]
-p_nb_2_ngen2 = ggplot(d_5_ngen2 , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(ngen2-ngen1))) +
+d_18_ngen2 = d_18[d_18$r_exp==2e-6&d_18$n_ind_exp==1000&d_18$n_cages==10,]
+p_nb_2_ngen2 = ggplot(d_18_ngen2 , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(ngen2-ngen1))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -392,7 +389,7 @@ title = ggdraw() + draw_label("Simplified simulations", hjust = 0.5, size = 30)
 p_nb_2_combined = plot_grid(title, p_nb_2_combined, ncol = 1, rel_heights = c(0.1,1))
 
 p_nb_2_combined
-ggsave(p_nb_2_combined, width = 12, height = 10, file = file.path(output_path, if(corrected){"Fig2_corrected.jpg"}else{"Fig2.jpg"}))
+ggsave(p_nb_2_combined, width = 12, height = 10, file = file.path(output_path, "simplified_params.jpg"))
 ```
 
 ### Simplified simulations with dominance
@@ -488,7 +485,7 @@ p_nb_dominance_combined = plot_grid(title_nb_dominance,
                                     legend_nb_dominance,
                                     nrow = 3, rel_heights = c(0.1, 1, 0.05))
 
-ggsave(p_nb_dominance_combined, width = 8, height = 8, file = file.path(output_path, "FigS4.jpg"))
+ggsave(p_nb_dominance_combined, width = 8, height = 8, file = file.path(output_path, "simplified_dominance.jpg"))
 ```
 
 
@@ -513,12 +510,7 @@ The analyses for this set were performed using all.gp = FALSE and using the true
 ### Figure 3 ###
 ################
 
-if(corrected){
-  d_9 = read.csv(file.path(data_path, "combined_data/Set_9_corrected_output.csv")) # Data for the standard set
-}else{
-  d_9 = read.csv(file.path(data_path, "combined_data/Set_9_output.csv")) # Data for the standard set
-}
-
+d_9 = read.csv(file.path(data_path, "combined_data/Set_9_corrected_output.csv")) # Data for the standard set
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_9 = add_new_va_data(new_va_data=d_new_va, target_data=d_9, verbose=TRUE)
@@ -533,7 +525,7 @@ title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
 
 p_b_std = plot_grid(title, p_b_std, ncol = 1, rel_heights = c(0.1,1))
 
-ggsave(plot = p_b_std, width = 8, height = 8, file = file.path(output_path, if(corrected){"Fig3_corrected.jpg"}else{"Fig3.jpg"}))
+ggsave(plot = p_b_std, width = 8, height = 8, file = file.path(output_path, "full_main.jpg"))
 p_b_std
 
 
@@ -658,7 +650,7 @@ p_b_dominance_combined = plot_grid(title_b_dominance,
                                     legend_b_dominance,
                                     nrow = 3, rel_heights = c(0.1, 1, 0.05))
 
-ggsave(p_b_dominance_combined, width = 8, height = 8, file = file.path(output_path, "FigS5.jpg"))
+ggsave(p_b_dominance_combined, width = 8, height = 8, file = file.path(output_path, "full_dominance.jpg"))
 
 ```
 
@@ -681,7 +673,7 @@ d_nb_poolseq = d_nb_poolseq[grep("pool_seq", d_nb_poolseq$analysis_stamp, invert
 d_nb_poolseq = add_new_va_data(new_va_data=d_new_va, target_data=d_nb_poolseq, verbose=TRUE)
 
 # Add the standard dataset
-d_nb_poolseq = rbind(d_5_std, d_nb_poolseq)
+d_nb_poolseq = rbind(d_18_std, d_nb_poolseq)
 
 d_nb_poolseq$Type = ifelse(grepl("poo", d_nb_poolseq$analysis_stamp),
                 sapply(strsplit(d_nb_poolseq$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
@@ -764,7 +756,7 @@ p_coverage_combined = plot_grid(p_coverage_combined,
 
 # Save file
 
-ggsave(plot = p_coverage_combined, width = 8, height = 5, file = file.path(output_path, "Fig7.jpg"))
+ggsave(plot = p_coverage_combined, width = 8, height = 5, file = file.path(output_path, "poolseq_coverage.jpg"))
 p_coverage_combined
 
 ###########################
@@ -789,7 +781,7 @@ p_pool_sites = ggplot(d_26, aes(y = vA_est, x = seg_sites, color = Type)) +
   theme(text = element_text(size = 15)) + geom_smooth(method = "lm") +
  theme(legend.position = "bottom") + ggtitle("Simplified simulations") + theme(plot.title = element_text(hjust = 0.5))
 
-ggsave(plot = p_pool_sites, width = 5, height = 5, file = file.path(output_path, "FigS6.jpg"))
+ggsave(plot = p_pool_sites, width = 5, height = 5, file = file.path(output_path, "poolseq_simplified_sites.jpg"))
 p_pool_sites
 
 
@@ -846,7 +838,7 @@ p_OD_combined = plot_grid(p_OD_combined,
 
 # Save file
 
-ggsave(plot = p_OD_combined, width = 8, height = 5, file = file.path(output_path, "FigS7.jpg"))
+ggsave(plot = p_OD_combined, width = 8, height = 5, file = file.path(output_path, "poolseq_OD_readlength.jpg"))
 p_OD_combined
 
 
@@ -858,14 +850,10 @@ We then vary various parameters one at a time while keeping the others fixed to 
 ### Varying the ratio of beneficial:deleterious mutations (scale = 0.033) (Figure 4C)
 
 ```{r full_varying_mut_ratio}
-if(corrected){
-  d_11 = read.csv(file.path(data_path, "combined_data/Set_11_corrected_output.csv")) # Data for the set with mut_ratio = 0.0002
-  d_14 = read.csv(file.path(data_path, "combined_data/Set_14_corrected_output.csv")) # Data for the set with mut_ratio = 0.02
-  
-}else{
-  d_11 = read.csv(file.path(data_path, "combined_data/Set_11_output.csv")) # Data for the set with mut_ratio = 0.0002
-  d_14 = read.csv(file.path(data_path, "combined_data/Set_14_output.csv")) # Data for the set with mut_ratio = 0.02
-}
+
+d_11 = read.csv(file.path(data_path, "combined_data/Set_11_corrected_output.csv")) # Data for the set with mut_ratio = 0.0002
+d_14 = read.csv(file.path(data_path, "combined_data/Set_14_corrected_output.csv")) # Data for the set with mut_ratio = 0.02
+
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_11 = add_new_va_data(new_va_data=d_new_va, target_data=d_11, verbose=TRUE)
@@ -897,11 +885,9 @@ p_ben_0.033
 ### Varying the map length in the experiment phase (scale = 0.033): ml_exp = c(0.01, 0.2, 2), mut_ratio = 0 (Figure 4A)
 
 ```{r full_varying_ml_exp}
-if(corrected){
-  d_12 = read.csv(file.path(data_path, "combined_data/Set_12_corrected_output.csv")) # Data when ml_exp was varied for scale = 0.033
-}else{
-  d_12 = read.csv(file.path(data_path, "combined_data/Set_12_output.csv")) # Data when ml_exp was varied for scale = 0.033
-}
+
+d_12 = read.csv(file.path(data_path, "combined_data/Set_12_corrected_output.csv")) # Data when ml_exp was varied for scale = 0.033
+
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_12 = add_new_va_data(new_va_data=d_new_va, target_data=d_12, verbose=TRUE)
@@ -934,13 +920,10 @@ p_ml_exp_0.033
 ### Varying the scale of the gamma distribution from which mutations are drawn in the simulation (deleterious mutations only) (scale = c(0.033, 0.045, 0.1)) (Figure 4D)
 
 ```{r full_varying_scale}
-if(corrected){
-  # Load the data for Set_15 in which mut_ratio was 0.0002 and 0.02
-  d_15 = read.csv(file.path(data_path, "combined_data/Set_15_corrected_output.csv"))
-}else{
-  # Load the data for Set_15 in which mut_ratio was 0.0002 and 0.02
-  d_15 = read.csv(file.path(data_path, "combined_data/Set_15_output.csv"))  
-}
+
+# Load the data for Set_15 in which mut_ratio was 0.0002 and 0.02
+d_15 = read.csv(file.path(data_path, "combined_data/Set_15_corrected_output.csv"))
+
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_15 = add_new_va_data(new_va_data=d_new_va, target_data=d_15, verbose=TRUE)
@@ -977,11 +960,7 @@ p_scale
 
 ```{r full_varying_ml_history}
 
-if(corrected){
-  d_13 = read.csv(file.path(data_path, "combined_data/Set_13_corrected_output.csv"))
-}else{
-  d_13 = read.csv(file.path(data_path, "combined_data/Set_13_output.csv"))
-}
+d_13 = read.csv(file.path(data_path, "combined_data/Set_13_corrected_output.csv"))
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_13 = add_new_va_data(new_va_data=d_new_va, target_data=d_13, verbose=TRUE)
@@ -1113,7 +1092,7 @@ p_Ne_res = ggplot(d_9_Ne, aes(y = Residual_var, x = Ne_exp)) +
   scale_x_discrete(labels = Ne_type_labs) +
   theme(text = element_text(size = 15))
   
-ggsave(p_Ne_res, width = 5, height = 5, file = file.path(output_path, if(corrected){"FigS3_corrected.jpg"}else{"FigS3.jpg"}))
+ggsave(p_Ne_res, width = 5, height = 5, file = file.path(output_path, "residual_var_NE.jpg"))
 
 p_Ne
 p_Ne_res
@@ -1137,7 +1116,7 @@ title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
 p_b_0.033_combined = plot_grid(title, p_b_0.033_combined, ncol = 1, rel_heights = c(0.1,1))
 p_b_0.033_combined
 
-ggsave(p_b_0.033_combined, width = 12, height = 12, file = file.path(output_path, if(corrected){"Fig4_corrected.jpg"}else{"Fig4.jpg"}))
+ggsave(p_b_0.033_combined, width = 12, height = 12, file = file.path(output_path, "full_params.jpg"))
 
 
 ```
@@ -1150,11 +1129,8 @@ Varying map length in history, but for \eta_{scale} = 0.045
 #################
 ### Figure S1 ###
 #################
-if(corrected){
-  d_N1 = read.csv(file.path(data_path, "combined_data/Set_N1_corrected_output.csv"))
-}else{
-  d_N1 = read.csv(file.path(data_path, "combined_data/Set_N1_output.csv"))
-}
+
+d_N1 = read.csv(file.path(data_path, "combined_data/Set_N1_corrected_output.csv"))
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_N1 = add_new_va_data(new_va_data=d_new_va, target_data=d_N1, verbose=TRUE)
@@ -1173,7 +1149,7 @@ p_b_0.045_ml = ggplot(d_N1 , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_tru
 
 p_b_0.045_ml
 
-ggsave(p_b_0.045_ml, width = 6, height = 5, file = file.path(output_path, if(corrected){"FigS1_corrected.jpg"}else{"FigS1.jpg"}))
+ggsave(p_b_0.045_ml, width = 6, height = 5, file = file.path(output_path, "full_ml_eta0.045.jpg"))
 
 ```
 
@@ -1333,7 +1309,7 @@ plot_categoriwise_va_lost = ggplot(d_summed_lost_va, aes(y = locuswise_va_lost_n
 
 va_lost_combined_plot = plot_grid(plot_lost_va, plot_lost_va_bias, plot_finescale_va_lost, plot_categoriwise_va_lost, ncol = 2, nrow = 2, labels = "AUTO")
 va_lost_combined_plot
-ggsave(va_lost_combined_plot, width = 10, height = 10, file = file.path(output_path, if(corrected){"FigS2_corrected.jpg"}else{"FigS2.jpg"}))
+ggsave(va_lost_combined_plot, width = 10, height = 10, file = file.path(output_path, "lost_va.jpg"))
 
 ### Calculate the the fraction of total amount of V_a lost at loci for alpha > 0.3 in the "Max." (V_a lost) simulation
 
@@ -1369,11 +1345,8 @@ if(alpha){
 ### Simplified simulations (Figure 5)
 
 ```{r simplified_comparison_BC}
-if(corrected){
-  d_16 = read.csv(file.path(data_path, "combined_data/Set_16_corrected_output.csv"))
-}else{
-  d_16 = read.csv(file.path(data_path, "combined_data/Set_16_output.csv"))
-}
+
+d_16 = read.csv(file.path(data_path, "combined_data/Set_16_corrected_output.csv"))
 
 d_16 = add_new_va_data(new_va_data=d_new_va, target_data=d_16, verbose=TRUE)
 d_16$vA_BC_est_ia = unlist(lapply(d_16$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[2])}))
@@ -1516,7 +1489,7 @@ title = ggdraw() + draw_label("Simplified simulations", hjust = 0.5, size = 30)
 # Add title
 p_bc_simplified_combined = plot_grid(title, p_bc_simplified_combined, ncol = 1, rel_heights = c(0.05,1))
 
-ggsave(p_bc_simplified_combined, file = file.path(output_path, if(corrected){"Fig5_corrected.jpg"}else{"Fig5.jpg"}), w = 15, h = 9)
+ggsave(p_bc_simplified_combined, file = file.path(output_path, "BC_simplified.jpg"), w = 15, h = 9)
 
 
 ```
@@ -1524,11 +1497,8 @@ ggsave(p_bc_simplified_combined, file = file.path(output_path, if(corrected){"Fi
 ### Full simulations (Figure 6)
 
 ```{r full_comparison_BC}
-if(corrected){
-  d_17 = read.csv(file.path(data_path, "combined_data/Set_17_corrected_output.csv"))
-}else{
-  d_17 = read.csv(file.path(data_path, "combined_data/Set_17_output.csv"))
-}
+
+d_17 = read.csv(file.path(data_path, "combined_data/Set_17_corrected_output.csv"))
 
 d_17 = add_new_va_data(new_va_data=d_new_va, target_data=d_17, verbose=FALSE)
 d_17$vA_BC_est_ia = unlist(lapply(d_17$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[2])}))
@@ -1671,7 +1641,7 @@ title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
 # Add title
 p_bc_full_combined = plot_grid(title, p_bc_full_combined, ncol = 1, rel_heights = c(0.05,1))
 
-ggsave(p_bc_full_combined, file = file.path(output_path, if(corrected){"Fig6_corrected.jpg"}else{"Fig6.jpg"}), w = 15, h = 9)
+ggsave(p_bc_full_combined, file = file.path(output_path, "BC_full.jpg"), w = 15, h = 9)
 
 
 ```
