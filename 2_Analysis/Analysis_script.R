@@ -137,7 +137,7 @@ library(pryr) ## For tracking memory usage using mem_used()
 library(RhpcBLASctl)
 
 # Control the number of BLAS threads if running on a cluster
-if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(12)}
+if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(2)}
 
 
 ################################################
@@ -156,7 +156,7 @@ library(Vw)
 
 Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "TEST_SCE-BIO-C06645_2025-07-16_10-41-15.799234", commandArgs(trailingOnly = TRUE)[1])
 
-pool_seq = TRUE
+pool_seq = FALSE
 
 if(pool_seq){
   read_length = 75
