@@ -137,7 +137,7 @@ trim_exp_files = FALSE                 # Should the SLiM output files for the ex
 del_files = TRUE                       # Should the .trees files be deleted at the end to save space?
 compress_files = TRUE                  # Should .txt and .trees files be compressed using gzip
 
-Job_ID = "Set_28"                   # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
+Job_ID = "Set_32a"                   # Job ID will be prefixed to Set_IDs so that output files can be more easily parsed
 seed = sample(1:10000000, size = 1)    # random seed
 message(paste("Random seed = ", seed, sep = ""))
 nsims = 1                              # Number of simulations - MUST be 1 if running on a cluster
@@ -146,8 +146,8 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"&nsims>1)stop("nsims must be 1 when r
 
 n_cages = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645", 10, (as.numeric(commandArgs(trailingOnly = TRUE)[5])))     # The number of replicate cages in the experiment
 
-end_gen = 2                          # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
-additive_limit = 2                   # In sims with use_dominance == 1, the history sim is run using additivity for the first additivity_limit generations
+end_gen = 25000                          # How many generations should the SLiM simulation run for while simulating the history (burnin) (for sims without burnin this has to be 2)
+additive_limit = 20000                   # In sims with use_dominance == 1, the history sim is run using additivity for the first additivity_limit generations
 
 if(end_gen<2){stop("end_gen must be an integer greater than or equal to 2")}
 
