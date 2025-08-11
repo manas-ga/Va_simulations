@@ -2,7 +2,7 @@
 
 #$ -V
 #$ -cwd
-#$ -N Set_29_corr
+#$ -N Set_29_new_va
 #$ -t 1-100
 #$ -tc 100
 #$ -l h_rt=03:30:00
