@@ -2,8 +2,8 @@
 
 #$ -V
 #$ -cwd
-#$ -N Set_31_corr
-#$ -t 1-300
+#$ -N Set_29_corr
+#$ -t 1-100
 #$ -tc 100
 #$ -l h_rt=03:30:00
 #$ -l h_vmem=5G
