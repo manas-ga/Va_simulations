@@ -41,7 +41,7 @@ param_matrix[,7] = 0
 param_matrix[,8] = mut_ratio
 param_matrix[,9] = total_sites
 param_matrix[,10] = 1
-param_matrix[,11] = 0.5
+param_matrix[,11] = 0.75
 
 # Add to this matrix if simulations other than the standard set are also required
 
