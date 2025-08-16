@@ -5,7 +5,7 @@
 #$ -N Set_32c		
 #$ -t 1-100
 #$ -tc 100
-#$ -l h_rt=7:00:00
+#$ -l h_rt=12:10:00
 #$ -l h_vmem=10g
 #$ -pe sharedmem 2
 #$ -j y
