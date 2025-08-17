@@ -3,9 +3,9 @@
 #$ -V
 #$ -cwd
 #$ -N Set_32c		
-#$ -t 1-100
+#$ -t 48-100
 #$ -tc 100
-#$ -l h_rt=12:10:00
+#$ -l h_rt=25:30:00
 #$ -l h_vmem=10g
 #$ -pe sharedmem 2
 #$ -j y
