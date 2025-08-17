@@ -2,7 +2,7 @@
 
 #$ -V
 #$ -cwd
-#$ -N S26_500x
+#$ -N S26_100x
 #$ -t 1-100
 #$ -tc 100
 #$ -l h_rt=10:00:00
@@ -13,4 +13,4 @@
 
 Param=`cat analysis_param_grid_eddie.txt | awk "NR==$SGE_TASK_ID"`
 
-Rscript Analysis_script.R $Param
+Rscript Analysis_script_temp.R $Param
