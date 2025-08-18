@@ -13,4 +13,4 @@
 
 Param=`cat analysis_param_grid_eddie.txt | awk "NR==$SGE_TASK_ID"`
 
-Rscript Analysis_script_temp.R $Param
+Rscript Analysis_script.R $Param
