@@ -1090,6 +1090,15 @@ p_scale = plot_grid(p_scale + theme(legend.position = "none"),
 
 p_scale
 
+##############################################
+### Plotting the leading eigenvectors of L ###
+##############################################
+
+# Selected the following Set_IDs with true V_A close to 0.05
+# "Set_9_bigbird_2024-12-26_03-45-11.636065_2.83054545454545e-07_0.5_2_1000_10_4_0_0"  
+# "Set_15_a_bigyin_2025-03-25_14-13-35.560332_8.3979797979798e-08_0.5_2_1000_10_4_0_0" 
+# "Set_15_b_bigyin_2025-03-25_20-20-20.587669_1.86545454545455e-07_0.5_2_1000_10_4_0_0"
+
 ```
 
 ### Varying the map length in the history phase (ml = c(0.5, 5, 50, 250)) (Figure 4B)
