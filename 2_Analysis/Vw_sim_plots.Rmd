@@ -1094,10 +1094,36 @@ p_scale
 ### Plotting the leading eigenvectors of L ###
 ##############################################
 
-# Selected the following Set_IDs with true V_A close to 0.05
-# "Set_9_bigbird_2024-12-26_03-45-11.636065_2.83054545454545e-07_0.5_2_1000_10_4_0_0"  
-# "Set_15_a_bigyin_2025-03-25_14-13-35.560332_8.3979797979798e-08_0.5_2_1000_10_4_0_0" 
-# "Set_15_b_bigyin_2025-03-25_20-20-20.587669_1.86545454545455e-07_0.5_2_1000_10_4_0_0"
+### Selected the following Set_IDs with true V_A close to 0.05
+# "Set_9_bigbird_2024-12-26_03-45-11.636065_2.83054545454545e-07_0.5_2_1000_10_4_0_0"  (scale = 0.033)
+# "Set_15_a_bigyin_2025-03-25_14-13-35.560332_8.3979797979798e-08_0.5_2_1000_10_4_0_0"  (scale = 0.1)
+# "Set_15_b_bigyin_2025-03-25_20-20-20.587669_1.86545454545455e-07_0.5_2_1000_10_4_0_0" (scale = 0.045)
+
+### The Rdata files containing the necessry data are stored in file.path(data_path/combined_data) and their filenames are:
+# Set_9_bigbird_2024-12-26_03-45-11.636065_2.83054545454545e-07_0.5_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_15-12-26.877413.Rdata
+# Set_15_a_bigyin_2025-03-25_14-13-35.560332_8.3979797979798e-08_0.5_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_15-12-49.384688.Rdata
+# Set_15_b_bigyin_2025-03-25_20-20-20.587669_1.86545454545455e-07_0.5_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_15-12-34.910486.Rdata
+    
+
+# Load the Rdata files for each of these simulations
+
+# scale = 0.033
+load(file.path(data_path, "combined_data/Set_9_bigbird_2024-12-26_03-45-11.636065_2.83054545454545e-07_0.5_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_15-12-26.877413.Rdata"))
+UL_0.033 = UL_data$UL
+DL_0.033 = UL_data$DL
+positions_0.033 = UL_data$SNPs
+
+# scale = 0.045
+load(file.path(data_path, "combined_data/Set_15_b_bigyin_2025-03-25_20-20-20.587669_1.86545454545455e-07_0.5_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_15-12-34.910486.Rdata"))
+UL_0.045 = UL_data$UL
+DL_0.045 = UL_data$DL
+positions_0.045 = UL_data$SNPs
+
+# scale = 0.1
+load(file.path(data_path, "combined_data/Set_15_a_bigyin_2025-03-25_14-13-35.560332_8.3979797979798e-08_0.5_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_15-12-49.384688.Rdata"))
+UL_0.1 = UL_data$UL
+DL_0.1 = UL_data$DL
+positions_0.1 = UL_data$SNPs
 
 ```
 
@@ -1134,6 +1160,22 @@ p_b_0.033_ml = plot_grid(p_b_0.033_ml + theme(legend.position = "none"),
                            rel_widths = c(1, 0.3))
 
 p_b_0.033_ml
+
+##############################################
+### Plotting the leading eigenvectors of L ###
+##############################################
+
+### Selected the following Set_IDs with true V_A close to 0.05
+# "Set_9_bigbird_2024-12-26_03-45-11.636065_2.83054545454545e-07_0.5_2_1000_10_4_0_0"  (ml = 0.5)
+# "Set_13_bigbird_2025-02-27_01-30-50.592525_2.47672727272727e-07_5_2_1000_10_4_0_0" (ml = 5)
+# "Set_13_bigyin_2025-02-28_23-09-50.578271_2.83054545454545e-07_50_2_1000_10_4_0_0" (ml = 50)
+# "Set_13_bigyin_2025-03-04_07-58-50.587939_2.78e-07_250_2_1000_10_4_0_0" (ml = 250)
+
+
+### The Rdata files containing the necessry data are stored in file.path(data_path/combined_data) and their filenames are:
+# Set_9_bigbird_2024-12-26_03-45-11.636065_2.83054545454545e-07_0.5_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_15-12-26.877413.Rdata
+
+    
 
 ```
 
