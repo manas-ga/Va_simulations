@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(cowplot)
 library(latex2exp)
+options(scipen = 999) # Avoid scientific numbers such as 1e+5
 ```
 
 The following code loads outputs of simulation analyses and makes figures for the manuscript. Simulation data is classified into sets, with the sets that are useful for the manuscript being  as follows (the number of simulations within each set are indicated inside brackets):
@@ -407,7 +408,7 @@ d_23$k = gsub(".*=", x=d_23$sim, "")
 
 p_nb_dom_main = ggplot(d_23, aes(y = vA_est, x = vA_true_new, color = k)) +
   theme_bw() + geom_point() + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Dominance (|k|)") +
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"(Dominance $(\kappa)$)")) +
   theme(text = element_text(size = 15))+ 
   scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
   geom_abline(slope = 1, intercept = 0) +
@@ -427,7 +428,7 @@ p_nb_dom_main = plot_grid(label_nb_dom_main,
 
 p_nb_dom_palpha = ggplot(d_23, aes(y = palpha_est, x = k, fill = k)) +
   theme_bw() + geom_boxplot() + 
-  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $p_{\alpha} $)"), fill = "Dominance (|k|)") +
+  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $p_{\alpha} $)"), fill = TeX(r"(Dominance $(\kappa)$)")) +
   theme(text = element_text(size = 15))+ 
   scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
   geom_abline(slope = 0, intercept = 0, linetype = "dotdash") +
@@ -443,7 +444,7 @@ p_nb_dom_palpha = plot_grid(label_nb_dom_palpha,
 
 p_nb_dom_balpha_slope = ggplot(d_23, aes(y = balpha_slope_est, x = k, fill = k)) +
   theme_bw() + geom_boxplot() + 
-  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $\beta^{(1)}_{\bar{\alpha}}$)"), fill = "Dominance (|k|)") +
+  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $\beta^{(1)}_{\bar{\alpha}}$)"), fill = TeX(r"(Dominance $(\kappa)$)")) +
   theme(text = element_text(size = 15))+ 
   scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
   geom_abline(slope = 0, intercept = 0, linetype = "dotdash") +
@@ -459,7 +460,7 @@ p_nb_dom_balpha_slope = plot_grid(label_nb_dom_balpha_slope,
 
 p_nb_dom_res_var = ggplot(d_23, aes(y = Residual_var, x = k, fill = k)) +
   theme_bw() + geom_boxplot() + 
-  labs(x = "Dominance (|k|)", y = "Residual variance", fill = "Dominance (|k|)") +
+  labs(x = "Dominance (|k|)", y = "Residual variance", fill = TeX(r"(Dominance $(\kappa)$)")) +
   theme(text = element_text(size = 15))+ 
   scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
   geom_abline(slope = 0, intercept = 1, linetype = "dotdash") +
@@ -550,7 +551,7 @@ d_25$k = gsub(".*=", x=d_25$sim, "")
 
 p_b_dom_main = ggplot(d_25, aes(y = vA_est, x = vA_true_new, color = k)) +
   theme_bw() + geom_point() + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Dominance (|k|)") +
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"(Dominance $(\kappa)$)")) +
   theme(text = element_text(size = 15))+ 
   scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
   geom_abline(slope = 1, intercept = 0) +
@@ -565,7 +566,7 @@ p_vA_va = ggplot(d_25, aes(y = vA_true_new, x = va_true_new, color = k)) +
  theme(legend.position = "bottom") +
   geom_abline(slope = 1, intercept = 0) +
   geom_smooth(method = "lm", se=FALSE) +
-  labs(y = TeX(r"(True additive genetic variance ($V_A$))"), x = TeX(r"(True additive genic variance ($V_a$))"), color = "Dominance (|k|)", title = "Full simulations", subtitle = "(with dominance in history phase)") + 
+  labs(y = TeX(r"(True additive genetic variance ($V_A$))"), x = TeX(r"(True additive genic variance ($V_a$))"), color = TeX(r"(Dominance $(\kappa)$)"), title = "Full simulations", subtitle = "(with dominance in history phase, 0.5 morgan)") + 
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12))
 
 ggsave(p_vA_va, width = 5, height = 5, file = file.path(output_path, "full_dominance_vA_va.jpg"))
@@ -583,7 +584,7 @@ p_b_dom_main = plot_grid(label_b_dom_main,
 
 p_b_dom_palpha = ggplot(d_25, aes(y = palpha_est, x = k, fill = k)) +
   theme_bw() + geom_boxplot() + 
-  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $p_{\alpha} $)"), fill = "Dominance (|k|)") +
+  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $p_{\alpha} $)"), fill = TeX(r"(Dominance $(\kappa)$)")) +
   theme(text = element_text(size = 15))+ 
   scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
   geom_abline(slope = 0, intercept = 0, linetype = "dotdash") +
@@ -599,7 +600,7 @@ p_b_dom_palpha = plot_grid(label_b_dom_palpha,
 
 p_b_dom_balpha_slope = ggplot(d_25, aes(y = balpha_slope_est, x = k, fill = k)) +
   theme_bw() + geom_boxplot() + 
-  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $\beta^{(1)}_{\bar{\alpha}}$)"), fill = "Dominance (|k|)") +
+  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $\beta^{(1)}_{\bar{\alpha}}$)"), fill = TeX(r"(Dominance $(\kappa)$)")) +
   theme(text = element_text(size = 15))+ 
   scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
   geom_abline(slope = 0, intercept = 0, linetype = "dotdash") +
@@ -615,7 +616,7 @@ p_b_dom_balpha_slope = plot_grid(label_b_dom_balpha_slope,
 
 p_b_dom_res_var = ggplot(d_25, aes(y = Residual_var, x = k, fill = k)) +
   theme_bw() + geom_boxplot() + 
-  labs(x = "Dominance (|k|)", y = "Residual variance", fill = "Dominance (|k|)") +
+  labs(x = "Dominance (|k|)", y = "Residual variance", fill = TeX(r"(Dominance $(\kappa)$)")) +
   theme(text = element_text(size = 15))+ 
   scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
   geom_abline(slope = 0, intercept = 1, linetype = "dotdash") +
@@ -663,7 +664,7 @@ d_31$k = gsub(".*=", x=d_31$sim, "")
 
 p_b_dom_sprinkled_main = ggplot(d_31, aes(y = vA_est, x = vA_true_new, color = k)) +
   theme_bw() + geom_point() + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Dominance (|k|)") +
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"(Dominance $(\kappa)$)")) +
   theme(text = element_text(size = 15))+ 
   scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
   geom_abline(slope = 1, intercept = 0) +
@@ -674,7 +675,7 @@ p_b_dom_sprinkled_main = ggplot(d_31, aes(y = vA_est, x = vA_true_new, color = k
 
 p_b_dom_sprinkled_palpha = ggplot(d_31, aes(y = palpha_est, x = k, fill = k)) +
   theme_bw() + geom_boxplot() + 
-  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $p_{\alpha} $)"), fill = "Dominance (|k|)") +
+  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $p_{\alpha} $)"), fill = TeX(r"(Dominance $(\kappa)$)")) +
   theme(text = element_text(size = 15))+ 
   scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
   geom_abline(slope = 0, intercept = 0, linetype = "dotdash") +
@@ -684,7 +685,7 @@ p_b_dom_sprinkled_palpha = ggplot(d_31, aes(y = palpha_est, x = k, fill = k)) +
 
 p_b_dom_sprinkled_balpha_slope = ggplot(d_31, aes(y = balpha_slope_est, x = k, fill = k)) +
   theme_bw() + geom_boxplot() + 
-  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $\beta^{(1)}_{\bar{\alpha}}$)"), fill = "Dominance (|k|)") +
+  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $\beta^{(1)}_{\bar{\alpha}}$)"), fill = TeX(r"(Dominance $(\kappa)$)")) +
   theme(text = element_text(size = 15))+ 
   scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
   geom_abline(slope = 0, intercept = 0, linetype = "dotdash") +
@@ -694,7 +695,7 @@ p_b_dom_sprinkled_balpha_slope = ggplot(d_31, aes(y = balpha_slope_est, x = k, f
 
 p_b_dom_sprinkled_res_var = ggplot(d_31, aes(y = Residual_var, x = k, fill = k)) +
   theme_bw() + geom_boxplot() + 
-  labs(x = "Dominance (|k|)", y = "Residual variance", fill = "Dominance (|k|)") +
+  labs(x = "Dominance (|k|)", y = "Residual variance", fill = TeX(r"(Dominance $(\kappa)$)")) +
   theme(text = element_text(size = 15))+ 
   scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
   geom_abline(slope = 0, intercept = 1, linetype = "dotdash") +
@@ -793,6 +794,20 @@ d_nb_coverage_0.01$Type = ifelse(grepl("poo", d_nb_coverage_0.01$analysis_stamp)
                 sapply(strsplit(d_nb_coverage_0.01$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
                 "Exact")
 
+#######################
+### Full (ml = 0.1) ###
+#######################
+
+# Only coverage is varied for poolseq
+
+d_b_coverage_0.1 = read.csv(file.path(data_path, "combined_data/Set_29_corrected_output.csv"))
+
+d_b_coverage_0.1 = add_new_va_data(new_va_data=d_new_va, target_data=d_b_coverage_0.1, verbose=TRUE)
+
+d_b_coverage_0.1$Type = ifelse(grepl("poo", d_b_coverage_0.1$analysis_stamp),
+                sapply(strsplit(d_b_coverage_0.1$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
+                "Exact")
+
 ###################################
 ### Coverage only for main text ###
 ###################################
@@ -806,16 +821,18 @@ d_b_coverage = d_b_poolseq[d_b_poolseq$Type%in%c("Exact", "pool_seq_TRUE_read_le
 ### Extract the coverage and make a separate column ###
 
 d_nb_coverage$Coverage = ifelse(d_nb_coverage$Type=="Exact", "Exact",  sapply(strsplit(d_nb_coverage$analysis_stamp, "_"), function(x) paste(x[8], "x", sep = "")))
-
 d_nb_coverage$Coverage = factor(d_nb_coverage$Coverage, levels = c("Exact", "1000x", "500x", "100x"))
 
 d_b_coverage$Coverage = ifelse(d_b_coverage$Type=="Exact", "Exact",  sapply(strsplit(d_b_coverage$analysis_stamp, "_"), function(x) paste(x[8], "x", sep = "")))
+d_b_coverage$Coverage = factor(d_b_coverage$Coverage, levels = c("Exact", "1000x", "500x", "100x"))
 
 d_nb_coverage_0.01$Coverage = ifelse(d_nb_coverage_0.01$Type=="Exact", "Exact",  sapply(strsplit(d_nb_coverage_0.01$analysis_stamp, "_"), function(x) paste(x[8], "x", sep = "")))
-
 d_nb_coverage_0.01$Coverage = factor(d_nb_coverage_0.01$Coverage, levels = c("Exact", "1000x", "500x", "100x"))
 
-d_b_coverage$Coverage = factor(d_b_coverage$Coverage, levels = c("Exact", "1000x", "500x", "100x"))
+d_b_coverage_0.1$Coverage = ifelse(d_b_coverage_0.1$Type=="Exact", "Exact",  sapply(strsplit(d_b_coverage_0.1$analysis_stamp, "_"), function(x) paste(x[8], "x", sep = "")))
+d_b_coverage_0.1$Coverage = factor(d_b_coverage_0.1$Coverage, levels = c("Exact", "1000x", "500x", "100x"))
+
+
 
 ### Make plots ###
 
@@ -825,7 +842,7 @@ p_nb_coverage = ggplot(d_nb_coverage, aes(y = vA_est, x = vA_true_new, color = C
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Coverage", title = "Simplified simulations", subtitle = "(~3000 sites, 0.5 morgan)") +
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
- theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12))
+ theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12)) + xlim(0, 0.2) + ylim(0, 0.2)
 
 p_b_coverage = ggplot(d_b_coverage, aes(y = vA_est, x = vA_true_new, color = Coverage)) +
   theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
@@ -833,7 +850,7 @@ p_b_coverage = ggplot(d_b_coverage, aes(y = vA_est, x = vA_true_new, color = Cov
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Coverage", title = "Full simulations", subtitle = "(~65000 sites, 0.5 morgan)") +
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
- theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12))
+ theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12)) + xlim(0, 0.1) + ylim(0, 0.175)
 
 p_nb_coverage_low_ml = ggplot(d_nb_coverage_0.01, aes(y = vA_est, x = vA_true_new, color = Coverage)) +
   theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
@@ -841,7 +858,15 @@ p_nb_coverage_low_ml = ggplot(d_nb_coverage_0.01, aes(y = vA_est, x = vA_true_ne
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Coverage", title = "Simplified simulations", subtitle = "(~3000 sites, 0.01 morgan)") +
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
- theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12))
+ theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12)) + xlim(0, 0.2) + ylim(0, 0.2)
+
+p_b_coverage_low_ml = ggplot(d_b_coverage_0.1, aes(y = vA_est, x = vA_true_new, color = Coverage)) +
+  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Coverage", title = "Full simulations", subtitle = "(~65000 sites, 0.1 morgan)") +
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) +
+ theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12)) + xlim(0, 0.1) + ylim(0, 0.175)
 
 # Extract legend
 
@@ -850,8 +875,9 @@ legend_coverage = get_plot_component(p_b_coverage + guides(color = guide_legend(
 # Combine without labels
 
 p_coverage_combined = plot_grid(p_nb_coverage + theme(legend.position = "none"),
-                                p_b_coverage + theme(legend.position = "none"),
                                 p_nb_coverage_low_ml + theme(legend.position = "none"),
+                                p_b_coverage + theme(legend.position = "none"),
+                                p_b_coverage_low_ml + theme(legend.position = "none"),
                                 labels = "auto",
                                 ncol = 2)
 
@@ -877,16 +903,17 @@ d_26$Type = ifelse(grepl("poo", d_26$analysis_stamp),
                 sapply(strsplit(d_26$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
                 "Exact")
 
-d_26$Error = d_26$vA_est - d_26$vA_true_new
-labels_sites_poolseq = c("Exact" = "Exact",
-                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = "Coverage: 1000x")
+d_26$Coverage = ifelse(d_26$Type=="Exact", "Exact",  sapply(strsplit(d_26$analysis_stamp, "_"), function(x) paste(x[8], "x", sep = "")))
+d_26$Coverage = factor(d_26$Coverage, levels = c("Exact", "1000x", "500x", "100x"))
 
-p_pool_sites = ggplot(d_26, aes(y = vA_est, x = seg_sites, color = Type)) + 
+d_26$Error = d_26$vA_est - d_26$vA_true_new
+
+p_pool_sites = ggplot(d_26, aes(y = Error, x = seg_sites/(r*sequence_length), color = Coverage)) + 
   theme_bw() + geom_point() + geom_abline(slope = 0, intercept = 0) + 
-  scale_color_manual(values = c("Exact" = "#009E73", "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = "#0072B2"), labels = labels_sites_poolseq) + 
-  labs(x = "Number of segregating sites", y = TeX(r"(Estimate of $V_A$)"), color = "Pool-seq", title = "Simplified simulations", subtitle = "(0.5 morgan)") +
-  theme(text = element_text(size = 15)) + geom_smooth(method = "lm") +
- theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(size = 12, hjust = 0.5))
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
+  labs(x = "Density of segregating sites (sites/morgan)", y = TeX(r"(Estimate of $V_A$ - true $V_A$)"), color = "Coverage", title = "Simplified simulations", subtitle = "(0.5 morgan)") +
+  theme(text = element_text(size = 15)) + 
+ theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(size = 12, hjust = 0.5)) 
 
 ggsave(plot = p_pool_sites, width = 5, height = 5, file = file.path(output_path, "poolseq_simplified_sites.jpg"))
 p_pool_sites

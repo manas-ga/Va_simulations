@@ -2,10 +2,10 @@
 
 #$ -V
 #$ -cwd
-#$ -N Set_29_new_va
-#$ -t 1-100
-#$ -tc 100
-#$ -l h_rt=03:30:00
+#$ -N Set_32_new_va
+#$ -t 1-285
+#$ -tc 285
+#$ -l h_rt=02:30:00
 #$ -l h_vmem=5G
 #$ -pe sharedmem 12
 #$ -j y
