@@ -166,7 +166,7 @@ for(sim in 1:nsims){
                                extract_mut_path = extract_mut_path,
                                mutations_path = temp_files_path, 
                                c_matrix_path = temp_files_path, 
-                               randomise = FALSE,
+                               randomise = TRUE,
                                delete_temp_files = TRUE)
   
   c_genome = sim_data$c_genome  
