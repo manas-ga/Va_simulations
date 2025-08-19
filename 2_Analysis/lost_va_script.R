@@ -147,7 +147,7 @@ if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04
 #install.packages(Vw_library_path, repos = NULL, type = "source")
 library(Vw)
 
-finescale = TRUE # Whether a file containing data on locus-wise va_lost vs alpha should be saved
+finescale = FALSE # Whether a file containing data on locus-wise va_lost vs alpha should be saved
 verbose = TRUE
 
 ########################

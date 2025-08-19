@@ -312,7 +312,7 @@ p_nb_2_ml_exp = ggplot(d_18_ml_exp, aes(y=vA_est, x = if(alpha){vA_true_new}else
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length in\nmorgans \n(experiment)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length in\nmorgan \n(experiment)") + 
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE)
@@ -531,9 +531,11 @@ p_b_std
 
 
 ```
-### Full simulations with dominance (Figure S5)
+### Full simulations with dominance 
 
 ```{r full_dominance}
+
+### Reference map length in history: 0.5 morgan ###
 
 d_25 = read.csv(file.path(data_path, "combined_data/Set_25_corrected_output.csv"))
 
@@ -543,21 +545,24 @@ d_25 = d_25[d_25$LDalpha==FALSE,]
 d_25 = add_new_va_data(new_va_data=d_new_va, target_data=d_25, verbose=TRUE)
 d_25$k = gsub(".*=", x=d_25$sim, "")
 
-
-# Since the ylabels have different widths, the combined plot dows not have the four panels properly aligned
-# Draw the yabels separately to pre-specified dimensions and then combine the y_label-less plots with the custom y-labels
-
-### true V_A vs true V_a ###
-
-p_b_dom_main = ggplot(d_25, aes(y = vA_est, x = vA_true_new, color = k)) +
+p_b_dom_0.5 = ggplot(d_25, aes(y = vA_est, x = vA_true_new, color = k)) +
   theme_bw() + geom_point() + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"(Dominance $(\kappa)$)")) +
-  theme(text = element_text(size = 15))+ 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"(Dominance $(\kappa)$)"), title = "0.5 morgan") +
+  theme(text = element_text(size = 15)) + 
   scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
   geom_abline(slope = 1, intercept = 0) +
  theme(legend.position = "bottom") +
-  geom_smooth(method = "lm", se=FALSE) 
+  geom_smooth(method = "lm", se=FALSE) + 
+  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12))
 
+# Save the legend
+legend_b_dominance = get_plot_component(p_b_dom_0.5 + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
+
+# Low map length resulted in large LD
+
+############################
+### true V_A vs true V_a ###
+############################
 
 p_vA_va = ggplot(d_25, aes(y = vA_true_new, x = va_true_new, color = k)) +
   theme_bw() + geom_point() + 
@@ -571,70 +576,29 @@ p_vA_va = ggplot(d_25, aes(y = vA_true_new, x = va_true_new, color = k)) +
 
 ggsave(p_vA_va, width = 5, height = 5, file = file.path(output_path, "full_dominance_vA_va.jpg"))
 
-# Save the legend
-legend_b_dominance = get_plot_component(p_b_dom_main + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
 
-label_b_dom_main = ggdraw() + draw_label(TeX(r"(Estimate of $V_A$)"), x = 0.5, y = 0.5, angle = 90, vjust = 0.5, hjust = 0.5, fontface = "bold", size = 15)
+### Higher map length in history: 5 morgan ###
 
-p_b_dom_main = plot_grid(label_b_dom_main, 
-                          p_b_dom_main + labs(y = NULL) + theme(legend.position = "none"), 
-                          ncol = 2, rel_widths = c(0.1, 1))
+d_32 = read.csv(file.path(data_path, "combined_data/Set_32_corrected_output.csv"))
+d_32 = add_new_va_data(new_va_data=d_new_va, target_data=d_32, verbose=TRUE)
+d_32$k = gsub(".*=", x=d_32$sim, "")
 
-### Boxplot for p_{alpha} ###
-
-p_b_dom_palpha = ggplot(d_25, aes(y = palpha_est, x = k, fill = k)) +
-  theme_bw() + geom_boxplot() + 
-  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $p_{\alpha} $)"), fill = TeX(r"(Dominance $(\kappa)$)")) +
+p_b_dom_5 = ggplot(d_32, aes(y = vA_est, x = vA_true_new, color = k)) +
+  theme_bw() + geom_point() + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"(Dominance $(\kappa)$)"), title = "5 morgan") +
   theme(text = element_text(size = 15))+ 
-  scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
-  geom_abline(slope = 0, intercept = 0, linetype = "dotdash") +
- theme(legend.position = "bottom")
+  scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
+  geom_abline(slope = 1, intercept = 0) +
+ theme(legend.position = "bottom") +
+  geom_smooth(method = "lm", se=FALSE) + 
+  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12))
 
-label_b_dom_palpha = ggdraw() + draw_label(TeX(r"(Estimate of $p_{\alpha} $)"), x = 0.5, y = 0.5, angle = 90, vjust = 0.5, hjust = 0.5, fontface = "bold", size = 15)
 
-p_b_dom_palpha = plot_grid(label_b_dom_palpha, 
-                          p_b_dom_palpha + labs(y = NULL) + theme(legend.position = "none"), 
-                          ncol = 2, rel_widths = c(0.1, 1))
+### Combine the two full simulation plots plots ###
 
-### Boxplot for B_{alpha}^{(1) ###
-
-p_b_dom_balpha_slope = ggplot(d_25, aes(y = balpha_slope_est, x = k, fill = k)) +
-  theme_bw() + geom_boxplot() + 
-  labs(x = "Dominance (|k|)", y = TeX(r"(Estimate of $\beta^{(1)}_{\bar{\alpha}}$)"), fill = TeX(r"(Dominance $(\kappa)$)")) +
-  theme(text = element_text(size = 15))+ 
-  scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
-  geom_abline(slope = 0, intercept = 0, linetype = "dotdash") +
- theme(legend.position = "bottom")
-
-label_b_dom_balpha_slope = ggdraw() + draw_label(TeX(r"(Estimate of $\beta^{(1)}_{\bar{\alpha}}$)"), x = 0.5, y = 0.5, angle = 90, vjust = 0.5, hjust = 0.5, fontface = "bold", size = 15)
-
-p_b_dom_balpha_slope = plot_grid(label_b_dom_balpha_slope, 
-                          p_b_dom_balpha_slope + labs(y = NULL) + theme(legend.position = "none"), 
-                          ncol = 2, rel_widths = c(0.1, 1))
-
-### Residual variance ###
-
-p_b_dom_res_var = ggplot(d_25, aes(y = Residual_var, x = k, fill = k)) +
-  theme_bw() + geom_boxplot() + 
-  labs(x = "Dominance (|k|)", y = "Residual variance", fill = TeX(r"(Dominance $(\kappa)$)")) +
-  theme(text = element_text(size = 15))+ 
-  scale_fill_manual(values = c("#009E73", "#0072B2",  "#999999")) +
-  geom_abline(slope = 0, intercept = 1, linetype = "dotdash") +
- theme(legend.position = "bottom")
-
-label_b_dom_res_var = ggdraw() + draw_label("Residual variance", x = 0.5, y = 0.5, angle = 90, vjust = 0.5, hjust = 0.5, size = 15)
-
-p_b_dom_res_var = plot_grid(label_b_dom_res_var, 
-                          p_b_dom_res_var + labs(y = NULL) + theme(legend.position = "none"), 
-                          ncol = 2, rel_widths = c(0.1, 1))
-
-### Combine the four plots ###
-
-p_b_dominance_combined = plot_grid(p_b_dom_main + theme(legend.position = "none"),
-                                    p_b_dom_palpha + theme(legend.position = "none"),
-                                    p_b_dom_res_var + theme(legend.position = "none"),
-                                    p_b_dom_balpha_slope + theme(legend.position = "none"),
-                                    labels = "auto", nrow = 2)
+p_b_dominance_combined = plot_grid(p_b_dom_0.5 + theme(legend.position = "none"),
+                                    p_b_dom_5 + theme(legend.position = "none"),
+                                    labels = "auto", ncol = 2)
 title_b_dominance = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
 
 p_b_dominance_combined = plot_grid(title_b_dominance,
@@ -645,6 +609,12 @@ p_b_dominance_combined = plot_grid(title_b_dominance,
 ggsave(p_b_dominance_combined, width = 8, height = 8, file = file.path(output_path, "full_dominance.jpg"))
 
 ```
+### Full simulations with dominance (5 morgan)
+
+```{r full_dominance_5_morgan}
+
+```
+
 ### Full simulations with 'sprinkled' dominance (Figure )
 
 Full simulations in which the history phase was simulated under additivity and dominance was switched off only during the experiment phase.
@@ -1034,7 +1004,7 @@ p_ml_exp_0.033 = ggplot(d_ml_exp , aes(y=vA_est, x = if(alpha){vA_true_new}else{
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(experiment)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgan \n(experiment)") + 
   scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
@@ -1144,7 +1114,7 @@ p_b_0.033_ml = ggplot(d_ml_history , aes(y=vA_est, x = if(alpha){vA_true_new}els
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgan \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
@@ -1174,8 +1144,42 @@ p_b_0.033_ml
 
 ### The Rdata files containing the necessry data are stored in file.path(data_path/combined_data) and their filenames are:
 # Set_9_bigbird_2024-12-26_03-45-11.636065_2.83054545454545e-07_0.5_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_15-12-26.877413.Rdata
+# Set_13_bigbird_2025-02-27_01-30-50.592525_2.47672727272727e-07_5_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_16-11-40.048848.Rdata
+# Set_13_bigyin_2025-02-28_23-09-50.578271_2.83054545454545e-07_50_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_16-12-21.755107.Rdata
+# Set_13_bigyin_2025-03-04_07-58-50.587939_2.78e-07_250_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_16-12-44.87969.Rdata
 
-    
+# Load the Rdata files for each of these simulations
+
+# ml = 0.5
+load(file.path(data_path, "combined_data/Set_9_bigbird_2024-12-26_03-45-11.636065_2.83054545454545e-07_0.5_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_15-12-26.877413.Rdata"))
+UL_0.5 = UL_data$UL
+DL_0.5 = UL_data$DL
+positions_0.5 = UL_data$SNPs
+
+# ml = 5
+load(file.path(data_path, "combined_data/Set_13_bigbird_2025-02-27_01-30-50.592525_2.47672727272727e-07_5_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_16-11-40.048848.Rdata"))
+UL_5 = UL_data$UL
+DL_5 = UL_data$DL
+positions_5 = UL_data$SNPs
+
+# ml = 50
+load(file.path(data_path, "combined_data/Set_13_bigyin_2025-02-28_23-09-50.578271_2.83054545454545e-07_50_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_16-12-21.755107.Rdata"))
+UL_50 = UL_data$UL
+DL_50 = UL_data$DL
+positions_50 = UL_data$SNPs
+
+# ml = 250
+load(file.path(data_path, "combined_data/Set_13_bigyin_2025-03-04_07-58-50.587939_2.78e-07_250_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_16-12-44.87969.Rdata"))
+UL_250 = UL_data$UL
+DL_250 = UL_data$DL
+positions_250 = UL_data$SNPs
+
+plot(abs(UL_0.5[,1]) ~ positions_0.5, xlab = "Position", ylab = "Absolute sitewise loadings", main = "0.5 morgan")
+plot(abs(UL_5[,1]) ~ positions_5, xlab = "Position", ylab = "Absolute sitewise loadings", main = "5 morgan")
+plot(abs(UL_50[,1]) ~ positions_50, xlab = "Position", ylab = "Absolute sitewise loadings", main = "50 morgan")
+plot(abs(UL_250[,1]) ~ positions_250, xlab = "Position", ylab = "Absolute sitewise loadings", main = "250 morgan")
+
+
 
 ```
 
@@ -1328,7 +1332,7 @@ p_b_0.045_ml = ggplot(d_N1 , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_tru
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans\n(history)", title = TeX(r"($\eta_{scale}$ = 0.045)")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgan\n(history)", title = TeX(r"($\eta_{scale}$ = 0.045)")) + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
@@ -1554,7 +1558,7 @@ p_bc_simplified_us = ggplot(d_16, aes(y = vA_est, x = if(alpha){vA_true_new}else
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgan \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) + ylim(0, 0.35) + xlim(0, 0.13) +
@@ -1568,7 +1572,7 @@ p_bc_simplified_bc_ia = ggplot(d_16, aes(y = vA_BC_est_ia, x = if(alpha){vA_true
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgan \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
@@ -1582,7 +1586,7 @@ p_bc_simplified_bc_iia = ggplot(d_16, aes(y = vA_BC_est_iia, x = if(alpha){vA_tr
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgan \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
@@ -1596,7 +1600,7 @@ p_bc_simplified_bc_iiia = ggplot(d_16, aes(y = vA_BC_est_iiia, x = if(alpha){vA_
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgan \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
@@ -1611,7 +1615,7 @@ p_bc_simplified_bc_ib = ggplot(d_16, aes(y = vA_BC_est_ib, x = if(alpha){vA_true
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgan \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
@@ -1625,7 +1629,7 @@ p_bc_simplified_bc_iib = ggplot(d_16, aes(y = vA_BC_est_iib, x = if(alpha){vA_tr
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgan \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
@@ -1639,7 +1643,7 @@ p_bc_simplified_bc_iiib = ggplot(d_16, aes(y = vA_BC_est_iiib, x = if(alpha){vA_
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgan \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
@@ -1652,7 +1656,7 @@ p_bc_simplified_bc_iiib = ggplot(d_16, aes(y = vA_BC_est_iiib, x = if(alpha){vA_
 p_bc_simplified_assumption_G_test = ggplot(d_16, aes(y = assumption_G_test, x = as.factor(sequence_length*r_msp), fill = as.factor(sequence_length*r_msp))) +
   theme_bw() +
   geom_boxplot() + 
-  labs(y = "Deviation from Assumption G", x = "Map length in morgans (history)") + 
+  labs(y = "Deviation from Assumption G", x = "Map length in morgan (history)") + 
   scale_fill_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 12)) + ggtitle(" ")
 
@@ -1706,7 +1710,7 @@ p_bc_full_us = ggplot(d_17, aes(y = vA_est, x = if(alpha){vA_true_new}else{vA_tr
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgan \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) + ylim(0, 0.35) + xlim(0, 0.13) +
@@ -1720,7 +1724,7 @@ p_bc_full_bc_ia = ggplot(d_17, aes(y = vA_BC_est_ia, x = if(alpha){vA_true_new}e
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgan \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
@@ -1734,7 +1738,7 @@ p_bc_full_bc_iia = ggplot(d_17, aes(y = vA_BC_est_iia, x = if(alpha){vA_true_new
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgan \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
@@ -1748,7 +1752,7 @@ p_bc_full_bc_iiia = ggplot(d_17, aes(y = vA_BC_est_iiia, x = if(alpha){vA_true_n
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgan \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
@@ -1763,7 +1767,7 @@ p_bc_full_bc_ib = ggplot(d_17, aes(y = vA_BC_est_ib, x = if(alpha){vA_true_new}e
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgan \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
@@ -1777,7 +1781,7 @@ p_bc_full_bc_iib = ggplot(d_17, aes(y = vA_BC_est_iib, x = if(alpha){vA_true_new
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgan \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
@@ -1791,7 +1795,7 @@ p_bc_full_bc_iiib = ggplot(d_17, aes(y = vA_BC_est_iiib, x = if(alpha){vA_true_n
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgan \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
@@ -1804,7 +1808,7 @@ p_bc_full_bc_iiib = ggplot(d_17, aes(y = vA_BC_est_iiib, x = if(alpha){vA_true_n
 p_bc_full_assumption_G_test = ggplot(d_17, aes(y = assumption_G_test, x = as.factor(sequence_length*r), fill = as.factor(sequence_length*r))) +
   theme_bw() +
   geom_boxplot() + 
-  labs(y = "Deviation from Assumption G", x = "Map length in morgans (history)") + 
+  labs(y = "Deviation from Assumption G", x = "Map length in morgan (history)") + 
   scale_fill_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 12)) + ggtitle(" ")
 
@@ -1835,7 +1839,7 @@ ggsave(p_bc_full_combined, file = file.path(output_path, "BC_full.jpg"), w = 15,
 
 ## Sanity check
 
-To perform sanity checks on our method, and our implementation of BC's method, we ran (simplified, i.e. no burnin) simulations with nearly-free recombination in the experiment (ml_exp = 5000). The map length in the history (including msprime) was either 0.5, 10, 50, or 100 morgans.
+To perform sanity checks on our method, and our implementation of BC's method, we ran (simplified, i.e. no burnin) simulations with nearly-free recombination in the experiment (ml_exp = 5000). The map length in the history (including msprime) was either 0.5, 10, 50, or 100 morgan.
 
 ```{r sanity_check}
 d_sanity = read.csv(file.path(data_path, "combined_data/sanity_check_output.csv"))
