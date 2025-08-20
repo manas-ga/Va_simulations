@@ -2,12 +2,12 @@
 
 #$ -V
 #$ -cwd
-#$ -N Set_32_al
-#$ -t 1-285
+#$ -N poolseq_logreads
+#$ -t 1-100
 #$ -tc 100
-#$ -l h_rt=5:30:00
-#$ -l h_vmem=25G
-#$ -pe sharedmem 12
+#$ -l h_rt=10:00:00
+#$ -l h_vmem=5G
+#$ -pe sharedmem 2
 #$ -j y
 #$ -o ~/std_out/
 
