@@ -4,8 +4,10 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
                    nR,          # matrix of non-recombinant probabilities between loci
                    pbar0,       # vector of allele frequencies at time-point 0
                    pbar1,       # vector of allele frequencies at time-point 1
+                   coverage1=NULL, 
                    ngen1=1,     # number of generations between parents and time-point 1
                    pbar2,       # vector of allele frequencies at time-point 2
+                   coverage2=NULL, 
                    ngen2,       # number of generations between parents and time-point 2
                    nind=NULL,
                    proj,        # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
@@ -328,7 +330,13 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
   # Garbage collection
   gc(verbose = FALSE)
   
-  
+  if(!is.null(coverage1)){
+    Q<-t(2*diag(Ltilde)/t(coverage1+coverage2))
+    Q<-apply(Q,1, function(x){t(tprojp)%*%Diagonal(length(x), x)%*%tprojp})
+    Q<-bdiag(Q)
+  }else{
+    Q<-NULL
+  }
   
   if(is.na(palpha)){
     
@@ -336,7 +344,7 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
       message("Estimating palpha...")
     }
     
-    palpha<-optim(0, fit.model, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=TRUE, Selec=Selec, verbose=verbose, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1, factr = 1e+11), hessian=TRUE)
+    palpha<-optim(0, fit.model, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, Q=Q, nrep=nrep, LLonly=TRUE, Selec=Selec, verbose=verbose, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1, factr = 1e+11), hessian=TRUE)
     
     palpha_var<--1/palpha$hessian
     palpha<-palpha$par
@@ -349,7 +357,7 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
     message("Fitting the final model...")
   }
   
-  output<-fit.model(palpha=palpha, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, nrep=nrep, LLonly=FALSE, Selec=Selec, verbose=verbose)
+  output<-fit.model(palpha=palpha, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, Q=Q, nrep=nrep, LLonly=FALSE, Selec=Selec, verbose=verbose)
   
   if(verbose){
     message("Calculating the estimate of Vw...")
@@ -357,7 +365,7 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
   
   if(method=="REML"){
     
-    sigma2alpha<-summary(output$model)$varcomp[1,1]
+    sigma2alpha<-summary(output$model)$varcomp['vm(locus, SC, singG = "PSD")',1]
 
     S<-matrix(0,2,2)
     colnames(S)<-rownames(S)<-c("int", "pmq")

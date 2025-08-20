@@ -1,5 +1,5 @@
 
-fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tprojp, pbar0, pbar1, pbar2, nrep, Selec, LLonly=FALSE, method = "REML", verbose=TRUE){
+fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tprojp, pbar0, pbar1, pbar2, Q=NULL, nrep, Selec, LLonly=FALSE, method = "REML", verbose=TRUE){
   
   if(verbose){
     message("Computing the covariance structure of locus effects...")
@@ -47,7 +47,12 @@ fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tpr
   
   attr(SC, "INVERSE")<-FALSE
   dimnames(SC) <- list(1:nrow(SC),1:nrow(SC))  # used for full-form matrices
-  
+
+  if(!is.null(Q)){
+    attr(Q, "INVERSE")<-FALSE
+    dimnames(Q) <- list(1:nrow(Q),1:nrow(Q))
+  } 
+
   if(verbose){
     message("Projecting allele frequencies...")
   }
@@ -88,17 +93,24 @@ fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tpr
   # force symmetry in case it is not exactly symmetric
   
   if(method=="REML"){
+
+    if(is.null(Q)){
+      random = ~vm(locus, SC, singG="PSD")
+    }else{
+      random = ~vm(locus, SC, singG="PSD")+~vm(locus, Q, singG="PSD")
+    }
+ 
     if(is.na(balpha[1]) & is.na(balpha[2])){
-      m1<-asreml(delta~int+pmq-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
+      m1<-asreml(delta~int+pmq-1, random = random, data=dat.gaussian, Cfixed=TRUE)
     }
     if(is.na(balpha[1]) & !is.na(balpha[2])){
-      m1<-asreml(delta~int+offset(pmq)-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
+      m1<-asreml(delta~int+offset(pmq)-1, random = random, data=dat.gaussian, Cfixed=TRUE)
     }
     if(!is.na(balpha[1]) & is.na(balpha[2])){
       if(balpha[1]==0){
-        m1<-asreml(delta~pmq-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
+        m1<-asreml(delta~pmq-1, random = random, data=dat.gaussian, Cfixed=TRUE)
       }else{
-        m1<-asreml(delta~offset(int)+pmq-1, random = ~vm(locus, SC, singG="PSD"), data=dat.gaussian, Cfixed=TRUE)
+        m1<-asreml(delta~offset(int)+pmq-1, random = random, data=dat.gaussian, Cfixed=TRUE)
       }
     }  
     if(!is.na(balpha[1]) & !is.na(balpha[2])){
