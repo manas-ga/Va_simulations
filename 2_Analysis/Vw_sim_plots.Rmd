@@ -476,15 +476,15 @@ p_nb_dom_res_var = plot_grid(label_nb_dom_res_var,
 
 p_nb_dominance_combined = plot_grid(p_nb_dom_main + theme(legend.position = "none"),
                                     p_nb_dom_palpha + theme(legend.position = "none"),
-                                    p_nb_dom_res_var + theme(legend.position = "none"),
                                     p_nb_dom_balpha_slope + theme(legend.position = "none"),
+                                    p_nb_dom_res_var + theme(legend.position = "none"),
                                     labels = "auto", nrow = 2)
 title_nb_dominance = ggdraw() + draw_label("Simplified simulations", hjust = 0.5, size = 30)
 
 p_nb_dominance_combined = plot_grid(title_nb_dominance,
                                     p_nb_dominance_combined,
                                     legend_nb_dominance,
-                                    nrow = 3, rel_heights = c(0.1, 1, 0.05))
+                                    nrow = 3, rel_heights = c(0.2, 2, 0.1))
 
 ggsave(p_nb_dominance_combined, width = 8, height = 8, file = file.path(output_path, "simplified_dominance.jpg"))
 ```
@@ -549,7 +549,7 @@ p_b_dom_0.5 = ggplot(d_25, aes(y = vA_est, x = vA_true_new, color = k)) +
   theme_bw() + geom_point() + 
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"(Dominance $(\kappa)$)"), title = "0.5 morgan") +
   theme(text = element_text(size = 15)) + 
-  scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
+  scale_color_manual(values = c("#009E73","#0072B2", "#D01C8B")) +
   geom_abline(slope = 1, intercept = 0) +
  theme(legend.position = "bottom") +
   geom_smooth(method = "lm", se=FALSE) + 
@@ -567,7 +567,7 @@ legend_b_dominance = get_plot_component(p_b_dom_0.5 + guides(color = guide_legen
 p_vA_va = ggplot(d_25, aes(y = vA_true_new, x = va_true_new, color = k)) +
   theme_bw() + geom_point() + 
   theme(text = element_text(size = 15))+ 
-  scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
+  scale_color_manual(values = c("#009E73","#0072B2", "#D01C8B")) +
  theme(legend.position = "bottom") +
   geom_abline(slope = 1, intercept = 0) +
   geom_smooth(method = "lm", se=FALSE) +
@@ -587,7 +587,7 @@ p_b_dom_5 = ggplot(d_32, aes(y = vA_est, x = vA_true_new, color = k)) +
   theme_bw() + geom_point() + 
   labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"(Dominance $(\kappa)$)"), title = "5 morgan") +
   theme(text = element_text(size = 15))+ 
-  scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
+  scale_color_manual(values = c("#009E73","#0072B2", "#D01C8B")) +
   geom_abline(slope = 1, intercept = 0) +
  theme(legend.position = "bottom") +
   geom_smooth(method = "lm", se=FALSE) + 
@@ -598,20 +598,25 @@ p_b_dom_5 = ggplot(d_32, aes(y = vA_est, x = vA_true_new, color = k)) +
 
 p_b_dominance_combined = plot_grid(p_b_dom_0.5 + theme(legend.position = "none"),
                                     p_b_dom_5 + theme(legend.position = "none"),
-                                    labels = "auto", ncol = 2)
+                                    labels = c("e", "f"), ncol = 2)
 title_b_dominance = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
 
 p_b_dominance_combined = plot_grid(title_b_dominance,
                                     p_b_dominance_combined,
                                     legend_b_dominance,
-                                    nrow = 3, rel_heights = c(0.1, 1, 0.05))
+                                    nrow = 3, rel_heights = c(0.2, 1, 0.1))
 
-ggsave(p_b_dominance_combined, width = 8, height = 8, file = file.path(output_path, "full_dominance.jpg"))
+ggsave(p_b_dominance_combined, width = 8, height = 5, file = file.path(output_path, "full_dominance.jpg"))
 
-```
-### Full simulations with dominance (5 morgan)
 
-```{r full_dominance_5_morgan}
+### Combine simplified and full dominance figures ###
+
+p_dominance_combined = plot_grid(p_nb_dominance_combined,
+                                 p_b_dominance_combined,
+                                 nrow = 2,
+                                 rel_heights = c(23, 13))
+
+ggsave(p_dominance_combined, width = 8, height = 12, file = file.path(output_path, "combined_dominance.jpg"))
 
 ```
 
@@ -678,8 +683,8 @@ legend_b_dominance_sprinkled = get_plot_component(p_b_dom_sprinkled_main + guide
 
 p_b_dominance_sprinkled_combined = plot_grid(p_b_dom_sprinkled_main + theme(legend.position = "none"),
                                     p_b_dom_sprinkled_palpha + theme(legend.position = "none"),
-                                    p_b_dom_sprinkled_res_var + theme(legend.position = "none"),
                                     p_b_dom_sprinkled_balpha_slope + theme(legend.position = "none"),
+                                    p_b_dom_sprinkled_res_var + theme(legend.position = "none"),
                                     labels = "auto", nrow = 2)
 title_b_dominance_sprinkled = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
 subtitle_b_dominance_sprinkled = ggdraw() + draw_label("(with dominance in the experiment phase)", hjust = 0.5, size = 20)
