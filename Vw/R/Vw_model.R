@@ -331,7 +331,7 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
   gc(verbose = FALSE)
   
   if(!is.null(coverage1)){
-    Q<-t(2*diag(Ltilde)/t(coverage1+coverage2))
+    Q<-t(2*diag(Ltilde)*t(1/coverage1+1/coverage2))
     Q<-apply(Q,1, function(x){t(tprojp)%*%Diagonal(length(x), x)%*%tprojp})
     Q<-bdiag(Q)
   }else{
