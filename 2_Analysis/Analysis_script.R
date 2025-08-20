@@ -1,4 +1,9 @@
 rm(list = ls())
+# Jarrod's PC ------
+# Rscript ~/Work/Va_simulations/2_Analysis/Analysis_script.R
+# source("~/Work/Va_simulations/2_Analysis/Analysis_script.R")
+
+# Manas's PC ------
 # Rscript /mnt/c/Users/msamant/Documents/GitHub/Va_simulations/2_Analysis/Analysis_script.R
 # source("/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/2_Analysis/Analysis_script.R")
 
@@ -93,7 +98,7 @@ if(grepl("ecdf.ed.ac.uk", Sys.info()["nodename"])){
 ### Path to SLiM output ###
 ###########################
 
-test = TRUE
+test = FALSE
 
 if(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553"){
   slim_output_path = if(test){file.path(file_storage_path, "b_Interim_files/SLiM_outputs")}else{file.path(slim_path, "SLiM_outputs")}
@@ -159,7 +164,7 @@ Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=
 pool_seq = TRUE
 
 if(pool_seq){
-  read_length = 100
+  read_length = 150
   coverage = 100
   V_logmean = 0
 }else{
@@ -175,7 +180,7 @@ for(sim in 1:nsims){
   analysed_data = analyse_sim(Set_ID = Set_ID,                            # The unique ID of the set of simulations that are controlled by a single R script
                               sim = sim,                                  # Each set can have multiple sims, but - on the cluster sim must always 1,
                               ngen2_optional = NULL,                      # Allows del_P to be calculated between ngen1 and manually specified ngen2 (which can be different from the last generation)
-                              unzip = TRUE,                               # Should the SLiM output file be unzipped, read, and then zipped back?
+                              unzip = FALSE,                               # Should the SLiM output file be unzipped, read, and then zipped back?
                               slim_output_path = slim_output_path,        # The directory where the SLiM outputs (for parents and experimental replicates) are stored (as .txt files)
                               sim_param_path = sim_param_path,            # The path to the directory where the .csv file containing simulation parameters is stored
                               extract_genomes_path = extract_genomes_path,# The path to the python script that extracts genomes and mutations from SLim outputs

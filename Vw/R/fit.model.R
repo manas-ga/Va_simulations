@@ -71,7 +71,7 @@ fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tpr
   
  # dat.gaussian<-data.frame(delta=c(pbar2_proj-pbar1_proj), locus=gl(ncol(pbar1_proj),nrep,ncol(pbar1_proj)*nrep), rep=gl(nrep,1,ncol(pbar1_proj)*nrep), pmq=c(pmq_proj), int=c(int_proj))
   
-  dat.gaussian<-data.frame(delta=c(t(pbar2_proj-pbar1_proj)), locus=gl(ncol(pbar1_proj),1,ncol(pbar1_proj)*nrep), rep=gl(nrep,ncol(pbar1_proj),ncol(pbar1_proj)*nrep), pmq=c(t(pmq_proj)), int=c(t(int_proj))))
+  dat.gaussian<-data.frame(delta=c(t(pbar2_proj-pbar1_proj)), locus=gl(ncol(pbar1_proj),1,ncol(pbar1_proj)*nrep), rep=gl(nrep,ncol(pbar1_proj),ncol(pbar1_proj)*nrep), pmq=c(t(pmq_proj)), int=c(t(int_proj)))
 
   
   if(!is.na(balpha[1])){
