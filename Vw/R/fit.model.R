@@ -69,8 +69,10 @@ fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tpr
   pmq_proj<-t(matrix(pmq, nsnps,nrep))%*%tprojp
   int_proj<-t(matrix(int, nsnps,nrep))%*%tprojp
   
-  dat.gaussian<-data.frame(delta=c(pbar2_proj-pbar1_proj), locus=gl(ncol(pbar1_proj),nrep,ncol(pbar1_proj)*nrep), rep=gl(nrep,1,ncol(pbar1_proj)*nrep), pmq=c(pmq_proj), int=c(int_proj))
+ # dat.gaussian<-data.frame(delta=c(pbar2_proj-pbar1_proj), locus=gl(ncol(pbar1_proj),nrep,ncol(pbar1_proj)*nrep), rep=gl(nrep,1,ncol(pbar1_proj)*nrep), pmq=c(pmq_proj), int=c(int_proj))
   
+  dat.gaussian<-data.frame(delta=c(t(pbar2_proj-pbar1_proj)), locus=gl(ncol(pbar1_proj),1,ncol(pbar1_proj)*nrep), rep=gl(nrep,ncol(pbar1_proj),ncol(pbar1_proj)*nrep), pmq=c(t(pmq_proj)), int=c(t(int_proj))))
+
   
   if(!is.na(balpha[1])){
     dat.gaussian$int<-dat.gaussian$int*balpha[1]
@@ -97,7 +99,7 @@ fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tpr
     if(is.null(Q)){
       random = ~vm(locus, SC, singG="PSD")
     }else{
-      random = ~vm(locus, SC, singG="PSD")+ vm(locus, Q, singG="PSD")
+      random = ~vm(locus, SC, singG="PSD")+vm(units, Q, singG="PSD")
     }
  
     if(is.na(balpha[1]) & is.na(balpha[2])){
