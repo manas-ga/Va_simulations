@@ -18,6 +18,15 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
                              V_logmean = NULL,
                              verbose=TRUE
                              ){     
+  ##########################
+  ### General principles ###
+  ##########################
+  
+  # 1. In SLiM outputs, mutations carried by genomes are represented by their temp_IDs, which can vary from generation to generation
+  # 2. Therefore, the python script that extracts genomes ("extract_genomes_path") has columns sorted by the temp_IDs of that repective genration
+  # 3. Each mutation also has a permanent_ID that remains constant throughout the simulation
+  # 4. To record the allele frequency/coverage at a given locus in a given generation and cage (ie replicate), the permanent IDs need to be matched to the data from the base population. 
+  # 5. In the output, loci are sorted in the ascending order of temp_IDs in the base population (i.e. generation "end_gen")
   
   ### Checks
   
@@ -120,7 +129,7 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
   # Delete the .txt file
   if(delete_temp_files){system(paste("rm ", mutations_path, "/", Set_ID, "_sim", sim, "_mutations_parents.txt", sep = ""))}
   
-  # Sort mutations based on the Temp_ID, so that the order of loci matches the order in c_ind
+  # Sort mutations based on the Temp_ID, so that the order of loci matches the order in c_genome
   
   mutations_0 = mutations_0[order(mutations_0$Temp_ID),]
   
@@ -141,14 +150,16 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
   ####### Calculate allele frequencies in the experiment for each cage #######
   ############################################################################
   ############################################################################  
-  
-  # Create empty vector to create the data frame containing the following variables as columns:
-  # 1. Raw delta P
-  # 2. Projected delta P
-  # 3. Cage ID (replicate)
-  # 4. Locus ID
+
+  # 
   
   P_matrix = c()  
+  
+  # If pool_seq=TRUE, create empty matrices to store the sitewise coverage 
+  if(pool_seq){
+    coverage1 = matrix(NA, nrow = n_cages, ncol = n_sites)
+    coverage2 = matrix(NA, nrow = n_cages, ncol = n_sites)
+  }
   
   for (cage in (1:n_cages)){
     
@@ -172,7 +183,7 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
         system(paste("gunzip", paste(slim_output_path, "/", Set_ID, "_sim", sim, "_cage", cage, "_output_experiment_", as.integer(gen), ".txt", sep = "")))
       }
       
-      # If pool_seq = TRUE extract both mutations and genomes, otherwise only extract mutations
+      # If pool_seq = TRUE extract both mutations and genomes, otherwise only extract mutations (because extracting only mutations is faster)
       if(pool_seq){
         system(paste("python", 
                      extract_genomes_path,                        # Path of the python script (3_Extract_genomes.py)
@@ -200,7 +211,7 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
     
     # If some of the loci get fixed/lost in subsequent generations, NAs should be inserted
     
-    # Create an empty vector to store allele frequencies
+    # Create an empty vector to store allele frequencies of all the generations of the current cage (columns = loci, rows = loci sorted according to temp_ID in the parents' generation)
     
     P = c()
     
@@ -244,6 +255,12 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
         
         # Modify the Numbers column in mut based on the sampled frequencies
         mut$Number = pool_seq_data$p*(2*n_ind_exp)
+        
+        # Store coverage
+        mut$coverage = pool_seq_data$coverage
+
+        # Create an empty vector to store site-wise coverage in the current generation sorted in order of temp_Ids in the parents generation
+        if(pool_seq&gen%in%c(end_gen+ngen1, end_gen+ngen2)){coverage_sorted = c()}
       }
       
       # Create an empty vector to store frequencies of mutations in the current generation
@@ -252,13 +269,19 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
       # Loop through the permanent IDs of  mutations segregating in end_gen (parents' generation)
       # i.e. Loop through Permanent IDs in mutations_0
       # Check if each mutation is present in the current generation
-      # If present, record the frequency in freq, otherwise add either 0 or 1 to freq using the round() function
+      # If present, record the frequency in freq, otherwise add either 0 or 1 to freq using the round() function on the previous generation's frequency
+      # If present and if(pool_seq&gen%in%c(end_gen+ngen1, end_gen+ngen2)), also record the coverage from mut$Coverage
+      # If absent and if(pool_seq&gen%in%c(end_gen+ngen1, end_gen+ngen2)), record the coverage as 2*n_ind_exp
       
       for(mutation in mutations_0$Permanent_ID){
-        if(mutation %in% mut$Permanent_ID){freq = c(freq, (mut[which(mut$Permanent_ID==mutation),]$Number)/(2*n_ind_exp))
+        
+        if(mutation %in% mut$Permanent_ID){
+          freq = c(freq, (mut[which(mut$Permanent_ID==mutation),]$Number)/(2*n_ind_exp))
+          if((pool_seq==TRUE)&(gen%in%c(end_gen+ngen1, end_gen+ngen2))){coverage_sorted = c(coverage_sorted, mut[which(mut$Permanent_ID==mutation),]$coverage)}
+        
         }else{
           freq = c(freq, round(P[which(mutations_0$Permanent_ID==mutation), gen - end_gen]))
-          
+          if((pool_seq==TRUE)&(gen%in%c(end_gen+ngen1, end_gen+ngen2))){coverage_sorted = c(coverage_sorted, 2*n_ind_exp)}
         }
       }
       
@@ -266,6 +289,10 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
       
       P = cbind(P, freq)
       
+      # Add the coverage vectors to coverage1 or coverage2 
+
+      if(pool_seq&gen==(end_gen + ngen1)){coverage1[cage,] = coverage_sorted}
+      if(pool_seq&gen==(end_gen + ngen2)){coverage2[cage,] = coverage_sorted}
     }
     
     P_matrix = rbind(P_matrix, P)
@@ -357,6 +384,6 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
     
   }
   
-  return(list(c_genome=c_genome, list_alpha=list_alpha, SNPs=SNPs, ngen1=ngen1, ngen2=ngen2,  pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, sim_params=sim_params))
+  return(list(c_genome=c_genome, list_alpha=list_alpha, SNPs=SNPs, ngen1=ngen1, ngen2=ngen2,  pbar0=pbar0, pbar1=pbar1,  coverage1=if(pool_seq){coverage1}else{NULL}, pbar2=pbar2, coverage2=if(pool_seq){coverage2}else{NULL}, sim_params=sim_params))
   
 }

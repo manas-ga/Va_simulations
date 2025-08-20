@@ -78,6 +78,7 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
   if(predict_NE){
     NE<- c(sim_data$sim_params$n_ind_exp, predict_NE(n=sim_data$sim_params$n_ind_exp, Ve=sim_data$sim_params$Ve_w_expt))
   }
+  
 
   ### Fit model ###
   
@@ -86,9 +87,11 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
   m1<-Vw_model(c_genome = NULL,          
                nR = parents_info$nR,
                pbar0 = sim_data$pbar0,                   
-               pbar1 = sim_data$pbar1,      
+               pbar1 = sim_data$pbar1,
+               coverage1 = sim_data$coverage1,
                ngen1=sim_data$ngen1,     
-               pbar2 = sim_data$pbar2,       
+               pbar2 = sim_data$pbar2,  
+               coverage2 = sim_data$coverage2,
                ngen2 = sim_data$ngen2,       
                nind = sim_data$sim_params$n_ind_exp,        
                proj=proj,
