@@ -2,7 +2,7 @@
 
 #$ -V
 #$ -cwd
-#$ -N Qpoolseq_log(2)
+#$ -N Qpoolseq_log2
 #$ -t 1-100
 #$ -tc 100
 #$ -l h_rt=01:30:00
