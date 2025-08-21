@@ -49,6 +49,7 @@ fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tpr
   dimnames(SC) <- list(1:nrow(SC),1:nrow(SC))  # used for full-form matrices
 
   if(!is.null(Q)){
+    Q<-as(Q, "dsTMatrix")
     attr(Q, "INVERSE")<-FALSE
     dimnames(Q) <- list(1:nrow(Q),1:nrow(Q))
   } 
