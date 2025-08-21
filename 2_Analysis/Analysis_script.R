@@ -1,9 +1,9 @@
 rm(list = ls())
-# Jarrod's PC ------
+# Jarrod's PC ------ "sce-bio-c04553"
 # Rscript ~/Work/Va_simulations/2_Analysis/Analysis_script.R
 # source("~/Work/Va_simulations/2_Analysis/Analysis_script.R")
 
-# Manas's PC ------
+# Manas's PC ------ "SCE-BIO-C06645"
 # Rscript /mnt/c/Users/msamant/Documents/GitHub/Va_simulations/2_Analysis/Analysis_script.R
 # source("/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/2_Analysis/Analysis_script.R")
 
@@ -73,8 +73,7 @@ if(Sys.info()["nodename"]=="SCE-BIO-C06645"){
 
 if(Sys.info()["nodename"]=="sce-bio-c04553"){  
   analysis_path = "~/Work/Va_simulations/2_Analysis"
-  file_storage_path = "~/Work/Va_simulations/1_Simulations"
-  slim_path = "/Volumes/hadfield/Va_simulations/sim_files"
+  file_storage_path = "/Volumes/hadfield/Va_simulations/sim_files"
   Vw_library_path = "~/Work/Va_simulations/Vw"
 }
 
@@ -85,8 +84,19 @@ if(Sys.info()["nodename"]=="sce-bio-c04553"){
 extract_genomes_path = file.path(analysis_path, "3_Extract_genomes.py")                                           ## Python script extracting mutations and genomes from the SLiM output file 
 extract_mut_path = file.path(analysis_path, "2_Extract_mutations.py")                                             ## Python script extracting mutations from the SliM output file
 
+#########################
+### Output file paths ###
+#########################
+
 temp_files_path = file.path(file_storage_path, "b_Interim_files")  
-output_path = paste(file_storage_path, "/c_Output", sep = "")                                                     ## Path where .csv file(s) containing final data are to be stored 
+output_path = file.path(file_storage_path, "c_Output")                                                     ## Path where .csv file(s) containing final data are to be stored 
+
+# If working locally on Manas' or Jarrod's PC, send the outputs to local destinations (not Datastore)
+
+if(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553"){
+  temp_files_path = file.path(analysis_path, "Output")  
+  output_path = file.path(analysis_path, "Output")   
+}
 
 # On Eddie use a different output path (since files in /scracth are deleted after a months)
 
@@ -98,10 +108,14 @@ if(grepl("ecdf.ed.ac.uk", Sys.info()["nodename"])){
 ### Path to SLiM output ###
 ###########################
 
-test = FALSE
+test = FALSE # If TRUE, this allows Manas to test stuff offline using sims stored on his PC (as opposed to using sims on Datastore)
 
-if(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553"){
+if(Sys.info()["nodename"]=="SCE-BIO-C06645"){
   slim_output_path = if(test){file.path(file_storage_path, "b_Interim_files/SLiM_outputs")}else{file.path(slim_path, "SLiM_outputs")}
+}
+
+if(Sys.info()["nodename"]=="sce-bio-c04553"){
+  slim_output_path = file.path(file_storage_path, "b_Interim_files/SLiM_outputs")
 }
 
 if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig", "c1", "c2", "c3", "c4", "c5", "c6", "ac3-n1", "ac3-n2", "ac3-n3", "ac3-n4", "ac3-n5", "ac3-n6")){
@@ -118,8 +132,12 @@ if(grepl("ecdf.ed.ac.uk", Sys.info()["nodename"])){
 ### Path to SLiM simulation parameters ###
 ##########################################
 
-if(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553"){
+if(Sys.info()["nodename"]=="SCE-BIO-C06645"){
   sim_param_path = if(test){file.path(file_storage_path, "c_Output")}else{file.path(slim_path, "sim_params")}   
+}
+
+if(Sys.info()["nodename"]=="sce-bio-c04553"){
+  sim_param_path = file.path(file_storage_path, "c_Output")
 }
 
 if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig", "c1", "c2", "c3", "c4", "c5", "c6", "ac3-n1", "ac3-n2", "ac3-n3", "ac3-n4", "ac3-n5", "ac3-n6")){
@@ -161,7 +179,7 @@ library(Vw)
 
 Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "TEST_SCE-BIO-C06645_2025-07-16_10-41-15.799234", commandArgs(trailingOnly = TRUE)[1])
 
-pool_seq = TRUE
+pool_seq = FALSE
 
 if(pool_seq){
   read_length = 150
@@ -199,7 +217,7 @@ for(sim in 1:nsims){
                               pa = 1,
                               Vs = "LoNL",                                # "L" or "LoNL"
                               method="REML",                              # Can be "REML" or "MCMC"
-                              palpha = NA,                                # If NA pdelta is estimated using optim()
+                              palpha = 0,                                # If NA pdelta is estimated using optim()
                               balpha = c(0, NA),                          # If c(NA,NA) both bedelta intercept and slope are estimated
                               AtleastOneRecomb=FALSE,
                               NE = c(1000, 1000),
