@@ -1,5 +1,5 @@
 
-fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tprojp, pbar0, pbar1, pbar2, Q=NULL, nrep, Selec, LLonly=FALSE, method = "REML", verbose=TRUE){
+fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tprojp, pbar0, pbar1, pbar2, projQ=NULL, nrep, Selec, LLonly=FALSE, method = "REML", verbose=TRUE){
   
   if(verbose){
     message("Computing the covariance structure of locus effects...")
@@ -48,10 +48,10 @@ fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tpr
   attr(SC, "INVERSE")<-FALSE
   dimnames(SC) <- list(1:nrow(SC),1:nrow(SC))  # used for full-form matrices
 
-  if(!is.null(Q)){
-    Q<-as(Q, "dsTMatrix")
-    attr(Q, "INVERSE")<-FALSE
-    dimnames(Q) <- list(1:nrow(Q),1:nrow(Q))
+  if(!is.null(projQ)){
+    projQ<-as(projQ, "dsTMatrix")
+    attr(projQ, "INVERSE")<-FALSE
+    dimnames(projQ) <- list(1:nrow(projQ),1:nrow(projQ))
   } 
 
   if(verbose){

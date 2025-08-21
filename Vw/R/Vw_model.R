@@ -22,6 +22,7 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
                    svdL=NULL,   # list with elements UL and DL,
                    NE=NULL,     # Can be a scalar (same Ne throughout), a vector of length 2 (different Ne's in the neutral (Ne[1]) and selected (Ne[2]) parts of the experiment), or a vector of length ngen2 (different Ne in each generation)
                    Ne=NE,
+                   diag.projQ=TRUE,
                    tol=sqrt(.Machine$double.eps),
                    save_tprojp=FALSE, 
                    verbose=TRUE)
@@ -332,10 +333,18 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
   
   if(!is.null(coverage1)){
     Q<-t(2*diag(Ltilde)*t(1/coverage1+1/coverage2))
-    Q<-apply(Q,1, function(x){t(tprojp)%*%Diagonal(length(x), x)%*%tprojp})
-    Q<-bdiag(Q)
+    if(diag.projQ){
+      projQ<-apply(Q,1, function(x){diag(t(tprojp)%*%Diagonal(length(x), x)%*%tprojp)})
+      rm("Q")
+      projQ<-unlist(projQ)
+      projQ<-Diagonal(length(projQ), projQ)
+    }else{  
+      projQ<-apply(Q,1, function(x){t(tprojp)%*%Diagonal(length(x), x)%*%tprojp})
+      rm("Q")
+      projQ<-bdiag(projQ)
+    }
   }else{
-    Q<-NULL
+    projQ<-NULL
   }
   
   if(is.na(palpha)){
@@ -344,7 +353,7 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
       message("Estimating palpha...")
     }
     
-    palpha<-optim(0, fit.model, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, Q=Q, nrep=nrep, LLonly=TRUE, Selec=Selec, verbose=verbose, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1, factr = 1e+11), hessian=TRUE)
+    palpha<-optim(0, fit.model, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, projQ=projQ, nrep=nrep, LLonly=TRUE, Selec=Selec, verbose=verbose, method = "L-BFGS-B", lower = -2, upper =2, control = list(fnscale=-1, factr = 1e+11), hessian=TRUE)
     
     palpha_var<--1/palpha$hessian
     palpha<-palpha$par
@@ -357,7 +366,7 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
     message("Fitting the final model...")
   }
   
-  output<-fit.model(palpha=palpha, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, Q=Q, nrep=nrep, LLonly=FALSE, Selec=Selec, verbose=verbose)
+  output<-fit.model(palpha=palpha, balpha=balpha, LDalpha = LDalpha, nsnps=nsnps, UL=UL, DL=DL, L=L, ngen2=ngen2, ngen1=ngen1, tprojp=tprojp, pbar0=pbar0, pbar1=pbar1, pbar2=pbar2, projQ=projQ, nrep=nrep, LLonly=FALSE, Selec=Selec, verbose=verbose)
   
   if(verbose){
     message("Calculating the estimate of Vw...")
