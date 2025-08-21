@@ -160,7 +160,7 @@ library(pryr) ## For tracking memory usage using mem_used()
 library(RhpcBLASctl)
 
 # Control the number of BLAS threads if running on a cluster
-if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(2)}
+if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(12)}
 
 
 ################################################
@@ -183,9 +183,9 @@ pool_seq = TRUE
 
 if(pool_seq){
   asreml.options(workspace="4gb") # only for poolseq
-  read_length = 800
-  coverage = 1000
-  V_logmean = log(2)
+  read_length = 37
+  coverage = 100
+  V_logmean = 0
 }else{
   read_length = NULL
   coverage = NULL
