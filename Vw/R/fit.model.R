@@ -49,7 +49,7 @@ fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tpr
   dimnames(SC) <- list(1:nrow(SC),1:nrow(SC))  # used for full-form matrices
 
   if(!is.null(projQ)){
-    projQ<-as(projQ, "dsTMatrix")
+    projQ<-as(projQ, "TsparseMatrix")
     attr(projQ, "INVERSE")<-FALSE
     dimnames(projQ) <- list(1:nrow(projQ),1:nrow(projQ))
   } 
@@ -97,10 +97,10 @@ fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tpr
   
   if(method=="REML"){
 
-    if(is.null(Q)){
+    if(is.null(projQ)){
       random = ~vm(locus, SC, singG="PSD")
     }else{
-      random = ~vm(locus, SC, singG="PSD")+vm(units, Q, singG="PSD")
+      random = ~vm(locus, SC, singG="PSD")+vm(units, projQ, singG="PSD")
     }
  
     if(is.na(balpha[1]) & is.na(balpha[2])){

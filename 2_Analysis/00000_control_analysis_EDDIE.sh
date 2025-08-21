@@ -2,10 +2,10 @@
 
 #$ -V
 #$ -cwd
-#$ -N poolseq_logreads
+#$ -N Qpoolseq_100x
 #$ -t 1-100
 #$ -tc 100
-#$ -l h_rt=10:00:00
+#$ -l h_rt=01:00:00
 #$ -l h_vmem=5G
 #$ -pe sharedmem 2
 #$ -j y

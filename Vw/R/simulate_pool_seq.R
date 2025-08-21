@@ -103,7 +103,7 @@ simulate_pool_seq = function(c_genome,    # Matrix of haploid genomes of all ind
   
   site_inds =  colSums((n_mapped_reads[seq(1, nrow(n_mapped_reads), 2),] + n_mapped_reads[seq(2, nrow(n_mapped_reads), 2),])>0) 
   
-  return(list("p" = p, "coverage" = count_total, "ind_reads" = ind_reads, "site_inds" = site_inds))
+  return(list("p" = p, "coverage" = ifelse(is.na(count_total), 1, count_total), "ind_reads" = ind_reads, "site_inds" = site_inds))
   
   
   

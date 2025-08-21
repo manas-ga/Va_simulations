@@ -207,7 +207,7 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
   unique_stamp = gsub(" ", "_", unique_stamp)
   unique_stamp = gsub(":", "-", unique_stamp)
   
-  if(pool_seq){unique_stamp = paste("pool_seq", pool_seq, "read_length", read_length, "coverage", coverage, "V_logmean", V_logmean, unique_stamp, sep = "_")}
+  if(pool_seq){unique_stamp = paste("incorporateQ_pool_seq", pool_seq, "read_length", read_length, "coverage", coverage, "V_logmean", V_logmean, unique_stamp, sep = "_")}
   
   if(verbose){message("Saving data...")}
   

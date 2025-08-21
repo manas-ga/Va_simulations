@@ -108,7 +108,7 @@ if(grepl("ecdf.ed.ac.uk", Sys.info()["nodename"])){
 ### Path to SLiM output ###
 ###########################
 
-test = FALSE # If TRUE, this allows Manas to test stuff offline using sims stored on his PC (as opposed to using sims on Datastore)
+test = TRUE # If TRUE, this allows Manas to test stuff offline using sims stored on his PC (as opposed to using sims on Datastore)
 
 if(Sys.info()["nodename"]=="SCE-BIO-C06645"){
   slim_output_path = if(test){file.path(file_storage_path, "b_Interim_files/SLiM_outputs")}else{file.path(slim_path, "SLiM_outputs")}
@@ -137,7 +137,7 @@ if(Sys.info()["nodename"]=="SCE-BIO-C06645"){
 }
 
 if(Sys.info()["nodename"]=="sce-bio-c04553"){
-  sim_param_path = file.path(file_storage_path, "c_Output")
+  sim_param_path = file.path(file_storage_path, "sim_params")
 }
 
 if(Sys.info()["nodename"]%in%c("bigfoot", "bigshot", "bigbird", "bigyin", "biggar", "bigwig", "c1", "c2", "c3", "c4", "c5", "c6", "ac3-n1", "ac3-n2", "ac3-n3", "ac3-n4", "ac3-n5", "ac3-n6")){
@@ -177,12 +177,13 @@ library(Vw)
 ########################
 
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "TEST_SCE-BIO-C06645_2025-07-16_10-41-15.799234", commandArgs(trailingOnly = TRUE)[1])
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "TEST_SCE-BIO-C06645_2025-08-21_16-01-17.50597", commandArgs(trailingOnly = TRUE)[1])
 
-pool_seq = FALSE
+pool_seq = TRUE
 
 if(pool_seq){
-  read_length = 150
+  asreml.options(workspace="4gb") # only for poolseq
+  read_length = 800
   coverage = 100
   V_logmean = 0
 }else{
@@ -198,7 +199,7 @@ for(sim in 1:nsims){
   analysed_data = analyse_sim(Set_ID = Set_ID,                            # The unique ID of the set of simulations that are controlled by a single R script
                               sim = sim,                                  # Each set can have multiple sims, but - on the cluster sim must always 1,
                               ngen2_optional = NULL,                      # Allows del_P to be calculated between ngen1 and manually specified ngen2 (which can be different from the last generation)
-                              unzip = FALSE,                               # Should the SLiM output file be unzipped, read, and then zipped back?
+                              unzip = TRUE,                               # Should the SLiM output file be unzipped, read, and then zipped back?
                               slim_output_path = slim_output_path,        # The directory where the SLiM outputs (for parents and experimental replicates) are stored (as .txt files)
                               sim_param_path = sim_param_path,            # The path to the directory where the .csv file containing simulation parameters is stored
                               extract_genomes_path = extract_genomes_path,# The path to the python script that extracts genomes and mutations from SLim outputs
@@ -217,7 +218,7 @@ for(sim in 1:nsims){
                               pa = 1,
                               Vs = "LoNL",                                # "L" or "LoNL"
                               method="REML",                              # Can be "REML" or "MCMC"
-                              palpha = 0,                                # If NA pdelta is estimated using optim()
+                              palpha = NA,                                # If NA pdelta is estimated using optim()
                               balpha = c(0, NA),                          # If c(NA,NA) both bedelta intercept and slope are estimated
                               AtleastOneRecomb=FALSE,
                               NE = c(1000, 1000),

@@ -281,7 +281,7 @@ extract_slim_data = function(Set_ID,                # The unique ID of the set o
         
         }else{
           freq = c(freq, round(P[which(mutations_0$Permanent_ID==mutation), gen - end_gen]))
-          if((pool_seq==TRUE)&(gen%in%c(end_gen+ngen1, end_gen+ngen2))){coverage_sorted = c(coverage_sorted, 2*n_ind_exp)}
+          if((pool_seq==TRUE)&(gen%in%c(end_gen+ngen1, end_gen+ngen2))){coverage_sorted = c(coverage_sorted, mean(mut$coverage))}
         }
       }
       
