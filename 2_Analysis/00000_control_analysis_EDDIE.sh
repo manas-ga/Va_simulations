@@ -2,7 +2,7 @@
 
 #$ -V
 #$ -cwd
-#$ -N Qpoolseq_100x
+#$ -N Qpoolseq_500x
 #$ -t 1-100
 #$ -tc 100
 #$ -l h_rt=01:00:00
