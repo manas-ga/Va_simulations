@@ -184,7 +184,7 @@ pool_seq = TRUE
 if(pool_seq){
   asreml.options(workspace="4gb") # only for poolseq
   read_length = 37
-  coverage = 100
+  coverage = 500
   V_logmean = 0
 }else{
   read_length = NULL

@@ -29,7 +29,7 @@ initialize()
 		defineConstant("seed", 12345);
 		
 	}
-	setSeed(seed + product(1:cage) + sum(1:cage));
+	setSeed(seed);
 	initializeMutationRate(mu_expt);
 	
 	if (DFE == "g"){

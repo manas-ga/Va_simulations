@@ -187,9 +187,9 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
     gc(verbose = FALSE)
   }
   
-  ########################################################
-  ### Calculate Selec (the among-replicate covariance) ###
-  ########################################################
+  ######################################
+  ### Calculate Selec (\mathcal{L})  ###
+  ######################################
   
   if(Vs=="LoNL"){ 
     
