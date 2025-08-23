@@ -2,10 +2,10 @@
 
 #$ -V
 #$ -cwd
-#$ -N QpoolseqFull_500x
+#$ -N QpoolseqFull_1000x
 #$ -t 1-100
 #$ -tc 100
-#$ -l h_rt=25:00:00
+#$ -l h_rt=17:30:00
 #$ -l h_vmem=25G
 #$ -pe sharedmem 12
 #$ -j y

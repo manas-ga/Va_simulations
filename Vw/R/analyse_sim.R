@@ -19,6 +19,7 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                        read_length = NULL,
                        coverage = NULL,
                        V_logmean = NULL,
+                       incorporateQ = TRUE,   # Should the Q matrix be incorporated while analysing poolseq data
                        proj = "BLoM",         # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
                        LDalpha = FALSE,       # Should L or diag(L) be considered while modelling distribution of alphas
                        pa = 1,
@@ -88,10 +89,10 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                nR = parents_info$nR,
                pbar0 = sim_data$pbar0,                   
                pbar1 = sim_data$pbar1,
-               coverage1 = sim_data$coverage1,
+               coverage1 = if(pool_seq&incorporateQ){sim_data$coverage1}else{NULL},
                ngen1=sim_data$ngen1,     
                pbar2 = sim_data$pbar2,  
-               coverage2 = sim_data$coverage2,
+               coverage2 = if(pool_seq&incorporateQ){sim_data$coverage2}else{NULL},
                ngen2 = sim_data$ngen2,       
                nind = sim_data$sim_params$n_ind_exp,        
                proj=proj,
@@ -115,7 +116,8 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
   balpha_intercept_est = m1$balpha[1]
   balpha_slope_est = m1$balpha[2]
   balpha_var_est = paste(m1$balpha_var[1,1], m1$balpha_var[2,2], m1$balpha_var[1,2], sep = "_")
-  sigma2alpha_est = summary(m1$model)$varcomp[1,1]
+  sigma2alpha_est = summary(m1$model)$varcomp['vm(locus, SC, singG = "PSD")', 'component']
+  Residual_var = summary(m1$model)$varcomp['units!R', 'component']
   
   
   ### Calculate Vw from Buffalo and Coop's method ###
@@ -207,14 +209,15 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
   unique_stamp = gsub(" ", "_", unique_stamp)
   unique_stamp = gsub(":", "-", unique_stamp)
   
-  if(pool_seq){unique_stamp = paste("incorporateQ_pool_seq", pool_seq, "read_length", read_length, "coverage", coverage, "V_logmean", V_logmean, unique_stamp, sep = "_")}
+  if(pool_seq&incorporateQ){unique_stamp = paste("incorporateQ_pool_seq", pool_seq, "read_length", read_length, "coverage", coverage, "V_logmean", V_logmean, unique_stamp, sep = "_")}
+  if(pool_seq&!incorporateQ){unique_stamp = paste("pool_seq", pool_seq, "read_length", read_length, "coverage", coverage, "V_logmean", V_logmean, unique_stamp, sep = "_")}
   
   if(verbose){message("Saving data...")}
   
   sim_params = sim_data$sim_params
   
   if(is.null(Ne)){Ne = sim_params$n_ind_exp}
-  analysis_data = data.frame("proj"=proj, "LDalpha"=LDalpha, "pa"=pa, "Vs"=Vs, "randomise"=randomise, "palpha_method"=palpha, "balpha_method"=paste(balpha[1], balpha[2], sep="_"), "Ne_exp" = paste(Ne, collapse = "_"), "va_true"=parents_info$va_true, "vA_true"=parents_info$vA_true, "vA_est"=vA_est, "vA_alpha_emp"=parents_info$vA_alpha_emp, "vA_BC" = if(sim_data$ngen2-sim_data$ngen1==1){vA_BC}else{NA}, "Ne_BC" = if(sim_data$ngen2-sim_data$ngen1==1){Ne_BC}else{NA}, "Residual_var" = summary(m1$model)$varcomp['units!R',1], "palpha_emp"=parents_info$parameters$palpha, "balpha_intercept_emp"=parents_info$parameters$balpha_0, "balpha_slope_emp"=parents_info$parameters$balpha_1, "sigma2alpha_emp"=parents_info$parameters$sigma2alpha, "palpha_est"=palpha_est, "palpha_var_est"=palpha_var_est, "balpha_intercept_est"=balpha_intercept_est, "balpha_slope_est"=balpha_slope_est, "balpha_var_est"=balpha_var_est, "sigma2alpha_est"=sigma2alpha_est, "seg_sites"=parents_info$seg_sites, "seg_sites_neu"=parents_info$seg_sites_neu, "seg_sites_ben"=parents_info$seg_sites_ben, "seg_sites_del"=parents_info$seg_sites_del, "mean_diversity"=parents_info$mean_diversity, "theta" = parents_info$theta, "all.gp" = all.gp, "analysis_stamp" = unique_stamp)
+  analysis_data = data.frame("proj"=proj, "LDalpha"=LDalpha, "pa"=pa, "Vs"=Vs, "randomise"=randomise, "palpha_method"=palpha, "balpha_method"=paste(balpha[1], balpha[2], sep="_"), "Ne_exp" = paste(Ne, collapse = "_"), "va_true"=parents_info$va_true, "vA_true"=parents_info$vA_true, "vA_est"=vA_est, "vA_alpha_emp"=parents_info$vA_alpha_emp, "vA_BC" = if(sim_data$ngen2-sim_data$ngen1==1){vA_BC}else{NA}, "Ne_BC" = if(sim_data$ngen2-sim_data$ngen1==1){Ne_BC}else{NA}, "Residual_var" = Residual_var, "palpha_emp"=parents_info$parameters$palpha, "balpha_intercept_emp"=parents_info$parameters$balpha_0, "balpha_slope_emp"=parents_info$parameters$balpha_1, "sigma2alpha_emp"=parents_info$parameters$sigma2alpha, "palpha_est"=palpha_est, "palpha_var_est"=palpha_var_est, "balpha_intercept_est"=balpha_intercept_est, "balpha_slope_est"=balpha_slope_est, "balpha_var_est"=balpha_var_est, "sigma2alpha_est"=sigma2alpha_est, "seg_sites"=parents_info$seg_sites, "seg_sites_neu"=parents_info$seg_sites_neu, "seg_sites_ben"=parents_info$seg_sites_ben, "seg_sites_del"=parents_info$seg_sites_del, "mean_diversity"=parents_info$mean_diversity, "theta" = parents_info$theta, "all.gp" = all.gp, "analysis_stamp" = unique_stamp)
   
   analysis_data = cbind(sim_params, analysis_data)
   write.table(rbind(names(analysis_data), analysis_data), file = paste(output_path, "/", Set_ID, "_sim_", sim, "_corrected_analysis_", unique_stamp, ".csv", sep = ""),col.names = FALSE, row.names = FALSE, sep = ",")
