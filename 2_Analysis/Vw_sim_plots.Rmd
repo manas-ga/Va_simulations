@@ -714,7 +714,7 @@ ggsave(p_b_dominance_sprinkled_combined, width = 8, height = 8, file = file.path
 
 d_nb_Qpoolseq = read.csv(file.path(data_path, "combined_data/Set_18_corrected_output.csv"))
 
-# retain only the dataset with pool_seq
+# retain only the dataset with pool_seq incorporating Q
 d_nb_Qpoolseq = d_nb_Qpoolseq[grep("incorporateQ_pool_seq", d_nb_Qpoolseq$analysis_stamp, invert = FALSE, value = FALSE),]
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
@@ -749,10 +749,82 @@ d_nb_Qpoolseq$Coverage = factor(d_nb_Qpoolseq$Coverage, levels = c("Exact", "100
 p_nb_Qcoverage = ggplot(d_nb_Qpoolseq, aes(y = vA_est, x = vA_true_new, color = Coverage)) +
   theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999", "orange")) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Coverage", title = "Simplified simulations", subtitle = "(~3000 sites, 0.5 morgan)") +
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "", title = "Simplified simulations", subtitle = "(incorporating covariance due to pool-seq in the analyses)") +
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
  theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12)) 
+
+############################################
+### Simplified sims + analyses without Q ###
+############################################
+
+d_nb_poolseq_noQ = read.csv(file.path(data_path, "combined_data/Set_18_corrected_output.csv"))
+
+# retain only the dataset with pool_seq without Q *and* the correct read length = 800 (there are other analyses with read_length = 75 and read_length = 1 which should not be included)
+d_nb_poolseq_noQ = d_nb_poolseq_noQ[grep("^pool_seq_TRUE_read_length_800", d_nb_poolseq_noQ$analysis_stamp, invert = FALSE, value = FALSE),]
+
+# Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
+d_nb_poolseq_noQ = add_new_va_data(new_va_data=d_new_va, target_data=d_nb_poolseq_noQ, verbose=TRUE)
+
+# Add the standard dataset
+d_nb_poolseq_noQ = rbind(d_18_std, d_nb_poolseq_noQ)
+
+d_nb_poolseq_noQ$Type = ifelse(grepl("poo", d_nb_poolseq_noQ$analysis_stamp),
+                sapply(strsplit(d_nb_poolseq_noQ$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
+                "Exact")
+
+### Extract the coverage and overdispersion and make a separate column ###
+
+d_nb_poolseq_noQ$Coverage = ifelse(d_nb_poolseq_noQ$Type=="Exact", "Exact",  sapply(strsplit(d_nb_poolseq_noQ$analysis_stamp, "_"), function(x) paste(x[8], "x_", x[11], sep = "")))
+# Separate the overdispersion
+d_nb_poolseq_noQ$OD = ifelse(d_nb_poolseq_noQ$Coverage=="Exact", "Exact",  sapply(strsplit(d_nb_poolseq_noQ$Coverage, "_"), function(x) paste(x[2], sep = "")))
+# Replace log(2) by "overdispersed", and otherwise add a blank
+d_nb_poolseq_noQ$OD = ifelse(d_nb_poolseq_noQ$OD %in% c("0", "Exact"), "", "-overdispersed")
+# Combine the coverage and the relabeled overdispersion
+d_nb_poolseq_noQ$Coverage = ifelse(d_nb_poolseq_noQ$Coverage=="Exact", "Exact",  sapply(strsplit(d_nb_poolseq_noQ$Coverage, "_"), function(x) paste(x[1], sep = "")))
+
+d_nb_poolseq_noQ$Coverage = paste(d_nb_poolseq_noQ$Coverage, d_nb_poolseq_noQ$OD, sep = "")
+unique(d_nb_poolseq_noQ$Coverage)
+
+
+d_nb_poolseq_noQ$Coverage = factor(d_nb_poolseq_noQ$Coverage, levels = c("Exact", "1000x", "500x", "100x", "1000x-overdispersed"))
+
+
+### Make plots ###
+
+p_nb_coverage_noQ = ggplot(d_nb_poolseq_noQ, aes(y = vA_est, x = vA_true_new, color = Coverage)) +
+  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999", "orange")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "", title = "Simplified simulations", subtitle = "(ignoring covariance due to pool-seq in the analyses)") +
+  theme(text = element_text(size = 15)) +
+  geom_smooth(method = "lm", se=FALSE) +
+ theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12)) 
+
+#############################
+### Combined plots with Q ###
+#############################
+
+# Extract legend
+
+legend_nb_Qpoolseq = get_plot_component(p_nb_Qcoverage + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
+
+# Combine without labels
+
+p_nb_Qpoolseq_combined = plot_grid(p_nb_Qcoverage + theme(legend.position = "none"),
+                                p_nb_coverage_noQ + theme(legend.position = "none"),
+                                labels = "auto",
+                                ncol = 2)
+
+# Add the legend
+
+p_nb_Qpoolseq_combined = plot_grid(p_nb_Qpoolseq_combined,
+                                legend_nb_Qpoolseq,
+                                nrow = 2, rel_heights = c(1, 0.05))
+
+# Save file
+
+ggsave(plot = p_nb_Qpoolseq_combined, width = 10, height = 5.5, file = file.path(output_path, "poolseq_simplified.jpg"))
+
 
 ############################################
 ### Full sims + analyses incorporating Q ###
@@ -788,287 +860,22 @@ d_b_Qpoolseq$Coverage = paste(d_b_Qpoolseq$Coverage, d_b_Qpoolseq$OD, sep = "")
 unique(d_b_Qpoolseq$Coverage)
 
 
-d_b_Qpoolseq$Coverage = factor(d_b_Qpoolseq$Coverage, levels = c("Exact", "100x"))
+d_b_Qpoolseq$Coverage = factor(d_b_Qpoolseq$Coverage, levels =c("Exact", "1000x", "500x", "100x", "1000x-overdispersed"))
 
 
 ### Make plots ###
 
 p_b_Qcoverage = ggplot(d_b_Qpoolseq, aes(y = vA_est, x = vA_true_new, color = Coverage)) +
   theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
-  scale_color_manual(values = c("#009E73", "#999999")) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Coverage", title = "Full simulations", subtitle = "(~65000 sites, 0.5 morgan)") +
+  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999", "orange")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "", title = "Full simulations", subtitle = "(incorporating covariance due to pool-seq in the analyses)") +
   theme(text = element_text(size = 15)) +
   geom_smooth(method = "lm", se=FALSE) +
   theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12))
 
+ggsave(plot = p_b_Qcoverage, width = 6, height = 6, file = file.path(output_path, "poolseq_full.jpg"))
 
-#############################
-### Combined plots with Q ###
-#############################
 
-# Extract legend
-
-legend_Qpoolseq = get_plot_component(p_nb_Qcoverage + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
-
-# Combine without labels
-
-p_Qpoolseq_combined = plot_grid(p_nb_Qcoverage + theme(legend.position = "none"),
-                                p_b_Qcoverage + theme(legend.position = "none"),
-                                labels = "auto",
-                                ncol = 2)
-
-# Add the legend
-
-p_Qpoolseq_combined = plot_grid(p_Qpoolseq_combined,
-                                legend_Qpoolseq,
-                                nrow = 2, rel_heights = c(1, 0.05))
-
-# Save file
-
-ggsave(plot = p_Qpoolseq_combined, width = 8, height = 5, file = file.path(output_path, "poolseq_withQ.jpg"))
-
-
-#############################
-### Simplified (ml = 0.5) ###
-#############################
-
-# Coverage, read length and overdispersion are varied for poolseq
-
-d_nb_poolseq = read.csv(file.path(data_path, "combined_data/Set_18_corrected_output.csv"))
-
-# retain only the dataset with pool_seq
-d_nb_poolseq = d_nb_poolseq[grep("pool_seq", d_nb_poolseq$analysis_stamp, invert = FALSE, value = FALSE),]
-
-# Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
-d_nb_poolseq = add_new_va_data(new_va_data=d_new_va, target_data=d_nb_poolseq, verbose=TRUE)
-
-# Add the standard dataset
-d_nb_poolseq = rbind(d_18_std, d_nb_poolseq)
-
-d_nb_poolseq$Type = ifelse(grepl("poo", d_nb_poolseq$analysis_stamp),
-                sapply(strsplit(d_nb_poolseq$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
-                "Exact")
-
-#######################
-### Full (ml = 0.5) ###
-#######################
-
-# Coverage, read length and overdispersion are varied for poolseq
-
-d_b_poolseq = read.csv(file.path(data_path, "combined_data/Set_9_corrected_output.csv"))
-
-# retain only the dataset with pool_seq
-d_b_poolseq = d_b_poolseq[grep("pool_seq", d_b_poolseq$analysis_stamp, invert = FALSE, value = FALSE),]
-
-# Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
-d_b_poolseq = add_new_va_data(new_va_data=d_new_va, target_data=d_b_poolseq, verbose=TRUE)
-
-# Analyses with a pool_seq coverage of 100 were accidentally analysed twice
-# Removing the analyses run on ac3
-
-d_b_poolseq = d_b_poolseq[grep(".ecdf.ed.ac.uk", d_b_poolseq$analysis_stamp),]
-
-# Add the standard dataset
-d_b_poolseq = rbind(d_9_std, d_b_poolseq)
-
-d_b_poolseq$Type = ifelse(grepl("poo", d_b_poolseq$analysis_stamp),
-                sapply(strsplit(d_b_poolseq$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
-                "Exact")
-
-##############################
-### simplified (ml = 0.01) ###
-##############################
-
-# Only coverage is varied for poolseq
-
-d_nb_coverage_0.01 = read.csv(file.path(data_path, "combined_data/Set_28_corrected_output.csv"))
-
-d_nb_coverage_0.01 = add_new_va_data(new_va_data=d_new_va, target_data=d_nb_coverage_0.01, verbose=TRUE)
-
-d_nb_coverage_0.01$Type = ifelse(grepl("poo", d_nb_coverage_0.01$analysis_stamp),
-                sapply(strsplit(d_nb_coverage_0.01$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
-                "Exact")
-
-#######################
-### Full (ml = 0.1) ###
-#######################
-
-# Only coverage is varied for poolseq
-
-d_b_coverage_0.1 = read.csv(file.path(data_path, "combined_data/Set_29_corrected_output.csv"))
-
-d_b_coverage_0.1 = add_new_va_data(new_va_data=d_new_va, target_data=d_b_coverage_0.1, verbose=TRUE)
-
-d_b_coverage_0.1$Type = ifelse(grepl("poo", d_b_coverage_0.1$analysis_stamp),
-                sapply(strsplit(d_b_coverage_0.1$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
-                "Exact")
-
-###################################
-### Coverage only for main text ###
-###################################
-
-#### Restrict only to data where coverage is varied for simplified (ml = 0.5) and full (ml = 0.5) ###
-
-d_nb_coverage = d_nb_poolseq[d_nb_poolseq$Type%in%c("Exact", "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0", "pool_seq_TRUE_read_length_75_coverage_500_V_logmean_0", "pool_seq_TRUE_read_length_75_coverage_100_V_logmean_0"),]
-
-d_b_coverage = d_b_poolseq[d_b_poolseq$Type%in%c("Exact", "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0", "pool_seq_TRUE_read_length_75_coverage_500_V_logmean_0", "pool_seq_TRUE_read_length_75_coverage_100_V_logmean_0"),]
-
-### Extract the coverage and make a separate column ###
-
-d_nb_coverage$Coverage = ifelse(d_nb_coverage$Type=="Exact", "Exact",  sapply(strsplit(d_nb_coverage$analysis_stamp, "_"), function(x) paste(x[8], "x", sep = "")))
-d_nb_coverage$Coverage = factor(d_nb_coverage$Coverage, levels = c("Exact", "1000x", "500x", "100x"))
-
-d_b_coverage$Coverage = ifelse(d_b_coverage$Type=="Exact", "Exact",  sapply(strsplit(d_b_coverage$analysis_stamp, "_"), function(x) paste(x[8], "x", sep = "")))
-d_b_coverage$Coverage = factor(d_b_coverage$Coverage, levels = c("Exact", "1000x", "500x", "100x"))
-
-d_nb_coverage_0.01$Coverage = ifelse(d_nb_coverage_0.01$Type=="Exact", "Exact",  sapply(strsplit(d_nb_coverage_0.01$analysis_stamp, "_"), function(x) paste(x[8], "x", sep = "")))
-d_nb_coverage_0.01$Coverage = factor(d_nb_coverage_0.01$Coverage, levels = c("Exact", "1000x", "500x", "100x"))
-
-d_b_coverage_0.1$Coverage = ifelse(d_b_coverage_0.1$Type=="Exact", "Exact",  sapply(strsplit(d_b_coverage_0.1$analysis_stamp, "_"), function(x) paste(x[8], "x", sep = "")))
-d_b_coverage_0.1$Coverage = factor(d_b_coverage_0.1$Coverage, levels = c("Exact", "1000x", "500x", "100x"))
-
-
-
-### Make plots ###
-
-p_nb_coverage = ggplot(d_nb_coverage, aes(y = vA_est, x = vA_true_new, color = Coverage)) +
-  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
-  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Coverage", title = "Simplified simulations", subtitle = "(~3000 sites, 0.5 morgan)") +
-  theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
- theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12)) + xlim(0, 0.2) + ylim(0, 0.2)
-
-p_b_coverage = ggplot(d_b_coverage, aes(y = vA_est, x = vA_true_new, color = Coverage)) +
-  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
-  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Coverage", title = "Full simulations", subtitle = "(~65000 sites, 0.5 morgan)") +
-  theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
- theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12)) + xlim(0, 0.1) + ylim(0, 0.175)
-
-p_nb_coverage_low_ml = ggplot(d_nb_coverage_0.01, aes(y = vA_est, x = vA_true_new, color = Coverage)) +
-  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
-  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Coverage", title = "Simplified simulations", subtitle = "(~3000 sites, 0.01 morgan)") +
-  theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
- theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12)) + xlim(0, 0.2) + ylim(0, 0.2)
-
-p_b_coverage_low_ml = ggplot(d_b_coverage_0.1, aes(y = vA_est, x = vA_true_new, color = Coverage)) +
-  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
-  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Coverage", title = "Full simulations", subtitle = "(~65000 sites, 0.1 morgan)") +
-  theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
- theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12)) + xlim(0, 0.1) + ylim(0, 0.175)
-
-# Extract legend
-
-legend_coverage = get_plot_component(p_b_coverage + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
-
-# Combine without labels
-
-p_coverage_combined = plot_grid(p_nb_coverage + theme(legend.position = "none"),
-                                p_nb_coverage_low_ml + theme(legend.position = "none"),
-                                p_b_coverage + theme(legend.position = "none"),
-                                p_b_coverage_low_ml + theme(legend.position = "none"),
-                                labels = "auto",
-                                ncol = 2)
-
-# Add the legend
-
-p_coverage_combined = plot_grid(p_coverage_combined,
-                                legend_coverage,
-                                nrow = 2, rel_heights = c(1, 0.05))
-
-# Save file
-
-ggsave(plot = p_coverage_combined, width = 8, height = 9, file = file.path(output_path, "poolseq_coverage.jpg"))
-p_coverage_combined
-
-###########################
-### Simplified by sites ###
-###########################
-
-d_26 = read.csv(file.path(data_path, "combined_data/Set_26_corrected_output.csv"))
-d_26 = add_new_va_data(new_va_data=d_new_va, target_data=d_26, verbose=TRUE)
-
-d_26$Type = ifelse(grepl("poo", d_26$analysis_stamp),
-                sapply(strsplit(d_26$analysis_stamp, "_"), function(x) paste(x[1:11], collapse = "_")),
-                "Exact")
-
-d_26$Coverage = ifelse(d_26$Type=="Exact", "Exact",  sapply(strsplit(d_26$analysis_stamp, "_"), function(x) paste(x[8], "x", sep = "")))
-d_26$Coverage = factor(d_26$Coverage, levels = c("Exact", "1000x", "500x", "100x"))
-
-d_26$Error = d_26$vA_est - d_26$vA_true_new
-
-p_pool_sites = ggplot(d_26, aes(y = Error, x = seg_sites/(r*sequence_length), color = Coverage)) + 
-  theme_bw() + geom_point() + geom_abline(slope = 0, intercept = 0) + 
-  scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
-  labs(x = "Density of segregating sites (sites/morgan)", y = TeX(r"(Estimate of $V_A$ - true $V_A$)"), color = "Coverage", title = "Simplified simulations", subtitle = "(0.5 morgan)") +
-  theme(text = element_text(size = 15)) + 
- theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(size = 12, hjust = 0.5)) 
-
-ggsave(plot = p_pool_sites, width = 5, height = 5, file = file.path(output_path, "poolseq_simplified_sites.jpg"))
-p_pool_sites
-
-
-##############################################################
-### Supplementary figures (overdispersion and read length) ###
-##############################################################
-
-d_nb_OD = d_nb_poolseq[d_nb_poolseq$Type%in%c("Exact", "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0", "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0", "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945"),]
-
-d_b_OD = d_b_poolseq[d_b_poolseq$Type%in%c("Exact", "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0", "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0", "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945"),]
-
-
-labels_OD = c("Exact" = "Exact",
-                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = expression(R[75]*C[1000]*V[0]),
-                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945" = expression(R[75]*C[1000]*V[log(2)]),
-                     "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0" = expression(R[1]*C[1000]*V[0]))
-
-values_OD = c("Exact" = "#009E73",
-                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0" = "#D01C8B",
-                     "pool_seq_TRUE_read_length_75_coverage_1000_V_logmean_0.693147180559945" = "#0072B2",
-                     "pool_seq_TRUE_read_length_1_coverage_1000_V_logmean_0" = "#999999")
-
-p_nb_OD = ggplot(d_nb_OD, aes(y = vA_est, x = vA_true_new, color = Type)) +
-  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
-  scale_color_manual(values = values_OD, labels = labels_OD) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Pool-seq", title = "Simplified simulations", subtitle = "(~3000 sites, 0.5 morgan)") +
-  theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
-  theme(legend.position = "bottom") + ggtitle("Simplified simulations") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(size = 12, hjust = 0.5))
-
-p_b_OD = ggplot(d_b_OD, aes(y = vA_est, x = vA_true_new, color = Type)) +
-  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
-  scale_color_manual(values = values_OD, labels = labels_OD) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Pool-seq", title = "Full simulations", subtitle = "(~65000 sites, 0.5 morgan)") +
-  theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
-  theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(size = 12, hjust = 0.5))
-
-# Extract legend
-
-legend_OD = get_plot_component(p_b_OD + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
-
-# Combine without labels
-
-p_OD_combined = plot_grid(p_nb_OD + theme(legend.position = "none"),
-                                p_b_OD + theme(legend.position = "none"),
-                                labels = "auto")
-
-# Add the legend
-
-p_OD_combined = plot_grid(p_OD_combined,
-                                legend_OD,
-                                nrow = 2, rel_heights = c(1, 0.1))
-
-# Save file
-
-ggsave(plot = p_OD_combined, width = 8, height = 5, file = file.path(output_path, "poolseq_OD_readlength.jpg"))
-p_OD_combined
 
 
 
