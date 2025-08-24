@@ -2,7 +2,7 @@
 
 #$ -V
 #$ -cwd
-#$ -N poolseq_simpl_noQ_1000x
+#$ -N poolseq_simpl_noQ_1000x_overdisp
 #$ -t 1-100
 #$ -tc 100
 #$ -l h_rt=1:30:00
