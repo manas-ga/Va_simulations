@@ -185,7 +185,7 @@ incorporateQ = FALSE
 if(pool_seq){
   asreml.options(workspace="4gb") # only for poolseq
   read_length = 800
-  coverage = 500
+  coverage = 1000
   V_logmean = 0
 }else{
   read_length = NULL
