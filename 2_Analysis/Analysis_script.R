@@ -160,7 +160,7 @@ library(pryr) ## For tracking memory usage using mem_used()
 library(RhpcBLASctl)
 
 # Control the number of BLAS threads if running on a cluster
-if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(12)}
+if(Sys.info()["nodename"]!="SCE-BIO-C06645"|Sys.info()["nodename"]!="sce-bio-c04553"){blas_set_num_threads(2)}
 
 
 ################################################
@@ -180,12 +180,13 @@ library(Vw)
 Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "TEST_SCE-BIO-C06645_2025-08-21_16-01-17.50597", commandArgs(trailingOnly = TRUE)[1])
 
 pool_seq = TRUE
+incorporateQ = FALSE
 
 if(pool_seq){
   asreml.options(workspace="4gb") # only for poolseq
-  read_length = 37
-  coverage = 1000
-  V_logmean = log(2)
+  read_length = 800
+  coverage = 100
+  V_logmean = 0
 }else{
   read_length = NULL
   coverage = NULL
@@ -213,6 +214,7 @@ for(sim in 1:nsims){
                               read_length = read_length,
                               coverage = coverage,
                               V_logmean = V_logmean,
+                              incorporateQ = incorporateQ,                # Should the Q matrix be incorporated while analysing poolseq data
                               proj = "BLoM",                              # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
                               LDalpha = FALSE,                            # Should L or diag(L) be considered while modelling distribution of alphas
                               pa = 1,

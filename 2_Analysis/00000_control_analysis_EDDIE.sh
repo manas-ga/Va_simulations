@@ -2,12 +2,12 @@
 
 #$ -V
 #$ -cwd
-#$ -N QpoolseqFull_overdispersed
+#$ -N poolseq_simpl_noQ_100x
 #$ -t 1-100
 #$ -tc 100
-#$ -l h_rt=13:30:00
-#$ -l h_vmem=25G
-#$ -pe sharedmem 12
+#$ -l h_rt=1:30:00
+#$ -l h_vmem=5G
+#$ -pe sharedmem 2
 #$ -j y
 #$ -o ~/std_out/
 
