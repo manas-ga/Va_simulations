@@ -1,0 +1,22 @@
+# First activate the conda environment, for some reason if diff.tex is created using the version installed outside the environment, compilation fails
+# Possibly because of this issue:
+# https://tex.stackexchange.com/questions/686046/latexdiff-not-compiling
+conda activate Va
+
+# Create the diff.tex file from the original and revised .tex files
+latexdiff main.tex main2.tex > diff.tex
+
+# Compile the diff.tex file
+pdflatex diff.tex
+
+# However, this does not compile the references properly because we are using the 'bibunits' package to create a separate bibliography for the main text and the supplement
+# This creates diff.aux and also bu1.aux, bu2.aux, etc. for each bibliography unit.
+# For unit 1:
+bibtex bu1
+bibtex bu2
+# For unit 2:
+bibtex bu1
+bibtex bu2
+
+pdflatex diff.tex
+pdflatex diff.tex

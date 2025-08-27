@@ -1,0 +1,563 @@
+\begin{thebibliography}{93}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+
+\bibitem[{{\rm Abbott} and {\rm Morrow}(2011)}]{abbott2011obtaining}
+{\rm Abbott, J.~K.},  and {\rm E.~H. Morrow}, 2011 Obtaining snapshots of
+  genetic variation using hemiclonal analysis.
+\newblock Trends in Ecology \& Evolution {\bf 26}: 359--368.
+
+\bibitem[{{\rm Abu-Awad} and {\rm Waller}(2023)}]{abu2023conditions}
+{\rm Abu-Awad, D.},  and {\rm D.~Waller}, 2023 Conditions for maintaining and
+  eroding pseudo-overdominance and its contribution to inbreeding depression.
+\newblock Peer Community Journal {\bf 3}.
+
+\bibitem[{{\rm Barton} {\em et~al.\/}(2017){\rm Barton}, {\rm Etheridge} and
+  {\rm V{\'e}ber}}]{Barton.2017}
+{\rm Barton, N.~H.}, {\rm A.~M. Etheridge},  and {\rm A.~V{\'e}ber}, 2017 The
+  infinitesimal model: Definition, derivation, and implications.
+\newblock Theoretical population biology {\bf 118}: 50--73.
+
+\bibitem[{{\rm Barton} and {\rm Partridge}(2000)}]{barton2000measuring}
+{\rm Barton, N.~H.},  and {\rm L.~Partridge}, 2000 Measuring fitness by means
+  of balancer chromosomes.
+\newblock Genetics Research {\bf 75}: 297--313.
+
+\bibitem[{{\rm Basu} {\em et~al.\/}(2024){\rm Basu}, {\rm Tekade}, {\rm Singh},
+  {\rm Das} and {\rm Prasad}}]{basu2024experimental}
+{\rm Basu, A.}, {\rm K.~Tekade}, {\rm A.~Singh}, {\rm P.~N. Das},  and {\rm
+  N.~G. Prasad}, 2024 Experimental evolution for improved postinfection
+  survival selects for increased disease resistance in \emph{Drosophila
+  melanogaster}.
+\newblock Evolution {\bf 78}: 1831--1843.
+
+\bibitem[{{\rm Bitter} {\em et~al.\/}(2024){\rm Bitter}, {\rm Berardi}, {\rm
+  Oken}, {\rm Huynh}, {\rm Lappo} {\em et~al.\/}}]{Bitter.2024}
+{\rm Bitter, M.}, {\rm S.~Berardi}, {\rm H.~Oken}, {\rm A.~Huynh}, {\rm
+  E.~Lappo} {\em et~al.\/}, 2024 Continuously fluctuating selection reveals
+  fine granularity of adaptation.
+\newblock Nature {\bf 634}: 389--396.
+
+\bibitem[{{\rm Bonnet} {\em et~al.\/}(2022){\rm Bonnet}, {\rm Morrissey}, {\rm
+  de~Villemereuil}, {\rm Alberts}, {\rm Arcese} {\em
+  et~al.\/}}]{bonnet2022genetic}
+{\rm Bonnet, T.}, {\rm M.~B. Morrissey}, {\rm P.~de~Villemereuil}, {\rm S.~C.
+  Alberts}, {\rm P.~Arcese} {\em et~al.\/}, 2022 Genetic variance in fitness
+  indicates rapid contemporary adaptive evolution in wild animals.
+\newblock Science {\bf 376}: 1012--1016.
+
+\bibitem[{{\rm Buffalo} and {\rm Coop}(2019)}]{buffalo2019linked}
+{\rm Buffalo, V.},  and {\rm G.~Coop}, 2019 The linked selection signature of
+  rapid adaptation in temporal genomic data.
+\newblock Genetics {\bf 213}: 1007--1045.
+
+\bibitem[{{\rm Buffalo} and {\rm Coop}(2020)}]{Buffalo.2020}
+{\rm Buffalo, V.},  and {\rm G.~Coop}, 2020 Estimating the genome-wide
+  contribution of selection to temporal allele frequency change.
+\newblock Proceedings of the National Academy of Sciences {\bf 117}:
+  20672--20680.
+
+\bibitem[{{\rm Bulmer}(1971)}]{Bulmer.1971}
+{\rm Bulmer, M.}, 1971 The effect of selection on genetic variability.
+\newblock The American Naturalist {\bf 105}: 201--211.
+
+\bibitem[{{\rm Bulmer}(1980)}]{bulmer1980mathematical}
+{\rm Bulmer, M.~G.}, 1980 {\em The mathematical theory of quantitative
+  genetics.\/}.
+\newblock Clarendon Press.
+
+\bibitem[{{\rm Burke} {\em et~al.\/}(2010){\rm Burke}, {\rm Dunham}, {\rm
+  Shahrestani}, {\rm Thornton}, {\rm Rose} {\em et~al.\/}}]{burke2010genome}
+{\rm Burke, M.~K.}, {\rm J.~P. Dunham}, {\rm P.~Shahrestani}, {\rm K.~R.
+  Thornton}, {\rm M.~R. Rose} {\em et~al.\/}, 2010 Genome-wide analysis of a
+  long-term evolution experiment with \emph{Drosophila}.
+\newblock Nature {\bf 467}: 587--590.
+
+\bibitem[{{\rm Burt}(1995)}]{burt1995evolution}
+{\rm Burt, A.}, 1995 The evolution of fitness.
+\newblock Evolution {\bf 49}: 1--8.
+
+\bibitem[{{\rm Butler} {\em et~al.\/}(2023){\rm Butler}, {\rm Cullis}, {\rm
+  Gilmour}, {\rm Gogel} and {\rm Thompson}}]{Butler.2023}
+{\rm Butler, D.}, {\rm B.~R. Cullis}, {\rm A.~R. Gilmour}, {\rm B.~J. Gogel},
+  and {\rm R.~Thompson}, 2023 {\em ASReml-R Reference Manual, Version 4.2\/}.
+\newblock Queensland DPI, Brisbane, Australia.
+
+\bibitem[{{\rm Campos} and {\rm Charlesworth}(2019)}]{campos2019effects}
+{\rm Campos, J.~L.},  and {\rm B.~Charlesworth}, 2019 The effects on neutral
+  variability of recurrent selective sweeps and background selection.
+\newblock Genetics {\bf 212}: 287--303.
+
+\bibitem[{{\rm Campos} {\em et~al.\/}(2013){\rm Campos}, {\rm Zeng}, {\rm
+  Parker}, {\rm Charlesworth} and {\rm Haddrill}}]{campos2013codon}
+{\rm Campos, J.~L.}, {\rm K.~Zeng}, {\rm D.~J. Parker}, {\rm B.~Charlesworth},
+  and {\rm P.~R. Haddrill}, 2013 Codon usage bias and effective population
+  sizes on the {X} chromosome versus the autosomes in \emph{Drosophila
+  melanogaster}.
+\newblock Molecular biology and evolution {\bf 30}: 811--823.
+
+\bibitem[{{\rm Charlesworth} and {\rm Charlesworth}(2010)}]{Charlesworth.2010}
+{\rm Charlesworth, B.},  and {\rm D.~Charlesworth}, 2010 {\em Elements of
+  evolutionary genetics\/}, volume~42.
+\newblock Springer.
+
+\bibitem[{{\rm Charlesworth} {\em et~al.\/}(1993){\rm Charlesworth}, {\rm
+  Morgan} and {\rm Charlesworth}}]{charlesworth1993effect}
+{\rm Charlesworth, B.}, {\rm M.~Morgan},  and {\rm D.~Charlesworth}, 1993 The
+  effect of deleterious mutations on neutral molecular variation.
+\newblock Genetics {\bf 134}: 1289--1303.
+
+\bibitem[{{\rm Charmantier} and {\rm Sheldon}(2006)}]{charmantier2006testing}
+{\rm Charmantier, A.},  and {\rm B.~C. Sheldon}, 2006 Testing genetic models of
+  mate choice evolution in the wild.
+\newblock Trends in Ecology \& Evolution {\bf 21}: 417--419.
+
+\bibitem[{{\rm Comeron} {\em et~al.\/}(2012){\rm Comeron}, {\rm Ratnappan} and
+  {\rm Bailin}}]{comeron2012many}
+{\rm Comeron, J.~M.}, {\rm R.~Ratnappan},  and {\rm S.~Bailin}, 2012 The many
+  landscapes of recombination in \emph{Drosophila melanogaster}.
+\newblock PLoS Genetics {\bf 8}: e1002905.
+
+\bibitem[{{\rm Coulson} {\em et~al.\/}(2006){\rm Coulson}, {\rm Benton}, {\rm
+  Lundberg}, {\rm Dall}, {\rm Kendall} {\em et~al.\/}}]{coulson2006estimating}
+{\rm Coulson, T.}, {\rm T.~Benton}, {\rm P.~Lundberg}, {\rm S.~Dall}, {\rm
+  B.~Kendall} {\em et~al.\/}, 2006 Estimating individual contributions to
+  population growth: evolutionary fitness in ecological time.
+\newblock Proceedings of the Royal Society B: Biological Sciences {\bf 273}:
+  547--555.
+
+\bibitem[{{\rm Dabi} and {\rm Schrider}(2025)}]{dabi2025population}
+{\rm Dabi, A.},  and {\rm D.~R. Schrider}, 2025 Population size rescaling
+  significantly biases outcomes of forward-in-time population genetic
+  simulations.
+\newblock Genetics {\bf 229}: iyae180.
+
+\bibitem[{{\rm de~Los~Campos} {\em et~al.\/}(2015){\rm de~Los~Campos}, {\rm
+  Sorensen} and {\rm Gianola}}]{de2015genomic}
+{\rm de~Los~Campos, G.}, {\rm D.~Sorensen},  and {\rm D.~Gianola}, 2015 Genomic
+  heritability: what is it?
+\newblock PLoS Genetics {\bf 11}: e1005048.
+
+\bibitem[{{\rm Delph}(2018)}]{delph2018study}
+{\rm Delph, L.~F.}, 2018 The study of local adaptation: a thriving field of
+  research.
+\newblock Journal of Heredity {\bf 109}: 1--2.
+
+\bibitem[{{\rm Edwards}(1994)}]{edwards1994fundamental}
+{\rm Edwards, A.~W.}, 1994 The fundamental theorem of natural selection.
+\newblock Biological Reviews {\bf 69}: 443--474.
+
+\bibitem[{{\rm Ewens}(1989)}]{ewens1989interpretation}
+{\rm Ewens, W.~J.}, 1989 An interpretation and proof of the fundamental theorem
+  of natural selection.
+\newblock Theoretical population biology {\bf 36}: 167--180.
+
+\bibitem[{{\rm Ewens}(2024)}]{ewens2024fundamental}
+{\rm Ewens, W.~J.}, 2024 The fundamental theorem of natural selection: the end
+  of a story.
+\newblock Evolution {\bf 78}: 803--808.
+
+\bibitem[{{\rm Falconer} and {\rm Mackay}(1996)}]{falconer1996}
+{\rm Falconer, D.},  and {\rm T.~Mackay}, 1996 {\em Introduction to
+  Quantitative Genetics, 4th edn\/}.
+\newblock Addison Wesley Longman, Harlow.
+
+\bibitem[{{\rm Ferrari} {\em et~al.\/}(2025){\rm Ferrari}, {\rm Feng}, {\rm
+  Zhang} and {\rm Mooney}}]{ferrari2025parameter}
+{\rm Ferrari, T.}, {\rm S.~Feng}, {\rm X.~Zhang},  and {\rm J.~Mooney}, 2025
+  Parameter scaling in population genetics simulations may introduce unintended
+  background selection: Considerations for scaled simulation design.
+\newblock Genome Biology and Evolution {\bf 17}: evaf097.
+
+\bibitem[{{\rm Fisher}(1930)}]{fisher1930genetical}
+{\rm Fisher, R.~A.}, 1930 {\em The genetical theory of natural selection\/}.
+\newblock Oxford University Press.
+
+\bibitem[{{\rm Fisher}(1941)}]{Fisher.1941}
+{\rm Fisher, R.~A.}, 1941 Average excess and average effect of a gene
+  substitution.
+\newblock Annals of Eugenics {\bf 11}: 53--63.
+
+\bibitem[{{\rm Fisher}(1958)}]{fisher1958genetical}
+{\rm Fisher, R.~A.}, 1958 {\em The genetical theory of natural selection, 2nd
+  revised edn\/}.
+\newblock Dover Publications, New York.
+
+\bibitem[{{\rm Foerster} {\em et~al.\/}(2007){\rm Foerster}, {\rm Coulson},
+  {\rm Sheldon}, {\rm Pemberton}, {\rm Clutton-Brock} {\em
+  et~al.\/}}]{foerster2007sexually}
+{\rm Foerster, K.}, {\rm T.~Coulson}, {\rm B.~C. Sheldon}, {\rm J.~M.
+  Pemberton}, {\rm T.~H. Clutton-Brock} {\em et~al.\/}, 2007 Sexually
+  antagonistic genetic variation for fitness in red deer.
+\newblock Nature {\bf 447}: 1107--1110.
+
+\bibitem[{{\rm Fowler} {\em et~al.\/}(1997){\rm Fowler}, {\rm Semple}, {\rm
+  Barton} and {\rm Partridge}}]{fowler1997genetic}
+{\rm Fowler, K.}, {\rm C.~Semple}, {\rm N.~H. Barton},  and {\rm L.~Partridge},
+  1997 Genetic variation for total fitness in \emph{Drosophila melanogaster}.
+\newblock Proceedings of the Royal Society of London. Series B: Biological
+  Sciences {\bf 264}: 191--199.
+
+\bibitem[{{\rm Frank} and {\rm Slatkin}(1992)}]{Frank.1992}
+{\rm Frank, S.~A.},  and {\rm M.~Slatkin}, 1992 Fisher's fundamental theorem of
+  natural selection.
+\newblock Trends in Ecology \& Evolution {\bf 7}: 92--95.
+
+\bibitem[{{\rm Gardner} {\em et~al.\/}(2005){\rm Gardner}, {\rm Fowler}, {\rm
+  Barton} and {\rm Partridge}}]{gardner2005genetic}
+{\rm Gardner, M.~P.}, {\rm K.~Fowler}, {\rm N.~H. Barton},  and {\rm
+  L.~Partridge}, 2005 Genetic variation for total fitness in \emph{Drosophila
+  melanogaster}: complex yet replicable patterns.
+\newblock Genetics {\bf 169}: 1553--1571.
+
+\bibitem[{{\rm Gianola} {\em et~al.\/}(2009){\rm Gianola}, {\rm de~Los~Campos},
+  {\rm Hill}, {\rm Manfredi} and {\rm Fernando}}]{gianola2009additive}
+{\rm Gianola, D.}, {\rm G.~de~Los~Campos}, {\rm W.~G. Hill}, {\rm E.~Manfredi},
+   and {\rm R.~Fernando}, 2009 Additive genetic variability and the {B}ayesian
+  alphabet.
+\newblock Genetics {\bf 183}: 347--363.
+
+\bibitem[{{\rm Gibbs} {\em et~al.\/}(1997){\rm Gibbs}, {\rm Chippindale} and
+  {\rm Rose}}]{gibbs1997physiological}
+{\rm Gibbs, A.~G.}, {\rm A.~K. Chippindale},  and {\rm M.~R. Rose}, 1997
+  Physiological mechanisms of evolved desiccation resistance in
+  \emph{Drosophila melanogaster}.
+\newblock Journal of Experimental Biology {\bf 200}: 1821--1832.
+
+\bibitem[{{\rm Godinho} {\em et~al.\/}(2024){\rm Godinho}, {\rm Fragata}, {\rm
+  Majer}, {\rm Rodrigues} and {\rm Magalh{\~a}es}}]{godinho2024limits}
+{\rm Godinho, D.~P.}, {\rm I.~Fragata}, {\rm A.~Majer}, {\rm L.~R. Rodrigues},
+  and {\rm S.~Magalh{\~a}es}, 2024 Limits to the adaptation of herbivorous
+  spider mites to metal accumulation in homogeneous and heterogeneous
+  environments.
+\newblock Journal of Evolutionary Biology : voae003.
+
+\bibitem[{{\rm Grafen}(2015)}]{grafen2015biological}
+{\rm Grafen, A.}, 2015 Biological fitness and the fundamental theorem of
+  natural selection.
+\newblock The American Naturalist {\bf 186}: 1--14.
+
+\bibitem[{{\rm Gupta} {\em et~al.\/}(2016){\rm Gupta}, {\rm Venkatesan}, {\rm
+  Chatterjee}, {\rm Syed}, {\rm Nivsarkar} {\em et~al.\/}}]{gupta2016no}
+{\rm Gupta, V.}, {\rm S.~Venkatesan}, {\rm M.~Chatterjee}, {\rm Z.~A. Syed},
+  {\rm V.~Nivsarkar} {\em et~al.\/}, 2016 No apparent cost of evolved immune
+  response in \emph{Drosophila melanogaster}.
+\newblock Evolution {\bf 70}: 934--943.
+
+\bibitem[{{\rm Haldane}(1919)}]{haldane1919map}
+{\rm Haldane, J. B.~S.}, 1919 The combination of linkage values, and the
+  calculation of distances between the loci of linked factors.
+\newblock Journal of Genetics {\bf 8}: 299--309.
+
+\bibitem[{{\rm Haller} and {\rm Messer}(2023)}]{haller2023slim}
+{\rm Haller, B.~C.},  and {\rm P.~W. Messer}, 2023 {SLiM} 4: multispecies
+  eco-evolutionary modeling.
+\newblock The American Naturalist {\bf 201}: E127--E139.
+
+\bibitem[{{\rm Hendry} {\em et~al.\/}(2018){\rm Hendry}, {\rm Schoen}, {\rm
+  Wolak} and {\rm Reid}}]{hendry2018contemporary}
+{\rm Hendry, A.~P.}, {\rm D.~J. Schoen}, {\rm M.~E. Wolak},  and {\rm J.~M.
+  Reid}, 2018 The contemporary evolution of fitness.
+\newblock Annual Review of Ecology, Evolution, and Systematics {\bf 49}:
+  457--476.
+
+\bibitem[{{\rm Hill} and {\rm Robertson}(1968)}]{Hill.1968}
+{\rm Hill, W.},  and {\rm A.~Robertson}, 1968 Linkage disequilibrium in finite
+  populations.
+\newblock Theoretical and applied genetics {\bf 38}: 226--231.
+
+\bibitem[{{\rm Hsu} {\em et~al.\/}(2024){\rm Hsu}, {\rm Lai}, {\rm Novak}, {\rm
+  Lehner}, {\rm Jak{\v{s}}i{\'c}} {\em et~al.\/}}]{hsu2024reproductive}
+{\rm Hsu, S.-K.}, {\rm W.-Y. Lai}, {\rm J.~Novak}, {\rm F.~Lehner}, {\rm A.~M.
+  Jak{\v{s}}i{\'c}} {\em et~al.\/}, 2024 Reproductive isolation arises during
+  laboratory adaptation to a novel hot environment.
+\newblock Genome Biology {\bf 25}: 141.
+
+\bibitem[{{\rm Johnston}(2024)}]{johnston2024understanding}
+{\rm Johnston, S.~E.}, 2024 Understanding the genetic basis of variation in
+  meiotic recombination: past, present, and future.
+\newblock Molecular Biology and Evolution {\bf 41}: msae112.
+
+\bibitem[{{\rm Joshi} and {\rm Mueller}(1996)}]{joshi1996density}
+{\rm Joshi, A.},  and {\rm L.~D. Mueller}, 1996 Density-dependent natural
+  selection in \emph{Drosophila}: trade-offs between larval food acquisition
+  and utilization.
+\newblock Evolutionary Ecology {\bf 10}: 463--474.
+
+\bibitem[{{\rm Kawecki} {\em et~al.\/}(2021){\rm Kawecki}, {\rm Erkosar}, {\rm
+  Dupuis}, {\rm Hollis}, {\rm Stillwell} {\em et~al.\/}}]{kawecki2021genomic}
+{\rm Kawecki, T.~J.}, {\rm B.~Erkosar}, {\rm C.~Dupuis}, {\rm B.~Hollis}, {\rm
+  R.~C. Stillwell} {\em et~al.\/}, 2021 The genomic architecture of adaptation
+  to larval malnutrition points to a trade-off with adult starvation resistance
+  in \emph{Drosophila}.
+\newblock Molecular Biology and Evolution {\bf 38}: 2732--2749.
+
+\bibitem[{{\rm Kelleher} {\em et~al.\/}(2016){\rm Kelleher}, {\rm Etheridge}
+  and {\rm McVean}}]{kelleher2016efficient}
+{\rm Kelleher, J.}, {\rm A.~M. Etheridge},  and {\rm G.~McVean}, 2016 Efficient
+  coalescent simulation and genealogical analysis for large sample sizes.
+\newblock PLoS computational biology {\bf 12}: e1004842.
+
+\bibitem[{{\rm Kirkpatrick} {\em et~al.\/}(2002){\rm Kirkpatrick}, {\rm
+  Johnson} and {\rm Barton}}]{Kirkpatrick.2002}
+{\rm Kirkpatrick, M.}, {\rm T.~Johnson},  and {\rm N.~Barton}, 2002 General
+  models of multilocus evolution.
+\newblock Genetics {\bf 161}: 1727--1750.
+
+\bibitem[{{\rm Kojima}(1959)}]{Kojima.1959}
+{\rm Kojima, K.}, 1959 Role of epistasis and overdominance in stability of
+  equilibria with selection.
+\newblock Proceedings of the National Academy of Sciences {\bf 45}: 984--989.
+
+\bibitem[{{\rm Kruuk}(2004)}]{kruuk2004estimating}
+{\rm Kruuk, L.~E.}, 2004 Estimating genetic parameters in natural populations
+  using the ‘animal model’.
+\newblock Philosophical Transactions of the Royal Society of London. Series B:
+  Biological Sciences {\bf 359}: 873--890.
+
+\bibitem[{{\rm Kruuk} {\em et~al.\/}(2000){\rm Kruuk}, {\rm Clutton-Brock},
+  {\rm Slate}, {\rm Pemberton}, {\rm Brotherstone} {\em
+  et~al.\/}}]{kruuk2000heritability}
+{\rm Kruuk, L.~E.}, {\rm T.~H. Clutton-Brock}, {\rm J.~Slate}, {\rm J.~M.
+  Pemberton}, {\rm S.~Brotherstone} {\em et~al.\/}, 2000 Heritability of
+  fitness in a wild mammal population.
+\newblock Proceedings of the National Academy of Sciences {\bf 97}: 698--703.
+
+\bibitem[{{\rm Kruuk} and {\rm Hadfield}(2007)}]{kruuk2007separate}
+{\rm Kruuk, L.~E.},  and {\rm J.~D. Hadfield}, 2007 How to separate genetic and
+  environmental causes of similarity between relatives.
+\newblock Journal of evolutionary biology {\bf 20}: 1890--1903.
+
+\bibitem[{{\rm Kulbaba} {\em et~al.\/}(2019){\rm Kulbaba}, {\rm Sheth}, {\rm
+  Pain}, {\rm Eckhart} and {\rm Shaw}}]{kulbaba2019additive}
+{\rm Kulbaba, M.~W.}, {\rm S.~N. Sheth}, {\rm R.~E. Pain}, {\rm V.~M. Eckhart},
+   and {\rm R.~G. Shaw}, 2019 Additive genetic variance for lifetime fitness
+  and the capacity for adaptation in an annual plant.
+\newblock Evolution {\bf 73}: 1746--1758.
+
+\bibitem[{{\rm Lee} and {\rm Chow}(2013)}]{Lee.2013}
+{\rm Lee, J.~J.},  and {\rm C.~C. Chow}, 2013 The causal meaning of {F}isher's
+  average effect.
+\newblock Genetics research {\bf 95}: 89--109.
+
+\bibitem[{{\rm Lynch} and {\rm Walsh}(1998)}]{lynch1998}
+{\rm Lynch, M.},  and {\rm B.~Walsh}, 1998 {\em Genetics and analysis of
+  quantitative traits\/}.
+\newblock Sinauer Associates, Inc., Sunderland.
+
+\bibitem[{{\rm Manna} {\em et~al.\/}(2011){\rm Manna}, {\rm Martin} and {\rm
+  Lenormand}}]{manna2011fitness}
+{\rm Manna, F.}, {\rm G.~Martin},  and {\rm T.~Lenormand}, 2011 Fitness
+  landscapes: an alternative theory for the dominance of mutation.
+\newblock Genetics {\bf 189}: 923--937.
+
+\bibitem[{{\rm Martinossi-Allibert} {\em et~al.\/}(2018){\rm
+  Martinossi-Allibert}, {\rm Savkovi{\'c}}, {\rm {\DJ}or{\dj}evi{\'c}}, {\rm
+  Arnqvist}, {\rm Stojkovi{\'c}} {\em et~al.\/}}]{martinossi2018consequences}
+{\rm Martinossi-Allibert, I.}, {\rm U.~Savkovi{\'c}}, {\rm
+  M.~{\DJ}or{\dj}evi{\'c}}, {\rm G.~Arnqvist}, {\rm B.~Stojkovi{\'c}} {\em
+  et~al.\/}, 2018 The consequences of sexual selection in well-adapted and
+  maladapted populations of bean beetles.
+\newblock Evolution {\bf 72}: 518--530.
+
+\bibitem[{{\rm McCullagh} and {\rm Nelder}(1989)}]{McCullagh.1989}
+{\rm McCullagh, P.},  and {\rm J.~A. Nelder}, 1989 {\em Generalised {L}inear
+  {M}odels\/}.
+\newblock Monographs on statistics and applied probability. Chapman \& Hall,
+  Cambridge, $2^{nd}$ edition.
+
+\bibitem[{{\rm Ohta} and {\rm Kimura}(1970)}]{ohta1970development}
+{\rm Ohta, T.},  and {\rm M.~Kimura}, 1970 Development of associative
+  overdominance through linkage disequilibrium in finite populations.
+\newblock Genetics Research {\bf 16}: 165--177.
+
+\bibitem[{{\rm Price}(1970)}]{price1970selection}
+{\rm Price, G.~R.}, 1970 Selection and covariance.
+\newblock Nature {\bf 227}: 520--521.
+
+\bibitem[{{\rm Price}(1972)}]{price1972fisher}
+{\rm Price, G.~R.}, 1972 Fisher's `fundamental theorem' made clear.
+\newblock Annals of human genetics {\bf 36}: 129--140.
+
+\bibitem[{{\rm Punzalan} {\em et~al.\/}(2014){\rm Punzalan}, {\rm Delcourt} and
+  {\rm Rundle}}]{punzalan2014comparing}
+{\rm Punzalan, D.}, {\rm M.~Delcourt},  and {\rm H.~Rundle}, 2014 Comparing the
+  intersex genetic correlation for fitness across novel environments in the
+  fruit fly, \emph{Drosophila serrata}.
+\newblock Heredity {\bf 112}: 143--148.
+
+\bibitem[{{\rm Queller}(2017)}]{queller2017fundamental}
+{\rm Queller, D.~C.}, 2017 Fundamental theorems of evolution.
+\newblock The American Naturalist {\bf 189}: 345--353.
+
+\bibitem[{{\rm Reznick} and {\rm Bryga}(1996)}]{reznick1996life}
+{\rm Reznick, D.~N.},  and {\rm H.~A. Bryga}, 1996 Life-history evolution in
+  guppies (\emph{Poecilia reticulata}: Poeciliidae). {V}. genetic basis of
+  parallelism in life histories.
+\newblock The American Naturalist {\bf 147}: 339--359.
+
+\bibitem[{{\rm Richards}(1961)}]{richards1961method}
+{\rm Richards, F.~S.}, 1961 A method of maximum-likelihood estimation.
+\newblock Journal of the Royal Statistical Society Series B: Statistical
+  Methodology {\bf 23}: 469--475.
+
+\bibitem[{{\rm Robertson}(1966)}]{robertson1966mathematical}
+{\rm Robertson, A.}, 1966 A mathematical model of the culling process in dairy
+  cattle.
+\newblock Animal Science {\bf 8}: 95--108.
+
+\bibitem[{{\rm Robinson} {\em et~al.\/}(2023){\rm Robinson}, {\rm Thyagarajan}
+  and {\rm Chippindale}}]{robinson2023evolution}
+{\rm Robinson, C.~E.}, {\rm H.~Thyagarajan},  and {\rm A.~K. Chippindale}, 2023
+  Evolution of reproductive isolation in a long-term evolution experiment with
+  \emph{Drosophila melanogaster}: 30 years of divergent life-history selection.
+\newblock Evolution {\bf 77}: 1756--1768.
+
+\bibitem[{{\rm Ruzicka} {\em et~al.\/}(2019){\rm Ruzicka}, {\rm Hill}, {\rm
+  Pennell}, {\rm Flis}, {\rm Ingleby} {\em et~al.\/}}]{ruzicka2019genome}
+{\rm Ruzicka, F.}, {\rm M.~S. Hill}, {\rm T.~M. Pennell}, {\rm I.~Flis}, {\rm
+  F.~C. Ingleby} {\em et~al.\/}, 2019 Genome-wide sexually antagonistic
+  variants reveal long-standing constraints on sexual dimorphism in fruit
+  flies.
+\newblock PLoS biology {\bf 17}: e3000244.
+
+\bibitem[{{\rm Salson} {\em et~al.\/}(2025){\rm Salson}, {\rm Duranton}, {\rm
+  Huynh}, {\rm Mariac}, {\rm Tranchant-Dubreuil} {\em
+  et~al.\/}}]{salson2025interplay}
+{\rm Salson, M.}, {\rm M.~Duranton}, {\rm S.~Huynh}, {\rm C.~Mariac}, {\rm
+  C.~Tranchant-Dubreuil} {\em et~al.\/}, 2025 Interplay between large
+  low-recombining regions and pseudo-overdominance in a plant genome.
+\newblock Nature Communications {\bf 16}: 6458.
+
+\bibitem[{{\rm Santiago} and {\rm Caballero}(1998)}]{Santiago.1998}
+{\rm Santiago, E.},  and {\rm A.~Caballero}, 1998 Effective size and
+  polymorphism of linked neutral loci in populations under directional
+  selection.
+\newblock Genetics {\bf 149}: 2105--2117.
+
+\bibitem[{{\rm Schaal} {\em et~al.\/}(2022){\rm Schaal}, {\rm Haller} and {\rm
+  Lotterhos}}]{schaal2022inversion}
+{\rm Schaal, S.~M.}, {\rm B.~C. Haller},  and {\rm K.~E. Lotterhos}, 2022
+  Inversion invasions: when the genetic basis of local adaptation is
+  concentrated within inversions in the face of gene flow.
+\newblock Philosophical Transactions of the Royal Society B {\bf 377}:
+  20210200.
+
+\bibitem[{{\rm Schenkel} {\em et~al.\/}(2018){\rm Schenkel}, {\rm Pen}, {\rm
+  Beukeboom} and {\rm Billeter}}]{schenkel2018making}
+{\rm Schenkel, M.~A.}, {\rm I.~Pen}, {\rm L.~W. Beukeboom},  and {\rm J.-C.
+  Billeter}, 2018 Making sense of intralocus and interlocus sexual conflict.
+\newblock Ecology and Evolution {\bf 8}: 13035--13050.
+
+\bibitem[{{\rm Searle}(2006)}]{searle2006}
+{\rm Searle, S.~R.}, 2006 {\em Matrix algebra useful for statistics\/}.
+\newblock John Wiley \& Sons.
+
+\bibitem[{{\rm Shaw} and {\rm Shaw}(2014)}]{shaw2014quantitative}
+{\rm Shaw, R.},  and {\rm F.~Shaw}, 2014 Quantitative genetic study of the
+  adaptive process.
+\newblock Heredity {\bf 112}: 13--20.
+
+\bibitem[{{\rm Simon} and {\rm Coop}(2024)}]{simon2024contribution}
+{\rm Simon, A.},  and {\rm G.~Coop}, 2024 The contribution of gene flow,
+  selection, and genetic drift to five thousand years of human allele frequency
+  change.
+\newblock Proceedings of the National Academy of Sciences {\bf 121}:
+  e2312377121.
+
+\bibitem[{{\rm Singh} {\em et~al.\/}(2023){\rm Singh}, {\rm Hasan} and {\rm
+  Agrawal}}]{singh2023investigation}
+{\rm Singh, A.}, {\rm A.~Hasan},  and {\rm A.~F. Agrawal}, 2023 An
+  investigation of the sex-specific genetic architecture of fitness in
+  \emph{Drosophila melanogaster}.
+\newblock Evolution {\bf 77}: 2015--2028.
+
+\bibitem[{{\rm Singh} {\em et~al.\/}(2015){\rm Singh}, {\rm Kochar} and {\rm
+  Prasad}}]{singh2015egg}
+{\rm Singh, K.}, {\rm E.~Kochar},  and {\rm N.~Prasad}, 2015 Egg viability,
+  mating frequency and male mating ability evolve in populations of
+  \emph{Drosophila melanogaster} selected for resistance to cold shock.
+\newblock PloS one {\bf 10}: e0129992.
+
+\bibitem[{{\rm Stephan} {\em et~al.\/}(1999){\rm Stephan}, {\rm Charlesworth}
+  and {\rm McVean}}]{stephan1999effect}
+{\rm Stephan, W.}, {\rm B.~Charlesworth},  and {\rm G.~McVean}, 1999 The effect
+  of background selection at a single locus on weakly selected, partially
+  linked variants.
+\newblock Genetics Research {\bf 73}: 133--146.
+
+\bibitem[{{\rm Sved} and {\rm Hill}(2018)}]{sved2018one}
+{\rm Sved, J.~A.},  and {\rm W.~G. Hill}, 2018 One hundred years of linkage
+  disequilibrium.
+\newblock Genetics {\bf 209}: 629--636.
+
+\bibitem[{{\rm Tilk} {\em et~al.\/}(2019){\rm Tilk}, {\rm Bergland}, {\rm
+  Goodman}, {\rm Schmidt}, {\rm Petrov} {\em et~al.\/}}]{tilk2019accurate}
+{\rm Tilk, S.}, {\rm A.~Bergland}, {\rm A.~Goodman}, {\rm P.~Schmidt}, {\rm
+  D.~Petrov} {\em et~al.\/}, 2019 Accurate allele frequencies from ultra-low
+  coverage pool-seq samples in evolve-and-resequence experiments.
+\newblock G3: Genes, Genomes, Genetics {\bf 9}: 4159--4168.
+
+\bibitem[{{\rm Vedder} {\em et~al.\/}(2011){\rm Vedder}, {\rm Komdeur}, {\rm
+  van~der Velde}, {\rm Schut} and {\rm Magrath}}]{vedder2011polygyny}
+{\rm Vedder, O.}, {\rm J.~Komdeur}, {\rm M.~van~der Velde}, {\rm E.~Schut},
+  and {\rm M.~J. Magrath}, 2011 Polygyny and extra-pair paternity enhance the
+  opportunity for sexual selection in blue tits.
+\newblock Behavioral Ecology and Sociobiology {\bf 65}: 741--752.
+
+\bibitem[{{\rm Vehvil{\"a}inen} {\em et~al.\/}(2008){\rm Vehvil{\"a}inen}, {\rm
+  Kause}, {\rm Quinton}, {\rm Koskinen} and {\rm Paananen}}]{Vehvilainen.2008}
+{\rm Vehvil{\"a}inen, H.}, {\rm A.~Kause}, {\rm C.~Quinton}, {\rm H.~Koskinen},
+   and {\rm T.~Paananen}, 2008 Survival of the currently fittest: genetics of
+  rainbow trout survival across time and space.
+\newblock Genetics {\bf 180}: 507--516.
+
+\bibitem[{{\rm Walsh}(2022)}]{walsh2022full}
+{\rm Walsh, B.}, 2022 How full is the evolutionary fuel tank?
+\newblock Science {\bf 376}: 920--921.
+
+\bibitem[{{\rm Wang} {\em et~al.\/}(2023){\rm Wang}, {\rm McNeil}, {\rm
+  Abdulazeez}, {\rm Pascual}, {\rm Johnston} {\em
+  et~al.\/}}]{wang2023variation}
+{\rm Wang, Y.}, {\rm P.~McNeil}, {\rm R.~Abdulazeez}, {\rm M.~Pascual}, {\rm
+  S.~E. Johnston} {\em et~al.\/}, 2023 Variation in mutation, recombination,
+  and transposition rates in \emph{Drosophila melanogaster} and
+  \emph{Drosophila simulans}.
+\newblock Genome Research {\bf 33}: 587--598.
+
+\bibitem[{{\rm Weir} and {\rm Cockerham}(1989)}]{Weir.1989}
+{\rm Weir, B.~S.},  and {\rm C.~C. Cockerham}, 1989 Complete characterization
+  of disequilibrium at two loci.
+\newblock In M.~Feldman, editor, {\em Mathematical Evolutionary Theory\/}.
+  Princeton University Press Princeton, NJ, 86--110.
+
+\bibitem[{{\rm Whitlock}(2015)}]{whitlock2015modern}
+{\rm Whitlock, M.~C.}, 2015 Modern approaches to local adaptation.
+\newblock The American Naturalist {\bf 186}: S1--S4.
+
+\bibitem[{{\rm Wright}(1938)}]{Wright.1938}
+{\rm Wright, S.}, 1938 Size of population and breeding structure in relation to
+  evolution.
+\newblock Science {\bf 87}: 340--431.
+
+\bibitem[{{\rm Xiao} {\em et~al.\/}(2019){\rm Xiao}, {\rm Bayat~Fard}, {\rm
+  Brzezinski}, {\rm Robertson} and {\rm Chippindale}}]{xiao2019experimental}
+{\rm Xiao, C.}, {\rm N.~Bayat~Fard}, {\rm K.~Brzezinski}, {\rm R.~M.
+  Robertson},  and {\rm A.~K. Chippindale}, 2019 Experimental evolution of
+  response to anoxia in \emph{Drosophila melanogaster}: recovery of locomotion
+  following $\text{CO}_2$ or $\text{N}_2$ exposure.
+\newblock Journal of Experimental Biology {\bf 222}: jeb199521.
+
+\bibitem[{{\rm Yang} {\em et~al.\/}(2011){\rm Yang}, {\rm Lee}, {\rm Goddard}
+  and {\rm Visscher}}]{yang2011gcta}
+{\rm Yang, J.}, {\rm S.~H. Lee}, {\rm M.~E. Goddard},  and {\rm P.~M.
+  Visscher}, 2011 Gcta: a tool for genome-wide complex trait analysis.
+\newblock The American Journal of Human Genetics {\bf 88}: 76--82.
+
+\bibitem[{{\rm Zeng} {\em et~al.\/}(2018){\rm Zeng}, {\rm De~Vlaming}, {\rm
+  Wu}, {\rm Robinson}, {\rm Lloyd-Jones} {\em et~al.\/}}]{zeng2018signatures}
+{\rm Zeng, J.}, {\rm R.~De~Vlaming}, {\rm Y.~Wu}, {\rm M.~R. Robinson}, {\rm
+  L.~R. Lloyd-Jones} {\em et~al.\/}, 2018 Signatures of negative selection in
+  the genetic architecture of human complex traits.
+\newblock Nature genetics {\bf 50}: 746--753.
+
+\end{thebibliography}

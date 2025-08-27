@@ -1,0 +1,149 @@
+\begin{thebibliography}{27}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+
+\bibitem[{{\rm Barton} {\em et~al.\/}(2017){\rm Barton}, {\rm Etheridge} and
+  {\rm V{\'e}ber}}]{Barton.2017}
+{\rm Barton, N.~H.}, {\rm A.~M. Etheridge},  and {\rm A.~V{\'e}ber}, 2017 The
+  infinitesimal model: Definition, derivation, and implications.
+\newblock Theoretical population biology {\bf 118}: 50--73.
+
+\bibitem[{{\rm Bohrnstedt} and {\rm Goldberger}(1969)}]{Bohrnstedt.1969}
+{\rm Bohrnstedt, G.~W.},  and {\rm A.~S. Goldberger}, 1969 On exact covariance
+  of products of random variables.
+\newblock Journal of the American Statistical Association {\bf 64}: 1439--1442.
+
+\bibitem[{{\rm Buffalo} and {\rm Coop}(2019)}]{buffalo2019linked}
+{\rm Buffalo, V.},  and {\rm G.~Coop}, 2019 The linked selection signature of
+  rapid adaptation in temporal genomic data.
+\newblock Genetics {\bf 213}: 1007--1045.
+
+\bibitem[{{\rm Buffalo} and {\rm Coop}(2020)}]{Buffalo.2020}
+{\rm Buffalo, V.},  and {\rm G.~Coop}, 2020 Estimating the genome-wide
+  contribution of selection to temporal allele frequency change.
+\newblock Proceedings of the National Academy of Sciences {\bf 117}:
+  20672--20680.
+
+\bibitem[{{\rm Bulmer}(1971)}]{Bulmer.1971}
+{\rm Bulmer, M.}, 1971 The effect of selection on genetic variability.
+\newblock The American Naturalist {\bf 105}: 201--211.
+
+\bibitem[{{\rm Bulmer}(1980)}]{bulmer1980mathematical}
+{\rm Bulmer, M.~G.}, 1980 {\em The mathematical theory of quantitative
+  genetics.\/}.
+\newblock Clarendon Press.
+
+\bibitem[{{\rm de~Los~Campos} {\em et~al.\/}(2015){\rm de~Los~Campos}, {\rm
+  Sorensen} and {\rm Gianola}}]{de2015genomic}
+{\rm de~Los~Campos, G.}, {\rm D.~Sorensen},  and {\rm D.~Gianola}, 2015 Genomic
+  heritability: what is it?
+\newblock PLoS Genetics {\bf 11}: e1005048.
+
+\bibitem[{{\rm Ethier} and {\rm Nagylaki}(1980)}]{ethier1980diffusion}
+{\rm Ethier, S.~N.},  and {\rm T.~Nagylaki}, 1980 Diffusion approximations of
+  {M}arkov chains with two time scales and applications to population genetics.
+\newblock Advances in Applied Probability {\bf 12}: 14--49.
+
+\bibitem[{{\rm Falconer} and {\rm Mackay}(1996)}]{falconer1996}
+{\rm Falconer, D.},  and {\rm T.~Mackay}, 1996 {\em Introduction to
+  Quantitative Genetics, 4th edn\/}.
+\newblock Addison Wesley Longman, Harlow.
+
+\bibitem[{{\rm Gianola} {\em et~al.\/}(2009){\rm Gianola}, {\rm de~Los~Campos},
+  {\rm Hill}, {\rm Manfredi} and {\rm Fernando}}]{gianola2009additive}
+{\rm Gianola, D.}, {\rm G.~de~Los~Campos}, {\rm W.~G. Hill}, {\rm E.~Manfredi},
+   and {\rm R.~Fernando}, 2009 Additive genetic variability and the {B}ayesian
+  alphabet.
+\newblock Genetics {\bf 183}: 347--363.
+
+\bibitem[{{\rm Good}(2022)}]{good2022linkage}
+{\rm Good, B.~H.}, 2022 Linkage disequilibrium between rare mutations.
+\newblock Genetics {\bf 220}: iyac004.
+
+\bibitem[{{\rm Haldane}(1919)}]{haldane1919map}
+{\rm Haldane, J. B.~S.}, 1919 The combination of linkage values, and the
+  calculation of distances between the loci of linked factors.
+\newblock Journal of Genetics {\bf 8}: 299--309.
+
+\bibitem[{{\rm Hill} and {\rm Robertson}(1968)}]{Hill.1968}
+{\rm Hill, W.},  and {\rm A.~Robertson}, 1968 Linkage disequilibrium in finite
+  populations.
+\newblock Theoretical and applied genetics {\bf 38}: 226--231.
+
+\bibitem[{{\rm Kojima}(1959)}]{Kojima.1959}
+{\rm Kojima, K.}, 1959 Role of epistasis and overdominance in stability of
+  equilibria with selection.
+\newblock Proceedings of the National Academy of Sciences {\bf 45}: 984--989.
+
+\bibitem[{{\rm Lynch} and {\rm Walsh}(1998)}]{lynch1998}
+{\rm Lynch, M.},  and {\rm B.~Walsh}, 1998 {\em Genetics and analysis of
+  quantitative traits\/}.
+\newblock Sinauer Associates, Inc., Sunderland.
+
+\bibitem[{{\rm McCullagh} and {\rm Nelder}(1989)}]{McCullagh.1989}
+{\rm McCullagh, P.},  and {\rm J.~A. Nelder}, 1989 {\em Generalised {L}inear
+  {M}odels\/}.
+\newblock Monographs on statistics and applied probability. Chapman \& Hall,
+  Cambridge, $2^{nd}$ edition.
+
+\bibitem[{{\rm McVean}(2002)}]{McVean.2002}
+{\rm McVean, G.~A.}, 2002 A genealogical interpretation of linkage
+  disequilibrium.
+\newblock Genetics {\bf 162}: 987--991.
+
+\bibitem[{{\rm Meuwissen} {\em et~al.\/}(2001){\rm Meuwissen}, {\rm Hayes} and
+  {\rm Goddard}}]{meuwissen2001prediction}
+{\rm Meuwissen, T.~H.}, {\rm B.~J. Hayes},  and {\rm M.~Goddard}, 2001
+  Prediction of total genetic value using genome-wide dense marker maps.
+\newblock genetics {\bf 157}: 1819--1829.
+
+\bibitem[{{\rm Ohta} and {\rm Kimura}(1969)}]{Ohta.1969}
+{\rm Ohta, T.},  and {\rm M.~Kimura}, 1969 Linkage disequilibrium due to random
+  genetic drift.
+\newblock Genetics Research {\bf 13}: 47--55.
+
+\bibitem[{{\rm Ohta} and {\rm Kimura}(1971)}]{Ohta.1971}
+{\rm Ohta, T.},  and {\rm M.~Kimura}, 1971 Linkage disequilibrium between two
+  segregating nucleotide sites under the steady flux of mutations in a finite
+  population.
+\newblock Genetics {\bf 68}: 571--580.
+
+\bibitem[{{\rm Santiago} and {\rm Caballero}(1998)}]{Santiago.1998}
+{\rm Santiago, E.},  and {\rm A.~Caballero}, 1998 Effective size and
+  polymorphism of linked neutral loci in populations under directional
+  selection.
+\newblock Genetics {\bf 149}: 2105--2117.
+
+\bibitem[{{\rm Song} and {\rm Song}(2007)}]{Song.2007}
+{\rm Song, Y.~S.},  and {\rm J.~S. Song}, 2007 Analytic computation of the
+  expectation of the linkage disequilibrium coefficient $r^2$.
+\newblock Theoretical population biology {\bf 71}: 49--60.
+
+\bibitem[{{\rm Sved} and {\rm Hill}(2018)}]{sved2018one}
+{\rm Sved, J.~A.},  and {\rm W.~G. Hill}, 2018 One hundred years of linkage
+  disequilibrium.
+\newblock Genetics {\bf 209}: 629--636.
+
+\bibitem[{{\rm Weir}(1996)}]{Weir.1996}
+{\rm Weir, B.~S.}, 1996 {\em Genetic data analysis {II}: methods for discrete
+  population genetic data\/}.
+\newblock Sunderland.
+
+\bibitem[{{\rm Weir} and {\rm Cockerham}(1989)}]{Weir.1989}
+{\rm Weir, B.~S.},  and {\rm C.~C. Cockerham}, 1989 Complete characterization
+  of disequilibrium at two loci.
+\newblock In M.~Feldman, editor, {\em Mathematical Evolutionary Theory\/}.
+  Princeton University Press Princeton, NJ, 86--110.
+
+\bibitem[{{\rm Wright}(1938)}]{Wright.1938}
+{\rm Wright, S.}, 1938 Size of population and breeding structure in relation to
+  evolution.
+\newblock Science {\bf 87}: 340--431.
+
+\bibitem[{{\rm Zeng} {\em et~al.\/}(2018){\rm Zeng}, {\rm De~Vlaming}, {\rm
+  Wu}, {\rm Robinson}, {\rm Lloyd-Jones} {\em et~al.\/}}]{zeng2018signatures}
+{\rm Zeng, J.}, {\rm R.~De~Vlaming}, {\rm Y.~Wu}, {\rm M.~R. Robinson}, {\rm
+  L.~R. Lloyd-Jones} {\em et~al.\/}, 2018 Signatures of negative selection in
+  the genetic architecture of human complex traits.
+\newblock Nature genetics {\bf 50}: 746--753.
+
+\end{thebibliography}
