@@ -42,33 +42,10 @@ The following code loads outputs of simulation analyses and makes figures for th
 
 ### On Manas's PC ###
 
-# EdiUni Datastore needs to be mounted via a vpn 
-# Or works only on the University's network
+# All data used for plotting exists in this repository in the directory: "Va_simulations/5_Manuscript_files/combined_data"
 
-if(Sys.info()["nodename"]=="SCE-BIO-C06645"){
-
-  if(Sys.info()["sysname"]=="Linux"){
-    
-    data_path = "/mnt/u/Datastore/CSCE/biology/groups/hadfield/Va_simulations/4_analysed_data" ## Local Wsl
-    output_path = "/mnt/c/Users/msamant/Documents/GitHub/Va_simulations/5_Manuscript_files/Manuscript_figures"
-    
-  }else{
-    
-    data_path = "U:/Datastore/CSCE/biology/groups/hadfield/Va_simulations/4_analysed_data" ## Local windows
-    output_path = "C:/Users/msamant/Documents/GitHub/Va_simulations/5_Manuscript_files/Manuscript_figures"
-  }
-}
-
-
-### On Jarrod's PC ###
-
-# EdiUni Datastore needs to be mounted via a vpn 
-# Or works only on the University's network
-
-if(Sys.info()["nodename"]=="sce-bio-c04553"){  
-  data_path = "/Volumes/hadfield/Va_simulations/4_analysed_data"
-  output_path = "~/Work/Va_simulations/5_Manuscript_files/Manuscript_figures"
-}
+data_path = "../5_Manuscript_files/combined_data"
+output_path = "../5_Manuscript_files/Manuscript_figures"
 
 ```
 
@@ -107,7 +84,7 @@ deduplicate_sim_analyses = function(data_frame){
 
 ## Function to add recalculated true V_A (V_A_true_new), lost_va to a dataframe
 
-These calculations were performed at a later stage and are stored in a separate file ("<data_path>/combined_data/new_va_calculation_combined.csv"). For every simulation in the input dataframe this functions looks up the row with the appropriate Set_ID in "new_va_calculation_combined.csv" and adds the V_A_true_new and other data pertaining to lost_va to the input dataframe.
+These calculations were performed at a later stage and are stored in a separate file ("<data_path>/new_va_calculation_combined.csv"). For every simulation in the input dataframe this functions looks up the row with the appropriate Set_ID in "new_va_calculation_combined.csv" and adds the V_A_true_new and other data pertaining to lost_va to the input dataframe.
 
 ```{r function_add_new_va_data}
 add_new_va_data = function(new_va_data,    # Data frame storing the calculations of vA_true_new, lost_va, etc
@@ -155,14 +132,13 @@ D. Histogram of the estimates of (\beta)_{\alpha}^{(1)}
 
 ```{r function_make_std_plots}
 make_std_plots = function(data, 
-                          alpha = FALSE, # If alpha = TRUE, alpha = eta + (1 - 2p)eta is used to calculate vA_true, i.e. vA_true_new is used in the plots. Otherwise, vA_true is used in the plots
                           font_size = 15, 
                           end_gen = 25000, 
                           data_in_title = FALSE){
   
   # vA_est ~ vA_true
 
-p_main = ggplot(data, aes(y = vA_est, x = if(alpha){vA_true_new}else{vA_true})) + 
+p_main = ggplot(data, aes(y = vA_est, x = vA_true_new)) + 
   theme_bw() + 
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
@@ -243,8 +219,8 @@ return(list(main = p_main, palpha = p_palpha, res_var = p_res_var, balpha_slope 
 Load the dataframe storing information on calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 
 ```{r load_new_va_data}
-d_new_va = read.csv(file.path(data_path, "combined_data/new_va_calculation_combined.csv"))
-alpha = TRUE # If alpha = TRUE, alpha = eta + (1 - 2p)eta is used to calculate vA_true, i.e. vA_true_new is used in the plots. Otherwise, vA_true is used in the plots
+d_new_va = read.csv(file.path(data_path, "new_va_calculation_combined.csv"))
+
 ```
 
 
@@ -263,7 +239,7 @@ ngen2 = 4
 
 ```{r simplified_standard}
 
-d_18 = read.csv(file.path(data_path, "combined_data/Set_18_corrected_output.csv"))
+d_18 = read.csv(file.path(data_path, "Set_18_corrected_output.csv"))
 
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
@@ -285,7 +261,7 @@ d_18_std = d_18[d_18$r_expt*d_18$sequence_length==2&d_18$n_ind_exp==1000&d_18$n_
 ### Figure 1 ###
 ################
 
-p_nb_2_std = make_std_plots(d_18_std, alpha = alpha)$combined
+p_nb_2_std = make_std_plots(d_18_std)$combined
 
 title = ggdraw() + draw_label("Simplified simulations", hjust = 0.5, size = 30)
 p_nb_2_std = plot_grid(title, p_nb_2_std, ncol = 1, rel_heights = c(0.1,1))
@@ -310,7 +286,7 @@ We then vary map length in the experiment (ml_exp), population size in the exper
 ### ml_exp ###
 
 d_18_ml_exp = d_18[d_18$n_ind_exp==1000&d_18$n_cages==10&d_18$ngen2==4,]
-p_nb_2_ml_exp = ggplot(d_18_ml_exp, aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(sequence_length*r_expt))) +
+p_nb_2_ml_exp = ggplot(d_18_ml_exp, aes(y=vA_est, x = vA_true_new, color = factor(sequence_length*r_expt))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -328,7 +304,7 @@ p_nb_2_ml_exp
 
 ### n_ind_exp ###
 d_18_nind = d_18[d_18$r_exp==2e-6&d_18$n_cages==10&d_18$ngen2==4,]
-p_nb_2_nind = ggplot(d_18_nind , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(n_ind_exp))) +
+p_nb_2_nind = ggplot(d_18_nind , aes(y=vA_est, x = vA_true_new, color = factor(n_ind_exp))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -347,7 +323,7 @@ p_nb_2_nind
 ### n_cages ###
 
 d_18_ncages = d_18[d_18$r_exp==2e-6&d_18$n_ind_exp==1000&d_18$ngen2==4,]
-p_nb_2_ncages = ggplot(d_18_ncages , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(n_cages))) +
+p_nb_2_ncages = ggplot(d_18_ncages , aes(y=vA_est, x = vA_true_new, color = factor(n_cages))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -366,7 +342,7 @@ p_nb_2_ncages
 ### ngen_expt ###
 
 d_18_ngen2 = d_18[d_18$r_exp==2e-6&d_18$n_ind_exp==1000&d_18$n_cages==10,]
-p_nb_2_ngen2 = ggplot(d_18_ngen2 , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(ngen2-ngen1))) +
+p_nb_2_ngen2 = ggplot(d_18_ngen2 , aes(y=vA_est, x = vA_true_new, color = factor(ngen2-ngen1))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -399,7 +375,7 @@ ggsave(p_nb_2_combined, width = 12, height = 10, file = file.path(output_path, "
 
 ```{r simplified_dominance}
 
-d_23 = read.csv(file.path(data_path, "combined_data/Set_23_corrected_output.csv"))
+d_23 = read.csv(file.path(data_path, "Set_23_corrected_output.csv"))
 d_23 = add_new_va_data(new_va_data=d_new_va, target_data=d_23, verbose=TRUE)
 d_23$k = gsub(".*=", x=d_23$sim, "")
 
@@ -513,7 +489,7 @@ The analyses for this set were performed using all.gp = FALSE and using the true
 ### Figure 3 ###
 ################
 
-d_9 = read.csv(file.path(data_path, "combined_data/Set_9_corrected_output.csv")) # Data for the standard set
+d_9 = read.csv(file.path(data_path, "Set_9_corrected_output.csv")) # Data for the standard set
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_9 = add_new_va_data(new_va_data=d_new_va, target_data=d_9, verbose=TRUE)
@@ -523,7 +499,7 @@ d_9 = d_9[grep("pool_seq", d_9$analysis_stamp, invert = TRUE, value = FALSE),]
 # Set 9 simulations were also renanalysed setting Ne_exp to c(1000, 1000) and setting all.gp = FALSE. Removing those rows.
 d_9_std = d_9[d_9$all.gp==FALSE&d_9$Ne_exp!="1000_1000",]
 
-p_b_std = make_std_plots(d_9_std, alpha = alpha)$combined
+p_b_std = make_std_plots(d_9_std)$combined
 title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
 
 p_b_std = plot_grid(title, p_b_std, ncol = 1, rel_heights = c(0.1,1))
@@ -539,7 +515,7 @@ p_b_std
 
 ### Reference map length in history: 0.5 morgan ###
 
-d_25 = read.csv(file.path(data_path, "combined_data/Set_25_corrected_output.csv"))
+d_25 = read.csv(file.path(data_path, "Set_25_corrected_output.csv"))
 
 # Remove analyses with LDalpha = TRUE
 d_25 = d_25[d_25$LDalpha==FALSE,]
@@ -564,7 +540,7 @@ legend_b_dominance = get_plot_component(p_b_dom_0.5 + guides(color = guide_legen
 
 ### Higher map length in history: 5 morgans ###
 
-d_32 = read.csv(file.path(data_path, "combined_data/Set_32_corrected_output.csv"))
+d_32 = read.csv(file.path(data_path, "Set_32_corrected_output.csv"))
 d_32 = add_new_va_data(new_va_data=d_new_va, target_data=d_32, verbose=TRUE)
 d_32$k = gsub(".*=", x=d_32$sim, "")
 
@@ -650,7 +626,7 @@ Full simulations in which the history phase was simulated under additivity and d
 
 ```{r full_dominance_sprinkled}
 
-d_31 = read.csv(file.path(data_path, "combined_data/Set_31_corrected_output.csv"))
+d_31 = read.csv(file.path(data_path, "Set_31_corrected_output.csv"))
 
 d_31 = add_new_va_data(new_va_data=d_new_va, target_data=d_31, verbose=TRUE)
 d_31$k = gsub(".*=", x=d_31$sim, "")
@@ -736,7 +712,7 @@ ggsave(p_b_dominance_sprinkled_combined, width = 8, height = 8, file = file.path
 ### Simplified sims + analyses incorporating Q ###
 ##################################################
 
-d_nb_Qpoolseq = read.csv(file.path(data_path, "combined_data/Set_18_corrected_output.csv"))
+d_nb_Qpoolseq = read.csv(file.path(data_path, "Set_18_corrected_output.csv"))
 
 # retain only the dataset with pool_seq incorporating Q
 d_nb_Qpoolseq = d_nb_Qpoolseq[grep("incorporateQ_pool_seq", d_nb_Qpoolseq$analysis_stamp, invert = FALSE, value = FALSE),]
@@ -782,7 +758,7 @@ p_nb_Qcoverage = ggplot(d_nb_Qpoolseq, aes(y = vA_est, x = vA_true_new, color = 
 ### Simplified sims + analyses without Q ###
 ############################################
 
-d_nb_poolseq_noQ = read.csv(file.path(data_path, "combined_data/Set_18_corrected_output.csv"))
+d_nb_poolseq_noQ = read.csv(file.path(data_path, "Set_18_corrected_output.csv"))
 
 # retain only the dataset with pool_seq without Q *and* the correct read length = 800 (there are other analyses with read_length = 75 and read_length = 1 which should not be included)
 d_nb_poolseq_noQ = d_nb_poolseq_noQ[grep("^pool_seq_TRUE_read_length_800", d_nb_poolseq_noQ$analysis_stamp, invert = FALSE, value = FALSE),]
@@ -855,7 +831,7 @@ ggsave(plot = p_nb_Qpoolseq_combined, width = 10, height = 5.5, file = file.path
 ############################################
 
 
-d_b_Qpoolseq = read.csv(file.path(data_path, "combined_data/Set_9_corrected_output.csv"))
+d_b_Qpoolseq = read.csv(file.path(data_path, "Set_9_corrected_output.csv"))
 
 # retain only the dataset with pool_seq
 d_b_Qpoolseq = d_b_Qpoolseq[grep("incorporateQ_pool_seq", d_b_Qpoolseq$analysis_stamp, invert = FALSE, value = FALSE),]
@@ -913,8 +889,8 @@ We then vary various parameters one at a time while keeping the others fixed to 
 
 ```{r full_varying_mut_ratio}
 
-d_11 = read.csv(file.path(data_path, "combined_data/Set_11_corrected_output.csv")) # Data for the set with mut_ratio = 0.0002
-d_14 = read.csv(file.path(data_path, "combined_data/Set_14_corrected_output.csv")) # Data for the set with mut_ratio = 0.02
+d_11 = read.csv(file.path(data_path, "Set_11_corrected_output.csv")) # Data for the set with mut_ratio = 0.0002
+d_14 = read.csv(file.path(data_path, "Set_14_corrected_output.csv")) # Data for the set with mut_ratio = 0.02
 
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
@@ -925,7 +901,7 @@ d_14 = add_new_va_data(new_va_data=d_new_va, target_data=d_14, verbose=TRUE)
 
 # Combined plot for proportion of beneficial mutations
 
-p_ben_0.033 = ggplot(rbind(d_9_std, d_11, d_14), aes(y = vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(format(mut_ratio, scientific = FALSE)))) +
+p_ben_0.033 = ggplot(rbind(d_9_std, d_11, d_14), aes(y = vA_est, x = vA_true_new, color = factor(format(mut_ratio, scientific = FALSE)))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -948,7 +924,7 @@ p_ben_0.033
 
 ```{r full_varying_ml_exp}
 
-d_12 = read.csv(file.path(data_path, "combined_data/Set_12_corrected_output.csv")) # Data when ml_exp was varied for scale = 0.033
+d_12 = read.csv(file.path(data_path, "Set_12_corrected_output.csv")) # Data when ml_exp was varied for scale = 0.033
 
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
@@ -956,7 +932,7 @@ d_12 = add_new_va_data(new_va_data=d_new_va, target_data=d_12, verbose=TRUE)
 
 d_ml_exp = rbind(d_9_std, d_12)
 
-p_ml_exp_0.033 = ggplot(d_ml_exp , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(sequence_length*r_expt))) +
+p_ml_exp_0.033 = ggplot(d_ml_exp , aes(y=vA_est, x = vA_true_new, color = factor(sequence_length*r_expt))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -984,7 +960,7 @@ p_ml_exp_0.033
 ```{r full_varying_scale}
 
 # Load the data for Set_15 in which mut_ratio was 0.0002 and 0.02
-d_15 = read.csv(file.path(data_path, "combined_data/Set_15_corrected_output.csv"))
+d_15 = read.csv(file.path(data_path, "Set_15_corrected_output.csv"))
 
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
@@ -994,7 +970,7 @@ d_scale = rbind(d_9_std, d_15)
 # Some simulations were erroneously analysed twice, in such case retain only the first analysis
 d_scale = deduplicate_sim_analyses(d_scale)
 
-p_scale = ggplot(d_scale , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(round(2*scale*shape, 2)))) +
+p_scale = ggplot(d_scale , aes(y=vA_est, x = vA_true_new, color = factor(round(2*scale*shape, 2)))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -1022,7 +998,7 @@ p_scale
 
 ```{r full_varying_ml_history}
 
-d_13 = read.csv(file.path(data_path, "combined_data/Set_13_corrected_output.csv"))
+d_13 = read.csv(file.path(data_path, "Set_13_corrected_output.csv"))
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_13 = add_new_va_data(new_va_data=d_new_va, target_data=d_13, verbose=TRUE)
@@ -1031,7 +1007,7 @@ d_13 = add_new_va_data(new_va_data=d_new_va, target_data=d_13, verbose=TRUE)
 
 d_ml_history = rbind(d_9_std, d_13)
 
-p_b_0.033_ml = ggplot(d_ml_history , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(sequence_length*r))) +
+p_b_0.033_ml = ggplot(d_ml_history , aes(y=vA_est, x = vA_true_new, color = factor(sequence_length*r))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -1052,59 +1028,6 @@ p_b_0.033_ml = plot_grid(p_b_0.033_ml + theme(legend.position = "none"),
 
 p_b_0.033_ml
 
-if(TRUE==FALSE){
-
-##############################################
-### Plotting the leading eigenvectors of L ###
-##############################################
-
-### Selected the following Set_IDs with true V_A close to 0.05
-# "Set_9_bigbird_2024-12-26_03-45-11.636065_2.83054545454545e-07_0.5_2_1000_10_4_0_0"  (ml = 0.5)
-# "Set_13_bigbird_2025-02-27_01-30-50.592525_2.47672727272727e-07_5_2_1000_10_4_0_0" (ml = 5)
-# "Set_13_bigyin_2025-02-28_23-09-50.578271_2.83054545454545e-07_50_2_1000_10_4_0_0" (ml = 50)
-# "Set_13_bigyin_2025-03-04_07-58-50.587939_2.78e-07_250_2_1000_10_4_0_0" (ml = 250)
-
-
-### The Rdata files containing the necessry data are stored in file.path(data_path/combined_data) and their filenames are:
-# Set_9_bigbird_2024-12-26_03-45-11.636065_2.83054545454545e-07_0.5_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_15-12-26.877413.Rdata
-# Set_13_bigbird_2025-02-27_01-30-50.592525_2.47672727272727e-07_5_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_16-11-40.048848.Rdata
-# Set_13_bigyin_2025-02-28_23-09-50.578271_2.83054545454545e-07_50_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_16-12-21.755107.Rdata
-# Set_13_bigyin_2025-03-04_07-58-50.587939_2.78e-07_250_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_16-12-44.87969.Rdata
-
-# Load the Rdata files for each of these simulations
-
-# ml = 0.5
-load(file.path(data_path, "combined_data/Set_9_bigbird_2024-12-26_03-45-11.636065_2.83054545454545e-07_0.5_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_15-12-26.877413.Rdata"))
-UL_0.5 = UL_data$UL
-DL_0.5 = UL_data$DL
-positions_0.5 = UL_data$SNPs
-
-# ml = 5
-load(file.path(data_path, "combined_data/Set_13_bigbird_2025-02-27_01-30-50.592525_2.47672727272727e-07_5_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_16-11-40.048848.Rdata"))
-UL_5 = UL_data$UL
-DL_5 = UL_data$DL
-positions_5 = UL_data$SNPs
-
-# ml = 50
-load(file.path(data_path, "combined_data/Set_13_bigyin_2025-02-28_23-09-50.578271_2.83054545454545e-07_50_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_16-12-21.755107.Rdata"))
-UL_50 = UL_data$UL
-DL_50 = UL_data$DL
-positions_50 = UL_data$SNPs
-
-# ml = 250
-load(file.path(data_path, "combined_data/Set_13_bigyin_2025-03-04_07-58-50.587939_2.78e-07_250_2_1000_10_4_0_0_sim_1_UL_positions_ac3-n1_2025-08-19_16-12-44.87969.Rdata"))
-UL_250 = UL_data$UL
-DL_250 = UL_data$DL
-positions_250 = UL_data$SNPs
-
-pdf(file.path(output_path, "LD_eigenvector1.pdf"), width = 10, height = 10)
-par(mfrow=c(2,2))
-plot(abs(UL_0.5[,1]) ~ positions_0.5, xlab = "Position", ylab = "Absolute sitewise loadings", main = "0.5 morgan", cex.main = 2, cex.lab = 1.7, cex = 1)
-plot(abs(UL_5[,1]) ~ positions_5, xlab = "Position", ylab = "Absolute sitewise loadings", main = "5 morgans", cex.main = 2, cex.lab = 1.7, cex = 1)
-plot(abs(UL_50[,1]) ~ positions_50, xlab = "Position", ylab = "Absolute sitewise loadings", main = "50 morgans", cex.main = 2, cex.lab = 1.7, cex = 1)
-plot(abs(UL_250[,1]) ~ positions_250, xlab = "Position", ylab = "Absolute sitewise loadings", main = "250 morgans", cex.main = 2, cex.lab = 1.7, cex = 1)
-dev.off()
-}
 
 ```
 
@@ -1125,7 +1048,7 @@ d_all.gp = rbind(d_9_std, d_9_nstd)
 all.gp_labs = c(TeX(r"(${\bf L}^{'}_{0} + \frac{ r_{ij} \times{\bf L}^{''}_{0}}{1-r_{ij}}$)"), TeX(r"($\bf L_0$)"))
 names(all.gp_labs) = c(FALSE, TRUE)
 
-p_all.gp = ggplot(d_all.gp, aes(y = vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = all.gp)) +
+p_all.gp = ggplot(d_all.gp, aes(y = vA_est, x = vA_true_new, color = all.gp)) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -1178,7 +1101,7 @@ for(i in 1:length(Ne_type)){
 
 names(Ne_type_labs) = Ne_type
 
-p_Ne = ggplot(d_9_Ne, aes(y = vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = Ne_exp)) +
+p_Ne = ggplot(d_9_Ne, aes(y = vA_est, x = vA_true_new, color = Ne_exp)) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -1246,14 +1169,14 @@ Varying map length in history, but for \eta_{scale} = 0.045
 ### Figure S1 ###
 #################
 
-d_N1 = read.csv(file.path(data_path, "combined_data/Set_N1_corrected_output.csv"))
+d_N1 = read.csv(file.path(data_path, "Set_N1_corrected_output.csv"))
 
 # Add calculations of vA_true_new, va_true_new, va_lost, va_lost_new
 d_N1 = add_new_va_data(new_va_data=d_new_va, target_data=d_N1, verbose=TRUE)
 
 ### ml ###
 
-p_b_0.045_ml = ggplot(d_N1 , aes(y=vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = factor(sequence_length*r))) +
+p_b_0.045_ml = ggplot(d_N1 , aes(y=vA_est, x = vA_true_new, color = factor(sequence_length*r))) +
   theme_bw() + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) + 
@@ -1279,7 +1202,7 @@ Plot the fraction of the initial additive genic variance lost by the end of the 
 # Figure S2A #
 ##############
 
-plot_lost_va = ggplot(d_scale, aes(y = if(alpha){((va_true_new - va_left_new)/va_true_new)}else{((va_true - va_left)/va_true)}, x = factor(round(2*shape*scale, digits = 2)), fill = factor(round(2*shape*scale, digits = 2)))) +
+plot_lost_va = ggplot(d_scale, aes(y = ((va_true_new - va_left_new)/va_true_new), x = factor(round(2*shape*scale, digits = 2)), fill = factor(round(2*shape*scale, digits = 2)))) +
   theme_bw() +
   geom_boxplot() +
   labs(y = TeX(r"(Fraction of the total $V_a(0)$ lost)"), x = TeX(r"($E[|\eta|]$)"), fill  = TeX(r"($E[|\eta|]$)")) +
@@ -1293,8 +1216,8 @@ plot_lost_va = ggplot(d_scale, aes(y = if(alpha){((va_true_new - va_left_new)/va
 
 # Does abs_va_lost explain the bias in our estimates?
 
-plot_lost_va_bias = ggplot(d_scale, aes(y = if(alpha){vA_est - vA_true_new}else{vA_est - vA_true},
-                                        x = if(alpha){va_true_new - va_left_new}else{va_true - va_left}, 
+plot_lost_va_bias = ggplot(d_scale, aes(y = vA_est - vA_true_new,
+                                        x = va_true_new - va_left_new, 
                                         color = factor(round(2*shape*scale, digits = 2)))) +
   theme_bw() +
   geom_point() +
@@ -1310,31 +1233,23 @@ plot_lost_va_bias = ggplot(d_scale, aes(y = if(alpha){vA_est - vA_true_new}else{
 
 # Identify the simulation with the greatest absolute loss in V_a
 
-if(alpha){
-  max_loss_sim = d_scale[which((d_scale$va_true_new - d_scale$va_left_new) == max(d_scale$va_true_new - d_scale$va_left_new)),]$Set_ID}else{
-  max_loss_sim = d_scale[which((d_scale$va_true - d_scale$va_left) == max(d_scale$va_true - d_scale$va_left)),]$Set_ID  
-  }
-
+max_loss_sim = d_scale[which((d_scale$va_true_new - d_scale$va_left_new) == max(d_scale$va_true_new - d_scale$va_left_new)),]$Set_ID
 message("Simulation with the geratest absolute loss in initial additive genic variance:")
 max_loss_sim
-max_loss_sim_vA_true = if(alpha){d_scale[d_scale$Set_ID==max_loss_sim,]$vA_true_new}else{d_scale[d_scale$Set_ID==max_loss_sim,]$vA_true}
+max_loss_sim_vA_true = d_scale[d_scale$Set_ID==max_loss_sim,]$vA_true_new
 message(paste("True V_A =", max_loss_sim_vA_true))
-
-message(paste("Lost V_a =", if(alpha){d_scale[d_scale$Set_ID==max_loss_sim,]$va_true_new - d_scale[d_scale$Set_ID==max_loss_sim,]$va_left_new}else{d_scale[d_scale$Set_ID==max_loss_sim,]$va_true - d_scale[d_scale$Set_ID==max_loss_sim,]$va_left}))
+message(paste("Lost V_a =", d_scale[d_scale$Set_ID==max_loss_sim,]$va_true_new - d_scale[d_scale$Set_ID==max_loss_sim,]$va_left_new))
 
 # Identify the simulation with the smallest absolute loss in V_a
 # However, limit only to simulations for which vA_true (or vA_true_new) is close to max_loss_sim_vA_true
 
-d_scale1 = d_scale[if(alpha){which((max_loss_sim_vA_true - 0.001) <= d_scale$vA_true_new & d_scale$vA_true_new<= (max_loss_sim_vA_true + 0.001))}else{which((max_loss_sim_vA_true - 0.001) <= d_scale$vA_true & d_scale$vA_true_new <= (max_loss_sim_vA_true + 0.001))},]
+d_scale1 = d_scale[which((max_loss_sim_vA_true - 0.001) <= d_scale$vA_true_new & d_scale$vA_true_new<= (max_loss_sim_vA_true + 0.001)),]
 
-if(alpha){
-  min_loss_sim = d_scale1[which((d_scale1$va_true_new - d_scale1$va_left_new) == min(d_scale1$va_true_new - d_scale1$va_left_new)),]$Set_ID}else{
-  min_loss_sim = d_scale1[which((d_scale1$va_true - d_scale1$va_left) == min(d_scale1$va_true - d_scale1$va_left)),]$Set_ID  
-  }
+min_loss_sim = d_scale1[which((d_scale1$va_true_new - d_scale1$va_left_new) == min(d_scale1$va_true_new - d_scale1$va_left_new)),]$Set_ID
 message("Simulation with the smallest absolute loss in initial additive genic variance:")
 min_loss_sim
-message(paste("True V_A =", if(alpha){d_scale[d_scale$Set_ID==min_loss_sim,]$vA_true_new}else{d_scale[d_scale$Set_ID==min_loss_sim,]$vA_true}))
-message(paste("Lost V_a =", if(alpha){d_scale[d_scale$Set_ID==min_loss_sim,]$va_true_new - d_scale[d_scale$Set_ID==min_loss_sim,]$va_left_new}else{d_scale[d_scale$Set_ID==min_loss_sim,]$va_true - d_scale[d_scale$Set_ID==min_loss_sim,]$va_left}))
+message(paste("True V_A =", d_scale[d_scale$Set_ID==min_loss_sim,]$vA_true_new))
+message(paste("Lost V_a =", d_scale[d_scale$Set_ID==min_loss_sim,]$va_true_new - d_scale[d_scale$Set_ID==min_loss_sim,]$va_left_new))
 
 # Load finescale data for these two simulations
 
@@ -1358,11 +1273,10 @@ d_finescale$lost_va_type = ifelse(d_finescale$Set_ID==min_loss_sim, "Min.", "Max
 # Restricting to selected loci only
 d_finescale_sel = d_finescale[d_finescale$list_alpha!=0,]
 
-plot_finescale_va_lost = ggplot(d_finescale_sel, aes(y = if(alpha){locuswise_va_lost_new}else{locuswise_va_lost},                                                      x = if(alpha){abs(list_alpha_new)}else{abs(list_alpha)}, 
-                                                     color = lost_va_type)) +
+plot_finescale_va_lost = ggplot(d_finescale_sel, aes(y = locuswise_va_lost_new, x = abs(list_alpha_new), color = lost_va_type)) +
   theme_bw() +
   geom_point() +
-  labs(y = TeX(r"($V_a$ lost at a locus$)"), x = if(alpha){TeX(r"($|\alpha|$)")}else{TeX(r"($|\eta|$)")}, color = "Simulation type") +
+  labs(y = TeX(r"($V_a$ lost at a locus$)"), x = TeX(r"($|\alpha|$)"), color = "Simulation type") +
   theme(text = element_text(size = 15)) +   
   theme(legend.position = "bottom") +
   scale_color_manual(values = c("Min." = "#009E73", "Max." = "#999999"),
@@ -1379,21 +1293,17 @@ plot_finescale_va_lost
 d_finescale_sel$list_alpha_cat = abs(round(d_finescale_sel$list_alpha, 2))
 d_finescale_sel$list_alpha_new_cat = abs(round(d_finescale_sel$list_alpha_new, 2))
 
-if(alpha){
-  d_summed_lost_va = aggregate(cbind(locuswise_va_true_new, locuswise_va_lost_new) ~ list_alpha_new_cat*lost_va_type, data = d_finescale_sel, FUN = "sum")
-  
-  d_summed_lost_va$fract_va_lost = d_summed_lost_va$locuswise_va_lost_new/d_summed_lost_va$locuswise_va_true_new
-  
-}else{
-  d_summed_lost_va = aggregate(cbind(locuswise_va, locuswise_va_lost) ~ list_alpha_cat*lost_va_type, data = d_finescale_sel, FUN = "sum")
-}
+
+d_summed_lost_va = aggregate(cbind(locuswise_va_true_new, locuswise_va_lost_new) ~ list_alpha_new_cat*lost_va_type, data = d_finescale_sel, FUN = "sum")
+
+d_summed_lost_va$fract_va_lost = d_summed_lost_va$locuswise_va_lost_new/d_summed_lost_va$locuswise_va_true_new
 
 
-plot_categoriwise_va_lost = ggplot(d_summed_lost_va, aes(y = locuswise_va_lost_new,                                                      x = if(alpha){list_alpha_new_cat}else{list_alpha_cat}, 
-                                                       fill = lost_va_type)) +
+
+plot_categoriwise_va_lost = ggplot(d_summed_lost_va, aes(y = locuswise_va_lost_new, x = list_alpha_new_cat, fill = lost_va_type)) +
     theme_bw() +
     geom_bar(stat = "Identity", position = position_dodge(preserve = "single")) +
-    labs(y = TeX(r"(Total $V_a$ lost at groups of loci)"), x = if(alpha){TeX(r"($|\alpha|$)")}else{TeX(r"($|\eta|$)")}, fill = "Simulation type") +
+    labs(y = TeX(r"(Total $V_a$ lost at groups of loci)"), x = TeX(r"($|\alpha|$)"), fill = "Simulation type") +
     theme(text = element_text(size = 15)) +   
     theme(legend.position = "bottom") +
     scale_fill_manual(values = c("Min." = "#009E73", "Max." = "#999999"),
@@ -1405,11 +1315,11 @@ plot_categoriwise_va_lost = ggplot(d_summed_lost_va, aes(y = locuswise_va_lost_n
 # Figure S2E # (not included)
 ##############
   
-  plot_categoriwise_fract_va_lost = ggplot(d_summed_lost_va, aes(y = fract_va_lost,                                                      x = if(alpha){list_alpha_new_cat}else{list_alpha_cat}, 
+  plot_categoriwise_fract_va_lost = ggplot(d_summed_lost_va, aes(y = fract_va_lost, x = list_alpha_new_cat, 
                                                        fill = lost_va_type)) +
     theme_bw() +
     geom_bar(stat = "Identity", position = position_dodge(preserve = "single")) +
-    labs(y = TeX(r"(Fraction $V_a$ lost at groups of loci)"), x = if(alpha){TeX(r"($|\alpha|$)")}else{TeX(r"($|\eta|$)")}, fill = "Simulation type") +
+    labs(y = TeX(r"(Fraction $V_a$ lost at groups of loci)"), x = TeX(r"($|\alpha|$)"), fill = "Simulation type") +
     theme(text = element_text(size = 15)) +   
     theme(legend.position = "bottom") +
     scale_fill_manual(values = c("Min." = "#009E73", "Max." = "#999999"),
@@ -1431,27 +1341,21 @@ ggsave(va_lost_combined_plot, width = 10, height = 10, file = file.path(output_p
 
 message("The fraction of V_a lost in the 'Max.' simulation at loci with alphas larger than 0.3 = ")
 
-if(alpha){
-  sum(d_summed_lost_va[d_summed_lost_va$lost_va_type=="Max."&d_summed_lost_va$list_alpha_new_cat>0.3,]$locuswise_va_lost_new)/sum(d_summed_lost_va[d_summed_lost_va$lost_va_type=="Max.",]$locuswise_va_lost_new)
-}else{
-  sum(d_summed_lost_va[d_summed_lost_va$lost_va_type=="Max."&d_summed_lost_va$list_alpha_cat>0.3,]$locuswise_va_lost)/sum(d_summed_lost_va[d_summed_lost_va$lost_va_type=="Max.",]$locuswise_va_lost)
-}
+
+sum(d_summed_lost_va[d_summed_lost_va$lost_va_type=="Max."&d_summed_lost_va$list_alpha_new_cat>0.3,]$locuswise_va_lost_new)/sum(d_summed_lost_va[d_summed_lost_va$lost_va_type=="Max.",]$locuswise_va_lost_new)
+
 
 message("The fraction of non-neutral loci in the 'Max.' simulation with alphas larger than 0.3 = ")
 
-if(alpha){
-  nrow(d_finescale_sel[d_finescale_sel$lost_va_type=="Max."&d_finescale_sel$list_alpha_new>0.3,])/nrow(d_finescale_sel[d_finescale_sel$lost_va_type=="Max.",])
-}else{
-   nrow(d_finescale_sel[d_finescale_sel$lost_va_type=="Max."&d_finescale_sel$list_alpha>0.3,])/nrow(d_finescale_sel[d_finescale_sel$lost_va_type=="Max.",]) 
-  }
+
+nrow(d_finescale_sel[d_finescale_sel$lost_va_type=="Max."&d_finescale_sel$list_alpha_new>0.3,])/nrow(d_finescale_sel[d_finescale_sel$lost_va_type=="Max.",])
+
 
 message("Mean |alpha| for non neutral loci in the 'Max.' simulation = ")
 
-if(alpha){
-    mean(abs(d_finescale_sel[d_finescale_sel$lost_va_type=="Max.",]$list_alpha_new))
-}else{
-    mean(abs(d_finescale_sel[d_finescale_sel$lost_va_type=="Max.",]$list_alpha))
-  }
+
+mean(abs(d_finescale_sel[d_finescale_sel$lost_va_type=="Max.",]$list_alpha_new))
+
 
 
 ```
@@ -1462,7 +1366,7 @@ if(alpha){
 
 ```{r simplified_comparison_BC}
 
-d_16 = read.csv(file.path(data_path, "combined_data/Set_16_corrected_output.csv"))
+d_16 = read.csv(file.path(data_path, "Set_16_corrected_output.csv"))
 
 d_16 = add_new_va_data(new_va_data=d_new_va, target_data=d_16, verbose=TRUE)
 d_16$vA_BC_est_ia = unlist(lapply(d_16$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[2])}))
@@ -1479,7 +1383,7 @@ d_16$assumption_G_test = unlist(lapply(d_16$vA_BC, function(x){as.numeric(unlist
 ### vA_est using our method ###
 ###############################
 
-p_bc_simplified_us = ggplot(d_16, aes(y = vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r_msp))) +
+p_bc_simplified_us = ggplot(d_16, aes(y = vA_est, x = vA_true_new, color = as.factor(sequence_length*r_msp))) +
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
@@ -1493,7 +1397,7 @@ p_bc_simplified_us = ggplot(d_16, aes(y = vA_est, x = if(alpha){vA_true_new}else
 ### vA_est using B&C Approach i-a ### (B+Ib+N+)
 #####################################
 
-p_bc_simplified_bc_ia = ggplot(d_16, aes(y = vA_BC_est_ia, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r_msp))) +
+p_bc_simplified_bc_ia = ggplot(d_16, aes(y = vA_BC_est_ia, x = vA_true_new, color = as.factor(sequence_length*r_msp))) +
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
@@ -1507,7 +1411,7 @@ p_bc_simplified_bc_ia = ggplot(d_16, aes(y = vA_BC_est_ia, x = if(alpha){vA_true
 ### vA_est using B&C Approach ii-a ### (B0Ib+N+)
 ######################################
 
-p_bc_simplified_bc_iia = ggplot(d_16, aes(y = vA_BC_est_iia, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r_msp))) +
+p_bc_simplified_bc_iia = ggplot(d_16, aes(y = vA_BC_est_iia, x = vA_true_new, color = as.factor(sequence_length*r_msp))) +
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
@@ -1521,7 +1425,7 @@ p_bc_simplified_bc_iia = ggplot(d_16, aes(y = vA_BC_est_iia, x = if(alpha){vA_tr
 ### vA_est using B&C Approach iii-a ###  (B0Ib0N+)
 #######################################
 
-p_bc_simplified_bc_iiia = ggplot(d_16, aes(y = vA_BC_est_iiia, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r_msp))) +
+p_bc_simplified_bc_iiia = ggplot(d_16, aes(y = vA_BC_est_iiia, x = vA_true_new, color = as.factor(sequence_length*r_msp))) +
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
@@ -1536,7 +1440,7 @@ p_bc_simplified_bc_iiia = ggplot(d_16, aes(y = vA_BC_est_iiia, x = if(alpha){vA_
 ### vA_est using B&C Approach i-b ### (B+Ib+N0)
 #####################################
 
-p_bc_simplified_bc_ib = ggplot(d_16, aes(y = vA_BC_est_ib, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r_msp))) +
+p_bc_simplified_bc_ib = ggplot(d_16, aes(y = vA_BC_est_ib, x = vA_true_new, color = as.factor(sequence_length*r_msp))) +
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
@@ -1550,7 +1454,7 @@ p_bc_simplified_bc_ib = ggplot(d_16, aes(y = vA_BC_est_ib, x = if(alpha){vA_true
 ### vA_est using B&C Approach ii-b ### (B0Ib+N0)
 ######################################
 
-p_bc_simplified_bc_iib = ggplot(d_16, aes(y = vA_BC_est_iib, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r_msp))) +
+p_bc_simplified_bc_iib = ggplot(d_16, aes(y = vA_BC_est_iib, x = vA_true_new, color = as.factor(sequence_length*r_msp))) +
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
@@ -1564,7 +1468,7 @@ p_bc_simplified_bc_iib = ggplot(d_16, aes(y = vA_BC_est_iib, x = if(alpha){vA_tr
 ### vA_est using B&C Approach iii-b ### (B0Ib0N0)
 #######################################
 
-p_bc_simplified_bc_iiib = ggplot(d_16, aes(y = vA_BC_est_iiib, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r_msp))) +
+p_bc_simplified_bc_iiib = ggplot(d_16, aes(y = vA_BC_est_iiib, x = vA_true_new, color = as.factor(sequence_length*r_msp))) +
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
@@ -1614,7 +1518,7 @@ ggsave(p_bc_simplified_combined, file = file.path(output_path, "BC_simplified.jp
 
 ```{r full_comparison_BC}
 
-d_17 = read.csv(file.path(data_path, "combined_data/Set_17_corrected_output.csv"))
+d_17 = read.csv(file.path(data_path, "Set_17_corrected_output.csv"))
 
 d_17 = add_new_va_data(new_va_data=d_new_va, target_data=d_17, verbose=FALSE)
 d_17$vA_BC_est_ia = unlist(lapply(d_17$vA_BC, function(x){as.numeric(unlist(strsplit(x, "_"))[2])}))
@@ -1631,7 +1535,7 @@ d_17$assumption_G_test = unlist(lapply(d_17$vA_BC, function(x){as.numeric(unlist
 ### vA_est using our method ###
 ###############################
 
-p_bc_full_us = ggplot(d_17, aes(y = vA_est, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r))) +
+p_bc_full_us = ggplot(d_17, aes(y = vA_est, x = vA_true_new, color = as.factor(sequence_length*r))) +
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
@@ -1645,7 +1549,7 @@ p_bc_full_us = ggplot(d_17, aes(y = vA_est, x = if(alpha){vA_true_new}else{vA_tr
 ### vA_est using B&C Approach i-a ### (B+Ib_N+)
 #####################################
 
-p_bc_full_bc_ia = ggplot(d_17, aes(y = vA_BC_est_ia, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r))) +
+p_bc_full_bc_ia = ggplot(d_17, aes(y = vA_BC_est_ia, x = vA_true_new, color = as.factor(sequence_length*r))) +
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
@@ -1659,7 +1563,7 @@ p_bc_full_bc_ia = ggplot(d_17, aes(y = vA_BC_est_ia, x = if(alpha){vA_true_new}e
 ### vA_est using B&C Approach ii-a ### (B0Ib+N+)
 ######################################
 
-p_bc_full_bc_iia = ggplot(d_17, aes(y = vA_BC_est_iia, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r))) +
+p_bc_full_bc_iia = ggplot(d_17, aes(y = vA_BC_est_iia, x = vA_true_new, color = as.factor(sequence_length*r))) +
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
@@ -1673,7 +1577,7 @@ p_bc_full_bc_iia = ggplot(d_17, aes(y = vA_BC_est_iia, x = if(alpha){vA_true_new
 ### vA_est using B&C Approach iii-a ### (B0Ib0N+)
 #######################################
 
-p_bc_full_bc_iiia = ggplot(d_17, aes(y = vA_BC_est_iiia, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r))) +
+p_bc_full_bc_iiia = ggplot(d_17, aes(y = vA_BC_est_iiia, x = vA_true_new, color = as.factor(sequence_length*r))) +
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
@@ -1688,7 +1592,7 @@ p_bc_full_bc_iiia = ggplot(d_17, aes(y = vA_BC_est_iiia, x = if(alpha){vA_true_n
 ### vA_est using B&C Approach i-b ### (B+Ib+N0)
 #####################################
 
-p_bc_full_bc_ib = ggplot(d_17, aes(y = vA_BC_est_ib, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r))) +
+p_bc_full_bc_ib = ggplot(d_17, aes(y = vA_BC_est_ib, x = vA_true_new, color = as.factor(sequence_length*r))) +
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
@@ -1702,7 +1606,7 @@ p_bc_full_bc_ib = ggplot(d_17, aes(y = vA_BC_est_ib, x = if(alpha){vA_true_new}e
 ### vA_est using B&C Approach ii-b ### (B0Ib+N0)
 ######################################
 
-p_bc_full_bc_iib = ggplot(d_17, aes(y = vA_BC_est_iib, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r))) +
+p_bc_full_bc_iib = ggplot(d_17, aes(y = vA_BC_est_iib, x = vA_true_new, color = as.factor(sequence_length*r))) +
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
@@ -1716,7 +1620,7 @@ p_bc_full_bc_iib = ggplot(d_17, aes(y = vA_BC_est_iib, x = if(alpha){vA_true_new
 ### vA_est using B&C Approach iii-b ### (B0Ib0N0)
 #######################################
 
-p_bc_full_bc_iiib = ggplot(d_17, aes(y = vA_BC_est_iiib, x = if(alpha){vA_true_new}else{vA_true}, color = as.factor(sequence_length*r))) +
+p_bc_full_bc_iiib = ggplot(d_17, aes(y = vA_BC_est_iiib, x = vA_true_new, color = as.factor(sequence_length*r))) +
   theme_bw() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) + 
