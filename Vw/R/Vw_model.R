@@ -374,7 +374,7 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
   
   if(method=="REML"){
     
-    sigma2alpha<-summary(output$model)$varcomp['vm(locus, SC, singG = "PSD")',1]*output$SC_scale
+    sigma2alpha<-summary(output$model)$varcomp['vm(locus, SC, singG = "PSD")',1]/output$SC_scale
 
     S<-matrix(0,2,2)
     colnames(S)<-rownames(S)<-c("int", "pmq")
