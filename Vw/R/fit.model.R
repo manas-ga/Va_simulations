@@ -44,7 +44,9 @@ fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tpr
     SC<-projpSelec%*%(t(projpSelec)*covp)
     # if LDalpha=F, covp is diagonal and this is more efficient. 
   }
-  
+  SC_scale<-mean(diag(SC))
+  SC<-SC/SC_scale
+
   attr(SC, "INVERSE")<-FALSE
   dimnames(SC) <- list(1:nrow(SC),1:nrow(SC))  # used for full-form matrices
 
@@ -141,6 +143,6 @@ fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tpr
   if(LLonly){
     return(m1$loglik)
   }else{
-    return(list(data=dat.gaussian, model=m1, SC=SC, palpha=palpha))
+    return(list(data=dat.gaussian, model=m1, SC=SC, palpha=palpha, SC_scale=SC_scale))
   }
 }
