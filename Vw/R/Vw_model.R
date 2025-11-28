@@ -4,10 +4,10 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
                    nR,          # matrix of non-recombinant probabilities between loci
                    pbar0,       # vector of allele frequencies at time-point 0
                    pbar1,       # vector of allele frequencies at time-point 1
-                   coverage1=NULL, 
+                   Q1=NULL,     # list of starting Q matrices for each replicate 
                    ngen1=1,     # number of generations between parents and time-point 1
                    pbar2,       # vector of allele frequencies at time-point 2
-                   coverage2=NULL, 
+                   Q2=NULL,     # list of final Q matrices for each replicate 
                    ngen2,       # number of generations between parents and time-point 2
                    nind=NULL,
                    proj,        # projection type for allele frequencies: "LoM", "BLoM", "L" or "N"
@@ -331,17 +331,21 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
   # Garbage collection
   gc(verbose = FALSE)
   
-  if(!is.null(coverage1)){
-    Q<-t(2*diag(Ltilde)*t(1/coverage1+1/coverage2))
+  if(!is.null(Q1)){
+
+    for(i in 1:length(Q1)){
+       if(class(Q1[[i]])=="ddiMatrix"){
+         Q1[[i]]<-t(tprojp)%*%Diagonal(nrow(Q1[[i]]), 2*diag(Ltilde)*(Q1[[i]]@x+Q2[[i]]@x))%*%tprojp 
+       }else{
+         Q1[[i]]<-2*t(tprojp)%*%(Ltilde*(Q1[[i]]+Q2[[i]]))%*%tprojp
+       }
+    }
+    projQ<-bdiag(Q1)
+    rm(list = c("Q1", "Q2"))
+    gc(verbose = FALSE)
+    
     if(diag.projQ){
-      projQ<-apply(Q,1, function(x){diag(t(tprojp)%*%Diagonal(length(x), x)%*%tprojp)})
-      rm("Q")
-      projQ<-unlist(projQ)
-      projQ<-Diagonal(length(projQ), projQ)
-    }else{  
-      projQ<-apply(Q,1, function(x){t(tprojp)%*%Diagonal(length(x), x)%*%tprojp})
-      rm("Q")
-      projQ<-bdiag(projQ)
+      projQ<-Diagonal(nrow(projQ), diag(projQ))
     }
   }else{
     projQ<-NULL
