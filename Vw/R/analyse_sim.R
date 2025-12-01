@@ -80,6 +80,12 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
     NE<- c(sim_data$sim_params$n_ind_exp, predict_NE(n=sim_data$sim_params$n_ind_exp, Ve=sim_data$sim_params$Ve_w_expt))
   }
   
+  ### Construct the Q matrices from coverage ###
+  
+  if(pool_seq&incorporateQ){
+    Q1<-apply(1/sim_data$coverage1, 1, Diagonal, n=ncol(sim_data$coverage1))
+    Q2<-apply(1/sim_data$coverage2, 1, Diagonal, n=ncol(sim_data$coverage1))
+  }
 
   ### Fit model ###
   
@@ -89,10 +95,10 @@ analyse_sim = function(Set_ID,                # The unique ID of the set of simu
                nR = parents_info$nR,
                pbar0 = sim_data$pbar0,                   
                pbar1 = sim_data$pbar1,
-               coverage1 = if(pool_seq&incorporateQ){sim_data$coverage1}else{NULL},
+               Q1 = if(pool_seq&incorporateQ){Q1}else{NULL},
                ngen1=sim_data$ngen1,     
                pbar2 = sim_data$pbar2,  
-               coverage2 = if(pool_seq&incorporateQ){sim_data$coverage2}else{NULL},
+               Q2 = if(pool_seq&incorporateQ){Q2}else{NULL},
                ngen2 = sim_data$ngen2,       
                nind = sim_data$sim_params$n_ind_exp,        
                proj=proj,

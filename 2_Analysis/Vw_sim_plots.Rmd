@@ -267,7 +267,7 @@ title = ggdraw() + draw_label("Simplified simulations", hjust = 0.5, size = 30)
 p_nb_2_std = plot_grid(title, p_nb_2_std, ncol = 1, rel_heights = c(0.1,1))
 
 
-ggsave(p_nb_2_std, width = 8, height = 8, file = file.path(output_path, "simplified_main.jpg"))
+ggsave(p_nb_2_std, width = 8, height = 8, file = file.path(output_path, "simplified_main.pdf"))
 p_nb_2_std
 
 
@@ -286,14 +286,14 @@ We then vary map length in the experiment (ml_exp), population size in the exper
 ### ml_exp ###
 
 d_18_ml_exp = d_18[d_18$n_ind_exp==1000&d_18$n_cages==10&d_18$ngen2==4,]
-p_nb_2_ml_exp = ggplot(d_18_ml_exp, aes(y=vA_est, x = vA_true_new, color = factor(sequence_length*r_expt))) +
+p_nb_2_ml_exp = ggplot(d_18_ml_exp, aes(y=vA_est, x = vA_true_new, color = factor(sequence_length*r_expt), shape = factor(sequence_length*r_expt))) +
   theme_bw() + 
-  geom_point() + 
+  geom_point(size = 2) + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length in\nmorgans \n(experiment)") + 
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length in\nmorgans \n(experiment)", shape = "Map length in\nmorgans \n(experiment)") + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + scale_shape_manual(values = c(15, 17, 16)) +
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE)
 
 legend_nb_2_ml_exp = get_legend(p_nb_2_ml_exp)
 p_nb_2_ml_exp = plot_grid(p_nb_2_ml_exp + theme(legend.position = "none"),
@@ -304,14 +304,14 @@ p_nb_2_ml_exp
 
 ### n_ind_exp ###
 d_18_nind = d_18[d_18$r_exp==2e-6&d_18$n_cages==10&d_18$ngen2==4,]
-p_nb_2_nind = ggplot(d_18_nind , aes(y=vA_est, x = vA_true_new, color = factor(n_ind_exp))) +
+p_nb_2_nind = ggplot(d_18_nind , aes(y=vA_est, x = vA_true_new, color = factor(n_ind_exp), shape = factor(n_ind_exp))) +
   theme_bw() + 
-  geom_point() + 
+  geom_point(size = 2) + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Population \nsize \n(experiment)") + 
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Population \nsize \n(experiment)", shape = "Population \nsize \n(experiment)") + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + scale_shape_manual(values = c(15, 17, 16)) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) 
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) 
 
 legend_nb_2_nind = get_legend(p_nb_2_nind)
 p_nb_2_nind = plot_grid(p_nb_2_nind + theme(legend.position = "none"),
@@ -323,14 +323,14 @@ p_nb_2_nind
 ### n_cages ###
 
 d_18_ncages = d_18[d_18$r_exp==2e-6&d_18$n_ind_exp==1000&d_18$ngen2==4,]
-p_nb_2_ncages = ggplot(d_18_ncages , aes(y=vA_est, x = vA_true_new, color = factor(n_cages))) +
+p_nb_2_ncages = ggplot(d_18_ncages , aes(y=vA_est, x = vA_true_new, color = factor(n_cages), shape = factor(n_cages))) +
   theme_bw() + 
-  geom_point() + 
+  geom_point(size = 2) + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Replicate \npopulations") + 
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Replicate \npopulations", shape = "Replicate \npopulations") + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + scale_shape_manual(values = c(15, 17, 16)) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) 
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) 
 
 legend_nb_2_ncages = get_legend(p_nb_2_ncages)
 p_nb_2_ncages = plot_grid(p_nb_2_ncages + theme(legend.position = "none"),
@@ -342,14 +342,14 @@ p_nb_2_ncages
 ### ngen_expt ###
 
 d_18_ngen2 = d_18[d_18$r_exp==2e-6&d_18$n_ind_exp==1000&d_18$n_cages==10,]
-p_nb_2_ngen2 = ggplot(d_18_ngen2 , aes(y=vA_est, x = vA_true_new, color = factor(ngen2-ngen1))) +
+p_nb_2_ngen2 = ggplot(d_18_ngen2 , aes(y=vA_est, x = vA_true_new, color = factor(ngen2-ngen1), shape = factor(ngen2-ngen1))) +
   theme_bw() + 
-  geom_point() + 
+  geom_point(size = 2) + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($\tau - t$)")) + 
-  scale_color_manual(values = c("#0072B2", "#009E73", "#999999")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($\tau - t$)"), shape = TeX(r"($\tau - t$)")) + 
+  scale_color_manual(values = c("#0072B2", "#009E73", "#999999")) + scale_shape_manual(values = c(15, 16, 17)) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) 
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) 
 
 legend_nb_2_ngen2 = get_legend(p_nb_2_ngen2)
 p_nb_2_ngen2 = plot_grid(p_nb_2_ngen2 + theme(legend.position = "none"),
@@ -368,7 +368,7 @@ title = ggdraw() + draw_label("Simplified simulations", hjust = 0.5, size = 30)
 p_nb_2_combined = plot_grid(title, p_nb_2_combined, ncol = 1, rel_heights = c(0.1,1))
 
 p_nb_2_combined
-ggsave(p_nb_2_combined, width = 12, height = 10, file = file.path(output_path, "simplified_params.jpg"))
+ggsave(p_nb_2_combined, width = 12, height = 10, file = file.path(output_path, "simplified_params.pdf"))
 ```
 
 ### Simplified simulations with dominance
@@ -384,14 +384,14 @@ d_23$k = gsub(".*=", x=d_23$sim, "")
 
 ### Main estimate vs true V_A ###
 
-p_nb_dom_main = ggplot(d_23, aes(y = vA_est, x = vA_true_new, color = k)) +
-  theme_bw() + geom_point() + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"(Degree of dominance $(|\kappa|)$)")) +
+p_nb_dom_main = ggplot(d_23, aes(y = vA_est, x = vA_true_new, color = k, shape = k)) +
+  theme_bw() + geom_point(size = 2) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"(Degree of dominance $(|\kappa|)$)"), shape = TeX(r"(Degree of dominance $(|\kappa|)$)")) +
   theme(text = element_text(size = 15))+ 
   scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
   geom_abline(slope = 1, intercept = 0) +
  theme(legend.position = "bottom") +
-  geom_smooth(method = "lm", se=FALSE) 
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) 
 
 # Save the legend
 legend_nb_dominance = get_plot_component(p_nb_dom_main + guides(color = guide_legend(nrow = 1)) + theme(legend.position = "bottom"), "guide-box-bottom") 
@@ -464,7 +464,7 @@ p_nb_dominance_combined = plot_grid(title_nb_dominance,
                                     legend_nb_dominance,
                                     nrow = 3, rel_heights = c(0.2, 2, 0.1))
 
-ggsave(p_nb_dominance_combined, width = 8, height = 8, file = file.path(output_path, "simplified_dominance.jpg"))
+# ggsave(p_nb_dominance_combined, width = 8, height = 8, file = file.path(output_path, "simplified_dominance.pdf"))
 ```
 
 
@@ -504,7 +504,7 @@ title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
 
 p_b_std = plot_grid(title, p_b_std, ncol = 1, rel_heights = c(0.1,1))
 
-ggsave(plot = p_b_std, width = 8, height = 8, file = file.path(output_path, "full_main.jpg"))
+ggsave(plot = p_b_std, width = 8, height = 8, file = file.path(output_path, "full_main.pdf"))
 p_b_std
 
 
@@ -523,14 +523,14 @@ d_25 = d_25[d_25$LDalpha==FALSE,]
 d_25 = add_new_va_data(new_va_data=d_new_va, target_data=d_25, verbose=TRUE)
 d_25$k = gsub(".*=", x=d_25$sim, "")
 
-p_b_dom_0.5 = ggplot(d_25, aes(y = vA_est, x = vA_true_new, color = k)) +
-  theme_bw() + geom_point() + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"(Degree of dominance $(|\kappa|)$)"), title = "0.5 morgan") +
+p_b_dom_0.5 = ggplot(d_25, aes(y = vA_est, x = vA_true_new, color = k, shape = k)) +
+  theme_bw() + geom_point(size = 2) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"(Degree of dominance $(|\kappa|)$)"), shape = TeX(r"(Degree of dominance $(|\kappa|)$)"), title = "0.5 morgan") +
   theme(text = element_text(size = 15)) + 
-  scale_color_manual(values = c("#009E73","#0072B2", "#D01C8B")) +
+  scale_color_manual(values = c("#009E73","#0072B2", "#D01C8B")) + scale_shape_manual(values = c(16, 17, 3)) +
   geom_abline(slope = 1, intercept = 0) +
  theme(legend.position = "bottom") +
-  geom_smooth(method = "lm", se=FALSE) + 
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) + 
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12))
 
 # Save the legend
@@ -544,14 +544,14 @@ d_32 = read.csv(file.path(data_path, "Set_32_corrected_output.csv"))
 d_32 = add_new_va_data(new_va_data=d_new_va, target_data=d_32, verbose=TRUE)
 d_32$k = gsub(".*=", x=d_32$sim, "")
 
-p_b_dom_5 = ggplot(d_32, aes(y = vA_est, x = vA_true_new, color = k)) +
-  theme_bw() + geom_point() + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"(Degree of dominance $(|\kappa|)$)"), title = "5 morgans") +
+p_b_dom_5 = ggplot(d_32, aes(y = vA_est, x = vA_true_new, color = k, shape = k)) +
+  theme_bw() + geom_point(size = 2) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"(Degree of dominance $(|\kappa|)$)"), shape = TeX(r"(Degree of dominance $(|\kappa|)$)"), title = "5 morgans") +
   theme(text = element_text(size = 15))+ 
-  scale_color_manual(values = c("#009E73","#0072B2", "#D01C8B")) +
+  scale_color_manual(values = c("#009E73","#0072B2", "#D01C8B")) + scale_shape_manual(values = c(16, 17, 3)) +
   geom_abline(slope = 1, intercept = 0) +
  theme(legend.position = "bottom") +
-  geom_smooth(method = "lm", se=FALSE) + 
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) + 
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12))
 
 
@@ -567,7 +567,7 @@ p_b_dominance_combined = plot_grid(title_b_dominance,
                                     legend_b_dominance,
                                     nrow = 3, rel_heights = c(0.2, 1, 0.1))
 
-#ggsave(p_b_dominance_combined, width = 8, height = 5, file = file.path(output_path, "full_dominance.jpg"))
+#ggsave(p_b_dominance_combined, width = 8, height = 5, file = file.path(output_path, "full_dominance.pdf"))
 
 
 ### Combine simplified and full dominance figures ###
@@ -577,30 +577,30 @@ p_dominance_combined = plot_grid(p_nb_dominance_combined,
                                  nrow = 2,
                                  rel_heights = c(23, 13))
 
-ggsave(p_dominance_combined, width = 8, height = 12, file = file.path(output_path, "combined_dominance.jpg"))
+ggsave(p_dominance_combined, width = 8, height = 12, file = file.path(output_path, "combined_dominance.pdf"))
 
 ############################
 ### true V_A vs true V_a ###
 ############################
 
-p_vA_va_0.5 = ggplot(d_25, aes(y = vA_true_new, x = va_true_new, color = k)) +
-  theme_bw() + geom_point() + 
+p_vA_va_0.5 = ggplot(d_25, aes(y = vA_true_new, x = va_true_new, color = k, shape = k)) +
+  theme_bw() + geom_point(size = 2) + 
   theme(text = element_text(size = 15))+ 
-  scale_color_manual(values = c("#009E73","#0072B2", "#D01C8B")) +
+  scale_color_manual(values = c("#009E73","#0072B2", "#D01C8B")) + scale_shape_manual(values = c(16, 17, 3)) +
  theme(legend.position = "bottom") +
   geom_abline(slope = 1, intercept = 0) +
-  geom_smooth(method = "lm", se=FALSE) +
-  labs(y = TeX(r"(True additive genetic variance ($V_A$))"), x = TeX(r"(True additive genic variance ($V_a$))"), color = TeX(r"(Degree of dominance $(|\kappa|)$)"), title = "0.5 morgan") + 
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) +
+  labs(y = TeX(r"(True additive genetic variance ($V_A$))"), x = TeX(r"(True additive genic variance ($V_a$))"), color = TeX(r"(Degree of dominance $(|\kappa|)$)"), shape = TeX(r"(Degree of dominance $(|\kappa|)$)"), title = "0.5 morgan") + 
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12))
 
-p_vA_va_5 = ggplot(d_32, aes(y = vA_true_new, x = va_true_new, color = k)) +
-  theme_bw() + geom_point() + 
+p_vA_va_5 = ggplot(d_32, aes(y = vA_true_new, x = va_true_new, color = k, shape = k)) +
+  theme_bw() + geom_point(size = 2) + 
   theme(text = element_text(size = 15))+ 
-  scale_color_manual(values = c("#009E73","#0072B2", "#D01C8B")) +
+  scale_color_manual(values = c("#009E73","#0072B2", "#D01C8B")) + scale_shape_manual(values = c(16, 17, 3)) +
  theme(legend.position = "bottom") +
   geom_abline(slope = 1, intercept = 0) +
-  geom_smooth(method = "lm", se=FALSE) +
-  labs(y = TeX(r"(True additive genetic variance ($V_A$))"), x = TeX(r"(True additive genic variance ($V_a$))"), color = TeX(r"(Degree of dominance $(|\kappa|)$)"), title = "5 morgans") + 
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) +
+  labs(y = TeX(r"(True additive genetic variance ($V_A$))"), x = TeX(r"(True additive genic variance ($V_a$))"), color = TeX(r"(Degree of dominance $(|\kappa|)$)"), shape = TeX(r"(Degree of dominance $(|\kappa|)$)"), title = "5 morgans") + 
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12))
 
 ### Combine the two full simulation plots plots ###
@@ -615,7 +615,7 @@ p_vA_va_combined = plot_grid(title_b_vA_va,
                                     legend_b_dominance,
                                     nrow = 3, rel_heights = c(0.1, 1, 0.1))
 
-ggsave(p_vA_va_combined, width = 10, height = 6, file = file.path(output_path, "full_dominance_vA_va.jpg"))
+ggsave(p_vA_va_combined, width = 10, height = 6, file = file.path(output_path, "full_dominance_vA_va.pdf"))
 
 
 ```
@@ -637,14 +637,14 @@ d_31$k = gsub(".*=", x=d_31$sim, "")
 
 ### Main estimate vs true V_A ###
 
-p_b_dom_sprinkled_main = ggplot(d_31, aes(y = vA_est, x = vA_true_new, color = k)) +
-  theme_bw() + geom_point() + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"(Degree of dominance $(|\kappa|)$)")) +
+p_b_dom_sprinkled_main = ggplot(d_31, aes(y = vA_est, x = vA_true_new, color = k, shape = k)) +
+  theme_bw() + geom_point(size = 2) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"(Degree of dominance $(|\kappa|)$)"), shape = TeX(r"(Degree of dominance $(|\kappa|)$)")) +
   theme(text = element_text(size = 15))+ 
   scale_color_manual(values = c("#009E73","#0072B2", "#999999")) +
   geom_abline(slope = 1, intercept = 0) +
  theme(legend.position = "bottom") +
-  geom_smooth(method = "lm", se=FALSE) 
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) 
 
 ### Boxplot for p_{alpha} ###
 
@@ -695,7 +695,7 @@ p_b_dominance_sprinkled_combined = plot_grid(title_b_dominance_sprinkled,
                                    legend_b_dominance_sprinkled,
                                    nrow = 4, rel_heights = c(0.1, 0.05, 1, 0.05))
 
-ggsave(p_b_dominance_sprinkled_combined, width = 8, height = 8, file = file.path(output_path, "full_dominance_sprinkled.jpg"))
+ggsave(p_b_dominance_sprinkled_combined, width = 8, height = 8, file = file.path(output_path, "full_dominance_sprinkled.pdf"))
 
 ```
 
@@ -746,12 +746,12 @@ d_nb_Qpoolseq$Coverage = factor(d_nb_Qpoolseq$Coverage, levels = c("Exact", "100
 
 ### Make plots ###
 
-p_nb_Qcoverage = ggplot(d_nb_Qpoolseq, aes(y = vA_est, x = vA_true_new, color = Coverage)) +
-  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
+p_nb_Qcoverage = ggplot(d_nb_Qpoolseq, aes(y = vA_est, x = vA_true_new, color = Coverage, shape = Coverage)) +
+  theme_bw() + geom_point(size = 2) + geom_abline(slope = 1, intercept = 0) + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999", "orange")) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "", title = "Simplified simulations", subtitle = "(incorporating covariance due to pool-seq in the analyses)") +
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "", shape = "", title = "Simplified simulations", subtitle = "(incorporating covariance due to pool-seq in the analyses)") +
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) +
  theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12)) 
 
 ############################################
@@ -792,12 +792,12 @@ d_nb_poolseq_noQ$Coverage = factor(d_nb_poolseq_noQ$Coverage, levels = c("Exact"
 
 ### Make plots ###
 
-p_nb_coverage_noQ = ggplot(d_nb_poolseq_noQ, aes(y = vA_est, x = vA_true_new, color = Coverage)) +
-  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
+p_nb_coverage_noQ = ggplot(d_nb_poolseq_noQ, aes(y = vA_est, x = vA_true_new, color = Coverage, shape = Coverage)) +
+  theme_bw() + geom_point(size = 2) + geom_abline(slope = 1, intercept = 0) + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999", "orange")) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "", title = "Simplified simulations", subtitle = "(ignoring covariance due to pool-seq in the analyses)") +
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "", shape = "", title = "Simplified simulations", subtitle = "(ignoring covariance due to pool-seq in the analyses)") +
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) +
  theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12)) 
 
 #############################
@@ -823,7 +823,7 @@ p_nb_Qpoolseq_combined = plot_grid(p_nb_Qpoolseq_combined,
 
 # Save file
 
-ggsave(plot = p_nb_Qpoolseq_combined, width = 10, height = 5.5, file = file.path(output_path, "poolseq_simplified.jpg"))
+ggsave(plot = p_nb_Qpoolseq_combined, width = 10, height = 5.5, file = file.path(output_path, "poolseq_simplified.pdf"))
 
 
 ############################################
@@ -865,15 +865,15 @@ d_b_Qpoolseq$Coverage = factor(d_b_Qpoolseq$Coverage, levels =c("Exact", "1000x"
 
 ### Make plots ###
 
-p_b_Qcoverage = ggplot(d_b_Qpoolseq, aes(y = vA_est, x = vA_true_new, color = Coverage)) +
-  theme_bw() + geom_point() + geom_abline(slope = 1, intercept = 0) + 
+p_b_Qcoverage = ggplot(d_b_Qpoolseq, aes(y = vA_est, x = vA_true_new, color = Coverage, shape = Coverage)) +
+  theme_bw() + geom_point(size = 2) + geom_abline(slope = 1, intercept = 0) + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999", "orange")) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "", title = "Full simulations", subtitle = "(incorporating covariance due to pool-seq in the analyses)") +
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "", shape = "", title = "Full simulations", subtitle = "(incorporating covariance due to pool-seq in the analyses)") +
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) +
   theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5, size = 12))
 
-ggsave(plot = p_b_Qcoverage, width = 6, height = 6, file = file.path(output_path, "poolseq_full.jpg"))
+ggsave(plot = p_b_Qcoverage, width = 6, height = 6, file = file.path(output_path, "poolseq_full.pdf"))
 
 
 
@@ -901,14 +901,14 @@ d_14 = add_new_va_data(new_va_data=d_new_va, target_data=d_14, verbose=TRUE)
 
 # Combined plot for proportion of beneficial mutations
 
-p_ben_0.033 = ggplot(rbind(d_9_std, d_11, d_14), aes(y = vA_est, x = vA_true_new, color = factor(format(mut_ratio, scientific = FALSE)))) +
+p_ben_0.033 = ggplot(rbind(d_9_std, d_11, d_14), aes(y = vA_est, x = vA_true_new, color = factor(format(mut_ratio, scientific = FALSE)), shape = factor(format(mut_ratio, scientific = FALSE)))) +
   theme_bw() + 
-  geom_point() + 
+  geom_point(size = 2) + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($\mu_{ben} : \mu_{del}$)")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($\mu_{ben} : \mu_{del}$)"), shape = TeX(r"($\mu_{ben} : \mu_{del}$)")) + 
   scale_color_manual(values = c("#009E73", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) +
   theme(plot.title = element_text(hjust = 0.5))
 
 legend_ben = get_legend(p_ben_0.033)
@@ -932,14 +932,14 @@ d_12 = add_new_va_data(new_va_data=d_new_va, target_data=d_12, verbose=TRUE)
 
 d_ml_exp = rbind(d_9_std, d_12)
 
-p_ml_exp_0.033 = ggplot(d_ml_exp , aes(y=vA_est, x = vA_true_new, color = factor(sequence_length*r_expt))) +
+p_ml_exp_0.033 = ggplot(d_ml_exp , aes(y=vA_est, x = vA_true_new, color = factor(sequence_length*r_expt), shape = factor(sequence_length*r_expt))) +
   theme_bw() + 
-  geom_point() + 
+  geom_point(size = 2) + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(experiment)") + 
-  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(experiment)", shape = "Map length \nin morgans \n(experiment)") + 
+  scale_color_manual(values = c("#0072B2", "#999999", "#009E73")) + scale_shape_manual(values = c(15, 17, 16)) +
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) +
   theme(plot.title = element_text(hjust = 0.5)) 
 
 
@@ -970,14 +970,14 @@ d_scale = rbind(d_9_std, d_15)
 # Some simulations were erroneously analysed twice, in such case retain only the first analysis
 d_scale = deduplicate_sim_analyses(d_scale)
 
-p_scale = ggplot(d_scale , aes(y=vA_est, x = vA_true_new, color = factor(round(2*scale*shape, 2)))) +
+p_scale = ggplot(d_scale , aes(y=vA_est, x = vA_true_new, color = factor(round(2*scale*shape, 2)), shape = factor(round(2*scale*shape, 2)))) +
   theme_bw() + 
-  geom_point() + 
+  geom_point(size = 2) + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($E[|\eta|]$)")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($E[|\eta|]$)"), shape = TeX(r"($E[|\eta|]$)")) + 
   scale_color_manual(values = c("#009E73", "#0072B2","#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) +
   theme(plot.title = element_text(hjust = 0.5)) 
 
 # When combining such plots, varying legend sizes can result in misaligned plots
@@ -1007,14 +1007,14 @@ d_13 = add_new_va_data(new_va_data=d_new_va, target_data=d_13, verbose=TRUE)
 
 d_ml_history = rbind(d_9_std, d_13)
 
-p_b_0.033_ml = ggplot(d_ml_history , aes(y=vA_est, x = vA_true_new, color = factor(sequence_length*r))) +
+p_b_0.033_ml = ggplot(d_ml_history , aes(y=vA_est, x = vA_true_new, color = factor(sequence_length*r), shape = factor(sequence_length*r))) +
   theme_bw() + 
-  geom_point() + 
+  geom_point(size = 2) + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)", shape = "Map length \nin morgans \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) +
   theme(plot.title = element_text(hjust = 0.5))
 
 # When combining such plots, varying legend sizes can result in mesaligned plots
@@ -1048,14 +1048,14 @@ d_all.gp = rbind(d_9_std, d_9_nstd)
 all.gp_labs = c(TeX(r"(${\bf L}^{'}_{0} + \frac{ r_{ij} \times{\bf L}^{''}_{0}}{1-r_{ij}}$)"), TeX(r"($\bf L_0$)"))
 names(all.gp_labs) = c(FALSE, TRUE)
 
-p_all.gp = ggplot(d_all.gp, aes(y = vA_est, x = vA_true_new, color = all.gp)) +
+p_all.gp = ggplot(d_all.gp, aes(y = vA_est, x = vA_true_new, color = all.gp, shape = all.gp)) +
   theme_bw() + 
-  geom_point() + 
+  geom_point(size = 2) + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($\tilde{\bf L}_0$)")) + 
-  scale_color_manual(values = c("#009E73", "#0072B2"), labels = all.gp_labs) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($\tilde{\bf L}_0$)"), shape = TeX(r"($\tilde{\bf L}_0$)")) + 
+  scale_color_manual(values = c("#009E73", "#0072B2"), labels = all.gp_labs) + scale_shape_manual(values = c(16, 17), labels = all.gp_labs) +
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) +
   theme(plot.title = element_text(hjust = 0.5))
 
 # When combining such plots, varying legend sizes can result in mesaligned plots
@@ -1101,14 +1101,15 @@ for(i in 1:length(Ne_type)){
 
 names(Ne_type_labs) = Ne_type
 
-p_Ne = ggplot(d_9_Ne, aes(y = vA_est, x = vA_true_new, color = Ne_exp)) +
+p_Ne = ggplot(d_9_Ne, aes(y = vA_est, x = vA_true_new, color = Ne_exp, shape = Ne_exp)) +
   theme_bw() + 
-  geom_point() + 
+  geom_point(size = 2) + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($N_E$)")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = TeX(r"($N_E$)"), shape =  TeX(r"($N_E$)")) + 
   scale_color_manual(values = c("#0072B2", "#009E73"), labels = Ne_type_labs) + 
+  scale_shape_manual(values = c(17, 16), labels = Ne_type_labs) +
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) +
   theme(plot.title = element_text(hjust = 0.5))
 
 legend_Ne = get_legend(p_Ne)
@@ -1131,7 +1132,7 @@ p_Ne_res = ggplot(d_9_Ne, aes(y = Residual_var, x = Ne_exp)) +
   scale_x_discrete(labels = Ne_type_labs) +
   theme(text = element_text(size = 15))
   
-ggsave(p_Ne_res, width = 5, height = 5, file = file.path(output_path, "residual_var_NE.jpg"))
+ggsave(p_Ne_res, width = 5, height = 5, file = file.path(output_path, "residual_var_NE.pdf"))
 
 p_Ne
 p_Ne_res
@@ -1155,7 +1156,7 @@ title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
 p_b_0.033_combined = plot_grid(title, p_b_0.033_combined, ncol = 1, rel_heights = c(0.1,1))
 p_b_0.033_combined
 
-ggsave(p_b_0.033_combined, width = 12, height = 12, file = file.path(output_path, "full_params.jpg"))
+ggsave(p_b_0.033_combined, width = 12, height = 12, file = file.path(output_path, "full_params.pdf"))
 
 
 ```
@@ -1176,19 +1177,19 @@ d_N1 = add_new_va_data(new_va_data=d_new_va, target_data=d_N1, verbose=TRUE)
 
 ### ml ###
 
-p_b_0.045_ml = ggplot(d_N1 , aes(y=vA_est, x = vA_true_new, color = factor(sequence_length*r))) +
+p_b_0.045_ml = ggplot(d_N1 , aes(y=vA_est, x = vA_true_new, color = factor(sequence_length*r), shape = factor(sequence_length*r))) +
   theme_bw() + 
-  geom_point() + 
+  geom_point(size = 2) + 
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans\n(history)", title = TeX(r"($E[|\eta|]$ = 0.03)")) + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans\n(history)", shape = "Map length \nin morgans\n(history)", title = TeX(r"($E[|\eta|]$ = 0.03)")) + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) +
   theme(plot.title = element_text(hjust = 0.5))
 
 p_b_0.045_ml
 
-ggsave(p_b_0.045_ml, width = 6, height = 5, file = file.path(output_path, "full_ml_eta0.045.jpg"))
+ggsave(p_b_0.045_ml, width = 6, height = 5, file = file.path(output_path, "full_ml_eta0.045.pdf"))
 
 ```
 
@@ -1218,10 +1219,11 @@ plot_lost_va = ggplot(d_scale, aes(y = ((va_true_new - va_left_new)/va_true_new)
 
 plot_lost_va_bias = ggplot(d_scale, aes(y = vA_est - vA_true_new,
                                         x = va_true_new - va_left_new, 
-                                        color = factor(round(2*shape*scale, digits = 2)))) +
+                                        color = factor(round(2*shape*scale, digits = 2)),
+                                        shape = factor(round(2*shape*scale, digits = 2)))) +
   theme_bw() +
-  geom_point() +
-  labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"),x = TeX(r"(Total $V_a$ lost)"), color = TeX(r"($E[|\eta|]$)")) +
+  geom_point(size = 2) +
+  labs(y = TeX(r"(Estimate of $V_A$ - True $V_A$)"),x = TeX(r"(Total $V_a$ lost)"), color = TeX(r"($E[|\eta|]$)"), shape = TeX(r"($E[|\eta|]$)")) +
   theme(text = element_text(size = 15)) +
   geom_abline(slope = -1, intercept = 0) + 
   scale_color_manual(values = c("#009E73", "#0072B2", "#999999"))  +
@@ -1273,15 +1275,14 @@ d_finescale$lost_va_type = ifelse(d_finescale$Set_ID==min_loss_sim, "Min.", "Max
 # Restricting to selected loci only
 d_finescale_sel = d_finescale[d_finescale$list_alpha!=0,]
 
-plot_finescale_va_lost = ggplot(d_finescale_sel, aes(y = locuswise_va_lost_new, x = abs(list_alpha_new), color = lost_va_type)) +
+plot_finescale_va_lost = ggplot(d_finescale_sel, aes(y = locuswise_va_lost_new, x = abs(list_alpha_new), color = lost_va_type, shape = lost_va_type)) +
   theme_bw() +
-  geom_point() +
-  labs(y = TeX(r"($V_a$ lost at a locus$)"), x = TeX(r"($|\alpha|$)"), color = "Simulation type") +
+  geom_point(size = 2) +
+  labs(y = TeX(r"($V_a$ lost at a locus$)"), x = TeX(r"($|\alpha|$)"), color = "Simulation type", shape = "Simulation type") +
   theme(text = element_text(size = 15)) +   
   theme(legend.position = "bottom") +
-  scale_color_manual(values = c("Min." = "#009E73", "Max." = "#999999"),
-    labels = c("Min." = TeX(r"(Min. $V_a$ lost)"), "Max." = TeX(r"(Max. $V_a$ lost)"))  # Custom legend labels
-  ) +
+  scale_color_manual(values = c("Min." = "#009E73", "Max." = "#999999"), labels = c("Min." = TeX(r"(Min. $V_a$ lost)"), "Max." = TeX(r"(Max. $V_a$ lost)"))) +
+  scale_shape_manual(values = c("Min." = 16, "Max." = 15), labels = c("Min." = TeX(r"(Min. $V_a$ lost)"), "Max." = TeX(r"(Max. $V_a$ lost)"))) +
   geom_line(aes(x = seq(0, 1.2, length = nrow(d_finescale_sel)), y = 0.5*(1/2000)*(1999/2000)*seq(0, 1.2, length = nrow(d_finescale_sel))^2), linewidth = 0.1, color = "black")
 
 plot_finescale_va_lost  
@@ -1335,7 +1336,7 @@ plot_categoriwise_va_lost = ggplot(d_summed_lost_va, aes(y = locuswise_va_lost_n
 
 va_lost_combined_plot = plot_grid(plot_lost_va, plot_lost_va_bias, plot_finescale_va_lost, plot_categoriwise_va_lost, ncol = 2, nrow = 2, labels = "auto")
 va_lost_combined_plot
-ggsave(va_lost_combined_plot, width = 10, height = 10, file = file.path(output_path, "lost_va.jpg"))
+ggsave(va_lost_combined_plot, width = 10, height = 10, file = file.path(output_path, "lost_va.pdf"))
 
 ### Calculate the the fraction of total amount of V_a lost at loci for alpha > 0.3 in the "Max." (V_a lost) simulation
 
@@ -1383,56 +1384,56 @@ d_16$assumption_G_test = unlist(lapply(d_16$vA_BC, function(x){as.numeric(unlist
 ### vA_est using our method ###
 ###############################
 
-p_bc_simplified_us = ggplot(d_16, aes(y = vA_est, x = vA_true_new, color = as.factor(sequence_length*r_msp))) +
+p_bc_simplified_us = ggplot(d_16, aes(y = vA_est, x = vA_true_new, color = as.factor(sequence_length*r_msp), shape = as.factor(sequence_length*r_msp))) +
   theme_bw() +
-  geom_point() +
+  geom_point(size = 2) +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)", shape = "Map length \nin morgans \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) + ylim(0, 0.35) + xlim(0, 0.13) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) + ylim(0, 0.35) + xlim(0, 0.13) +
   ggtitle("Our method") + theme(plot.title = element_text(hjust = 0.5)) 
 
 #####################################
 ### vA_est using B&C Approach i-a ### (B+Ib+N+)
 #####################################
 
-p_bc_simplified_bc_ia = ggplot(d_16, aes(y = vA_BC_est_ia, x = vA_true_new, color = as.factor(sequence_length*r_msp))) +
+p_bc_simplified_bc_ia = ggplot(d_16, aes(y = vA_BC_est_ia, x = vA_true_new, color = as.factor(sequence_length*r_msp), shape = as.factor(sequence_length*r_msp))) +
   theme_bw() +
-  geom_point() +
+  geom_point(size = 2) +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)", shape = "Map length \nin morgans \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
   ggtitle(TeX(r"(B&C Approach $B^+Ib^+N^+$)")) + theme(plot.title = element_text(hjust = 0.5)) 
 
 ######################################
 ### vA_est using B&C Approach ii-a ### (B0Ib+N+)
 ######################################
 
-p_bc_simplified_bc_iia = ggplot(d_16, aes(y = vA_BC_est_iia, x = vA_true_new, color = as.factor(sequence_length*r_msp))) +
+p_bc_simplified_bc_iia = ggplot(d_16, aes(y = vA_BC_est_iia, x = vA_true_new, color = as.factor(sequence_length*r_msp), shape = as.factor(sequence_length*r_msp))) +
   theme_bw() +
-  geom_point() +
+  geom_point(size = 2) +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)", shape = "Map length \nin morgans \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
   ggtitle(TeX(r"(B&C Approach $B^0Ib^+N^+$)")) + theme(plot.title = element_text(hjust = 0.5))
 
 #######################################
 ### vA_est using B&C Approach iii-a ###  (B0Ib0N+)
 #######################################
 
-p_bc_simplified_bc_iiia = ggplot(d_16, aes(y = vA_BC_est_iiia, x = vA_true_new, color = as.factor(sequence_length*r_msp))) +
+p_bc_simplified_bc_iiia = ggplot(d_16, aes(y = vA_BC_est_iiia, x = vA_true_new, color = as.factor(sequence_length*r_msp), shape = as.factor(sequence_length*r_msp))) +
   theme_bw() +
-  geom_point() +
+  geom_point(size = 2) +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)", shape = "Map length \nin morgans \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
   ggtitle(TeX(r"(B&C Approach $B^0Ib^0N^+$)")) + theme(plot.title = element_text(hjust = 0.5))
 
 
@@ -1440,42 +1441,42 @@ p_bc_simplified_bc_iiia = ggplot(d_16, aes(y = vA_BC_est_iiia, x = vA_true_new, 
 ### vA_est using B&C Approach i-b ### (B+Ib+N0)
 #####################################
 
-p_bc_simplified_bc_ib = ggplot(d_16, aes(y = vA_BC_est_ib, x = vA_true_new, color = as.factor(sequence_length*r_msp))) +
+p_bc_simplified_bc_ib = ggplot(d_16, aes(y = vA_BC_est_ib, x = vA_true_new, color = as.factor(sequence_length*r_msp), shape = as.factor(sequence_length*r_msp))) +
   theme_bw() +
-  geom_point() +
+  geom_point(size = 2) +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)", shape = "Map length \nin morgans \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
   ggtitle(TeX(r"(B&C Approach $B^+Ib^+N^0$)")) + theme(plot.title = element_text(hjust = 0.5))
 
 ######################################
 ### vA_est using B&C Approach ii-b ### (B0Ib+N0)
 ######################################
 
-p_bc_simplified_bc_iib = ggplot(d_16, aes(y = vA_BC_est_iib, x = vA_true_new, color = as.factor(sequence_length*r_msp))) +
+p_bc_simplified_bc_iib = ggplot(d_16, aes(y = vA_BC_est_iib, x = vA_true_new, color = as.factor(sequence_length*r_msp), shape = as.factor(sequence_length*r_msp))) +
   theme_bw() +
-  geom_point() +
+  geom_point(size = 2) +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)", shape = "Map length \nin morgans \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
   ggtitle(TeX(r"(B&C Approach $B^0Ib^+N^0$)")) + theme(plot.title = element_text(hjust = 0.5))
 
 #######################################
 ### vA_est using B&C Approach iii-b ### (B0Ib0N0)
 #######################################
 
-p_bc_simplified_bc_iiib = ggplot(d_16, aes(y = vA_BC_est_iiib, x = vA_true_new, color = as.factor(sequence_length*r_msp))) +
+p_bc_simplified_bc_iiib = ggplot(d_16, aes(y = vA_BC_est_iiib, x = vA_true_new, color = as.factor(sequence_length*r_msp), shape = as.factor(sequence_length*r_msp))) +
   theme_bw() +
-  geom_point() +
+  geom_point(size = 2) +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)", shape = "Map length \nin morgans \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
   ggtitle(TeX(r"(B&C Approach $B^0Ib^0N^0$)")) + theme(plot.title = element_text(hjust = 0.5))
 
 ###################################
@@ -1509,7 +1510,7 @@ title = ggdraw() + draw_label("Simplified simulations", hjust = 0.5, size = 30)
 # Add title
 p_bc_simplified_combined = plot_grid(title, p_bc_simplified_combined, ncol = 1, rel_heights = c(0.05,1))
 
-ggsave(p_bc_simplified_combined, file = file.path(output_path, "BC_simplified.jpg"), w = 15, h = 9)
+ggsave(p_bc_simplified_combined, file = file.path(output_path, "BC_simplified.pdf"), w = 15, h = 9)
 
 
 ```
@@ -1535,56 +1536,56 @@ d_17$assumption_G_test = unlist(lapply(d_17$vA_BC, function(x){as.numeric(unlist
 ### vA_est using our method ###
 ###############################
 
-p_bc_full_us = ggplot(d_17, aes(y = vA_est, x = vA_true_new, color = as.factor(sequence_length*r))) +
+p_bc_full_us = ggplot(d_17, aes(y = vA_est, x = vA_true_new, color = as.factor(sequence_length*r), shape = as.factor(sequence_length*r))) +
   theme_bw() +
-  geom_point() +
+  geom_point(size = 2) +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)", shape = "Map length \nin morgans \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE) + ylim(0, 0.35) + xlim(0, 0.13) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE) + ylim(0, 0.35) + xlim(0, 0.13) +
   ggtitle("Our method") + theme(plot.title = element_text(hjust = 0.5))
 
 #####################################
 ### vA_est using B&C Approach i-a ### (B+Ib_N+)
 #####################################
 
-p_bc_full_bc_ia = ggplot(d_17, aes(y = vA_BC_est_ia, x = vA_true_new, color = as.factor(sequence_length*r))) +
+p_bc_full_bc_ia = ggplot(d_17, aes(y = vA_BC_est_ia, x = vA_true_new, color = as.factor(sequence_length*r), shape = as.factor(sequence_length*r))) +
   theme_bw() +
-  geom_point() +
+  geom_point(size = 2) +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)", shape = "Map length \nin morgans \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
   ggtitle(TeX(r"(B&C Approach $B^+Ib^+N^+$)")) + theme(plot.title = element_text(hjust = 0.5)) 
 
 ######################################
 ### vA_est using B&C Approach ii-a ### (B0Ib+N+)
 ######################################
 
-p_bc_full_bc_iia = ggplot(d_17, aes(y = vA_BC_est_iia, x = vA_true_new, color = as.factor(sequence_length*r))) +
+p_bc_full_bc_iia = ggplot(d_17, aes(y = vA_BC_est_iia, x = vA_true_new, color = as.factor(sequence_length*r), shape = as.factor(sequence_length*r))) +
   theme_bw() +
-  geom_point() +
+  geom_point(size = 2) +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)", shape = "Map length \nin morgans \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
   ggtitle(TeX(r"(B&C Approach $B^0Ib^+N^+$)")) + theme(plot.title = element_text(hjust = 0.5))
 
 #######################################
 ### vA_est using B&C Approach iii-a ### (B0Ib0N+)
 #######################################
 
-p_bc_full_bc_iiia = ggplot(d_17, aes(y = vA_BC_est_iiia, x = vA_true_new, color = as.factor(sequence_length*r))) +
+p_bc_full_bc_iiia = ggplot(d_17, aes(y = vA_BC_est_iiia, x = vA_true_new, color = as.factor(sequence_length*r), shape = as.factor(sequence_length*r))) +
   theme_bw() +
-  geom_point() +
+  geom_point(size = 2) +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)", shape = "Map length \nin morgans \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
   ggtitle(TeX(r"(B&C Approach $B^0Ib^0N^+$)")) + theme(plot.title = element_text(hjust = 0.5))
 
 
@@ -1592,42 +1593,42 @@ p_bc_full_bc_iiia = ggplot(d_17, aes(y = vA_BC_est_iiia, x = vA_true_new, color 
 ### vA_est using B&C Approach i-b ### (B+Ib+N0)
 #####################################
 
-p_bc_full_bc_ib = ggplot(d_17, aes(y = vA_BC_est_ib, x = vA_true_new, color = as.factor(sequence_length*r))) +
+p_bc_full_bc_ib = ggplot(d_17, aes(y = vA_BC_est_ib, x = vA_true_new, color = as.factor(sequence_length*r), shape = as.factor(sequence_length*r))) +
   theme_bw() +
-  geom_point() +
+  geom_point(size = 2) +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)", shape = "Map length \nin morgans \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
   ggtitle(TeX(r"(B&C Approach $B^+Ib^+N^0$)")) + theme(plot.title = element_text(hjust = 0.5))
 
 ######################################
 ### vA_est using B&C Approach ii-b ### (B0Ib+N0)
 ######################################
 
-p_bc_full_bc_iib = ggplot(d_17, aes(y = vA_BC_est_iib, x = vA_true_new, color = as.factor(sequence_length*r))) +
+p_bc_full_bc_iib = ggplot(d_17, aes(y = vA_BC_est_iib, x = vA_true_new, color = as.factor(sequence_length*r), shape = as.factor(sequence_length*r))) +
   theme_bw() +
-  geom_point() +
+  geom_point(size = 2) +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)", shape = "Map length \nin morgans \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
   ggtitle(TeX(r"(B&C Approach $B^0Ib^+N^0$)")) + theme(plot.title = element_text(hjust = 0.5))
 
 #######################################
 ### vA_est using B&C Approach iii-b ### (B0Ib0N0)
 #######################################
 
-p_bc_full_bc_iiib = ggplot(d_17, aes(y = vA_BC_est_iiib, x = vA_true_new, color = as.factor(sequence_length*r))) +
+p_bc_full_bc_iiib = ggplot(d_17, aes(y = vA_BC_est_iiib, x = vA_true_new, color = as.factor(sequence_length*r), shape = as.factor(sequence_length*r))) +
   theme_bw() +
-  geom_point() +
+  geom_point(size = 2) +
   geom_abline(intercept = 0, slope = 1) + 
-  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)") + 
+  labs(x = TeX(r"(True $V_A$)"), y = TeX(r"(Estimate of $V_A$)"), color = "Map length \nin morgans \n(history)", shape = "Map length \nin morgans \n(history)") + 
   scale_color_manual(values = c("#009E73", "#D01C8B", "#0072B2", "#999999")) + 
   theme(text = element_text(size = 15)) +
-  geom_smooth(method = "lm", se=FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
+  geom_smooth(method = "lm", se=FALSE, show.legend = FALSE)  + ylim(0, 0.35) + xlim(0, 0.13) +
   ggtitle(TeX(r"(B&C Approach $B^0Ib^0N^0$)")) + theme(plot.title = element_text(hjust = 0.5))
 
 ###################################
@@ -1661,7 +1662,7 @@ title = ggdraw() + draw_label("Full simulations", hjust = 0.5, size = 30)
 # Add title
 p_bc_full_combined = plot_grid(title, p_bc_full_combined, ncol = 1, rel_heights = c(0.05,1))
 
-ggsave(p_bc_full_combined, file = file.path(output_path, "BC_full.jpg"), w = 15, h = 9)
+ggsave(p_bc_full_combined, file = file.path(output_path, "BC_full.pdf"), w = 15, h = 9)
 
 
 ```

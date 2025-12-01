@@ -1,0 +1,38 @@
+This directory contains the files necessary to generate a PDF by compiling the main manuscript (final_main.tex). 
+The main manuscript refers to objects (figures, equations, etc.) defined in the supplementary information (final_supp.tex). Cross-referencing is performed using the package "xr-hyper".
+This requires .aux files generated during the compilation of "final_supp.tex".
+
+# Files and directories
+
+Figures: A directory that contains supplementary figures that are required for compiling final_supp.tex. 
+
+GENETICSturqoise.eps and GENETICSturqoise.pdf: Files part of the GENETICS template.
+
+Vw.bib: Contains a library of references used in final_main.tex and final_supp.tex.
+
+final_main.tex: A .tex file for the main text.
+
+final_supp.tex: A .tex file for the supplementary information.
+
+genetics.bst: Referencing style for GENETICS.
+
+gsajnl.cls: Page layout for GENETICS
+
+styles: A directory containing various styles used for GENETICS, of which "inv" is used for the current manuscript. 
+
+The remaining files are generated during the compilation of final_supp.tex and main_supp.tex (see below)
+
+# Workflow
+
+## pdflatex final_supp.tex
+
+This compiles the supplementary information to generate .aux files that contain labels of various equations and figures, which are to be imported into the main text.
+IMPORTANT: Do not use the PDF of the supplementary information from here - it has been uploaded separately. This step is just for generating labels.
+
+## pdflatex final_main.tex
+
+This compiles the main text, correctly importing the labels. However, since we are using the package bibunits for referencing, citations aren't rendered correctly at this stage.
+To add citations run the following twwo commands.
+
+## bibtex bu1
+## pdflatex final_main.tex  

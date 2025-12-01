@@ -1,0 +1,769 @@
+\documentclass[9pt,twocolumn,twoside,lineno]{gsajnl}
+% Use the documentclass option 'lineno' to view line numbers
+
+\usepackage{epstopdf}
+
+\articletype{inv} % article type
+% {inv} Investigation
+% {gs} Genomic Selection
+% {goi} Genetics of Immunity
+% {gos} Genetics of Sex
+% {mp} Multiparental Populations
+\usepackage{tabulary} % for tables
+\usepackage{ltablex} % To add a full-width longtable in the two-column format
+\keepXColumns
+\usepackage{authblk}
+\usepackage{fancyhdr}
+\usepackage[utf8]{inputenc}
+\usepackage[sectionbib]{bibunits}
+\defaultbibliographystyle{genetics} 
+\defaultbibliography{Vw} 
+\usepackage[round]{natbib}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{xr-hyper} % external references with hyperlinks
+
+% Tell LaTeX where to find appendix references
+\externaldocument{final_supp}  % refers to .aux file
+\usepackage{nameref}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{comment}
+\usepackage{lineno}
+\usepackage{caption}
+\usepackage{lscape}
+\usepackage{geometry}
+\usepackage{longtable}
+\usepackage{float}  % for captionof
+
+\runningtitle{Estimating heritable variance in fitness} % For use in the footer
+\runningauthor{Geeta Arun \textit{et al.}}
+
+\title{Estimating the additive genetic variance for relative fitness from changes in allele frequency}
+
+\author[1, $\ast$]{Manas Geeta Arun}
+\author[1,2]{Aidan Angus-Henry}
+\author[1]{Darren J. Obbard}
+\author[1]{Jarrod D. Hadfield}
+
+
+\affil[1]{Institute of Ecology and Evolution, The University of Edinburgh, Ashworth Laboratories Charlotte Auerbach Road, Edinburgh, EH9 3FL, United Kingdom.}
+
+\affil[2]{Charité - Universitätsmedizin Berlin, Charitéplatz 1, 10117 Berlin, Germany.}
+
+% Use the \equalcontrib command to mark authors with equal
+% contributions, using the relevant superscript numbers
+%\equalcontrib{1}
+%\equalcontrib{2}
+
+\correspondingauthoraffiliation[$\ast$]{Corresponding author: manas.geetaarun@ed.ac.uk.}
+
+\begin{abstract}
+The rate of adaptation is equal to the additive genetic variance for relative fitness ($V_A$) in the population. Estimating $V_A$ typically involves obtaining suitable measures of fitness on a large number of individuals with known pairwise relatedness. Such data are hard to collect and the results are often sensitive to the definition of fitness used. Here, we present a new method for estimating $V_A$ that does not involve making measurements of fitness on individuals, but instead tracks changes in the genetic composition of the population. First, we show that $V_A$ can readily be expressed as a function of the genome-wide diversity/linkage disequilibrium matrix and genome-wide expected change in allele frequency due to selection. We then show how independent experimental replicates can be used to infer the expected change in allele frequency due to selection and then estimate $V_A$ via a linear mixed model. Finally, using individual-based simulations, we demonstrate that our approach yields precise and accurate estimates over a range of biologically plausible scenarios. 
+\end{abstract}
+
+\keywords{Fisher’s Fundamental Theorem of Natural Selection; rate of adaptation; quantitative genetics; evolve and resequence}
+
+\dates{\rec{xx xx, xxxx} \acc{xx xx, xxxx}}
+
+\begin{document}
+\renewcommand{\figurename}{}
+\renewcommand{\thefigure}{Figure \arabic{figure}}
+\begin{bibunit}
+
+
+\maketitle
+\thispagestyle{firststyle}
+%\slugnote
+%\firstpagefootnote
+\vspace{-13pt}% Only used for adjusting extra space in the left column of the first page
+
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+
+Despite its simplicity, the fundamental theorem of natural selection (FTNS) \citep{fisher1930genetical,fisher1958genetical} is arguably one of the most central results in evolutionary biology, providing a concise mathematical statement of how quickly a population is expected to adapt. It describes the per generation gain in the mean fitness of a population as a result of natural selection, assuming the `environment' (including variables intrinsic to the population, such as density or allele frequencies) are held constant \citep{ewens1989interpretation, Frank.1992}. The crucial insight the FTNS provides is that the rate of this increase in mean fitness is exactly equal to the additive genetic variance for relative fitness ($V_A$) in the population \citep{burt1995evolution, grafen2015biological}. Consequently, estimating $V_A$ is one of the `\emph{holy grails}' of evolutionary genetics  \citep{walsh2022full}, despite the FTNS being criticised for its inability to predict the actual gain in mean fitness \citep{price1972fisher, ewens1989interpretation, ewens2024fundamental} (also see \citet{edwards1994fundamental} for an historical review of the debate around FTNS). 
+
+A number of attempts have been made to measure $V_A$ in wild populations. Typically, these have involved long term studies on natural populations in which the lifetime reproductive success of a large number of individuals has been measured. Combining these fitness data with information on the relatedness among individuals in a (generalised) linear mixed model approach yields estimates of $V_A$ \citep{kruuk2004estimating}. This is far from straightforward in natural populations, as it can be notoriously difficult to tease apart additive genetic effects from common environmental effects, such as parental effects \citep{kruuk2007separate, shaw2014quantitative}. In addition, wild study systems are rarely closed, meaning emigration can be misinterpreted as mortality and offspring sired outside the study area can be overlooked. Furthermore, many studies on wild populations lack genetic pedigrees, and as a consequence may miss substantial fitness variation acquired through undetected polygamy \citep{vedder2011polygyny, charmantier2006testing}. In addition to these biases, estimates from wild populations also tend to come with considerable uncertainty. \citet{burt1995evolution} reviewed studies estimating $V_A$ in three species of plants and three species of animals, and found that most estimates of $V_A$ were not significantly different from zero. They argued that the upper bound for estimates of $V_A$ could be as high as 0.3, but most likely less than 0.1. Consistent with this, and using a larger data set, \citet{hendry2018contemporary} reported that estimates of $V_A$ varied between zero and 0.85, with the vast majority of estimates (73\%) being less than 0.2. Overall, the mean $\widehat{V_A}$ across studies was 0.08. In a recent meta-analysis, \citet{bonnet2022genetic} applied Bayesian quantitative genetic methods to data obtained from 19 long term studies on wild vertebrate populations. They reported a meta-analytic mean $V_A$ of 0.185 across studies, considerably higher than those obtained by \citet{burt1995evolution} and \citet{hendry2018contemporary}. Surprisingly, estimates of $V_A$ in populations of Spotted Hyenas (\emph{Crocuta crocuta}), as well as two of the three populations of Blue Tits (\emph{Cyanistes caeruleus}) were higher than 0.4. This is a remarkable finding, since it suggests that growth rates in these populations should increase nearly 1.5 fold every generation due to selection, provided the environment remains constant. All three meta-analyses investigating $V_A$ \citep{burt1995evolution,hendry2018contemporary,bonnet2022genetic} have detected substantial variability between study systems in their estimates of $V_A$. Although most of this variability will be sampling error, the best estimate suggests the variability in actual $V_A$ across populations is also large with a standard deviation of 0.11, although there is substantial uncertainty about its exact value (95\% credible intervals: 0.01--0.26) \citep{bonnet2022genetic}.  
+
+Measuring $V_A$ in the laboratory is considerably more straightforward, and involves either quantitative genetic breeding designs such as diallel crosses and full-sib half-sib experiments \citep{falconer1996,lynch1998}, or experimental techniques such as hemiclonal analysis \citep{abbott2011obtaining}. While the controlled environment of the laboratory can, to a large extent, help overcome some of the challenges faced by field studies, laboratory environments often lack important features that are likely to generate fitness variation, such as parasites, predators, and competitors. Therefore, it is not entirely clear if laboratory estimates of $V_A$ are particularly relevant. Furthermore, many laboratory studies standardise their fitness measurements in a way that makes it hard to infer estimates of $V_A$ (eg. \citet{ruzicka2019genome})  or work with absolute fitness but then fail to report $V_A$ (eg. \citet{singh2023investigation}). However, these studies do suggest that genetic variance for fitness is likely highly dependent on the specific environment in which fitness is assayed (eg. \citet{punzalan2014comparing}). In one of the few laboratory studies that estimated the genetic variance for \emph{relative} fitness,  \citet{martinossi2018consequences} reported estimates from isofemale lines of the bean beetle, \emph{Acanthoscelides obtectus}, that were highly sensitive to evolutionary history, assay environment, and sex, being higher in males (0.13-0.42) than in females (0.013-0.056).  A compromise between the precision of the laboratory environment and the biotic and abiotic complexity encountered by wild populations can be achieved by working with experimental populations established in the field, an approach especially tractable in annual plants. Working with field populations of the annual legume \textit{Chamaecrista fasciculata}, \citet{kulbaba2019additive} found estimates of $V_A$ that varied considerably among populations and years. Interestingly, many of their estimates were appreciably larger, with the largest estimate (calculated from Table 1 in the correction) being 3.05.  
+
+A common difficulty for current field and laboratory approaches is that, while Darwinian fitness is a deceptively intuitive concept, there is little consensus on its precise definition. In fact, it has been argued that the appropriate definition of fitness can vary depending on the context \citep{hendry2018contemporary}. In the absence of a universal definition, empiricists can only use a measure of fitness deemed most appropriate for their study system, and it is reasonable to assume that estimates of $V_A$ are likely to be sensitive to the definition of fitness used. A useful illustration of this point is provided by two studies that estimated $V_A$ in a wild population of Red Deer (\emph{Cervus elaphus}), using largely overlapping datasets, but markedly different definitions of fitness \citep{kruuk2000heritability, foerster2007sexually}. \citet{kruuk2000heritability} defined fitness as the total number of progeny produced by an individual in its lifetime and estimated $V_A$ to be 0.1, whereas \cite{foerster2007sexually} employed an alternative definition of fitness that measured an individual’s contribution to population growth \citep{coulson2006estimating} and obtained the appreciably higher estimate of 0.64. 
+
+Some of the definitional difficulties of measuring $V_A$ can be overcome by measuring $V_A$ as the rate of adaptation, rather than comparing measures of fitness among relatives. One of the earliest attempts to explore this idea was made by \citet{fowler1997genetic} (also see \citet{gardner2005genetic}) in laboratory populations of \emph{Drosophila melanogaster}. Using balancer chromosomes  that allow recombination to be suppressed on the third chromosome, \citet{fowler1997genetic} could track the frequency trajectories of newly introduced wild-type third chromosomes over the course of 43 weeks. By modelling fitness using genotype frequency data for a number of different wild-type third chromosomes  \citep{barton2000measuring}, they demonstrated the presence of substantial $V_A$ on the third chromosome. More recently, in a landmark study, \citet{buffalo2019linked} developed a method to estimate the amount of genome-wide allele frequency change that can be attributed to selection. The linchpin of their theory is the idea that linked selection induces across-generation covariances in allele frequency change at neutral loci, since associations between these neutral loci and their respective non-neutral backgrounds persist across generations. This new theoretical framework has the potential to pave the way for a powerful empirical tool to detect genomic signatures of linked selection \citep{Buffalo.2020, simon2024contribution}. Of particular relevance here, \citet{buffalo2019linked} also show that their method can be used to obtain estimates of $V_A$, albeit under some potentially restrictive assumptions.
+
+In this study, we present an alternative theoretical framework that relates $V_A$ to genome-wide changes in allele frequency. Using mathematical identities only, we show how $V_A$ can be obtained from an initial linkage disequilibrium (LD) matrix and expected changes in allele frequency due to selection, without making any assumptions about patterns of gene action or the relationships between genotype fitnesses and genotype frequencies. Our approach, like that of \citet{buffalo2019linked}, relies on temporal genomic data and does not necessitate measuring fitness in individuals. However, in contrast to the `bottom-up' population genetic approach of \citet{buffalo2019linked}, we use a `top-down' quantitative genetic approach which simplifies and generalises some aspects of the problem.
+
+Our aim here is three-fold. First, we derive our central theoretical result from first principles. Second, we develop the statistical machinery required to apply our result to real biological data, and validate it with individual based simulations that permit dominance effects, but assume random mating and an absence of epistasis. Third, we make a detailed comparison of our method with that of \citet{buffalo2019linked}.
+
+\section*{Materials and methods}
+\addcontentsline{toc}{section}{Materials and methods}
+Table \ref{tab:notation} summarises the notation used in the following text and the subsection `Assumptions retained in our approach' (see below) summarises the assumptions involved in our approach. Supplementary information \ref{App:workflow} provides a detailed workflow for applying our method to real data.
+\subsection*{Outline of the theory}
+\addcontentsline{toc}{subsection}{Outline of the theory}
+
+We consider a population consisting of $N$ diploid individuals. We assume that there are $n_L$ segregating biallelic loci in the population. Let $c_{k,i}$ and $\alpha_i$ represent the proportion of copies of an arbitrarily chosen reference allele at locus $i$ in individual $k$ and Fisher's average effect \citep{Fisher.1941} for relative fitness at locus $i$, respectively. The widely accepted mathematical definition of the $\alpha$'s are the regression coefficients obtained from a multiple regression of the $c$'s on relative fitness, $w$ \citep{Fisher.1941, Lee.2013}. The vector $\boldsymbol{{\alpha}}$ can be expressed as
+
+\begin{equation} \label{eq1}
+\begin{array}{rl} 
+\boldsymbol{{\alpha}} &= \textbf{L}^{-1}COV(\textbf{c}, w) 
+\end{array}
+\end{equation}
+where $\textbf{c}$ is the vector of predictors representing the $c$'s at all loci for an individual and $\textbf{L}$ is a symmetric ${n_L} \times {n_L}$ matrix whose $i^{th}$ (diagonal) element is the variance in the $c$'s at locus $i$ computed over individuals, while the  $ij^{th}$ (off-diagonal) element describes the covariance between the $c$'s at locus $i$ and locus $j$ computed over individuals. 
+
+The breeding value for the relative fitness of individual $k$ is then
+
+$$u_k = {\bf c}^{\top}_{k}\boldsymbol{{\alpha}}$$
+and the additive genetic variance for relative fitness is the variance of this quantity across individuals:
+
+\begin{equation} \label{eq2}
+\begin{array}{rl} 
+{V_A} &= VAR({\bf c}^{\top}\boldsymbol{{\alpha}}) \\ 
+&= \boldsymbol{{\alpha}}^{\top}VAR({\bf c}, {\bf c}^{\top})\boldsymbol{{\alpha}}\\ 
+&= \boldsymbol{\alpha}^{\top}\textbf{L}\boldsymbol{\alpha}\\
+\end{array}
+\end{equation}
+This follows from the fact that at any given point in time, $\alpha$'s are constant across individuals. In the absence of mutation and meiotic drive, the allele frequency in parents is transmitted to offspring without bias, such that the vector of expected change in allele frequencies due to selection can be expressed as Robertson's covariance \citep{robertson1966mathematical, price1970selection, queller2017fundamental}:
+
+\begin{equation} \label{eq3}
+\begin{array}{rl}
+E[\Delta{\textbf{p}}] &= E[\Delta\bar{{\textbf{c}}}]\\
+&= COV(\textbf{c}, w)
+\end{array}
+\end{equation}
+where the expectation is taken over the evolutionary process.
+
+Substituting Equation \ref{eq1} into Equation \ref{eq3} gives $E[\Delta{\textbf{p}}] = {\bf L}\boldsymbol{\alpha}$, which is the multivariate analogue of Equation 10 in \citet{Kirkpatrick.2002}. Combining this with Equation \ref{eq2} yields,
+ 
+\begin{equation} \label{eq4}
+\begin{array}{rl}
+{V_A} &= \left({\textbf{L}^{-1}E[\Delta{\textbf{p}}]}\right)^{\top}{\textbf{L}}\left({\textbf{L}^{-1}E[\Delta{\textbf{p}}]}\right)\\
+&= E[\Delta{\textbf{p}}]^{\top}{\textbf{L}^{-1}}E[\Delta{\textbf{p}}]
+\end{array}
+\end{equation}
+
+Equation \ref{eq4} is a general result and involves no assumptions about the patterns of dominance or epistasis for fitness, or about patterns of mating. An intuitive explanation of why $V_A$ can be calculated this way is to note Fisher's Fundamental Theorem states that ${V_A}$ is equal to the (partial) increase in mean fitness caused by evolutionary change through natural selection. Equation \ref{eq2} can be expressed as a sum of $\alpha_i E[\Delta p_i]$ over all loci, $i$:
+
+\begin{equation} \label{eq2b}
+\begin{array}{rl}
+{V_A} &= \boldsymbol{\alpha}^{\top}E[\Delta{\textbf{p}}]
+\end{array}
+\end{equation}
+
+In this,  $\alpha$ represents the proportional change in the population mean fitness that is caused by a unit change in allele frequency at a locus \citep{Fisher.1941, Kojima.1959, Lee.2013}. Therefore, multiplying $\alpha$ by the actual change caused by natural selection, $E[\Delta p]$, we get the proportional change in mean fitness caused by evolutionary change by natural selection at that locus \citep[see Eq 51.4][also]{price1972fisher}. If we then add these changes at every locus in the genome, we obtain the total proportional change in mean fitness due to evolutionary change by natural selection, and hence $V_A$.  
+
+\subsection*{Extending our approach to practical situations}
+\addcontentsline{toc}{subsection}{Extending our approach}
+
+
+Our theoretical approach assumes $\boldsymbol{\alpha}$ or $E[\Delta {\bf p}]$ are known. In reality, neither can be directly observed and must be inferred from data on observed allele frequency change, $\Delta {\bf p}$. Since $\Delta {\bf p}$ will vary around $E[\Delta {\bf p}]$ due to genetic drift, $E[\Delta {\bf p}]$ must be inferred using replicate observations of $\Delta {\bf p}$. Since time cannot be replayed, we infer $E[\Delta {\bf p}]$ through experimental replicates (see \citet{Buffalo.2020} also). Our theoretical model also assumes ${\bf L}$ is known, but since it is hard to generate experimental replicates without at least one round of reproduction, we condition on ${\bf L}_{0}$ (${\bf L}$ in a generation prior to the first generation over which allele frequency change is measured). In what follows we will refer to the population at time zero (generation 0) as the `base population'. Our aim is then to approximate the additive genetic variance for fitness in the base population $V_A(0)$ as $V_{\bar A}(0)=\bar{\boldsymbol{\alpha}}^{\top}{\bf L}_0\bar{\boldsymbol{\alpha}}$, where $\bar{\boldsymbol{\alpha}}$ is the mean vector of average effects averaged over time and replicates. Note that if average effects are constant then $V_{\bar A}(0)=V_A(0)$, but if the average effects vary then $V_A(0)$ will in general exceed $V_{\bar A}(0)$ which can be interpreted as the additive genetic \emph{covariance} in fitness between replicates/time points for a population with genotypic structure equal to that in the base population (see Supplementary information \ref{App:dist}). It is important to note that conventional methods for estimating $V_A$ -- such as those relying on pedigreed individuals -- also estimate additive genetic \emph{covariances} among environments in which relatives are assayed \citep{Vehvilainen.2008} and these covariances equal $V_A$ only when the average effects remain constant. \\
+
+We also allow allele frequency changes to be measured over multiple generations, rather than a single generation. Thus, $\Delta {\bf p}_m = \Delta {\bf p}_{t_m,m}+\Delta {\bf p}_{t_m+1,m}\dots\Delta {\bf p}_{\tau_m-1,m}$ is the observed change in allele frequency from generation $t_m$ to $\tau_m$ in replicate $m$, with $\Delta {\bf p}_{t,m}$ being the change from time $t$ to $t+1$. Note that $t_m$ (i.e. the generation in which we start recording allele frequency changes in replicate $m$) can be any positive integer. If replicate populations are derived from the base population with exactly one round of reproduction, $t_m$ would be 1 for all $m$. $\tau_m$ can be any integer greater than $t_m$. We first note that the total change in allele frequency in replicate $m$ between times $t_m$ and $\tau_m$ is
+
+\begin{equation}
+\Delta {\bf p}_{m} = \sum^{\tau_m-1}_{t=t_m}\left({\bf L}_{t,m}\boldsymbol{\alpha}_{t,m}+\underset{D}\Delta {\bf p}_{t,m}\right)
+\end{equation}
+
+where ${\bf L}_{t,m}\boldsymbol{\alpha}_{t,m}=E[\Delta{\bf p}_{t,m}]$ is the expected change in allele frequency due to selection in replicate $m$ between generation $t$ and $t+1$ and $\underset{D}\Delta {\bf p}_{t,m}$ is the change due to drift. It is important to note that ${\bf L}_{t,m}\boldsymbol{\alpha}_{t,m}$ captures responses to both direct and indirect selection. ${\bf L}$ will vary over time and we decompose ${\bf L}$ at a particular time/replicate into a part that can be predicted by ${\bf L}_0$ and the action of drift and recombination, and a part that cannot be predicted. To do this we decompose  ${\bf L}$ into ${\bf L}^{'}$ and ${\bf L}^{''}$, following the notation of \citet{buffalo2019linked}. ${\bf L}^{'}$ represents the (co)variances in the $c$'s computed over the haploid genomes of all $2N$ gametic contributions that constitute the population. Thus, the diagonal elements of ${\bf L}^{'}$ are proportional to gametic (gene) diversity and the off-diagonals are proportional to gametic-phase disequilibrium. On the other hand, ${\bf L}^{''}$  represents the (co)variances that arise due to alleles within the different gametic contributions of a genotype, and thus the diagonal elements are proportional to the additive coefficients of Hardy-Weinberg disequilibrium (\citet{bulmer1980mathematical} and Chapter 12 in \citet{Weir.1989}), and the off-diagonal elements are proportional to the nongametic-phase disequilibrium. Given this decomposition, the dynamics of ${\bf L}$ under drift and recombination are (See Supplementary information \ref{Appendix:LD} for details and \citet{Hill.1968} and \citet{Santiago.1998}):
+
+\begin{equation}
+{\bf L}_{t,m}= {\bf N}_{t,m}\circ\tilde{\bf L}_{0}+\Delta{\bf L}^{'}_{t,m}+{\bf L}^{''}_{t,m}
+\label{Eq:LD_dynamics}
+\end{equation}
+where $\circ$ is the Hadamard (i.e. element-wise) product, $\tilde{\bf L}_{0}$ is the weighted sum of ${\bf L}^{'}_{0}$ and ${\bf L}^{''}_{0}$ , with the $ij^{th}$ element of ${\bf L}^{''}_{0}$ weighted by $r_{ij}/(1-r_{ij})$ and ${\bf N}_{t,m}$ is a matrix with the $ij^{th}$ element being $(1-r_{ij})^{t}\prod_{k=0}^{t-1}(1-\frac{1}{2N_{e_{k,m}}})$. $r_{ij}$ is the recombination rate between the two loci and  $N_{e_{k,m}}$ is the effective population size in generation $k$ in replicate $m$. $\Delta {\bf L}^{'}_{t,m}$ is a stochastic term that represents the accumulated change in ${\bf L}^{'}$ between generations 0 and $t$ in replicate $m$ that cannot be predicted. ${\bf L}^{''}_{t,m}$ is the matrix of nongametic-phase disequilbria that arises in generation $t$ in replicate $m$. In the absence of selection, $\Delta {\bf L}^{'}_{t,m}$ and ${\bf L}^{''}_{t,m}$ have zero expectation. In the following, it will be useful to designate $\boldsymbol{\mathcal{L}}_{t,m} = {\bf N}_{t,m}\circ\tilde{\bf L}_0$ as the predicted ${\bf L}_{t,m}$, for $t>0$, conditional on ${\bf L}^{'}_{0}$ and ${\bf L}^{''}_{0}$. Also, we represent the deviation of ${\bf L}_{t,m}$ from this prediction as $\Delta {\bf L}_{t,m}=\Delta {\bf L}^{'}_{t,m}+{\bf L}^{''}_{t,m}$. It will also be useful to denote $\boldsymbol{\alpha}_{t,m}=\bar{\boldsymbol{\alpha}}+\Delta\boldsymbol{\alpha}_{t,m}$ where $\Delta\boldsymbol{\alpha}_{t,m}$ is the deviation of the average effects (in generation $t$ in replicate $m$) from the mean of the average effects across time and replicates.  We can then decompose the change due to selection into two terms:
+\begin{small}
+\begin{equation}
+\begin{array}{rl}
+\Delta {\bf p}_m
+=& \sum_{t=t_m}^{\tau_m-1} \left(\boldsymbol{\mathcal{L}}_{t,m}\bar{\boldsymbol{\alpha}}+\Delta{\bf L}_{t,m}\bar{\boldsymbol{\alpha}}+\boldsymbol{\mathcal{L}}_{t,m}\Delta\boldsymbol{\alpha}_{t,m}+\Delta{\bf L}_{t,m}\Delta\boldsymbol{\alpha}_{t,m}+\underset{D}\Delta {\bf p}_{t, m}\right)\\
+=& \sum_{t=t_m}^{\tau_m-1} \left(\boldsymbol{\mathcal{L}}_{t,m}\bar{\boldsymbol{\alpha}}+\underset{U}\Delta {\bf p}_{t, m}+\underset{D}\Delta {\bf p}_{t, m}\right)\\
+=&\boldsymbol{\mathcal{L}}_{m}\bar{\boldsymbol{\alpha}}+\underset{U}\Delta {\bf p}_{m}+\underset{D}\Delta {\bf p}_{m}\\
+\end{array}
+\label{Eq:dp}
+\end{equation}
+\end{small}
+Here quantities subscripted with just $m$ are the sums of the relevant quantity over $t$ (for example, $\boldsymbol{\mathcal{L}}_m=\sum_{t=t_m}^{\tau_m-1}\boldsymbol{\mathcal{L}}_{t,m}$). The predictable change due to selection is $\boldsymbol{\mathcal{L}}_{m}\bar{\boldsymbol{\alpha}}$ and is similar to that derived for a single locus in \citet{Santiago.1998}. The unpredictable change due to selection caused by stochastic changes in  ${\bf L}$ and/or $\boldsymbol{\alpha}$ is $\underset{U}\Delta {\bf p}_{m}=\sum_{t=t_m}^{\tau_m-1}\left(\Delta{\bf L}_{t,m}\bar{\boldsymbol{\alpha}}+\boldsymbol{\mathcal{L}}_{t,m}\Delta\boldsymbol{\alpha}_{t,m}+\Delta{\bf L}_{t,m}\Delta\boldsymbol{\alpha}_{t,m}\right)$. The total change due to drift is $\underset{D}\Delta {\bf p}_m$. The $\underset{D}\Delta {\bf p}_m$ have zero expectation and are independent across replicates \citep{buffalo2019linked}. In what follows we also assume the $\underset{U}\Delta {\bf p}_m$ have zero expectation, although we believe there are two primary mechanisms by which this assumption can fail. First, the model for the predicted changes in ${\bf L}$ (i.e. $\boldsymbol{\mathcal{L}}_m$) may be inaccurate such that the $\Delta{\bf L}_{t,m}$ have non-zero expectation. Since $\boldsymbol{\mathcal{L}}_m$ is derived under the assumptions of drift and recombination only, directional changes in ${\bf L}$ induced by selection is an obvious mechanism. However, if the genetic architecture of fitness is sufficiently polygenic, such that selection coefficients associated with individual loci are small, selection-induced changes in ${\bf L}$ may be safely ignored. In other words, selection-induced changes in ${\bf L}$  may cause the total allele frequency change due to selection to be negligibly different from $\boldsymbol{\mathcal{L}}_{m}\bar{\boldsymbol{\alpha}}$, the expected allele frequency change due to selection. Second, the product $\Delta{\bf L}_{t,m}\Delta\boldsymbol{\alpha}_{t,m}$ may have non-zero expectation if changes in the average effects are correlated with changes in patterns of diversity/LD. Again, selection-induced changes in $\Delta{\bf L}_{t,m}$ is a possible mechanism. Additionally, unless all gene action is additive, changes in ${\bf L}$ also induce changes in $\boldsymbol{\alpha}$ since then average effects depend on allele frequencies (Supplementary information \ref{App:loglinear}). 
+
+ However, calculating change in allele frequency over a single generation (i.e. $\tau_m-t_m=1$) would minimise any bias since any change in ${\bf L}$ due to selection should be minimised and the approximations that follow will be more accurate.  Although the approximations will hold better when $\tau_m-t_m=1$, increasing  $\tau_m-t_m$ (i.e. calculating change in allele frequency over multiple generations) will increase power since the changes in allele frequency due to selection will be larger. 
+
+Assuming both $\underset{U}\Delta {\bf p}_{m}$ and $\underset{D}\Delta {\bf p}_{m}$ have zero expectation we can derive the mean and covariance structure (computed over the evolutionary process) of allele frequency change in a replicate as:
+
+\begin{equation}
+\begin{array}{rl}
+E\left[\Delta {\bf p}_m\right]
+=& \boldsymbol{\mathcal{L}}_m\bar{\boldsymbol{\alpha}}\\
+\end{array}
+\label{eq:Edelta}
+\end{equation}
+
+
+\begin{equation}
+\begin{array}{rl}
+VAR\left(\Delta {\bf p}_m\right) =&\boldsymbol{\mathcal{D}}_m+\boldsymbol{\mathcal{U}}_m\\
+\end{array}
+\end{equation}
+
+where $\boldsymbol{\mathcal{D}}_m$ and $\boldsymbol{\mathcal{U}}_m$ are the covariances due to the cumulative action of drift and the unpredictable response to selection, respectively. The drift (co)variances have expectation equal to $\tilde{\bf L}_{0}\circ{\bf M}^{(m)}$ where ${\bf M}^{(m)}=\sum_{t=t_m}^{\tau_m-1}{\bf M}_{t,m}\circ{\bf N}_{t,m}$ and the $ij^{th}$ element of ${\bf M}_{t,m}$ is $(1-r_{ij})/N_{E_{t,m}}$ (Supplementary information \ref{App:dist}). Note that since the predictable response to selection includes both direct and indirect selection, the relevant effective population size for the drift covariance in allele frequency does not include the effects of linked selection and for this reason we denote it as $N_E$ rather than $N_e$. Using this notation, $N_E=4N/(2+V_o)$ where $N$ is the census population size and $V_o$ is the variance in offspring number in the absence of additive genetic fitness variation \citep{Wright.1938}. Although the dynamics of ${\bf L}$ (Equation \ref{Eq:LD_dynamics}, also see Supplementary information \ref{Appendix:LD}) were derived under drift and recombination in the absence of selection, and hence $N_e=N_E$, the dynamical equations for ${\bf L}$ will better approximate reality when an effective population size that incorporates all excess variation in fitness is used. Consequently, we use $N_e$ and $N_E$ to distinguish the effective population sizes that are relevant for stochastic changes in ${\bf L}$ and allele frequency, respectively.
+
+There is no easy form for the covariance due to the cumulative unpredictable response to selection and we simply denote it as $\boldsymbol{\mathcal{U}}_m$ (Supplementary information \ref{App:dist}). While the drift terms will be independent across replicates, we also need to assume that $\underset{U}\Delta {\bf p}_{m}$ are independent across replicates for the covariance between replicates to be zero. An obvious source of non-independence would be if replicates are not initiated from individuals independently generated from Generation $0$ individuals (i.e. $t_m\neq1$ for at least one $m$). If this were the case, the $\Delta {\bf L}$ will be dependent across replicates due to the shared changes in ${\bf L}$ from generation $0$ to the generation from which the replicates are derived. This could be minimised by initialising replicates as early as possible (ideally at $t_m=1$).\\   
+
+\subsection*{Inference outline}
+\addcontentsline{toc}{subsection}{Inference outline}
+
+In the previous section, the mean average effects,  $\bar{\boldsymbol{\alpha}}$, are treated as fixed and expectations and variances are taken over the evolutionary process, including variation in the average effects over time and replicates. When making inferences, we treat the mean average effects as random variables rather than fixed quantities (See Supplementary information \ref{App:alpha_random} and \citet{gianola2009additive} for a discussion on what this implies) and derive expectations and (co)variances taken over both the evolutionary process and the distribution of $\bar{\boldsymbol{\alpha}}$. Using the laws of total expectation and (co)variance we obtain:
+
+\begin{equation}
+\begin{array}{rl}
+E\left[\Delta {\bf p}_m\right]
+=& \boldsymbol{\mathcal{L}}_m\boldsymbol{\mu}_{\bar{\alpha}}\\
+\end{array}
+\label{eq:Edelta}
+\end{equation}
+
+and 
+
+\begin{equation}
+\begin{array}{rl}
+VAR\left(\Delta {\bf p}_m\right) =&\boldsymbol{\mathcal{L}}_m{\bf V}_{\bar{\alpha}}\boldsymbol{\mathcal{L}}_m+\boldsymbol{\mathcal{D}}_m+\boldsymbol{\mathcal{U}}_m\\
+\end{array}
+\end{equation}
+where $\boldsymbol{\mu}_{\bar{\alpha}}$ and ${\bf V}_{\bar{\alpha}}$ and are the mean and covariance  structure of the mean average effects respectively. Critically, when deconditioning on $\bar{\boldsymbol{\alpha}}$ the cross-replicate covariances become non-zero:
+
+\begin{equation}
+\begin{array}{rl}
+COV(\Delta {\bf p}_m, \Delta {\bf p}_n^{\top})
+=&\boldsymbol{\mathcal{L}}_m{\bf V}_{\bar{\alpha}}\boldsymbol{\mathcal{L}}_n\\
+\end{array}
+\label{eq:covdelta}
+\end{equation}
+where $m$ and $n$ are a pair of replicates.\\ 
+
+In Supplementary information \ref{App:alpha_random} we determine permissible models for $\boldsymbol{\mu}_{\bar{\alpha}}^{\top}$ and ${\bf V}_{\bar{\alpha}}$.  Of those, we identify the sensible biological model for the mean average effect:
+
+\begin{equation} 
+\begin{array}{rl}
+\boldsymbol{\mu}_{\bar{\alpha}} = & \beta^{(1)}_{\bar{\alpha}}({\bf p}_{0}-{\bf q}_{0})
+\end{array}
+\end{equation}
+where ${\bf p}_{0}$ is the frequency of the reference alleles at each locus in the base population and ${\bf q}_{0}=\bf{1}-{\bf p}_{0}$. For the variance of the average effects, we identify the model 
+
+\begin{equation} 
+\begin{array}{rl}
+{\bf V}_{\bar{\alpha}}=& \sigma^2_{\bar{\alpha}}{\bf L}_{0}^{p_{\bar{\alpha}}}
+\end{array}
+\end{equation}
+although in our analysis of simulated data we set the off-diagonal elements of ${\bf L}_{0}$ to zero in the above equation, such that the variance in average effects is simply a power function of the genetic diversities \citep{zeng2018signatures}. When $p_{\bar{\alpha}}=0$ average effects are independent of genetic diversity, and when $p_{\bar{\alpha}}=-1$ average effects scale inversely with genetic diversity. $p_{\bar{\alpha}}=-1$ is a common assumption in many related approaches \citep[e.g.][]{yang2011gcta} and under this assumption $\sigma^2_{\bar{\alpha}}$ is the average contribution of a locus to the additive genic variance.
+
+By applying sum of squares theory \citep[page 355]{searle2006} to Equation \ref{eq2} we can obtain the (posterior) expectation of $V_{\bar A}(0)$ after averaging over the distribution of average effects (Supplementary information \ref{App:alpha_random} and \citet{gianola2009additive}):
+
+\begin{equation} \label{eq6}
+\begin{array}{rl}
+E[V_{\bar A}(0)] &= E[\boldsymbol{\bar \alpha}^{\top}\textbf{L}_0\bar{\boldsymbol{\alpha}}]\\
+&= Tr(\textbf{L}_0{\bf V}_{\bar{\alpha}}) + \boldsymbol{\mu}_{\bar{\alpha}}^{\top}\textbf{L}_0\boldsymbol{\mu}_{\bar{\alpha}}\\
+\end{array}
+\end{equation}
+where we aim to estimate $\boldsymbol{\mu}_{\bar{\alpha}}$ and ${\bf V}_{\bar{\alpha}}$ through Equations \ref{eq:Edelta}--\ref{eq:covdelta} using multiple evolutionary replicates starting from a common base population.
+
+
+Rather than working with the allele frequency changes directly, we project them on to a new (reduced) basis and denote this new vector of changes as $\Delta\overrightarrow{\bf p} = {\bf P}\Delta{\bf p}$ where ${\bf P}$ is some projection matrix. We chose a projection that collapses allele frequency changes into the non-null subspace of ${\bf L}_{0}$, since $V_{\bar A}(0)$ only depends on this subspace (Supplementary information \ref{App:projection} and Supporting Information in \citet{de2015genomic}). To do this, let ${\bf U}_{\bf L}$ be the eigenvectors of ${\bf L}_{0}$ with non-zero eigenvalues and then the drift covariance in the reduced subspace is ${\bf U}_{\bf L}^{\top}(\tilde{\bf L}_{0}\circ{\bf M}^{(m)}){\bf U}_{\bf L}$. If we have ${\bf U}_2$ and ${\bf D}_2$ as the eigenvectors and a diagonal matrix of square-rooted eigenvalues of this matrix, then the projection matrix ${\bf P} = {\bf D}_2^{-1}{\bf U}_2^{\top}{\bf U}_{\bf L}^{\top}$ results in projected allele frequency changes that are identically and independently distributed under drift in the reduced subspace only (see Supplementary information \ref{App:projection}).
+
+The mean and covariance of the projected allele frequency changes due to predictable selection are:
+
+\begin{equation} 
+\begin{array}{rl}
+E[\Delta \overrightarrow{\bf p}_m] = &
+{\bf P}_{m}\boldsymbol{\mathcal{L}}_m
+\boldsymbol{\mu}_{\bar{\alpha}}
+\end{array}
+\end{equation}
+
+and 
+
+\begin{equation} 
+\begin{array}{rl}
+COV(\Delta \overrightarrow{\bf p}_m, \Delta \overrightarrow{\bf p}_n) = &
+{\bf P}_{m}\boldsymbol{\mathcal{L}}_m{\bf V}_{\bar{\alpha}}
+\boldsymbol{\mathcal{L}}_n{\bf P}^{\top}_{n}
+\end{array}
+\end{equation}
+
+With $p_{\bar{\alpha}}$ known, the model is a linear mixed model with covariance structure due to the predictable response to selection being proportional (by a factor $\sigma^2_{\bar{\alpha}}$ that is to be estimated) to
+
+\begin{equation} 
+\overrightarrow{\bf V}_{m,n} \propto {\bf P}\boldsymbol{\mathcal{L}}_m{\bf L}_{0}^{p_{\bar{\alpha}}}
+\boldsymbol{\mathcal{L}}_n{\bf P}^{\top}
+\end{equation}
+between replicates $m$ and $n$. When $\boldsymbol{\mathcal{L}}^{(m)}=\boldsymbol{\mathcal{L}}^{(n)}$ for all $n$ and $m$, then this can more easily be fitted by incorporating locus as a random effect with the above covariance structure. The vector of expected values (shown for replicate $m$) is also proportional to  
+
+\begin{equation} 
+\overrightarrow{\boldsymbol \mu}_m \propto {\bf P}\boldsymbol{\mathcal{L}}^{(m)}({\bf p}_{0}-{\bf q}_{0})
+\end{equation}
+with the associated coefficient $\beta^{(1)}_{\bar{\alpha}}$ to be estimated. 
+
+We estimate the parameters of the model by treating it as a separable linear mixed model problem
+\citep{richards1961method}. Conditional on a value of ${p_{\bar{\alpha}}}$ the model is linear mixed model and the conditional (restricted) maximum likelihood can be obtained from asreml \citep{Butler.2023}. In order to maximise the (unconditional) likelihood we use the R function optim to find the value of  ${p_{\bar{\alpha}}}$ that results in the highest conditional likelihood. Note that the residual variance should equal one if there is no unpredictable response to selection. 
+
+Although linear (mixed) models generate unbiased estimates of $\boldsymbol{\mu}_{\bar{\alpha}}$, the quadratic form $\widehat{\boldsymbol{\mu}_{\bar{\alpha}}}^{\top}{\bf L}_0\widehat{\boldsymbol{\mu}_{\bar{\alpha}}}$ will be upwardly biased by sampling error in $\beta^{(1)}_{\bar{\alpha}}$. To correct for this bias, we use the inverse Hessian (conditional on the best estimate of ${p_{\bar{\alpha}}}$) to get an approximate expression for the sampling variance  ($S_{\bar{\alpha}}$) of $\beta^{(1)}_{\bar{\alpha}}$, and use this in order to get an improved estimate of the quadratic form as follows (see Supplementary information \ref{App:bias_correction} for a general derivation):
+
+\begin{equation} 
+\widehat{\boldsymbol{\mu}_{\bar{\alpha}}^{\top}{\bf L}_0\boldsymbol{\mu}_{\bar{\alpha}}}= \widehat{\boldsymbol{\mu}_{\bar{\alpha}}}^{\top}{\bf L}_0\widehat{\boldsymbol{\mu}_{\bar{\alpha}}}-{\bf X}^{\top}{\bf L}_0{\bf X}{S}_{\bar{\alpha}}
+\end{equation}
+where ${\bf X}$ is the fixed effect design matrix.
+
+In addition, allele frequency changes will rarely be known without error and will most likely be estimated using a pool-seq approach. In such cases, it is necessary to add an additional covariance structure into the model that accommodates the estimation error. In Supplementary information \ref{App:pool-seq} we derive the covariance structure for projected allele-frequency change (in replicate $m$) as:
+
+
+\begin{equation}
+\overrightarrow{\boldsymbol{\mathcal{E}}}_m = 2\sigma^2_o{\bf P}\left(\boldsymbol{\mathcal L}_{t_m,m}\circ{\bf Q}_{t_m,m}+\boldsymbol{\mathcal L}_{\tau_m,m}\circ{\bf Q}_{\tau_m,m}\right){\bf P}^{\top}
+\end{equation}
+where element $ij$ of a ${\bf Q}$ matrix is the number of reads that span site $i$ and $j$ divided by the product of the coverages at the two sites. When $i=j$, $Q_{i,j}$ is simply the inverse of the coverage. When individuals have a constant probability of being sampled, $\sigma^2_o$ is expected to be one, but we treat it is a free parameter in order to capture any overdispersion \citep{McCullagh.1989}.
+
+\subsection*{Comparison with  \citet{buffalo2019linked}}
+\addcontentsline{toc}{subsection}{Comparison to the results of \citet{buffalo2019linked}}
+
+
+To connect our work with \citet{buffalo2019linked} (henceforth `B\&C') it will be useful to express the covariance matrix  ${\bf L}$ in terms of a diagonal matrix of standard deviations,  ${\bf B}$, (half the square-root of the genetic diversities under random mating) and the correlation matrix, ${\bf R}$, such that  ${\bf L}={\bf B}{\bf R}{\bf B}$. We can then split the response to selection in generation $t$ into two parts:
+
+\begin{equation}
+\begin{array}{rrcl}
+{\bf L}_t\boldsymbol{\alpha}_t =& {\bf B}_t{\bf B}_t\boldsymbol{\alpha}_t&+&{\bf B}_t({\bf R}_t-{\bf I}){\bf B}_t\boldsymbol{\alpha}_t\\
+=&\underset{S}\Delta {\bf p}_t&+&\underset{L}\Delta {\bf p}_t
+\end{array}
+\end{equation}
+where the first term is due to direct selection at the loci, and the second term is due to linkage-disequilibria with other selected loci. It will also be useful to distinguish the additive \textit{genetic} variance ($V_A(t)$) from the additive \textit{genic} variance  ($V_a(t)$) in generation $t$:
+\begin{equation}
+V_A(t) = \boldsymbol{\alpha}_t{\bf L}_t\boldsymbol{\alpha}^{\top}_t
+\end{equation}
+versus
+\begin{equation}
+V_a(t) = \boldsymbol{\alpha}_t{\bf B}_t{\bf B}_t\boldsymbol{\alpha}^{\top}_t
+\end{equation}
+with the distinction being that the additive \emph{genetic} variance ($V_A(t)$) captures the contributions of both genetic diversities at individual loci and the linkage disequilibria between pairs of loci, while the additive \emph{genic} variance ($V_a(t)$) captures the contributions of genetic diversities only.
+
+We can also think about the additive genetic/genic covariance in fitness between time points $t$ and $\tau$ for a population with genetic structure equal to that in generation $t$:
+
+\begin{equation}
+C_A(\tau\rightarrow t) = \boldsymbol{\alpha}_{t}{\bf L}_t\boldsymbol{\alpha}^{\top}_{\tau}
+\end{equation}
+
+and
+
+\begin{equation}
+C_a(\tau\rightarrow t) = \boldsymbol{\alpha}_{t}{\bf B}_t{\bf B}_t\boldsymbol{\alpha}^{\top}_{\tau}
+\end{equation}
+
+These will differ from $V_A(t)$ or $V_a(t)$ when the average effects at generation $\tau$ are different from those at generation $t$. 
+
+In the theory section above, we assumed ${\bf L}_t$ and $\boldsymbol{\alpha}_t$ were known and so the change due to both direct and linked selection are fixed quantities, as is $V_A(t)$. In contrast, B\&C condition on ${\bf B}_t$ and $\boldsymbol{\alpha}_t$, and treat ${\bf R}_t$ as a random variable. Consequently, in B\&C, the change due to direct selection and $V_a(t)$ are fixed, as in our approach, since genetic diversities and average effects are known. However, the change due to indirect selection and $V_A(t)$ is random since the linkage-disequilibrium is unknown.  In our inference section we acknowledge that $\boldsymbol{\alpha}$ cannot be directly observed, but develop a model for the distribution of $\alpha$'s, where estimates of $V_A(t)$ can be made after marginalising $\boldsymbol{\alpha}$. Similarly, in the approach of B\&C the $\boldsymbol{\alpha}$'s and the elements of ${\bf B}$ for selected sites are also not directly observed, but they make a number of strong assumptions that effectively allow the joint distribution of the average effects and selected site diversities to be marginalised.\\
+
+In Supplementary information \ref{App:BandC} we work through the derivation of B\&C using our own notation and retaining a full multi-locus treatment. For easy comparison with the present work, here we summarise both the explicit and implicit  assumptions underlying the general approach of B\&C:
+ 
+\begin{itemize}
+
+\item A) Allele frequency changes are only measured over a single generation.
+
+\item B) There is no direct selection on the loci for which allele frequency change is measured.
+
+\item C) The reference allele at a neutral locus is chosen arbitrarily.
+
+\item D) The signed linkage-disequilibrium between selected sites is zero, which precludes processes such as Hill-Robertson interference. Under this assumption $V_A=V_a$.
+
+\item E) Changes in ${\bf R}$ are due to recombination alone - selection and drift are absent. 
+
+\item F) Nongametic-phase linkage disequilibrium is absent.  
+
+\item G)  There is no relationship between the additive genic variation at a selected site and its LD with neutral sites, as measured through $R_{t, ij}R_{\tau,ij}$ where $i$ is a neutral locus and $j$ a selected locus. Note that since genetic diversity determines the additive genic variation and LD (even measured as a correlation) is constrained by the genetic diversities at the two loci, this is unlikely to be met \citep{sved2018one}.
+
+\item H) The average effects are constant, i.e. $\boldsymbol{\alpha}_t=\boldsymbol{\alpha}_{\tau}$ if estimates are to be interpreted as the additive genic variance (or additive genetic variance, if Assumption D is met) in generation $\tau$. If they are not constant, it is the additive genic/genetic covariance between generations $t$ and $\tau$ that is measured.  
+
+\item I) The initial expected LD-structure between selected and neutral loci, $E[R_{t,i j}^2]$, is approximated from an expression for $E[L_{t,i j}^2]$, which is itself derived under mutation-recombination-drift balance (i.e. no selection). This assumption is partly relaxed in the Appendix by assuming the expected LD-structure between selected and neutral loci is equal to the observed LD-structure between all loci, not distinguishing between selected and neutral loci (Assumption I-b). However, in many cases the genetic diversity at selected loci will be less than that found at (or assumed for) neutral loci and so $E[R_{t, ij}^2]$ will likely be smaller than assumed \citep{sved2018one}.
+
+\item J) The ratio of genetic diversity in generation $\tau$ to genetic diversity in generation $t$ ($\phi_{t,\tau}$), is constant across all selected loci. Under this assumption, dividing the estimate of $V_a(\tau)$ by $\phi_{t,\tau}$ gives an estimate of $V_a(t)$.
+
+\item K) The recombination rate between two sites $g$ base pairs apart is given by $(1 - e^{-2g\bar{r}})/2$ (i.e. Haldane's \citeyearpar{haldane1919map} mapping function) where $\bar{r}$ is the average crossover rate per site per generation. 
+
+\item L) Neutral and selected loci are distributed uniformly and independently across the genome such that the distance between them has a triangular distribution. 
+
+\item M) Since the genetic diversity at selected sites is not measured, it is assumed that $\phi_{t,\tau}$ is equal to the average ratio of genetic diversity in generation $\tau$ to genetic diversity in generation $t$ across all neutral loci.
+\end{itemize}
+
+When applying the theory to data, the method of B\&C requires two additional assumptions:
+
+\begin{itemize}
+
+\item Ib) The average LD between selected and neutral sites is equal to the average LD observed between all sites: see Assumption I) above.
+
+\item N) The (co)variance in allele frequency changes divided through by the average genetic diversity is a good approximation for the (co)variance of weighted allele frequency changes where the weights are the inverse of the square root of the genetic diversities. 
+
+\item O) If allele frequencies are estimated from a sample, then the estimation error is binomially distributed.
+\end{itemize}
+
+\subsubsection*{Assumptions retained in our approach}
+Our approach works with diploid populations throughout, and assumes non-overlapping generations. While deriving our main theoretical result (Equation \ref{eq4}), we further assume an absence of meiotic drive and mutation. When extending our approach to practical situations and in our inference approach, we relax most of the assumptions made by B\&C, but not all. 
+\begin{itemize}
+\item Assumption E is only partly relaxed - the change in ${\bf R}$ does not assume a lack of drift but it does assume a lack of selection. 
+\item We also make Assumption H if we choose to interpret $V_{\bar A}(0)$ as as an additive genetic variance (i.e. $V_{A}(0)$) rather than an additive genetic covariance over replicate/time-points. 
+\item Assumptions E \& H result in the unpredictable response to selection being zero. While we do not make this assumption, we do assume that the unpredictable responses to selection are independent across replicates. However, when applying the theory to data we assume that the within-replicate (residual) (co)variances are driven by drift only (rather than an unpredictable response to selection) and that the drift (co)variances are equal to their expected values (conditional on ${\bf L}_0$). In reality, the within-replicate covariances are likely larger, due to the unpredictable response to selection. This assumption might not be too severe if the unpredictable response to selection results in within-replicate (co)variances that are proportional to those under pure drift, although the residual variance may be higher than expected. 
+\item In the absence of a recombination map, Assumption K may also be applied in our method. 
+\item If ${\bf L}_0$ cannot be partitioned into gametic-phase and nongametic-phase contributions, assumption F might also be made by substituting ${\bf L}_0$ for ${\bf L}^{'}_0$ in $\tilde{\bf L}_0\circ{\bf N}$ and $\tilde{\bf L}_0\circ{\bf M}$. 
+\item By relaxing some of the more extreme assumptions of B\&C we are instead forced into making assumptions about the mean and covariance structure of the average effects of projected loci when making inferences. 
+\end{itemize}
+
+\subsection*{Multilocus simulations}
+\addcontentsline{toc}{subsection}{Multilocus simulations}
+To validate our method and inference approach, we performed multilocus simulations using msprime (version 1.2.0) \citep{kelleher2016efficient} and SLiM (version 4.2.2) \citep{haller2023slim}. The code for the simulations and the downstream analyses performed in R (version 4.3.3) is available on GitHub (\url{https://github.com/manas-ga/Va_simulations}) and includes the R library, \texttt{Vw}. We first describe the structure of the simulations in general terms and then discuss the specifics of our parameter choices in the context of the scaling used (see `Simulation parameters' below). While these simulations do incorporate dominance effects, it is important to acknowledge that they do not include epistatic interactions between loci. They also assume random mating and non-overlapping generations. Furthermore, it is also important to note that genetic variation in fitness in our simulations was maintained, primarily, by drift-recombination-mutation-selection equilibrium, and our simulations do not capture other mechanisms of maintenance of genetic variation for fitness such as balancing selection or frequency-dependent selection.
+
+We simulated a single, contiguous 1 million base-pair long genomic region. Our simulations had two distinct phases: the first phase simulated the history of an ancestral population and the second phase simulated a typical evolve and resequence experiment with independent replicate experimental populations derived from a base population drawn from the ancestral population.  
+
+\subsubsection*{Model for fitness}
+
+We used an additive model across loci for log absolute fitness, $log(W)$, as in \citet{buffalo2019linked}. This choice was motivated by the fact that the variance in $log(W)$ is approximately equal to the variance in relative fitness (see Appendix 1 in \citet{lynch1998}). Across-locus additivity implies that the genotypic value of log fitness for individual $k$ is equal to $Y_k = \sum_{i=1}^{n_L}{y_{k,i}}$, where  ${y_{k,i}}$ represents the genotypic contribution made by locus $i$ to the log absolute fitness of individual $k$. Within loci, we employed the classical quantitative genetic fitness scheme (pp. 67 in \citet{lynch1998}) adapted for \emph{proportions} ($c_{k,i}$'s) (as opposed to counts) of reference alleles within individuals: 
+
+\begin{equation}
+\begin{array}{rl}
+
+y_{k,i} =
+
+\begin{cases}
+    0 & \text{if } c_{k,i} = 0 \\
+    (1 + {\kappa}_i)\eta_i/2 & \text{if } c_{k,i} = 0.5 \\
+    \eta_i & \text{if } c_{k,i} = 1
+\end{cases}
+
+\end{array} 
+\end{equation}
+where $\kappa$ determines the degree of dominance. Note that $\kappa=0$ implies additivity and $\kappa=-1$ complete recessivity. The average effect for log absolute fitness at locus $i$ is then given by $\eta_i^{(a)} = \eta_i[1 + {\kappa}_i(q_i - p_i)]$ (see Equation 4.10b in \citet{lynch1998}). The average effects for (relative) fitness ($\alpha$'s) are well approximated by the $\eta^{(a)}$'s when they are small in magnitude, but higher-order approximations are required when the $\eta^{(a)}$'s are large (see Supplementary information \ref{App:loglinear}). To obtain the log fitness of each individual we added a noise term drawn from a standard normal distribution (mean = 0, variance = 1) to the genotypic value.  The absolute fitness of each individual was then obtained by exponentiating the individual's log fitness.  
+
+We sampled the $\eta$'s from a distribution comprising a weighted mixture of three distributions: (1) a point mass at $\eta = 0$ representing neutral mutations, (2) a reflected gamma distribution with shape = 0.3 and scale = $\eta_{scale}$ (typically 0.066, unless specified otherwise) representing deleterious mutations, and (3) a gamma distribution with shape = 0.3 and scale = $\eta_{scale}$ (typically 0.066, unless specified otherwise) representing beneficial mutations. Thus, for both deleterious and beneficial mutations, the mean absolute $\eta$ (i.e. $E[|\eta|]$) (scale $\times$ shape) was, typically, 0.02. The ratio of the frequency of beneficial to deleterious mutations, and $\eta_{scale}$ varied among simulations. Below, we refer to the distribution of non-neutral $\eta$'s (i.e. omitting mixture component (1) described above) as the `distribution of fitness effects' (DFE), but note that this is in fact the distribution of non-zero effects on log fitness.
+
+\subsubsection*{Phase 1 (`history phase'): Simulating the history of an ancestral population}
+
+We first used a neutral coalescent simulation implemented in msprime \citep{kelleher2016efficient} to construct genealogies for 2,500 diploid genomes (i.e. $N_e$ = 2,500). To initialise a (non-equilibrium) set of selected loci, we then simulated mutations at a rate $\mu_{msp}$, using the pyslim package to attach fitness effects ($\eta$) drawn randomly from the non-neutral part of the distribution described above. Since derived mutations are rare, and the DFE is predominantly deleterious, this will generate a positive relationship between the reference allele frequency and the fitness effects $\eta$'s (and therefore the $\alpha$'s, i.e. the average effects for relative fitness), such that $\beta^{(1)}_{\bar \alpha} >0$ but there should be no relationship between genetic diversities and the $\eta$'s (i.e. $p_{\bar \alpha} = 0$). We implemented the fitness model described above by using SLiM's \citep{haller2023slim} default recipe for polygenic selection (in the Wright-Fisher mode). SLiM code for implementing dominance effects in a quantitative genetic framework was adapted from  \citet{schaal2022inversion}. To reach mutation-selection-drift balance,  we then let this population of 2,500 individuals evolve forward in time with selection for 25,000 generations. Non-neutral mutations drawn from the same DFE were allowed to occur in this period at a rate given by $\mu_{SLiM}$.  At generation 25,000, as the alleles reach mutation-selection-drift balance, we expect $\beta^{(1)}_{\bar \alpha}$ to have become more positive and $p_{\bar \alpha}$ to have become more negative, better reflecting a real population undergoing selection. 
+
+In generation 25,000, we sampled $N_0$ diploid individuals (typically 1000, unless specified otherwise) from this population, which then go on to become the base population in the next phase of the simulation. At this stage, we generated complete genomes for the $N_0$ individuals in the base population by using pyslim to add neutral mutations to the tree sequence recorded so far. To obtain our target number of loci, $n_L$ (typically 65,000, unless specified otherwise), we set the neutral mutation rate to be $(n_L-n_{L_\mathcal{S}})/g$ where $n_{L_\mathcal{S}}$ is the number of non-neutral segregating sites already present and $g$ is the total branch length of the recorded tree sequence. We recorded the phased genotype of each parent at each locus, allowing  us to construct ${\bf L}_0$ and ${\bf L}^{'}_0$. 
+
+\subsubsection*{Phase 2 (`experiment phase'): Simulating an evolve and resequence experiment}
+
+In the second phase of our simulations, again implemented in SLiM, we first allowed the base population to undergo one round of reproduction without selection to establish replicate experimental populations (typically 1,000 individuals in each of 10 replicates, unless specified otherwise). Next, we allowed each of these populations to evolve forward in time (typically three generations, unless specified otherwise) with selection as in the history phase. Since our goal was to estimate $V_A$ in the base population, we restricted our analyses only to the set of loci segregating in the base population. Any new mutations in subsequent generations would, in all likelihood, occur at loci outside this set.  Therefore, we did not simulate new mutations during the experiment phase. For each of the independent replicate populations, we recorded the genome-wide vector of allele frequencies in each generation of the experiment. 
+
+\subsubsection*{Simulation parameters}
+
+\subsubsection*{\textit{Varying the true levels of $V_A$}}
+
+We varied the true (i.e. simulated) levels of $V_A$ from \textit{ca.} 0.01 to 0.1 by varying the number of non-neutral segregating sites ($n_{L_\mathcal{S}}$) in the base population using a range of rates of non-neutral mutations in the history phase in both msprime ($\mu_{msp}$) and SLiM ($\mu_{SLiM}$). For example, in simulations with $E[|\eta|] = 0.02$ (i.e. $\eta_{scale} = 0.066$) and no beneficial mutations, we varied $\mu_{msp}$ between $5.56 \times 10^{-9}$ and $5.56 \times 10^{-8}$ and $\mu_{SLiM}$ between $5.56 \times 10^{-7}$ and $5.56 \times 10^{-6}$, which resulted in  $n_{L_\mathcal{S}}$ varying between \emph{ca.} 10,000 and 64,000 in the base population (for other scenarios see Table \ref{tab:sim_params}). We set $\mu_{msp}$ to be an order of magnitude smaller than $\mu_{SLiM}$ in most simulations because otherwise all individuals would have had a fitness of zero at the end of the coalescent part of the history phase. This extreme mutation load arises because deleterious alleles, having previously evolved under neutrality, would segregate at fairly high frequencies. However, the choice of $\mu_{msp}$ is  unlikely to significantly affect the composition of the base population in most simulations, since the non-neutral genetic diversity of the base population of the experiment phase was primarily determined by the drift-recombination-mutation-selection equilibrium reached over the course of the 25,000 generation long forward simulation, and therefore primarily dependent on $\mu_{SLiM}$.
+
+
+\subsubsection*{\textit{Number of segregating sites ($n_L$)}}
+
+The requirement for handling large $n_L \times n_L$ matrices (e.g. ${\bf L}_0$, ${\bf L}^{'}_0$, $\bf M$, and $\bf N$, etc.) imposed an upper bound of around 70,000 on $n_L$ to permit the analysis of simulations in parallel. Under most scenarios the entire target range of simulated $V_A$ (i.e. approximately 0.01 to 0.1) could be achieved without $n_{L_\mathcal{S}}$ exceeding 65,000. Therefore, in general, we set $n_L$ to 65,000 (but see `Simplified simulations' below). However, under a small minority of scenarios -- for example, at higher map lengths in the history phase (\ref{fig:full_params}B) or under strong dominance (\ref{fig:combined_dominance}) -- generating a larger $V_A$ required significantly more than 65,000 non-neutral segregating sites. Consequently, in such cases, we had to discard simulations in which $n_{L_\mathcal{S}}$ was greater than 65,000 which generally happened at the higher mutation rates and, therefore, the higher levels of $V_A$. 
+
+\subsubsection*{\textit{Map length of the simulated region}}
+
+There are two recombination-related parameters likely to influence the performance of our method: (1) the $V_A$ per map length, and (2) the density of segregating sites per unit map length. Since our simulations were scaled down in an important way -- namely, they assumed that $V_A$ was limited to only about 65,000 segregating sites as opposed to millions of sites in real populations -- it was not possible to simultaneously set parameters (1) and (2) close to their realistic values. Therefore, we varied the effective map length from 0.001 to 2 morgans which spans scenarios where either the total map length of the simulated region is comparable to a typical \emph{D. melanogaster} autosome ($\sim$0.5 morgan) or the density of segregating sites is comparable ($\sim$0.065 morgan). Exact settings are detailed in the `Reference parameters' section below. The typical \emph{D. melanogaster} map-length was determined from an effective crossover rate of $10^{-8}$ \citep{comeron2012many,wang2023variation} and a 50Mb chromosome. The typical site-density was determined under the assumption that there are one million segregating sites per morgan, which is reasonably consistent with a recent evolve-and-resequence study employing \emph{D. melanogaster} (\citet{Bitter.2024}: 827,200 and 893,465 sites on Chromosome 2 and 3 respectively). 
+
+Since we only simulated a population of 2,500 individuals in the history phase, which is $\sim$500 times smaller than the estimate of $N_e$ in \emph{D. melanogaster} \citep{campos2013codon, campos2019effects}, we scaled our map-length upwards by a factor of 500 to achieve the target effective map-length described above (\citet{campos2019effects} but see \citet{dabi2025population} and \citet{ferrari2025parameter} for potential issues). On the other hand, since the experiment phase simulates a realistic evolve-and-resequence experiment with $N_e \approx 1,000$, this scaling was not applied to map lengths in the experiment phase (see `Reference parameters' below). In what follows, the map-lengths implemented in the simulations are reported rather than the target effective map-lengths. 
+
+\subsubsection*{\textit{Degree of dominance}}
+
+In the simulations with dominance effects (i.e. $\kappa \neq 0$) we always modelled deleterious alleles to be recessive. In practical terms, this meant that ${\kappa}_i$ was set to be positive when $\eta_i$ was positive, and ${\kappa}_i$ was set to be negative when $\eta_i$ was negative. For simplicity, in a given simulation, we assumed $|\kappa_i|$ to be the same across all loci, although the actual dominance deviation, $d_i = \kappa_i \eta_i$ would be locus-specific. We simulated two different levels of $|\kappa|$: (1) $|\kappa| = 0.5$, and (2) $|\kappa| = 0.9$.  These correspond to $h=0.25$ and $h=0.05$, respectively, when the heterozygous fitness is $1 - hs$. While $h=0.25$ is consistent with the theoretical expectation from a fitness landscape based model \citep{manna2011fitness}, $h = 0.05$, where every deleterious allele is almost completely recessive is probably extreme. Since full simulations with dominance were up to two orders of magnitude slower than their additive counterparts, we switched on dominance effects only in the last 5,000 generations of the history phase (i.e. from generation 20,001) as well as in the experiment phase. Relative to additive simulations, full simulations with dominance also required significantly more segregating sites to generate a given level of $V_A$. To generate sufficient $V_A$ (i.e. between \emph{ca.} 0.01 and 0.1) while keeping $n_{L_\mathcal{S}}$ below 67,500, we simulated deleterious mutations from a gamma distribution with a slightly larger mean effect on log fitness (i.e. E[|$\eta|] = 0.03$) in the history phase and set $|\kappa|$ to either 0.5 or 0.75. To test our method against extreme dominance (i.e. $|\kappa| = 0.9$), we performed additional full simulations in which  we simulated the entire history phase under additivity, and switched on dominance effects only in the experiment phase. While the resulting genetic composition was far from the expected equilibrium, deleterious alleles were expected to be segregating at substantially lower frequencies than in the simplified simulations.  
+
+\subsubsection*{\textit{Reference parameters}}
+
+Our aim was to investigate the sensitivity of our method to the following parameters: (1) map length in the history phase (0.5 morgan, 5 morgans, 50 morgans, 250 morgans), (2) map length in the experiment phase (0.01 morgan, 0.2 morgan, 2 morgans), (3) number of replicate populations in the experiment phase (3, 5, 10), (4) the population size of each of the replicate populations (100, 500, 1,000), (5) number of generations over which allele frequency changes were recorded in the experiment phase (1, 3, 5), (6) the ratio of the rates of beneficial to deleterious mutations (0\%, 0.02 \%, 2\%), and (7) the mean of the gamma distribution from which non-neutral $\eta$'s were sampled, $E[|\eta|]$ (0.02, 0.03, 0.06), and (8) the degree of dominance, $\kappa$ (0, 0.5, 0.9).
+
+Rather than vary all parameters in a fully factorial design, we selected a reference parameter set and explored the sensitivity of the method by changing each parameter in turn. The reference parameter set was (1) a map length of 0.5 morgan in the history phase (2) a map length of 2 morgans in the experiment phase, (3) 10 replicate populations in the experiment phase, (4) a population size of 1,000 in each of the replicate populations in the experiment phase, (5) 3 generations over which allele frequency changes were recorded in the experiment phase, (6) no beneficial mutations in the history phase, (7) $E[|\eta|] = 0.02$, and (8) complete additivity (i.e. $\kappa=0$). The reference parameter set was chosen to best reflect evolve-and-resequence experiments using \emph{D. melanogaster}. 
+
+Note that we varied $E[|\eta|]$ by using three different values (0.066, 0.09, and 0.2) for the scale of the gamma distribution ($\eta_{scale}$) from which the $\eta$'s for non-neutral mutations were drawn while keeping the shape parameter fixed to 0.3. This meant that the coefficient of variation was fixed to $1/\sqrt{0.3}$.  
+
+\subsubsection*{Simplified simulations}
+
+In addition to the full simulations described above, we performed a set of simplified, proof-of-principle simulations to test the logic of our method. These simulations were different from the full simulations in three ways:
+
+(1) The history phase was highly abbreviated -- the forward simulation implemented in SLiM lasted only a single generation without any selection. This meant that the ancestral population -- from which replicate experimental population were founded -- had evolved entirely under neutrality. 
+
+(2) Rather than attach $\eta$'s to the derived alleles generated with msprime, we attached the $\eta$'s randomly with respect to either of the two alleles segregating at the locus. Amendments (1) and (2) generate a scenario where there is no relationship between allele frequency and $\eta$:  both $p_{\bar \alpha}$ and $\beta^{(1)}_{\bar \alpha}$ are expected to be zero.  
+
+(3) Given that the ancestral population had evolved without selection, these simplified simulations had considerably higher genetic diversities compared to the full simulations. This meant that fewer segregating non-neutral sites ($n_{L_\mathcal{S}}$) were required to achieve true levels of $V_A$ between 0.01 and 0.1. Therefore, in these simulations, we set $n_L$ to be 3,000, much lower than the 65,000 used for the full simulations. We achieved this by varying $\mu_{msp}$ between $3 \times 10^{-9}$ and $2.35 \times 10^{-8}$. $\mu_{SLiM}$ was set to 0 in these simulations. This resulted in $n_{L_\mathcal{S}}$ at the end of the history phase being between 160 and 1,902. We then added neutral mutations using a suitable rate as described above such that $n_L$ was expected to be 3,000. 
+
+\subsubsection*{Simulating pool-seq}
+
+To investigate the consequences of sampling noise around true allele frequencies in real data, we reanalysed the reference sets for full and simplified simulations with allele frequencies in the experiment phase obtained via simulated pool-seq. Specifically, we investigated the sensitivity of our approach to the pool-seq coverage (i.e. the expected number of reads spanning a given locus) and the degree of overdispersion in the number of individuals sampled. We assumed that the number of reads mapping to individual $k$ followed a Poisson distribution with mean $\lambda_{x, k}$, which in turn is sampled from a log-normal distribution with parameters $\mu_x$ and $V_x$. Varying $V_x$ allowed us to control the degree of heterogeneity in the probabilities with which individuals are sampled. For a given level of coverage and read length, we determined the expected number of reads mapping to an individual ($E[\lambda_{x}]$). For a given value of $V_x$ and read-length, using the expression for the mean of a lognormal distribution ($E[\lambda_{x}] = exp(\mu_x + V_x/2)$),  we chose $\mu_x$ to achieve the target coverage: $\mu_x = log(E[\lambda_{x}]) - V_x/2$. We mapped reads to the genomes of various individuals in the population by sampling the starting positions for each read from a uniform distribution.
+
+To select the length of the reads in these simulations, we first note that the expected number of segregating sites spanned by a 150 base-pair read in a recent evolve-and-resequence study \citep{Bitter.2024} (827,200 segregating sites on chromosome 2 which is $\sim$50 Mb in length) is approximately 2.5. To achieve this, we fixed the read length to be 800 while analysing simplified simulations ($\sim$ 3,000 segregating sites) and 37 when analysing full simulations ($\sim$ 65,000 segregating sites). We used four different combinations of coverage and $V_x$: (1) coverage = 100x, $V_x = 0$; (2) coverage = 500x, $V_x = 0$; (3) coverage = 1000x, $V_x = 0$); (4) coverage = 1000x, $V_x = log(2)$. Note that $V_x = 0$ corresponds to a situation where individuals are sampled without overdispersion.
+
+\subsubsection*{Comparison with B\&C}
+
+To compare the precision and the accuracy of our approach to that of B\&C, we performed additional simplified and full simulations. Although originally designed for the covariance in allele frequency change between multiple time points, B\&C's method can be readily adapted to allele frequency changes recorded over a single generation in multiple independent evolutionary replicates (see Equation \ref{Eq:BCcov13} and \citet{Buffalo.2020}). We set simulation parameters to their reference values (see above) with a few modifications. First, to make comparisons of biases clearer, we reduced noise by employing 50 replicate populations, and second, allele frequency change in the experiment phase was recorded over a single generation. We also ran these simulations at four different levels of map length in the history phase: 0.5 morgan, 5 morgans, 50 morgans, and 100 morgans.
+
+To investigate the consequences of Assumptions B, Ib, and N, we implemented B\&C's method using six different approaches. For clarity, we label the six approaches using a code (see Table \ref{tab:BC_approaches}) that indicates with superscripts whether an assumption is required (+) or not required (0) for an approach to work. To test Assumption B, we recorded allele frequency changes at either all segregating sites ($B^+$) or neutral sites only ($B^0$). To test Assumption Ib, we used either the average LD between all sites ($Ib^+$) or the average LD between selected sites with neutral sites ($Ib^0$). And finally, we either divided the (co)variance in allele frequency change throughout by twice the average genetic diversity ($N^+$; analogous to Equation 16 in B\&C) or used the (co)variance of weighted allele frequency change, where the weights are the inverse of the square root of twice the genetic diversity ($N^0$).  
+
+\section*{Results}
+\addcontentsline{toc}{section}{Results}
+\subsection*{Simplified simulations}
+
+We begin by discussing results from the simplified simulations in which we expect there to be no relationship between allele frequencies and $\alpha$'s. Under our reference parameter set (no dominance, map length in history = 0.5 morgan, map length in the experiment = 2 morgans), our method provided precise and unbiased estimates of $V_A$ throughout the simulated range (0.01-- 0.1) (\ref{fig:simplified_main}a). Furthermore, the estimates of $p_{\bar \alpha} $ and $\beta^{(1)}_{\bar{\alpha}}$ were centred around 0 as expected (\ref{fig:simplified_main}b-c), and the residual variance was marginally above 1 (\ref{fig:simplified_main}d). Next, we investigated how our estimates of $V_A$ were affected by changing (1) map length of the genomic region being simulated, (2) population size of each replicate population in the evolve and resequence experiment, (3) number of replicate populations, and (4) number of generations over which allele frequency changes were recorded in the experiment. Estimates of $V_A$ remained unbiased as the map length in the experiment became smaller, although estimates became noisier, particularly at higher values of $V_A$ (\ref{fig:simplified_params}a).  As expected, estimates also became noisier as the number of individuals, replicate populations, or generations became smaller (\ref{fig:simplified_params}b-d). However, estimates appeared upwardly biased when the number of replicate populations or generations was small (\ref{fig:simplified_params}c-d). Estimates of $V_A$ from simplified simulations incorporating dominance effects in the fitness model were generally precise, but exhibited a small upward bias when dominance effects were large in magnitude (\ref{fig:combined_dominance}a). As the degree of dominance increased, the estimates of $p_{\bar \alpha} $ and $\beta^{(1)}_{\bar{\alpha}}$ became increasingly more negative and the residual variance became larger (\ref{fig:combined_dominance}b-d). 
+
+
+\subsection*{Full simulations}
+In our full simulations we let the ancestral population evolve forward in time with selection for 25,000 generations before simulating the experiment. In these simulations, we expect the population to be at drift-recombination-mutation-selection equilibrium, such that $p_{\alpha} $ is negative and $\beta^{(1)}_{\bar{\alpha}}$ is positive. Results from our reference set (no dominance, map length in history = 0.5 morgan, map length in the experiment = 2 morgans) suggest that not only does our method provide precise and unbiased estimates of $V_A$ (\ref{fig:full_main}a), but it does so by correctly estimating the signs of $p_{\alpha}$ and $\beta^{(1)}_{\bar{\alpha}}$ (\ref{fig:full_main}b-c). As before, estimates of $V_A$ became slightly noisier at shorter map lengths during the experiment (\ref{fig:full_params}a). The quality of our estimates of $V_A$ was not significantly affected by adding beneficial mutations during the history phase (\ref{fig:full_params}c). On the other hand, our estimates were downwardly biased at larger map lengths in the history phase (\ref{fig:full_params}b, also see \ref{fig:full_ml_eta0.045}) and when non-neutral loci had on average larger fitness effects ($E[|\eta|]$) (i.e. when $\eta_{scale}$ was larger) (\ref{fig:full_params}d). The bias at larger $E[|\eta|]$ was likely driven by the loss of additive genic variance at large-effect loci during the experiment (\ref{fig:lost_va}a-d).  
+
+When we simulated the history phase under additivity and switched on dominance only in the experiment phase, we obtained fairly reliable estimates of $V_A$ (\ref{fig:full_dominance_sprinkled}). However, switching on dominance in the last 5,000 generations of the history phase resulted in estimates that were significantly upwardly biased, especially when dominance effects were strong (\ref{fig:combined_dominance}e). However, at the relatively low map length in the history phase (0.5 morgan) used in these simulations, the additive genetic variance for fitness was substantially lower than the additive genic variance (\ref{fig:full_dominance_vA_va}). This suggested the build up of unusually high negative linkage disequilibria between recessive deleterious alleles, generating pseudo-overdominance \citep{ohta1970development, abu2023conditions}, a phenomenon typically observed in regions of extremely low recombination \citep{salson2025interplay}. At higher levels of map length in the history phase (5 morgans), our method provided unbiased estimates of $v_A$ (\ref{fig:combined_dominance}f).     
+
+Finally, we re-analysed our standard set of full simulations in two different ways (\ref{fig:full_params}e-f). First, to accommodate cases in which phased genomes, and therefore ${\bf L}^{'}_{0}$, are unavailable, we assumed that ${\bf L}^{''}_{0}$ was 0 and set ${\bf L}^{'}_{0}$ = ${\bf L}_0$. In other words, we assumed that $\tilde{\bf L}_0$ = ${\bf L}_0$. Our analyses suggest that this assumption leads to a slight downward bias in our estimates of $V_A$ (\ref{fig:full_params}e). Second, to account for instances where $N_E$ in the experiment phase is unknown, we replaced our estimate of $N_E$ in the experiment phase by the number of individuals. Our analyses suggest that this does not affect our estimates of $V_A$ in any way (\ref{fig:full_params}f), with the faster than expected drift being absorbed by an increased residual variance (\ref{fig:residual_var_NE}): estimates of $N_E$ can be obtained by dividing the assumed value of $N_E$ by the estimated residual variance. 
+
+\subsection*{Simulating pool-seq}
+
+When we incorporated the expected covariance structure due to pool-seq sampling in our models, the performance of our method was practically unaffected by obtaining allele frequencies in the experiment phase using simulated pool-seq in the simplified simulations (\ref{fig:poolseq_simplified}A), although a modest negative bias was observed at low (100x) coverage in the full simulations (\ref{fig:poolseq_full}). Additionally, both in the simplified and the full simulations, the degree of overdispersion in the number of reads mapping to an individual did not adversely affect our estimates of $V_A$. Along expected lines (see Supplementary information \ref{App:pool-seq}), omitting the covariance structure of pool-seq sampling from our models led to estimates of $V_A$ that were significantly downwardly biased, with virtually no $V_A$ detected at 100x coverage (\ref{fig:poolseq_simplified}B).   
+
+\subsection*{Comparison with B\&C}
+
+In both simplified and full simulations, all implementations of B\&C's method resulted in a strong upward bias at low recombination rates in the history phase (\ref{fig:BC_simplified} and \ref{fig:BC_full}). This was likely a consequence of Assumption G being violated; the correlation between the contribution of a selected site $j$ to $V_a$ and the persistent association of this site with neutral alleles ($\sum_{ \mathcal{N}_i}(R_{{i_m}{j_m}}R_{{i_n}{j_n}})$) was considerably higher than 0 when the map length in the history phase was low (panel h of \ref{fig:BC_simplified} and \ref{fig:BC_full}). In contrast, the estimates of $V_A$ provided by our method were unbiased and had far greater precision compared to any of the six implementations of B\&C's method in the simplified simulations (\ref{fig:BC_simplified}g), although there was a small upward bias at low recombination rates in the full simulations (\ref{fig:BC_full}g). Due to the difficulty of distinguishing selected from unselected sites, B\&C suggested that the average LD between all sites could be used instead of the LD between selected and unselected sites (Assumption Ib) and indeed this assumption seems to be well justified (panels d \& f in \ref{fig:BC_simplified} and \ref{fig:BC_full} are very similar). However, an inability to distinguish selected from unselected sites would likely mean that B\&C's method is applied to allele frequency change data from \emph{all} segregating sites, contravening Assumption B. This results in considerable overestimation of $V_A$ in simplified simulations (\ref{fig:BC_simplified}a-b) but not in full simulations (\ref{fig:BC_full}a-b). Under all scenarios the bias in the method of B\&C can be reduced (but not eliminated) by relaxing Assumption N (compare panels b, d, and f in \ref{fig:BC_simplified}-\ref{fig:BC_full} to panels a, c and e). Under assumption N, it is assumed that the (co)variance in allele frequency change weighted by the square root of twice the genetic diversities can be approximated by the (co)variances in allele frequency change divided through by twice the average diversities. However, this approximation is not required. 
+
+\section*{Discussion}
+\addcontentsline{toc}{section}{Discussion}
+
+In this paper we estimate the additive genetic variance for relative fitness ($V_A$) directly from the change in the genetic composition of a population caused by selection. Assuming only the absence of meiotic drive and ignoring mutation, we show that $V_A$ can be conveniently expressed as a function of the genome-wide genetic diversity matrix $\textbf{L}$, and the vector of genome-wide expected allele frequency change due to selection, $E[\Delta{\textbf{p}}]$. In our inference approach, we describe how a linear mixed model can be employed to estimate $E[\Delta{\textbf{p}}]$ via independent evolutionary replicates derived from the same base population with a known $\textbf{L}$ -- a common feature of evolve-and-resequence studies.  Unlike alternative methods \citep{buffalo2019linked}, this allows us to obtain estimates of $V_A$ that are largely robust to the underlying genetic properties of the population and the genetic architecture of fitness. Moreover, the underlying modelling framework not only allows $V_A$ to be estimated, but allows inferences about the relationship between effect sizes and allele frequency.    
+
+Although $E[\Delta{p}]$'s at individual loci cannot be usefully estimated, for our purposes it is sufficient to estimate their distribution as parameterised through the mean vector $\boldsymbol{\mu_{\bar{\alpha}}}$ and the (co)variance matrix $\boldsymbol{V_{\bar{\alpha}}}$ for the distribution of the average effects for fitness, the $\alpha$'s. Our inference approach uses a low-dimensional (3-parameter), but biologically sensible, model for the means and (co)variances. It is superficially surprising that such a simple model for an $n_L$ (the number of loci) dimensional distribution can produce accurate results. However, in a typical dataset one expects the number of individuals, $N$, to be far smaller than the number of loci, $n_L$. Therefore, the non-null subspace of $\textbf{L}$ has only $N$ dimensions, and we can work with allele frequency changes projected into this reduced space. This provides a route to understanding how the distribution of $\alpha$'s can be estimated from selected changes in allele frequency that must be negligible compared to the impact of drift: the projection defines `\emph{chunks}' of genome, and it is the frequency changes in these chunks, rather than individual alleles, that are tracked. Since the aggregate fitness effects of alleles across chunks will be more substantial, they can be more easily detected. Moreover, since these aggregate effects may involve a large number of loci, they will, thanks to the central limit theorem, tend to normality and, conditional on the projection, converge in distribution. Since the projection is defined by ${\bf L}$, a model of the $\alpha$'s that conditions on aspects of ${\bf L}$ ($p-q$ and $pq$ in our case) is expected to be sufficient.      
+
+The results of our simulations demonstrate that our approach provides usefully precise and consistent estimates of $V_A$ over a wide range of parameter combinations and experimental designs. In the simplified simulations, in which the relationship between allele frequencies and $\alpha$'s was expected to be absent, the model requires only a single parameter: the variance in average effects, $\sigma^2_{\bar{\alpha}}$. If such a model is assumed, this is a relatively straightforward inference problem and the method of \citet{buffalo2019linked} can give accurate estimates if selected and neutral sites can be distinguished, and certain patterns of recombination and linkage-disequilibrium hold.  Although our approach does not assume such a model, it can accurately infer $V_A$ and also the lack of relationship between allele frequencies and $\alpha$'s, with the two parameters that determine the relationship between allele frequency and $\alpha$ all centered on their null expectations (\ref{fig:simplified_main}). However, in reality, independence between allele frequency and $\alpha$ seems implausible at mutation-selection-drift balance, and the elevated contribution of high-diversity loci to $V_A$ under the simple, but unrealistic, scenario may result in greater power to detect $V_A$.
+
+At mutation-selection-drift balance a negative relationship is expected between $\alpha$'s and allele frequencies \citep{Charlesworth.2010}. Although it could be argued that the strength of this relationship will be reduced in experimental evolution studies, which generally expose populations to novel environmental stressors (such as a laboratory environment, pathogens \citep{basu2024experimental}, extreme population densities \citep{joshi1996density} and temperatures \citep{singh2015egg, hsu2024reproductive}, desiccation \citep{gibbs1997physiological}, malnutrition \citep{kawecki2021genomic}, or toxic substances \citep{godinho2024limits, xiao2019experimental}) it seems unlikely that no relationship would persist. Even under the more realistic scenario of our full simulations, in which the base population had evolved under selection for 25,000 generations, our approach provided reliable estimates of $V_A$ that were remarkably robust to the details of the distribution of fitness effects, such as the relative frequency of beneficial mutations, or properties of the population such as the recombination rate. Furthermore, it did so by correctly inferring a negative relationship between fitness effects of alleles and genetic diversity, and a positive relationship between fitness effects and $p-q$, as expected under mutation-selection balance.
+
+An important assumption of our method is that any consistent change in the $\alpha$'s is vanishingly small in the time-frame over which allele frequency changes are recorded. However, when fitness-causing alleles act non-additively, $\alpha$'s depend on allele frequency and so are expected to change as allele frequencies change. In spite of this, in the simplified simulations where allele frequency change was expected to be large, the performance of the method was minimally affected when allowing dominance at all loci. Moreover, given the form $\alpha_i \approx \eta_i[1 - \kappa_i(p_i-q_i)]$ (where the product $\eta_i\kappa_i$ is always positive in our simulations), the method correctly inferred that the two parameters describing the relationship between the $\alpha$'s and allele frequencies would become increasingly negative with the degree of dominance (\ref{fig:combined_dominance}). Surprisingly, when we allowed dominance effects in the history phase and so allele frequencies and effects had come to an equilibrium we found that our method overestimated $V_A$ to varying degrees depending on how recessive the deleterious allele was. However, this was not because of a failure of the infinitesimal approximation in the experimental phase, but because substantial negative LD had built up during the history phase and our model of $V_{\bar \alpha}$ failed to capture this: the additive genetic variance was roughly half the additive genic variance.  It seems that our simulations were resulting in substantial pseudo-overdominance \citep{abu2023conditions} - a phenomenon characteristic of regions of very low recombination \citep{salson2025interplay}. When we performed identical simulations at higher recombination rates in the history phase, this problem was not observed.
+
+Another key assumption of our method is that any consistent, selection-induced changes in $\textbf{L}$ are negligible, which then allows us to model the expected evolution of $\textbf{L}$ due to the action of drift and recombination. Selection-induced changes in $\textbf{L}$ may be safely ignored if the genetic architecture of fitness is sufficiently polygenic such that selection coefficients associated with each locus are vanishingly small. It is important to note that this assumption was fully relaxed in all of our simulations, in which selection was free to influence the evolution of $\textbf{L}$ along with drift and recombination. Despite this, the performance of our method was virtually unaffected, even in the simplified simulations where selection-induced changes in $\textbf{L}$ were expected to be relatively large.  
+
+While our method generally performs well, some biases were observed. In terms of experimental design, small upward biases are evident when power is low - either because there are few replicates and/or allele frequency change is only calculated over a single generation. In terms of genetic architecture, our approach marginally underestimates $V_A$ when the fitness effects of new non-neutral mutations are large. This downward bias seems to arise because there is a large contribution of rare highly deleterious variants to $V_A$ and these get lost during the experimental phase. Nevertheless, even when 25\% of $V_A$ was lost during the course of the experiment the impact on estimates was rather minor.  Similarly, modest downward biases were observed when the recombination rate in the history phase was increased, but the source of this bias has been harder to diagnose. Increasing the recombination rate resulted in an increase in the number of segregating selected sites and their genetic diversity, and a steeper relationship between $\alpha$ and genetic diversity, consistent with a reduction in the effects of background selection \citep{charlesworth1993effect} on weakly selected sites \citep{stephan1999effect}.  While it is not clear why this causes downward bias in the estimates, it is also unclear whether real populations would ever have such extreme genetic architecture where the bulk of the additive genetic variance for fitness is caused by highly deleterious variants segregating at very low frequencies. In order to make the forward simulations manageable we were working with considerably smaller population and genome sizes than are typical of real populations. It is not clear, however, whether the standard rescaling of mutations rates, recombination rates and selection coefficients to accommodate this downsizing results in genetic architectures that would be typical of larger populations and larger genomes \citep{dabi2025population}. 
+
+While our method performs well when applied to simulated data, application to real-world data would involve overcoming a number of challenges. First, we require genome-wide allele frequency change data from multiple independent evolutionary replicates -- although this should be readily available for most evolve-and-resequence experiments using approaches such as pool-seq. An important point of consideration, therefore, is the minimum pool-seq coverage that the method requires. For our simplified simulations, there was little deterioration in model performance as coverage dropped or overdispersion increased, suggesting modest coverage (100x) should be sufficient if the appropriate covariance structure is used. While this might be surprising, the relevant parameter is probably not coverage \emph{per se}, but the number of reads overlapping at least one segregating site per unit map length, as this determines how accurately the frequency of a `chunk' of genome can be measured. Using a similar argument, \citet{tilk2019accurate} demonstrated that supplementing pool-seq sampling with haplotype inference tools can result in nearly 500x `effective' coverage at 10x empirical coverage. Given the ancestral haplotype structure is a core requirement of our method, it may be possible that even greater precision could be achieved by also using such tools. However, this could come with the risk that estimation errors are correlated across replicates and be mistaken for patterns of selection. For our full simulations, a moderate downward bias was observed at 100x coverage. While this may suggest that our method demands relatively high coverage ($\geq$500x), it is worth noting that we only implemented an approximate (i.e. diagonal) covariance structure for pool-seq sampling while analysing our simulations due to computational limitations. Incorporating the full covariance structure should lead to improved estimates.
+
+Second, we require the genetic diversity matrix $\textbf{L}$ in the base population from which the replicates are derived. This is not always the case for evolve-and-resequence studies, in which base populations are often split into replicate baseline populations long before the experiment, or when newer selection regimes are derived mid-experiment \citep{burke2010genome,singh2015egg,gupta2016no, robinson2023evolution}. Furthermore, our method requires that sufficient individuals from the base population are individually sequenced  to estimate  $\textbf{L}$, or -- even better --  its gametic phase ($\textbf{L}^{'}$) and non-gametic phase ($\textbf{L}^{''}$) components, although the required phasing should become more readily available with long-read sequencing. Third, to predict how $\textbf{L}$ evolves, we require an estimate of the recombination probability between all pairs of segregating sites, such as a recombination map for the population. In reality, recombination maps are likely to have been derived from other populations, in which recombination patterns may differ \citep{johnston2024understanding}. Although recombination maps can be approximated, for example by using Haldane's mapping function, it is not clear how sensitive the method is to errors in the recombination map. Fourth, our method requires the mean number of generations over which allele frequency changes are calculated, which may be hard to infer with overlapping generations. Since allele-frequency change will be roughly proportional to the number of generations that have elapsed ($n_g$), and $V_A$ is quadratic in allele-frequency change, estimates of $V_A$ might be out by a factor $(n_g/\widehat{n_g})^2$, where $\widehat{n_g}$ is the assumed number of generations. Fifth, our method uses effective population size to predict how $\textbf{L}$ evolves ($N_e$) and to derive expressions for the drift (co)variance ($N_E$). Although reliable estimates of both effective population sizes may be hard to obtain, this is unlikely to be a major issue because: (i) $\textbf{L}^{'}$ decays with a rate roughly proportional to $1 - 1/N_e$ (likely making it insensitive to errors in estimating  $N_e$)  and (ii) our simulations suggest that using the wrong $N_E$ does not adversely affect our estimates of $V_A$ because the mis-specification is absorbed by the residual variance of the model. Sixth, our simulations minimise the unpredictable response to selection by modelling a constant environment. However, with selection coefficients that vary in time or across replicates, the unpredictable response to selection will be greater. Indeed in outdoor mesocosms of \emph{D. melanogaster}, \citet{Bitter.2024} report that allele frequency changes can switch signs over time-points separated by a matter of weeks in spite of exhibiting highly concordant evolution between replicates. It is not clear to what degree this will affect inferences. Finally, selection can often act in different ways in different contexts such as space \citep{whitlock2015modern, delph2018study}, time, and between the two sexes \citep{schenkel2018making}. Our approach captures the effects of selection averaged over all these different contexts. Specifically, if loci have different fitness effects in males and females, we effectively estimate $(V_{A,f} + V_{A,m} + 2COV_{A,mf})/4$, where $V_{A,f}$ and $V_{A,m}$ are the additive genetic variances for relative fitness in females and males respectively, and $COV_{A,mf}$ is the intersexual additive genetic covariance for relative fitness. For these reasons, when applied to replicate populations, our estimates of $V_A$ are perhaps best thought of as the additive genetic \emph{covariance} in fitness between replicates. Although rarely made explicit, estimates from wild systems should be interpreted in the same way: the additive genetic covariance between the environments in which relatives live \citep{Vehvilainen.2008}.   
+
+Analysing data from wild populations is likely to entail further challenges. For example, in natural populations, allele frequency change from immigration may be consequential, and without some modification is likely to be mistaken for allele frequency change caused by natural selection \citep{simon2024contribution}. Furthermore, replicate populations are unlikely to be available for natural systems -- with some exceptions such as Trinidadian guppies \citep{reznick1996life} -- although with some modifications our method could be adapted to use allele frequency change data from multiple time points. However, a lack of individual-level sequences in the base population would mean that the estimates of $\textbf{L}$ will likely be considerably noisier in natural populations. 
+
+While we accept that the data requirements for our method are steep, and the list of caveats appears long, we do think that information about $V_A$ can be successfully leveraged from current evolve and resequence studies. Going forward, we hope this work will inform future evolve and resequence study design, and that estimates of $V_A$ from a wide range of organisms and environments become available. Partitioning $V_A$ into genomic features is an obvious next step, and in the future we hope to go beyond simply knowing the magnitude of $V_A$ and start to understand its underlying causes.
+
+\section*{Data availability statement}
+\addcontentsline{toc}{section}{Data Availability Statement}
+This study does not use any data. The code used for simulations and analyses is available in the following GitHub repository: \url{https://github.com/manas-ga/Va_simulations}.
+
+\section*{Acknowledgments}
+\addcontentsline{toc}{section}{Acknowledgments}
+
+The authors would like to thank Bill Hill, Brian Charlesworth, Peter Keightley, Konrad Lohse, Bruce Walsh, Ben Longdon and Vince Buffalo for their insightful comments, and The Argyle for hosting us at the early stages of this project. Computer simulations and analyses described here were performed on the AC3 computing cluster based at Ashworth Laboratories, and on Eddie, the University of Edinburgh's main high performance computing facility.
+
+\section*{Study funding}
+\addcontentsline{toc}{section}{Study funding}
+This work was funded by a Natural Environment Research Council (NERC) grant (reference: NE/W001330/1). For the purpose of open access, the authors have applied a Creative Commons Attribution (CC BY) license to any Author Accepted Manuscript version arising from this submission.
+
+\section*{Conflict of interest}
+\addcontentsline{toc}{section}{Conflict of interest}
+The authors have no conflicts of interest to declare.
+
+\putbib
+\end{bibunit}
+
+
+\onecolumn
+
+\section{Figure legends}
+
+\begin{figure}[H]
+%\includegraphics[scale = 0.15]{Figures/simplified_main.jpg}
+\caption{Results of simplified simulations  (map length in the history phase = 0.5 morgan, map length in the experiment phase = 2 morgans, number of replicate populations = 10, population size = 1,000, number of generations = 3, the mean of the gamma distribution from which effect sizes for log absolute fitness were sampled for non-neutral mutations ($E[|\eta|]$) = 0.02, and no dominance (i.e. $\kappa$ = 0)). (a) A scatter plot of estimates of $V_A$ vs true values of $V_A$. The solid black line indicates the 1:1 line. The inference of $V_A$ was obtained by modelling the mean and the (co)variance of the average effects for relative fitness as $\boldsymbol{\mu}_{\bar{\alpha}} = \beta^{(1)}_{\bar{\alpha}}({\bf p}_{0}-{\bf q}_{0})$ and ${\bf V}_{\bar{\alpha}}=\sigma^2_{\bar{\alpha}}{\bf L}_{0}^{p_{\bar{\alpha}}}$, respectively.   (b)-(d) Histograms of the estimates of $p_{\bar \alpha} $, $\beta^{(1)}_{\bar{\alpha}}$, and the residual variance, respectively. The vertical red lines indicate null expectations (0 for $p_{\bar \alpha} $ and $\beta^{(1)}_{\bar{\alpha}}$, and 1 for the residual variance). The black dashed lines indicate the means of the respective distributions.}
+  \label{fig:simplified_main}
+\end{figure}
+
+\begin{figure}[H]
+%\includegraphics[scale = 0.12]{Figures/simplified_params.jpg}
+\caption{Scatter plots of estimates of $V_A$ vs true values of $V_A$ for simplified simulations at different levels of (a) map length in the experiment, (b) population size of each replicate population in the evolve and resequence experiment, (c) number of replicate populations, and (d) number of generations over which allele frequency changes were recorded in the experiment. In each case, other than the parameter to be varied, the other parameters were fixed at their default values (the mean of the gamma distribution from which effect sizes for log absolute fitness were sampled for non-neutral mutations ($E[|\eta|]$) = 0.02, map length in the history phase = 0.5 morgan, map length in the experiment phase = 2 morgans, number of replicate populations = 10, population size = 1,000, number of generations = 3, and no dominance ($\kappa$ = 0)). The solid black line indicates the 1:1 line. The coloured lines represent regression lines for estimates of $V_A$ vs true values of $V_A$.}
+  \label{fig:simplified_params}
+\end{figure}
+
+\begin{figure}[H]
+%\includegraphics[scale = 0.12]{Figures/combined_dominance.jpg}
+\caption{Results of simulations with map lengths in the experiment phase = 2 morgans, number of replicate populations = 10, population size = 1,000, number of generations = 3, and different degrees of dominance: $\kappa$ = 0 (green circles), $\kappa$ = 0.5 (blue triangles), $\kappa$ = 0.75 (magenta plus signs) and $\kappa$ = 0.9 (grey squares). (a-d) are the results from the simplified simulations with the map length in the history phase = 0.5 morgan and the mean of the gamma distribution from which effect sizes for log absolute fitness are sampled for non-neutral mutations ($E[|\eta|]$) = 0.02. (a) A scatter plot of estimates of $V_A$ vs true values of $V_A$. The solid black line indicates the 1:1 line. The coloured lines represent regression lines for estimates of $V_A$ vs true values of $V_A$. (b-d) Estimates of model parameters $p_{\bar \alpha}$, $\beta^{(1)}_{\bar{\alpha}}$, and the residual variance, respectively. (e-f) Scatter plots of estimates of $V_A$ vs true values from full simulations (with $E[|\eta|] = 0.03$) when the map length in the history phase was either 0.5 morgan (e) or 5 morgans (f).}
+  \label{fig:combined_dominance}
+\end{figure}
+
+\begin{figure}[H]
+%\includegraphics[scale = 0.15]{Figures/full_main.jpg}
+\caption{Results of full simulations with a burn-in phase of 25,000 generations (map length in the history phase = 0.5 morgan, map length in the experiment phase = 2 morgans, number of replicate populations = 10, population size = 1,000, number of generations = 3, the mean of the gamma distribution from which effect sizes for log absolute fitness were sampled for non-neutral mutations ($E[|\eta|]$) = 0.02, and no dominance (i.e. $\kappa$ = 0)). (a) A scatter plot of estimates of $V_A$ vs true values of $V_A$. The solid black line indicates the 1:1 line. The inference of $V_A$ was obtained by modelling the mean and the (co)variance of the average effects for relative fitness as $\boldsymbol{\mu}_{\bar{\alpha}} = \beta^{(1)}_{\bar{\alpha}}({\bf p}_{0}-{\bf q}_{0})$ and ${\bf V}_{\bar{\alpha}}=\sigma^2_{\bar{\alpha}}{\bf L}_{0}^{p_{\bar{\alpha}}}$, respectively.  (b)-(d) Histograms of the estimates of $p_{\bar \alpha} $, $\beta^{(1)}_{\bar{\alpha}}$, and the residual variance, respectively. The vertical red lines indicate null expectations (0 for $p_{\bar \alpha} $ and $\beta^{(1)}_{\bar{\alpha}}$, and 1 for the residual variance). The black dashed lines indicate the means of the respective distributions.}
+  \label{fig:full_main}
+\end{figure}
+
+\begin{figure}[H]
+%\includegraphics[scale = 0.12]{Figures/full_params.jpg}
+\caption{Scatter plots of estimates of $V_A$ vs true values of $V_A$ for full simulations with a burn-in phase of 25,000 generations at different values of (a) map length in the experiment phase, (b) map length during the history phase, (c) the ratio of rates of beneficial and deleterious mutations in the history phase, and (d) the mean of the gamma distribution from which effect sizes for log absolute fitness were sampled for non-neutral mutations ($E[|\eta|]$). In each case, other than the parameter to be varied, the other parameters were fixed at their default values (map length in the history phase = 0.5 morgan, map length in the experiment phase = 2 morgans, number of replicate populations = 10, population size = 1,000, number of generations = 3, $E[|\eta|]$ = 0.02, and no dominance (i.e. $\kappa$ = 0)). The solid black line indicates the 1:1 line. The coloured lines represent regression lines for estimates of $V_A$ vs true values of $V_A$. The effect of analysing the standard set of simulations (\ref{fig:full_main}) (e) without partitioning $\tilde{\bf L}_0$ into its gametic (${\bf L}^{'}_{0}$) and non-gametic phase (${\bf L}^{''}_{0}$) components, and (f) using $N_E = N = 1,000$. Note that in (F), a large number of green circles are eclipsed by the blue triangles.}
+\label{fig:full_params}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+%\includegraphics[scale = 0.15]{Figures/poolseq_simplified.jpg}
+\caption{Scatter plots of estimates of $V_A$ vs true values of $V_A$ for simplified simulations (map length in the history phase = 0.5 morgan, map length in the experiment phase = 2 morgans, number of replicate populations = 10, population size = 1,000, number of generations = 3, the mean of the gamma distribution from which effect sizes for log absolute fitness were sampled for non-neutral mutations ($E[|\eta|]$) = 0.02, and no dominance (i.e. $\kappa$ = 0)) using either exact allele frequencies in the experiment phase (green circles), or allele frequencies in the experiment phase obtained via simulated pool-seq implemented without any overdispersion in the number of reads mapping to an individual, at three different levels of coverage (expected number of reads mapping a segregating site: 1000x (magenta triangles), 500x (blue squares), and 100x (grey plus symbols)) as well as estimates obtained from simulated pool-seq implemented with overdispersion ($V_x = log(2)$) in the number of reads mapping to an individual, at 1000x coverage (orange empty boxes with crosses). Reads were modelled to be 800 base-pairs long. The solid black line indicates the 1:1 line. The coloured lines represent regression lines for estimates of $V_A$ vs true values of $V_A$. Estimates of $V_A$ were obtained by either incorporating (a) or omitting (b) the expected covariance structure due to pool-seq sampling in the models.}
+  \label{fig:poolseq_simplified}
+\end{figure}
+
+%\newgeometry{left=1cm,bottom=2cm, top=1cm, right=1cm}
+%\begin{landscape}
+\begin{figure}[H]
+%\begin{center}
+%\includegraphics[scale = 0.14]{Figures/BC_simplified.jpg}
+%\end{center}
+\caption{Estimates of $V_A$ obtained using our method (g) and various applications of the B\&C Approach (a--f) from simplified simulations with varying 
+    map lengths in the history phase: 0.5 morgan (green circles), 5 morgans (magenta triangles), 50 morgans (blue squares), and 100 morgans (grey plus symbols). The solid black line indicates the 1:1 line. Each application of B\&C is defined in terms of which three assumptions (B, Ib, N) are required or not (designated with a `$+$' or `0' superscript, respectively). Assumption B is that allele frequencies are tracked at unselected loci only, Assumption Ib is that the average LD between all sites is equal to the average LD between selected and unselected sites, and Assumption N is that the covariance between projected allele frequency changes is equal to the covariance between allele frequencies changes scaled by the average projection (see Table \ref{tab:BC_approaches} for details). Panel h is the correlation between the contribution of a selected sites to $V_a$ and their persistent associations with neutral alleles (i.e. deviations from Assumption G in B\&C)}
+    \label{fig:BC_simplified}
+\end{figure}
+%\end{landscape}
+
+%\begin{landscape}
+\begin{figure}[H]
+%\begin{center}
+%\includegraphics[scale = 0.14]{Figures/BC_full.jpg}
+%\end{center}
+\caption{Estimates of $V_A$ obtained using our method (g) and various applications of the B\&C Approach (a--f) from full simulations with varying map lengths in the history phase: 0.5 morgan (green circles), 5 morgans (magenta triangles), 50 morgans (blue squares), and 100 morgans (grey plus symbols). The solid black line indicates the 1:1 line. Each application of B\&C is defined in terms of which three assumptions (B, Ib, N) are required or not (designated with a `$+$' or `0' superscript, respectively). Assumption B is that allele frequencies are tracked at unselected loci only, Assumption Ib is that the average LD between all sites is equal to the average LD between selected and unselected sites, and Assumption N is that the covariance between projected allele frequency changes is equal to the covariance between allele frequencies changes scaled by the average projection (see Table \ref{tab:BC_approaches} for details). Panel h is the correlation between the contribution of a selected sites to $V_a$ and their persistent associations with neutral alleles (i.e. deviations from Assumption G in B\&C). For clarity of presentation, in (a), (c), and (e), we have restricted the range of the y axis between 0 and 0.35. As a consequence, points having an estimate of $V_A$ above 0.35 have been excluded from the plot for 0.5 morgan (green circles).}
+    \label{fig:BC_full}
+\end{figure}
+%\end{landscape}
+%\restoregeometry
+
+
+\begin{table}[p]
+    \centering
+    
+    \begin{tabular}{cccccc}
+    \hline
+        $\boldsymbol{|\kappa|}$&$\boldsymbol{E[|\eta|]}$&$\boldsymbol{\mu_{ben}:\mu_{del}}$ &$\boldsymbol{\mu_{msp}}$  &$\boldsymbol{\mu_{SLiM}}$  & $\boldsymbol{n_{L_\mathcal{S}}}$\\
+        \hline
+        0&0.02& 0 & $5.56\times10^{-8}$ -- $5.56\times10^{-7}$ &$5.56\times10^{-7}$ --  $5.56\times10^{-6}$  & 10058  -- 63755\\
+        0&0.02& 0.0002 & $5.56\times10^{-8}$ --  $5.56\times10^{-7}$ & $5.56\times10^{-7}$ -- $5.56\times10^{-6}$ & 9742 -- 63797\\
+         0&0.02& 0.02  & $2.0\times10^{-8}$ -- $2.0\times10^{-7}$ & $2.0\times10^{-7}$ -- $2.0\times10^{-6}$ & 3127 --  29999\\
+         0&0.03& 0 & $3.6\times10^{-8}$ --  $3.6\times10^{-7}$ & $3.6\times10^{-7}$ --  $3.6\times10^{-6}$ & 6565 --  42097\\
+         0&0.06& 0 & $1.8\times10^{-8}$ -- $1.6\times10^{-7}$ & $1.8\times10^{-7}$ -- $1.6\times10^{-6}$ & 2998 --  18011 \\
+         0.5&0.03&0&$7.2\times10^{-8}$ -- $3.24\times10^{-7}$&$7.2\times10^{-7}$ -- $3.24\times10^{-6}$&13738 -- 49299\\
+         0.75&0.03&0&$7.5\times10^{-8}$ -- $2.07\times10^{-7}$&$7.5\times10^{-7}$ -- $2.07\times10^{-6}$&16870 -- 38695\\
+         \hline
+    \end{tabular}
+    \caption{The ranges for the rates for non-neutral mutations used in the history phase of the full simulations implemented in msprime ($\mu_{msp}$) (the coalescent simulation) and SLiM ($\mu_{SLiM}$) (the forward simulation of the history), along with the ranges for the resulting number of non-neutral sites segregating in the population at the end of the history phase ($n_{L_\mathcal{S}}$) in simulations with different values of the absolute degree of dominance ($|\kappa|$), the mean of the gamma distribution from which effect sizes for log absolute fitness were sampled for non-neutral mutations ($E[|\eta|]$), and the ratio of the rate of beneficial mutations to the rate of deleterious mutations in the history phase ($\mu_{ben}:\mu_{del}$). Note that the ranges for the number of selected loci, $n_{L_\mathcal{S}}$, are only shown for the simulations where the map length in the history phase was 0.5 morgan.}
+    \label{tab:sim_params}
+    
+\end{table}
+
+
+
+\begin{table}[p]
+    \centering
+    \begin{tabular}{cccc}
+    \hline
+        \textbf{Approach} & $\boldsymbol{\Delta p}$ & \textbf{Average LD between} &  $\boldsymbol{Cov(\Delta\textbf{p}_m,\Delta\textbf{p}_n)}$  \\
+         \hline
+         $B^+Ib^+N^+$&all sites&all sites&divided throughout by ${(\bar{p}_m\bar{q}_m + \bar{p}_n\bar{q}_n )/2}$\\
+         $B^0Ib^+N^+$&neutral sites&all sites&divided throughout by ${(\bar{p}_m\bar{q}_m + \bar{p}_n\bar{q}_n )/2}$\\
+         $B^0Ib^0N^+$&neutral sites&selected \& neutral sites&divided throughout by ${(\bar{p}_m\bar{q}_m + \bar{p}_n\bar{q}_n )/2}$\\
+         $B^+Ib^+N^0$&all sites&all sites&replaced by $Cov(\Delta\overrightarrow{\textbf{p}_m},\Delta\overrightarrow{\textbf{p}_n})$\\
+         $B^0Ib^+N^0$&neutral sites&all sites&replaced by $Cov(\Delta\overrightarrow{\textbf{p}_m},\Delta\overrightarrow{\textbf{p}_n})$\\
+         $B^0Ib^0N^0$&neutral sites&selected \& neutral sites&replaced by $Cov(\Delta\overrightarrow{\textbf{p}_m},\Delta\overrightarrow{\textbf{p}_n})$\\
+         \hline
+    \end{tabular}
+    \caption{We applied B\&C's method to our simulations using six different approaches. The requirement of Assumptions B, Ib, and N is indicated using superscripts ("+" when required and "0" when not required). We used allele frequency change ($\Delta\textbf{p}$) at either all segregating sites (Assumption B required) or at neutral segregating sites only (Assumption B not required). We computed average LD using either the LD between all segregating sites (Assumption Ib required) or the LD between selected and neutral sites (Assumption Ib not required). We used either the (co)variance in $\Delta\textbf{p}$ divided throughout by twice the average genetic diversity (Assumption N required) or the (co)variance in weighted $\Delta\textbf{p}$ (i.e. $\Delta\overrightarrow{\textbf{p}}$) where the weights are the square roots of twice the genetic diversity at each site (Assumption N not required).}
+    \label{tab:BC_approaches}
+\end{table}
+
+\newpage
+
+
+\begin{longtable}{p{2cm}p{13cm}}
+
+\hline
+\textbf{Symbol}&\textbf{Description}\\
+\hline
+${\bf B}$&Diagonal matrix of standard deviations for the $c$'s\\
+$c_{k,i}$& Number of reference alleles at locus $i$ for individual $k$ divided by 2.\\
+$C_{A}(t\rightarrow\tau)$&Additive genetic covariance for relative fitness between generation $t$ and $\tau$ for a population with genetic structure equal to that in generation $t$.\\
+$C_{a}(t\rightarrow\tau)$&Additive genic covariance for relative fitness between generation $t$ and $\tau$ for a population with genetic structure equal to that in generation $t$.\\
+${\bf D}_{2}$&Diagonal matrix of square-rooted eigenvalues of $\boldsymbol{\mathcal{D}}$\\
+$\boldsymbol{\mathcal{D}}_m$&Matrix that gives the covariance in allele frequency changes between generation $t_m$ and $\tau_m$ in replicate $m$ due to drift.\\
+$\boldsymbol{\mathcal{E}}_m$&Matrix that gives the covariance in allele frequency change estimation errors in replicate $m$.\\
+${\bf F}_{t\tau}$&${\bf W}_{t\tau}$ but with the diagonals set to zero.\\
+$g$&Total branch length of the tree sequence recorded in the history phase of the simulations\\
+${\bf H}_{t\tau}$&${\bf W}_{t\tau}$ but with the off-diagonals set to zero.\\
+${\bf L}_{t,m}$&Covariance matrix of c's at time $t$ in replicate $m$.\\
+${\bf L}^{'}_{t,m}$&Covariance matrix of $c$'s at time $t$ in replicate $m$ due to being on the same gametic contribution. \\
+${\bf L}^{''}_{t,m}$&Covariance matrix of $c$'s at time $t$ in replicate $m$ due to being on different gametic contributions. \\
+$\Delta{\bf L}^{'}_{t,m}$&The stochastic change in ${\bf L}^{'}$ between time zero and $t$ in replicate $m$.\\
+$\tilde{\bf L}_{0}$&Weighted sum of ${\bf L}^{'}_0$ and ${\bf L}^{''}_0$ with weights for element $ij$ being 1 and $z_{{0},ij}/\zeta_{{0},ij}$ respectively.\\
+$\boldsymbol{\mathcal{L}}_{t,m}$&A matrix that gives, when post-multiplied by $\boldsymbol{\alpha}$, the predictable change in allele frequency due to selection between generation $t_m$ and $t_m+1$ in replicate $m$.\\
+$\boldsymbol{\mathcal{L}}_m$&A matrix that gives, when post-multiplied by $\boldsymbol{\alpha}$, the predictable change in allele frequency due to selection between generation $t_m$ and $\tau_m$ in replicate $m$.\\
+${\bf M}_{t,m}$&Matrix of weights for $\tilde{\bf L}_{0}$ that gives the covariance in allele frequency changes  due to drift between time $t>0$ and $t+1$ in replicate $m$.\\
+${\bf M}_{m}$&Matrix of weights for $\tilde{\bf L}_{0}$ that gives the covariance in allele frequency changes  due to drift between time $t_m>0$ and $\tau_m$ in replicate $m$\\
+$n_L$&Number of loci\\
+$n_{L_\mathcal{S}}$&Number of non-neutral segregating sites\\
+$N_{t,m}$&Census population size at time $t$ in replicate $m$\\
+$N_{e_{t,m}}$&Variance effective population size at time $t$ in replicate $m$\\
+$N_{E_{t,m}}$&Variance effective population size at time $t$ in replicate $m$ ignoring the impact of linked-selection\\
+${\bf N}_{t,m}$&Matrix of weights for $\tilde{\bf L}_{0}$ that gives the expected ${\bf L}$ at time $t>0$ in replicate $m$.\\
+${\bf N}_{m}$&Matrix of weights for $\tilde{\bf L}_{0}$ that gives the sum of the expected ${\bf L}$ from time $t_m>0$ to $\tau_m$ in replicate $m$.\\
+$\mathcal{N}$&Used as a subscript to indicate the set of neutral loci.\\
+$O_{ij}$& Number of pool-seq reads spanning sites $i$ and $j$. If $i=j$, $O_{ij}$ is the coverage.\\
+$p_{\bar{\alpha}}$&Parameter that takes ${\bf L}_0$ to some power \\
+${\bf p}_{t,m}$& Vector of reference allele frequencies at time $t$ in replicate $m$.\\
+$\Delta {\bf p}_{t,m}$&Vector of reference allele frequency changes between time $t$ and $t+1$ in replicate $m$.\\
+$\Delta {\bf p}_{m}$&Vector of reference allele frequency changes between time $t_m$ and $\tau_m$ in replicate $m$.\\
+${\bf P}$&Projection matrix for allele frequencies.\\
+${\bf q}_{t,m}$& Vector of alternate allele frequencies at time $t$ in replicate $m$.\\
+${\bf Q}_m$& Matrix that is proportional to the covariance in allele frequency change estimation errors in replicate $m$.\\
+$r_{ij}$&Recombination rate between loci $i$ and $j$.\\
+$R_{t,ij}$&Correlation in allele count between locus $i$ and $j$ at time $t$ (Note the use of the uppercase to distinguish from the recombination rate $r$).\\
+${\bf R}_{+}$&Matrix of recombination probabilities.\\
+${\bf R}_{-}$&Matrix of non-recombination probabilities.\\
+${\bf R}$&Correlation matrix of the $c$'s.\\
+${\bf S}_{\bar{\alpha}}$&Sampling covariance matrix for the parameters of the regression on the mean average effects, $\boldsymbol{\beta}_{\bar{\alpha}}$.\ \\
+$\mathcal{S}$&Used as a subscript to indicate the set of selected loci.\\
+$t_m$&Time at which allele frequencies are first measured in replicate $m$.\\
+${\bf U}$&Eigenvectors of ${\bf L}_0$.\\
+${\bf U}_{\bf L}$&Eigenvectors of ${\bf L}_0$ with non-zero eigenvalues.\\
+${\bf U}_{2}$&Eigenvectors of $\boldsymbol{\mathcal{D}}$\\
+$\boldsymbol{\mathcal{U}}_m$&Matrix that gives the covariance in allele frequency changes between generation $t_m$ and $\tau_m$ in replicate $m$ due to the unpredictable response to selection.\\
+$V_a(t)$&Additive genic variance for relative fitness at time $t$\\
+$V_A(t)$&Additive genetic variance for relative fitness at time $t$\\
+$V_{\bar A}(t)$&Additive genetic covariance between replicate/time-points for relative fitness in a population with genotypic composition equal to that at time $t$.\\
+$V_x$&Variance of the normal distribution from which $log(\lambda_{x})$'s are sampled\\
+$\bf{V}_{\bar{\alpha}}$&Covariance matrix for the mean average effects.\\\
+$w$&Relative fitness\\
+$W$&Absolute fitness\\
+${\bf W}_{t\tau}$&A matrix with the $ij^{th}$ element equal to $R_{t,ji}R_{\tau,ki}(b_{\tau,i}/b_{t,i})$\\
+${\bf X}$&Design matrix for the regression of the mean average effects on ${\bf p}_0 - {\bf q}_0$.\\
+${y_{k,i}}$&Genotypic contribution made by locus $i$ to the log absolute fitness ($log(W)$) of individual $k$\\
+$Y_k$&Genotypic value of log fitness for individual $k$\\
+$z_{t,ij}$&$(1-r_{t,ij})(1-\frac{1}{2N_{e_t}})$\\
+$\boldsymbol{\alpha}_{t,m}$& Vector of average effects for relative fitness at time $t$ in replicate $m$.\\
+$\bar{\boldsymbol{\alpha}}$& Vector of mean average effects for relative fitness.\\
+$\Delta{\bf \alpha}_{t,m}$&Vector of deviations of the average effects for relative fitness at time $t$ in replicate $m$ from the global mean.\\
+$\beta^{(1)}_{\bar{\alpha}}$&Slope of the regression of the mean average effects on ${\bf p}_0 - {\bf q}_0$.\\
+$\zeta_{t,ij}$&$r_{t,ij}(1-\frac{1}{2N_{e_t}})$\\
+$\eta_{i}$& Difference between the genotypic contributions to $log(W)$ by the reference and non-reference homozygotes at locus $i$\\
+$\eta_i^{(a)}$&Average effect for $log(W)$ at locus $i$\\
+$\eta_{scale}$&Scale of the gamma distribution from which $\eta's$ were sampled in the history phase of the simulations\\
+$\kappa_i$&Degree of dominance at locus $i$ for log absolute fitness. \\
+$\lambda_{x,k}$&Mean of the Poisson distribution from which the number of reads mapping to individual $k$ are sampled while simulating pool-seq \\
+$\mu_{msp}$&Mutation rate for non-neutral mutations in the coalescent part of the history phase of the simulations\\
+$\mu_{SLiM}$& Mutation rate for non-neutral mutations in the forward part of the history phase of the simulations\\
+$\mu_x$&Mean of the normal distribution from which $log(\lambda_{x})$'s are sampled\\
+$\boldsymbol{\mu}_{\bar{\alpha}}$&Vector of expected values for the mean average effects.\\
+$\sigma^{2}_{\bar{\alpha}}$&Proportionality constant that relates $\bf{V}_{\bar{\alpha}}$ to ${\bf L}_{0}^{p_{\bar{\alpha}}}$.\\
+$\sigma^2_o$& Parameter for scaling sampling (co)variances for allele frequencies: values greater than 1 indicate overdispersion.\\
+$\tau_m$&Time at which allele frequencies are finally measured in replicate $m$.\\
+$\phi_{t,\tau}$&The ratio of genetic diversity in generation $\tau$ to genetic diversity in generation $t$ assumed constant across all selected loci.\\
+$\overrightarrow{}$&Used above a symbol to indicate it is on the projected space.\\
+$\widehat{\ \ \ \ }$&Used above a symbol to indicate an estimate.\\
+\hline
+\caption{Notation}
+\label{tab:notation}
+
+\end{longtable}
+\twocolumn
+
+
+\end{document} 

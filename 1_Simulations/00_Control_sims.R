@@ -75,6 +75,12 @@ if(Sys.info()["nodename"]=="SCE-BIO-C06645"){
 
 }
 
+# If running on a different computer, uncomment the following two lines and specify paths 
+# base_path = "enter the path to this file"
+# file_storage_path = "enter the bath where temporary files are to be stored"
+
+
+
 # Paths to various scripts that are used for running the simulations and extracting information from SLiM outputs
 
 msprime_burnin_path = file.path(base_path, "0_neutral_burnin.py")                                             ## msprime script generating the initial sequences

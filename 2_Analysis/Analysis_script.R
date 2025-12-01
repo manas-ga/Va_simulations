@@ -177,15 +177,15 @@ library(Vw)
 ########################
 
 
-Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "TEST_SCE-BIO-C06645_2025-08-21_16-01-17.50597", commandArgs(trailingOnly = TRUE)[1])
+Set_ID = ifelse(Sys.info()["nodename"]=="SCE-BIO-C06645"|Sys.info()["nodename"]=="sce-bio-c04553", "TEST_SCE-BIO-C06645_2025-11-26_13-28-55.786568", commandArgs(trailingOnly = TRUE)[1])
 
-pool_seq = TRUE
-incorporateQ = FALSE
+pool_seq = FALSE
+incorporateQ = TRUE
 
 if(pool_seq){
   asreml.options(workspace="4gb") # only for poolseq
   read_length = 800
-  coverage = 1000
+  coverage = 100
   V_logmean = log(2)
 }else{
   read_length = NULL
@@ -226,7 +226,7 @@ for(sim in 1:nsims){
                               NE = c(1000, 1000),
                               predict_NE =  TRUE,                         # If true, this overwrites the Ne supplied above by Ne = c(nind_expt, predict_Ne(nind_expt, Ve_w_expt))
                               verbose = TRUE,
-                              all.gp = FALSE)
+                              all.gp = TRUE)
   
   message("Final output:")
   print(analysed_data)

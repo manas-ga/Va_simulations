@@ -33,10 +33,13 @@ https://www.biorxiv.org/content/10.1101/2025.05.13.653886v1
 Contains scripts to perform individual based simulations using msprime and SLiM
 
 ## 2_Analysis
-Contains scripts to parse the output files generated in the simulations, perform analyses, and generate
+Contains scripts to parse the output files generated in the simulations, perform analyses, and generate figures
 
 ## 3_logs
 Logs of job arrays run on the AC3 cluster to run simulations and analyses
+
+## 4_analysed_data
+Compiled simulation output used for generating figures
 
 ## 5_Manuscript_files
 Manuscript figures and other files useful for manuscript submission
@@ -44,9 +47,9 @@ Manuscript figures and other files useful for manuscript submission
 ## Old and trial stuff
 Rendundant and old code
 
-## Va_anal.yml
-A .yml file storing the conda environment used for the analyses
-
 ## Va_env.yml
 A .yml file storing the conda environment used for the simulations and the analyses
+
+## Vw
+Contains the R library 'Vw'
 
