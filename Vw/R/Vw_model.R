@@ -16,7 +16,6 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
                    palpha,
                    balpha,
                    Vs,
-                   method,
                    L,           # between individual covariance in allele proportion
                    Ltilde,      # between gamete covariance in half allele proportion
                    svdL=NULL,   # list with elements UL and DL,
@@ -83,7 +82,6 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
   
   if(!proj%in%c("LoM", "BLoM", "L", "N")){stop("proj must be one of 'LoM', 'L', 'N'")}
   if(!Vs%in%c("LoNL", "L")){stop("Vs must be either 'LoNL' or 'L'")}
-  if(!method%in%c("REML", "MCMC")){stop("method must be either 'REML' or 'MCMC'")}
   
   #####################################
   ### calculate projection matrices ###
@@ -375,31 +373,38 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
   if(verbose){
     message("Calculating the estimate of Vw...")
   }
+   
+  sigma2alpha<-summary(output$model)$varcomp['vm(locus, SC, singG = "PSD")',"component"]/output$SC_scale
+
+  S<-matrix(0,2,2)
+  colnames(S)<-rownames(S)<-c("int", "pmq")
+
+  if(is.na(balpha[1]) & is.na(balpha[2])){
+    balpha<-summary(output$model, coef=TRUE)$coef.fixed[c("int", "pmq"),1]
+    S<-output$model$Cfixed[c("int", "pmq"),c("int", "pmq")]
+    fitted<-balpha[1]+output$data$pmq*balpha[2]
+  }
+  if(is.na(balpha[1]) & !is.na(balpha[2])){
+    balpha[1]<-summary(output$model, coef=TRUE)$coef.fixed["int",1]
+    S[1,1]<-output$model$Cfixed["int", "int"]
+    fitted<-rep(balpha[1], nrow(output$data))
+  }
+  if(!is.na(balpha[1]) & is.na(balpha[2])){
+    balpha[2]<-summary(output$model, coef=TRUE)$coef.fixed["pmq",1]
+    S[2,2]<-output$model$Cfixed["pmq", "pmq"]
+    fitted<-output$data$pmq*balpha[2]
+  }
+
+  fitted<-fitted+output$model$random[match(paste0('vm(obs, V, singG = "PSD")_', output$data$locus), rownames(output$model$random))]
+  # add locus effect random effects to prediction
+
+  marginal.v<-rep(summary(output$model)$varcomp["units!R", "component"], nrow(output$data))
   
-  if(method=="REML"){
-    
-    sigma2alpha<-summary(output$model)$varcomp['vm(locus, SC, singG = "PSD")',1]/output$SC_scale
-
-    S<-matrix(0,2,2)
-    colnames(S)<-rownames(S)<-c("int", "pmq")
-
-    if(is.na(balpha[1]) & is.na(balpha[2])){
-      balpha<-summary(output$model, coef=TRUE)$coef.fixed[c("int", "pmq"),1]
-      S<-output$model$Cfixed[c("int", "pmq"),c("int", "pmq")]
-    }
-    if(is.na(balpha[1]) & !is.na(balpha[2])){
-      balpha[1]<-summary(output$model, coef=TRUE)$coef.fixed["int",1]
-      S[1,1]<-output$model$Cfixed["int", "int"]
-    }
-    if(!is.na(balpha[1]) & is.na(balpha[2])){
-      balpha[2]<-summary(output$model, coef=TRUE)$coef.fixed["pmq",1]
-      S[2,2]<-output$model$Cfixed["pmq", "pmq"]
-    }
+  if(!is.null(projQ)){
+    marginal.v<-marginal.v+diag(projQ)*summary(output$model)$varcomp['vm(units, projQ, singG = "PSD")',"component"]
   }
-  if(method=="MCMC"){
-    sigma2alpha<-posterior.mode(output$model$VCV[,1])
-    balpha<-colMeans(output$model$Sol[,c("int", "pmq")])
-  }
+
+  std.resid<-(output$data$delta-fitted)/sqrt(marginal.v)
   
   X<-cbind(rep(1, length(pbar0)), 2*pbar0-1)
   
@@ -416,6 +421,6 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
   
   
   
-  return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, palpha=output$palpha, balpha=balpha, palpha_var=palpha_var, balpha_var=S, tprojp=if(save_tprojp){tprojp}else{NULL}, X=X, DL=ifelse(exists("DL"), DL, NA)))
+  return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, palpha=output$palpha, balpha=balpha, palpha_var=palpha_var, balpha_var=S, tprojp=if(save_tprojp){tprojp}else{NULL}, X=X, DL=ifelse(exists("DL"), DL, NA), fitted=fitted, std.resid=std.resid))
   
 }
