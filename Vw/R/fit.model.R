@@ -1,5 +1,5 @@
 
-fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tprojp, pbar0, pbar1, pbar2, projQ=NULL, nrep, Selec, LLonly=FALSE, method = "REML", verbose=TRUE){
+fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tprojp, pbar0, pbar1, pbar2, projQ=NULL, nrep, Selec, LLonly=FALSE, verbose=TRUE){
   
   if(verbose){
     message("Computing the covariance structure of locus effects...")
@@ -97,48 +97,29 @@ fit.model<-function(palpha, balpha, LDalpha, nsnps, UL, DL, L, ngen2, ngen1, tpr
   SC[lower.tri(SC)]<-t(SC)[lower.tri(SC)]
   # force symmetry in case it is not exactly symmetric
   
-  if(method=="REML"){
+  if(is.null(projQ)){
+    random = ~vm(locus, SC, singG="PSD")
+  }else{
+    random = ~vm(locus, SC, singG="PSD")+vm(units, projQ, singG="PSD")
+  }
 
-    if(is.null(projQ)){
-      random = ~vm(locus, SC, singG="PSD")
+  if(is.na(balpha[1]) & is.na(balpha[2])){
+    m1<-asreml(delta~int+pmq-1, random = random, data=dat.gaussian, Cfixed=TRUE)
+  }
+  if(is.na(balpha[1]) & !is.na(balpha[2])){
+    m1<-asreml(delta~int+offset(pmq)-1, random = random, data=dat.gaussian, Cfixed=TRUE)
+  }
+  if(!is.na(balpha[1]) & is.na(balpha[2])){
+    if(balpha[1]==0){
+      m1<-asreml(delta~pmq-1, random = random, data=dat.gaussian, Cfixed=TRUE)
     }else{
-      random = ~vm(locus, SC, singG="PSD")+vm(units, projQ, singG="PSD")
+      m1<-asreml(delta~offset(int)+pmq-1, random = random, data=dat.gaussian, Cfixed=TRUE)
     }
- 
-    if(is.na(balpha[1]) & is.na(balpha[2])){
-      m1<-asreml(delta~int+pmq-1, random = random, data=dat.gaussian, Cfixed=TRUE)
-    }
-    if(is.na(balpha[1]) & !is.na(balpha[2])){
-      m1<-asreml(delta~int+offset(pmq)-1, random = random, data=dat.gaussian, Cfixed=TRUE)
-    }
-    if(!is.na(balpha[1]) & is.na(balpha[2])){
-      if(balpha[1]==0){
-        m1<-asreml(delta~pmq-1, random = random, data=dat.gaussian, Cfixed=TRUE)
-      }else{
-        m1<-asreml(delta~offset(int)+pmq-1, random = random, data=dat.gaussian, Cfixed=TRUE)
-      }
-    }  
-    if(!is.na(balpha[1]) & !is.na(balpha[2])){
-      warning("asreml doesn't allow models without fixed effects, so intercept fitted but replaced with balpha[1]!")
-      m1<-asreml(delta~offset(pmq + int), random = random, data=dat.gaussian, Cfixed=TRUE)
-    } 
-  }
-  
-  if(method=="MCMC"){
-    
-    if(LLonly){stop("method = MCMC specified so can't return log-likelihood with LLony=TRUE")}
-    
-    invSC<-solve(SC)
-    invSC <- as(invSC, "sparseMatrix") 
-    attr(invSC, "rowNames") <- 1:ncol(SC)
-    attr(invSC, "colNames") <- 1:ncol(SC)
-    
-    prior<-list(B=list(mu=balpha, V=diag(2)*1e+10))
-    diag(prior$B$V)[which(!is.na(balpha))]<-1e-10
-    prior$B$mu[which(is.na(balpha))]<-0
-    
-    m1<-MCMCglmm(delta~pmq+int-1, random=~locus, data=dat.gaussian, ginverse=list(locus=invSC), family="gaussian", pr=TRUE, prior=prior)
-  }
+  }  
+  if(!is.na(balpha[1]) & !is.na(balpha[2])){
+    warning("asreml doesn't allow models without fixed effects, so intercept fitted but replaced with balpha[1]!")
+    m1<-asreml(delta~offset(pmq + int), random = random, data=dat.gaussian, Cfixed=TRUE)
+  } 
   
   if(LLonly){
     return(m1$loglik)
