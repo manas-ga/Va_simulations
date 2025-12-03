@@ -395,11 +395,11 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
     fitted<-output$data$pmq*balpha[2]
   }
 
-  fitted<-fitted+output$model$random[match(paste0('vm(obs, V, singG = "PSD")_', output$data$locus), rownames(output$model$random))]
+  fitted<-fitted+coef(output$model)$random[match(paste0('vm(locus, SC, singG = "PSD")_', output$data$locus), rownames(coef(output$model)$random))]
   # add locus effect random effects to prediction
 
   marginal.v<-rep(summary(output$model)$varcomp["units!R", "component"], nrow(output$data))
-  
+
   if(!is.null(projQ)){
     marginal.v<-marginal.v+diag(projQ)*summary(output$model)$varcomp['vm(units, projQ, singG = "PSD")',"component"]
   }
