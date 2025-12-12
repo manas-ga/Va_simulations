@@ -421,6 +421,6 @@ Vw_model<-function(c_genome=NULL,    # gamete genotypes (rows gametes (rows 1 & 
   
   
   
-  return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, palpha=output$palpha, balpha=balpha, palpha_var=palpha_var, balpha_var=S, tprojp=if(save_tprojp){tprojp}else{NULL}, X=X, DL=ifelse(exists("DL"), DL, NA), fitted=fitted, std.resid=std.resid))
+  return(list(Vw_est=Vw_est, data=output$data, model=output$model, SC=output$SC, palpha=output$palpha, sigma2alpha=sigma2alpha, balpha=balpha, palpha_var=palpha_var, balpha_var=S, tprojp=if(save_tprojp){tprojp}else{NULL}, X=X, DL=ifelse(exists("DL"), DL, NA), fitted=fitted, std.resid=std.resid))
   
 }
